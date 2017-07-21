@@ -27,4 +27,13 @@ cp setup-environment.example.sh setup-environment.sh
 
 Now modify the setup-environment shell script with parameters valid for your needs. For example the SMTP settings require you have an SMTP server.
 
+## Start application using Docker
+```bash
+./docker.sh
+```
+**Note:** If your environment requries a proxy. Ensure you have set the *http_proxy* and *https_proxy* enviornment variables before running the script above.
+
+Once all the containers have been built and are running, you can access the application in your browser by visiting: http://localhost
+
+
 The project has been structured using Git submodules according to recommendations made here: https://www.philosophicalhacker.com/post/using-git-submodules-effectively/
