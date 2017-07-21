@@ -21,6 +21,7 @@ To get platform running quickly we recommened using Docker. First ensure you hav
 ```bash
 git clone https://github.com/emea-ssg-drd/open-iot-connector.git
 cd open-iot-connector
+git submodule init
 git submodule update --remote --merge
 cp setup-environment.example.sh setup-environment.sh
 ```
