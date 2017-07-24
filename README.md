@@ -26,7 +26,7 @@ git submodule update --remote --merge
 cp setup-environment.example.sh setup-environment.sh
 ```
 
-Now modify the setup-environment shell script with parameters valid for your needs. For example the SMTP settings require you have an SMTP server.
+Now modify the setup-environment.sh shell script with parameters valid for your needs. For example the SMTP settings require you have an SMTP server.
 
 ## Start application using Docker
 ```bash
