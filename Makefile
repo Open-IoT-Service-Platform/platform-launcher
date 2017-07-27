@@ -13,12 +13,12 @@
 
 build: .init
 	@$(call msg,"Building IoT connector ..."); 
-	@/bin/bash -c "./docker.sh build "
+	@/bin/bash -c "./docker.sh create "
 
 
 build-force: .init
 	@$(call msg,"Building IoT connector ..."); 
-	@/bin/bash -c "./docker.sh build --no-cache "
+	@/bin/bash -c "./docker.sh create --force-recreate "
 
 start: build
 	@$(call msg,"Starting IoT connector ..."); 
