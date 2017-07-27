@@ -22,7 +22,8 @@ build-force: .init
 
 start: build
 	@$(call msg,"Starting IoT connector ..."); 
-	@/bin/bash -c "./docker.sh start "
+	@/bin/bash -c "service --status-all | grep -q redis-server | systemctl stop redis-server"
+	@/bin/bash -c "./docker.sh restart "
 
 stop: 
 	@$(call msg,"Stopping IoT connector ..."); 
