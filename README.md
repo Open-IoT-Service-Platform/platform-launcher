@@ -18,20 +18,25 @@ The platform consists of multiple components (services) each designed and optimi
 
 To get platform running quickly we recommened using Docker. First ensure you have the latest version of Docker installed on your computer.
 
-```bash
-git clone https://github.com/emea-ssg-drd/open-iot-connector.git
-cd open-iot-connector
-git submodule init
-git submodule update --remote --merge
-cp setup-environment.example.sh setup-environment.sh
-```
+## Setting the ssh keys
 
-Now modify the setup-environment.sh shell script with parameters valid for your needs. For example the SMTP settings require you have an SMTP server.
 
-## Start application using Docker
-```bash
-./docker.sh
-```
+## Cloning the Open IoT Connector
+
+	# git clone https://github.com/emea-ssg-drd/open-iot-connector.git
+
+## Creating the IoT Connector
+
+	# cd open-iot-connector
+
+	Now modify the setup-environment.sh shell script with parameters valid for your needs. For example the SMTP settings require you have an SMTP server.
+
+	# make 
+
+## Starting application using Docker
+
+	# make start
+
 **Note:** If your environment requries a proxy. Ensure you have set the *http_proxy* and *https_proxy* enviornment variables before running the script above.
 
 Once all the containers have been built and are running, you can access the application in your browser by visiting: http://localhost
