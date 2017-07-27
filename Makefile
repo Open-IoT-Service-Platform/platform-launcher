@@ -11,9 +11,22 @@
 	sudo usermod -aG docker ${USER}
 	@touch $@
 
-docker: .init
+build: .init
+	@$(call msg,"Building IoT connector ..."); 
+	@/bin/bash -c "./docker.sh build "
+
+
+build-force: .init
+	@$(call msg,"Building IoT connector ..."); 
+	@/bin/bash -c "./docker.sh build --no-cache "
+
+start: build
 	@$(call msg,"Starting IoT connector ..."); 
-	@/bin/bash -c "./docker.sh"
+	@/bin/bash -c "./docker.sh start "
+
+stop: 
+	@$(call msg,"Stopping IoT connector ..."); 
+	@/bin/bash -c "./docker.sh stop "
 
 
 update:
@@ -22,7 +35,13 @@ update:
 	@@git submodule update
 
 clean:
+	@$(call msg,"Cleaning ..."); 
 	@rm -f .init
+
+distclean: clean
+	@/bin/bash -c "./docker.sh down "
+	@rm -rf ./data
+
 
 #----------------------------------------------------------------------------------------------------------------------
 # helper functions

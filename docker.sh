@@ -11,5 +11,5 @@ if [ -n "$http_proxy" ] && [ -n "$https_proxy" ]; then
 fi
 
 # Start containers
-echo "Starting IoT connector..."
-docker-compose up
+docker-compose $*
+
