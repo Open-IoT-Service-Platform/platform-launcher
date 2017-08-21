@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set env for application
-./setup-environment.sh
+. ./setup-environment.sh
 
 if [ -n "$http_proxy" ] && [ -n "$https_proxy" ]; then
 	# Run redsocks to allow containers to use proxy
