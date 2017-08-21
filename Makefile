@@ -9,6 +9,14 @@
 	git submodule update --remote --merge
 	cp setup-environment.example.sh setup-environment.sh
 	sudo usermod -aG docker ${USER}
+	if [ -f iotanalytics-dashboard/public-interface/keys/private.pem ]; then echo "private keys in dashboard existing. Not updated"; else \
+		openssl genpkey -algorithm RSA -out iotanalytics-dashboard/public-interface/keys/private.pem -pkeyopt rsa_keygen_bits:2048;\
+		openssl rsa -pubout -in iotanalytics-dashboard/public-interface/keys/private.pem -out iotanalytics-dashboard/public-interface/keys/public.pem; \
+	fi;
+	if [ -f iotanalytics-websocket-server/security/private.pem ]; then echo "private keys in websocket-server existing. Not updated!"; else \
+	openssl genpkey -algorithm RSA -out iotanalytics-websocket-server/security/private.pem -pkeyopt rsa_keygen_bits:2048;\
+	openssl rsa -pubout -in iotanalytics-websocket-server/security/private.pem -out iotanalytics-websocket-server/security/public.pem;\
+	fi
 	@touch $@
 
 build: .init
@@ -22,8 +30,8 @@ build-force: .init
 
 start: build
 	@$(call msg,"Starting IoT connector ..."); 
-	@/bin/bash -c "service --status-all | grep -q redis-server | systemctl stop redis-server"
-	@/bin/bash -c "./docker.sh restart "
+	/bin/bash -c "( (service --status-all | grep -q redis-server) && (systemctl stop redis-server) ) || true"
+	/bin/bash -c "./docker.sh restart "
 
 stop: 
 	@$(call msg,"Stopping IoT connector ..."); 
