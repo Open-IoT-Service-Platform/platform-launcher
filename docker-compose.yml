@@ -91,7 +91,7 @@ services:
     environment:
       - VCAP_SERVICES=${VCAP_SERVICES}
       - VCAP_APPLICATION=${VCAP_APPLICATION}
-    command: ./wait-for-it.sh postgres:5432 -t 300 -- ./server.js
+    command: ./wait-for-it.sh postgres:5432 -t 300 -- ./scripts/docker-start.sh
   dashboard:
     build:
       context: ./iotanalytics-dashboard/public-interface
