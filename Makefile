@@ -22,6 +22,8 @@
 build: .init
 	@$(call msg,"Building IoT connector ..."); 
 	@/bin/bash -c "./docker.sh create "
+	@/bin/bash -c "./docker.sh run --no-deps dashboard npm install"
+	@/bin/bash -c "./docker.sh run --no-deps websocket-server npm install"
 
 
 build-force: .init
