@@ -1,0 +1,1873 @@
+<!DOCTYPE HTML><html><head><title>REST API for Open IOT Connector (OIC) API documentation</title><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="generator" content="https://github.com/raml2html/raml2html 6.4.1"><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/styles/default.min.css"><script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.min.js"></script><script type="text/javascript" src="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js"></script><script type="text/javascript">
+      $(document).ready(function() {
+        $('.page-header pre code, .top-resource-description pre code, .modal-body pre code').each(function(i, block) {
+          hljs.highlightBlock(block);
+        });
+
+        $('[data-toggle]').click(function() {
+          var selector = $(this).data('target') + ' pre code';
+          $(selector).each(function(i, block) {
+            hljs.highlightBlock(block);
+          });
+        });
+
+        // open modal on hashes like #_action_get
+        $(window).bind('hashchange', function(e) {
+          var anchor_id = document.location.hash.substr(1); //strip #
+          var element = $('#' + anchor_id);
+
+          // do we have such element + is it a modal?  --> show it
+          if (element.length && element.hasClass('modal')) {
+            element.modal('show');
+          }
+        });
+
+        // execute hashchange on first page load
+        $(window).trigger('hashchange');
+
+        // remove url fragment on modal hide
+        $('.modal').on('hidden.bs.modal', function() {
+          try {
+            if (history && history.replaceState) {
+                history.replaceState({}, '', '#');
+            }
+          } catch(e) {}
+        });
+      });
+    </script><style>
+      .hljs {
+        background: transparent;
+      }
+      .parent {
+        color: #999;
+      }
+      .list-group-item > .badge {
+        float: none;
+        margin-right: 6px;
+      }
+      .panel-title > .methods {
+        float: right;
+      }
+      .badge {
+        border-radius: 0;
+        text-transform: uppercase;
+        width: 70px;
+        font-weight: normal;
+        color: #f3f3f6;
+        line-height: normal;
+      }
+      .badge_get {
+        background-color: #63a8e2;
+      }
+      .badge_post {
+        background-color: #6cbd7d;
+      }
+      .badge_put {
+        background-color: #22bac4;
+      }
+      .badge_delete {
+        background-color: #d26460;
+      }
+      .badge_patch {
+        background-color: #ccc444;
+      }
+      .list-group, .panel-group {
+        margin-bottom: 0;
+      }
+      .panel-group .panel+.panel-white {
+        margin-top: 0;
+      }
+      .panel-group .panel-white {
+        border-bottom: 1px solid #F5F5F5;
+        border-radius: 0;
+      }
+      .panel-white:last-child {
+        border-bottom-color: white;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+      }
+      .panel-white .panel-heading {
+        background: white;
+      }
+      .tab-pane ul {
+        padding-left: 2em;
+      }
+      .tab-pane h1 {
+        font-size: 1.3em;
+      }
+      .tab-pane h2 {
+        font-size: 1.2em;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #ddd;
+      }
+      .tab-pane h3 {
+        font-size: 1.1em;
+      }
+      .tab-content {
+        border-left: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+        padding: 10px;
+      }
+      #sidebar {
+        margin-top: 30px;
+        padding-right: 5px;
+        overflow: auto;
+        height: 90%;
+      }
+      .top-resource-description {
+        border-bottom: 1px solid #ddd;
+        background: #fcfcfc;
+        padding: 15px 15px 0 15px;
+        margin: -15px -15px 10px -15px;
+      }
+      .resource-description {
+        border-bottom: 1px solid #fcfcfc;
+        background: #fcfcfc;
+        padding: 15px 15px 0 15px;
+        margin: -15px -15px 10px -15px;
+      }
+      .resource-description p:last-child {
+        margin: 0;
+      }
+      .list-group .badge {
+        float: left;
+      }
+      .method_description {
+        margin-left: 85px;
+      }
+      .method_description p:last-child {
+        margin: 0;
+      }
+      .list-group-item {
+        cursor: pointer;
+      }
+      .list-group-item:hover {
+        background-color: #f5f5f5;
+      }
+      pre code {
+        overflow: auto;
+        word-wrap: normal;
+        white-space: pre;
+      }
+      .items {
+        background: #f5f5f5;
+        color: #333;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 9.5px;
+        margin: 0 0 10px;
+        font-size: 13px;
+        line-height: 1.42857143;
+      }
+      .examples {
+        margin-left: 0.5em;
+      }
+      .resource-modal li > ul {
+        margin-bottom: 1em;
+      }
+    </style></head><body data-spy="scroll" data-target="#sidebar"><div class="container"><div class="row"><div class="col-md-9" role="main"><div class="page-header"><h1>REST API for Open IOT Connector (OIC) API documentation <small>version v1</small></h1><p>http://streammyiot.com</p></div><div class="panel panel-default"><div class="panel-heading"><h3 id="v1_api_auth" class="panel-title"><h2>Authorization</h2></h3></div><div class="panel-body"><div class="top-resource-description"><p>This part of the API handles authorization. The authorization is done with JWT. The API can be used to get a JWT token and retrieve information about it.</p></div><div class="panel-group"><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_auth_token"><span class="parent">/v1/api/auth</span>/token</a> <span class="methods"><a href="#v1_api_auth_token_post"><span class="badge badge_post">post</span></a></span></h4></div><div id="panel_v1_api_auth_token" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_auth_token_post'" class="list-group-item"><span class="badge badge_post">post</span><div class="method_description"><p>Get the JWS for a user. The token is unique for every request.</p><p><strong>Token expiration:</strong></p><p>User JWT token is valid for 24h and contains user access information. On access change, token should be refreshed, to use new privileges. Example situation that require token refresh:</p><ul><li>User creates new account - to use new account, token must be refreshed</li><li>User has been invited to new account - to have access to this account, token should be refreshed</li><li>User account role has been updated, for instance admin privileges were granted - to use new level of access, token must be refreshed</li></ul></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_auth_token_post"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_post">post</span> <span class="parent">/v1/api/auth</span>/token</h4></div><div class="modal-body"><div class="alert alert-info"><p>Get the JWS for a user. The token is unique for every request.</p><p><strong>Token expiration:</strong></p><p>User JWT token is valid for 24h and contains user access information. On access change, token should be refreshed, to use new privileges. Example situation that require token refresh:</p><ul><li>User creates new account - to use new account, token must be refreshed</li><li>User has been invited to new account - to have access to this account, token should be refreshed</li><li>User account role has been updated, for instance admin privileges were granted - to use new level of access, token must be refreshed</li></ul></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_auth_token_post_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_auth_token_post_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_auth_token_post_request"><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "authorization",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "username": {
+      "type": "string",
+      "required": true
+    },
+    "password": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "username": "user@example.com",
+  "password": "mypassword"
+}
+</code></pre></div></div><div class="tab-pane" id="v1_api_auth_token_post_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{ "token": "eyJ0eXAi..." }
+</code></pre></div></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_auth_tokeninfo"><span class="parent">/v1/api/auth</span>/tokenInfo</a> <span class="methods"><a href="#v1_api_auth_tokeninfo_get"><span class="badge badge_get">get</span></a></span></h4></div><div id="panel_v1_api_auth_tokeninfo" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_auth_tokeninfo_get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"><p>Get info about the JWT token</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_auth_tokeninfo_get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent">/v1/api/auth</span>/tokenInfo</h4></div><div class="modal-body"><div class="alert alert-info"><p>Get info about the JWT token</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_auth_tokeninfo_get_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_auth_tokeninfo_get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_auth_tokeninfo_get_request"><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_auth_tokeninfo_get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "header": {
+    "typ": "JWT",
+    "alg": "RS256"
+  },
+  "payload": {
+    "jti": "7b1430a2-dd61-4a47-919c-495cadb1ea7b",
+    "iss": "http://streammyiot.com",
+    "sub": "53fdff4418b547e4241b8358",
+    "exp": "2014-10-02T07:53:25.361Z"
+  }
+}</code></pre></div></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_auth_me"><span class="parent">/v1/api/auth</span>/me</a> <span class="methods"><a href="#v1_api_auth_me_get"><span class="badge badge_get">get</span></a></span></h4></div><div id="panel_v1_api_auth_me" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_auth_me_get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"><p>Get user information about the owner of the JWT token</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_auth_me_get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent">/v1/api/auth</span>/me</h4></div><div class="modal-body"><div class="alert alert-info"><p>Get user information about the owner of the JWT token</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_auth_me_get_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_auth_me_get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_auth_me_get_request"><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_auth_me_get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "id": "5524fb12b57077f3012323c2",
+  "created": 1428487559131,
+  "email": "user@example.com",
+  "termsAndConditions": true,
+  "updated": 1428487559131,
+  "verified": true
+}</code></pre></div></div></div></div></div></div></div></div></div></div></div><div class="panel panel-default"><div class="panel-heading"><h3 id="v1_api_users" class="panel-title"><h2>User Management</h2></h3></div><div class="panel-body"><div class="top-resource-description"><p>Handles user creation, updating, deleting and password changes and retrieval</p></div><div class="panel-group"><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_users__userid_"><span class="parent">/v1/api/users</span>/{userId}</a> <span class="methods"><a href="#v1_api_users__userid__get"><span class="badge badge_get">get</span></a> <a href="#v1_api_users__userid__put"><span class="badge badge_put">put</span></a> <a href="#v1_api_users__userid__delete"><span class="badge badge_delete">delete</span></a></span></h4></div><div id="panel_v1_api_users__userid_" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_users__userid__get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"></div><div class="clearfix"></div></div><div onclick="window.location.href = '#v1_api_users__userid__put'" class="list-group-item"><span class="badge badge_put">put</span><div class="method_description"><p><strong>Update user attributes.</strong></p><p>As an user, you can add attributes to your user data. Attributes can be any key/value pair.</p></div><div class="clearfix"></div></div><div onclick="window.location.href = '#v1_api_users__userid__delete'" class="list-group-item"><span class="badge badge_delete">delete</span><div class="method_description"><p><strong>Delete a User.</strong></p><p>This action will result in deleting your user data, and also accounts if they do not have any other administrators. You will also no longer be able to use your old token.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_users__userid__get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent">/v1/api/users</span>/{userId}</h4></div><div class="modal-body"><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_users__userid__get_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_users__userid__get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_users__userid__get_request"><h3>URI Parameters</h3><ul><li><strong>userId</strong>: <em>required (string)</em><p>The ID of a user. This was returned when the user was created. If you don&#39;t have the userId but have user credentials, you can obtain an Authorization Token(cf. Authorization section)and then get the Authorization Token Info. The UserId will be the subject of the token payload. If the result body were converted to a JavaScript object, the userId would be at result["payload"]["sub"]</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>53e95985c8406a147700b94d</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_users__userid__get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "id": "53e95985c8406a147700b94d",
+  "accounts": {
+    "e5d969cd-e7fa-404e-a1e5-f4ce138f62c3": {
+      "name": "Group1_Account",
+      "role": "admin",
+      "healthTimePeriod": 86400
+    }
+  },
+  "attributes": {
+    "phone": "123456789",
+    "another_attribute": "another_value"
+  },
+  "email": "test@example.com",
+  "termsAndConditions": true,
+  "verified": true
+}</code></pre></div></div></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_users__userid__put"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_put">put</span> <span class="parent">/v1/api/users</span>/{userId}</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Update user attributes.</strong></p><p>As an user, you can add attributes to your user data. Attributes can be any key/value pair.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_users__userid__put_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_users__userid__put_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_users__userid__put_request"><h3>URI Parameters</h3><ul><li><strong>userId</strong>: <em>required (string)</em><p>The ID of a user. This was returned when the user was created. If you don&#39;t have the userId but have user credentials, you can obtain an Authorization Token(cf. Authorization section)and then get the Authorization Token Info. The UserId will be the subject of the token payload. If the result body were converted to a JavaScript object, the userId would be at result["payload"]["sub"]</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>53e95985c8406a147700b94d</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "user",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "required": false
+    },
+    "role": {
+      "type": "string",
+      "required": false
+    },
+    "type": {
+      "type": "string",
+      "required": false
+    },
+    "accounts": {
+      "type": "object",
+      "required": false
+    },
+    "attributes": {
+      "type": "object",
+      "required": false
+    },
+    "email": {
+      "type": "string",
+      "required": false
+    },
+    "password": {
+      "type": "string",
+      "required": false
+    },
+    "salt": {
+      "type": "string",
+      "required": false
+    },
+    "provider": {
+      "type": "string",
+      "required": false
+    },
+    "verified": {
+      "type": "boolean",
+      "required": false
+    },
+    "termsAndConditions": {
+      "type": "boolean",
+      "required": false
+    },
+    "created": {
+      "type": "number",
+      "required": false
+    },
+    "updated": {
+      "type": "number",
+      "required": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{   
+  "attributes":{
+    "phone":"123456789",
+    "another_attribute":"another_value",
+    "new":"next_string_value"
+  }
+}
+</code></pre></div></div><div class="tab-pane" id="v1_api_users__userid__put_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2></div></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_users__userid__delete"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_delete">delete</span> <span class="parent">/v1/api/users</span>/{userId}</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Delete a User.</strong></p><p>This action will result in deleting your user data, and also accounts if they do not have any other administrators. You will also no longer be able to use your old token.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_users__userid__delete_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_users__userid__delete_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_users__userid__delete_request"><h3>URI Parameters</h3><ul><li><strong>userId</strong>: <em>required (string)</em><p>The ID of a user. This was returned when the user was created. If you don&#39;t have the userId but have user credentials, you can obtain an Authorization Token(cf. Authorization section)and then get the Authorization Token Info. The UserId will be the subject of the token payload. If the result body were converted to a JavaScript object, the userId would be at result["payload"]["sub"]</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>53e95985c8406a147700b94d</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_users__userid__delete_response"><h2>HTTP status code <a href="http://httpstatus.es/204" target="_blank">204</a></h2></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_users_forgot_password"><span class="parent">/v1/api/users</span>/forgot_password</a> <span class="methods"><a href="#v1_api_users_forgot_password_put"><span class="badge badge_put">put</span></a> <a href="#v1_api_users_forgot_password_post"><span class="badge badge_post">post</span></a></span></h4></div><div id="panel_v1_api_users_forgot_password" class="panel-collapse collapse"><div class="panel-body"><div class="resource-description"><p><strong>Change forgotten password.</strong></p><p>In order to change password (for cases in which user do not remember the old one) you have to do following steps:</p><ul><li>Invoke POST /users/forgot_password. After this step user will receive email with a url, which can be used to set a new password via IoT Dashboard. In email there will be user&#39;s token as a part of resetPassword url. Token is required for successful completion of next steps. Token is unique for user and action.</li><li>Invoke PUT /users/forgot_password, with token from email received by user after completion of point 1. In a request body you have to put new password and token.</li></ul></div><div class="list-group"><div onclick="window.location.href = '#v1_api_users_forgot_password_put'" class="list-group-item"><span class="badge badge_put">put</span><div class="method_description"><p><strong>Request change password</strong></p><p>Methods generate and send email, which can be used to change password. User email has to be specified in request body.</p></div><div class="clearfix"></div></div><div onclick="window.location.href = '#v1_api_users_forgot_password_post'" class="list-group-item"><span class="badge badge_post">post</span><div class="method_description"><p><strong>Update password</strong></p><p>Method set new password for the user. In request body you have put token received in a email (send after invoking POST /users/forgot_password) and the new password.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_users_forgot_password_put"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_put">put</span> <span class="parent">/v1/api/users</span>/forgot_password</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Request change password</strong></p><p>Methods generate and send email, which can be used to change password. User email has to be specified in request body.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_users_forgot_password_put_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_users_forgot_password_put_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_users_forgot_password_put_request"><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "forgot_password",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "email": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "email":"test@example.com"
+}
+</code></pre></div></div><div class="tab-pane" id="v1_api_users_forgot_password_put_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p></div></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_users_forgot_password_post"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_post">post</span> <span class="parent">/v1/api/users</span>/forgot_password</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Update password</strong></p><p>Method set new password for the user. In request body you have put token received in a email (send after invoking POST /users/forgot_password) and the new password.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_users_forgot_password_post_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_users_forgot_password_post_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_users_forgot_password_post_request"><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "change_password",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "token": {
+      "type": "string",
+      "required": true
+    },
+    "password": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "token":"ki2pc9RdnVVSKoN4",
+  "password":"Qwerty2"
+}
+</code></pre></div></div><div class="tab-pane" id="v1_api_users_forgot_password_post_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_users__email__change_password"><span class="parent">/v1/api/users</span>/{email}/change_password</a> <span class="methods"><a href="#v1_api_users__email__change_password_put"><span class="badge badge_put">put</span></a></span></h4></div><div id="panel_v1_api_users__email__change_password" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_users__email__change_password_put'" class="list-group-item"><span class="badge badge_put">put</span><div class="method_description"><p><strong>Change password</strong></p><p>Methods set new password for a user (identified by email).</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_users__email__change_password_put"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_put">put</span> <span class="parent">/v1/api/users</span>/{email}/change_password</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Change password</strong></p><p>Methods set new password for a user (identified by email).</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_users__email__change_password_put_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_users__email__change_password_put_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_users__email__change_password_put_request"><h3>URI Parameters</h3><ul><li><strong>email</strong>: <em>required (string)</em><p>User email</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>test@example.com</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "change_password",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "currentpwd": {
+      "type": "string",
+      "required": true
+    },
+    "password": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "currentpwd": "Qwerty1",
+  "password": "Qwerty2"
+}
+</code></pre></div></div><div class="tab-pane" id="v1_api_users__email__change_password_put_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_users_request_user_verification"><span class="parent">/v1/api/users</span>/request_user_verification</a> <span class="methods"><a href="#v1_api_users_request_user_verification_post"><span class="badge badge_post">post</span></a></span></h4></div><div id="panel_v1_api_users_request_user_verification" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_users_request_user_verification_post'" class="list-group-item"><span class="badge badge_post">post</span><div class="method_description"><p><strong>Request user verification</strong></p><p>Methods generate and send email, which can be used to activate user. User email has to be specified in request body.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_users_request_user_verification_post"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_post">post</span> <span class="parent">/v1/api/users</span>/request_user_verification</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Request user verification</strong></p><p>Methods generate and send email, which can be used to activate user. User email has to be specified in request body.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_users_request_user_verification_post_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_users_request_user_verification_post_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_users_request_user_verification_post_request"><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "reactivation",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "email": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "email":"test@example.com"
+}
+</code></pre></div></div><div class="tab-pane" id="v1_api_users_request_user_verification_post_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p></div></div></div></div></div></div></div></div></div></div><div class="panel panel-default"><div class="panel-heading"><h3 id="v1_api_accounts" class="panel-title"><h2>Account Management</h2></h3></div><div class="panel-body"><div class="top-resource-description"><p>This API handles Accounts and User related operations</p></div><div class="panel-group"><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_accounts"><span class="parent"></span>/v1/api/accounts</a> <span class="methods"><a href="#v1_api_accounts_post"><span class="badge badge_post">post</span></a></span></h4></div><div id="panel_v1_api_accounts" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_accounts_post'" class="list-group-item"><span class="badge badge_post">post</span><div class="method_description"><p><strong>Create an Account</strong></p><p>Important: After creating account, user Authorization token must be refreshed to access the new account data.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts_post"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_post">post</span> <span class="parent"></span>/v1/api/accounts</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Create an Account</strong></p><p>Important: After creating account, user Authorization token must be refreshed to access the new account data.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts_post_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts_post_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts_post_request"><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "user",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "required": false
+    },
+    "public_id": {
+      "type": "string",
+      "required": false
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "healthTimePeriod": {
+      "type": "number",
+      "required": false
+    },
+    "created": {
+      "type": "number",
+      "required": false
+    },
+    "updated": {
+      "type": "number",
+      "required": false
+    },
+    "exec_interval": {
+      "type": "number",
+      "required": false
+    },
+    "base_line_exec_interval": {
+      "type": "number",
+      "required": false
+    },
+    "cd_model_frequency": {
+      "type": "number",
+      "required": false
+    },
+    "cd_execution_frequency": {
+      "type": "number",
+      "required": false
+    },
+    "data_retention": {
+      "type": "number",
+      "required": false
+    },
+    "attributes": {
+      "type": "object",
+      "required": false
+    },
+    "settings": {
+      "type": "object",
+      "required": false,
+      "properties": {
+        "trackSensorHealth": {
+          "type": "boolean",
+          "required": true
+        }
+      }
+    },
+    "activation_code": {
+      "type": "string",
+      "required": false
+    },
+    "activation_code_expire_date": {
+      "type": "number",
+      "required": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "name": "AccountName"
+}</code></pre></div></div><div class="tab-pane" id="v1_api_accounts_post_response"><h2>HTTP status code <a href="http://httpstatus.es/201" target="_blank">201</a></h2><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{ 
+  "name":"AccountName",
+  "healthTimePeriod":86400,
+  "created":1406919627586,
+  "updated":1406919627586,
+  "exec_interval":300,
+  "base_line_exec_interval":86400,
+  "cd_model_frequency":604800,
+  "cd_execution_frequency":600,
+  "data_retention":0,
+  "id":"321ef007-8449-477f-9ea0-d702d77e64b9"
+}
+</code></pre></div></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_accounts__accountid_"><span class="parent">/v1/api/accounts</span>/{accountId}</a> <span class="methods"><a href="#v1_api_accounts__accountid__get"><span class="badge badge_get">get</span></a> <a href="#v1_api_accounts__accountid__put"><span class="badge badge_put">put</span></a> <a href="#v1_api_accounts__accountid__delete"><span class="badge badge_delete">delete</span></a></span></h4></div><div id="panel_v1_api_accounts__accountid_" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_accounts__accountid__get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"><p><strong>Get Account information</strong></p></div><div class="clearfix"></div></div><div onclick="window.location.href = '#v1_api_accounts__accountid__put'" class="list-group-item"><span class="badge badge_put">put</span><div class="method_description"><p><strong>Update an Account</strong></p></div><div class="clearfix"></div></div><div onclick="window.location.href = '#v1_api_accounts__accountid__delete'" class="list-group-item"><span class="badge badge_delete">delete</span><div class="method_description"><p><strong>Delete an Account.</strong></p><p>Deletes an Account and all its data.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent">/v1/api/accounts</span>/{accountId}</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Get Account information</strong></p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__get_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__get_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_accounts__accountid__get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{  
+  "name": "AccountName",
+  "healthTimePeriod": 86400,
+  "created": 1404415261310,
+  "updated": 1404415261310,
+  "exec_interval": 120,
+  "base_line_exec_interval": 86400,
+  "cd_model_frequency": 604800,
+  "cd_execution_frequency": 600,
+  "data_retention": 0,
+  "attributes":{
+    "phone":"123456789",
+    "another_attribute":"another_value"
+  },
+  "id": "321ef007-8449-477f-9ea0-d702d77e64b9"
+}
+</code></pre></div></div></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__put"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_put">put</span> <span class="parent">/v1/api/accounts</span>/{accountId}</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Update an Account</strong></p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__put_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__put_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__put_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "user",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "required": false
+    },
+    "public_id": {
+      "type": "string",
+      "required": false
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "healthTimePeriod": {
+      "type": "number",
+      "required": false
+    },
+    "created": {
+      "type": "number",
+      "required": false
+    },
+    "updated": {
+      "type": "number",
+      "required": false
+    },
+    "exec_interval": {
+      "type": "number",
+      "required": false
+    },
+    "base_line_exec_interval": {
+      "type": "number",
+      "required": false
+    },
+    "cd_model_frequency": {
+      "type": "number",
+      "required": false
+    },
+    "cd_execution_frequency": {
+      "type": "number",
+      "required": false
+    },
+    "data_retention": {
+      "type": "number",
+      "required": false
+    },
+    "attributes": {
+      "type": "object",
+      "required": false
+    },
+    "settings": {
+      "type": "object",
+      "required": false,
+      "properties": {
+        "trackSensorHealth": {
+          "type": "boolean",
+          "required": true
+        }
+      }
+    },
+    "activation_code": {
+      "type": "string",
+      "required": false
+    },
+    "activation_code_expire_date": {
+      "type": "number",
+      "required": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "name": "NEWAccountName",
+  "healthTimePeriod": 86400,        
+  "exec_interval": 120,
+  "base_line_exec_interval": 86400,
+  "cd_model_frequency": 604800,
+  "cd_execution_frequency": 600,
+  "data_retention": 0,
+  "attributes":{
+    "phone":"123456789",
+    "another_attribute":"another_value",
+    "new":"next_string_value"
+  },
+  "id": "321ef007-8449-477f-9ea0-d702d77e64b9"
+}
+</code></pre></div></div><div class="tab-pane" id="v1_api_accounts__accountid__put_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p></div></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__delete"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_delete">delete</span> <span class="parent">/v1/api/accounts</span>/{accountId}</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Delete an Account.</strong></p><p>Deletes an Account and all its data.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__delete_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__delete_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__delete_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_accounts__accountid__delete_response"><h2>HTTP status code <a href="http://httpstatus.es/204" target="_blank">204</a></h2><p>NO CONTENT</p></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_accounts__accountid__activationcode"><span class="parent">/v1/api/accounts/{accountId}</span>/activationcode</a> <span class="methods"><a href="#v1_api_accounts__accountid__activationcode_get"><span class="badge badge_get">get</span></a></span></h4></div><div id="panel_v1_api_accounts__accountid__activationcode" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_accounts__accountid__activationcode_get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"><p><strong>Get Account Activation Code</strong></p><p>The Account Activation Code is the transient activation code that can be used to activate devices for the account. It expires after one hour.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__activationcode_get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent">/v1/api/accounts/{accountId}</span>/activationcode</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Get Account Activation Code</strong></p><p>The Account Activation Code is the transient activation code that can be used to activate devices for the account. It expires after one hour.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__activationcode_get_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__activationcode_get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__activationcode_get_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_accounts__accountid__activationcode_get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "activationCode": "CgSVoHee",
+  "timeLeft": 1404418861
+}
+</code></pre></div></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_accounts__accountid__activationcode_refresh"><span class="parent">/v1/api/accounts/{accountId}/activationcode</span>/refresh</a> <span class="methods"><a href="#v1_api_accounts__accountid__activationcode_refresh_put"><span class="badge badge_put">put</span></a></span></h4></div><div id="panel_v1_api_accounts__accountid__activationcode_refresh" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_accounts__accountid__activationcode_refresh_put'" class="list-group-item"><span class="badge badge_put">put</span><div class="method_description"><p><strong>Renew Account Activation Code</strong></p><p>Forces the renewal of the Account Activation Code.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__activationcode_refresh_put"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_put">put</span> <span class="parent">/v1/api/accounts/{accountId}/activationcode</span>/refresh</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Renew Account Activation Code</strong></p><p>Forces the renewal of the Account Activation Code.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__activationcode_refresh_put_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__activationcode_refresh_put_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__activationcode_refresh_put_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_accounts__accountid__activationcode_refresh_put_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "activationCode": "bBnvBWrT",
+  "timeLeft": 1404419896
+}</code></pre></div></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_accounts__accountid__users__userid_"><span class="parent">/v1/api/accounts/{accountId}</span>/users/{userId}</a> <span class="methods"><a href="#v1_api_accounts__accountid__users__userid__put"><span class="badge badge_put">put</span></a></span></h4></div><div id="panel_v1_api_accounts__accountid__users__userid_" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_accounts__accountid__users__userid__put'" class="list-group-item"><span class="badge badge_put">put</span><div class="method_description"><p><strong>Change another user privileges to your account (you need to be an admin)</strong></p><p>You can upgrade a standard user of your account (who currently has "user" privileges - default for invited users) to an admin. To do so, you have to be an admin of account for which you want to upgrade another user&#39;s access. {role} is supposed to be "user" or "admin".</p><p>Remember that user can be promoted from user to admin, but admin privileges cannot be revoked.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__users__userid__put"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_put">put</span> <span class="parent">/v1/api/accounts/{accountId}</span>/users/{userId}</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Change another user privileges to your account (you need to be an admin)</strong></p><p>You can upgrade a standard user of your account (who currently has "user" privileges - default for invited users) to an admin. To do so, you have to be an admin of account for which you want to upgrade another user&#39;s access. {role} is supposed to be "user" or "admin".</p><p>Remember that user can be promoted from user to admin, but admin privileges cannot be revoked.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__users__userid__put_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__users__userid__put_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__users__userid__put_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li><li><strong>userId</strong>: <em>required (string)</em><p>The ID of User you would like to add account for</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>53e95985c8406a147700b94d</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "user",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "required": false
+    },
+    "role": {
+      "type": "string",
+      "required": false
+    },
+    "type": {
+      "type": "string",
+      "required": false
+    },
+    "accounts": {
+      "type": "object",
+      "required": false
+    },
+    "attributes": {
+      "type": "object",
+      "required": false
+    },
+    "email": {
+      "type": "string",
+      "required": false
+    },
+    "password": {
+      "type": "string",
+      "required": false
+    },
+    "salt": {
+      "type": "string",
+      "required": false
+    },
+    "provider": {
+      "type": "string",
+      "required": false
+    },
+    "verified": {
+      "type": "boolean",
+      "required": false
+    },
+    "termsAndConditions": {
+      "type": "boolean",
+      "required": false
+    },
+    "created": {
+      "type": "number",
+      "required": false
+    },
+    "updated": {
+      "type": "number",
+      "required": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "id": "{userId}",
+  "accounts": {
+    "{accountId}": "{role}"
+  }
+}    
+</code></pre></div></div><div class="tab-pane" id="v1_api_accounts__accountid__users__userid__put_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p></div></div></div></div></div></div></div></div></div></div><div class="panel panel-default"><div class="panel-heading"><h3 id="v1_api_accounts__accountid__rules" class="panel-title"><h2>Rule Management</h2></h3></div><div class="panel-body"><div class="top-resource-description"><p>This API is used to manage Rules. A Rule is an association between one or more device&#39;s components, a set of conditions for those components, and a number of actions that have to be triggered in case those conditions are met.</p><p><strong>Supported rule action types</strong></p><table class="table"><thead><tr><th>Type</th><th style="text-align:center">Target</th><th>Description</th></tr></thead><tbody><tr><td>"mail"</td><td style="text-align:center">["test@example.com"]</td><td>Array of recipients&#39; email addresses</td></tr><tr><td>"http"</td><td style="text-align:center">["<a href="http://www.example.com">http://www.example.com</a>"]</td><td>Array of HTTP endpoints where request should be sent.They should expect and accept POST requests.</td></tr><tr><td>"actuation"</td><td style="text-align:center">["command"]</td><td>Array of commands</td></tr></tbody></table><p>To receive alerts as requests to HTTP endpoint, set "type" in actions section to "http" and "target" in the same section to desired endpoint. Additionally you can add custom HTTP headers to received alerts. To do this, add "http_headers" object to "actions" section if chosen action type is http. Example:</p><pre><code class="lang-json">"actions": [
+{
+  "type": "http",
+  "target": [
+    "http://test.com"
+  ],
+  "http_headers":
+    {
+      "header1": "value1",
+      "header2": "value2"
+    }
+}]
+</code></pre></div><div class="panel-group"><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_accounts__accountid__rules"><span class="parent"></span>/v1/api/accounts/{accountId}/rules</a> <span class="methods"><a href="#v1_api_accounts__accountid__rules_get"><span class="badge badge_get">get</span></a> <a href="#v1_api_accounts__accountid__rules_post"><span class="badge badge_post">post</span></a></span></h4></div><div id="panel_v1_api_accounts__accountid__rules" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_accounts__accountid__rules_get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"><p><strong>Get List of Rules</strong></p><p>Get a list of all rules for the specified account.</p></div><div class="clearfix"></div></div><div onclick="window.location.href = '#v1_api_accounts__accountid__rules_post'" class="list-group-item"><span class="badge badge_post">post</span><div class="method_description"><p><strong>Create a Rule</strong></p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__rules_get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent"></span>/v1/api/accounts/{accountId}/rules</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Get List of Rules</strong></p><p>Get a list of all rules for the specified account.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__rules_get_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__rules_get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__rules_get_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_accounts__accountid__rules_get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>[
+{
+  "externalId": 6831,
+  "name": "rule2",
+  "description": "test rule",
+  "owner": "test@example.com",
+  "naturalLanguage": "temperatura Equal 45 Or ",
+  "type": "Regular",
+  "creationDate": 1411119645083,
+  "lastUpdateDate": 1411119645083,
+  "resetType": "Manual",
+  "priority": "Low",
+  "status": "Active",
+  "population": {},
+  "conditions": {
+    "operator": "OR",
+    "values": []
+  }
+}
+]
+</code></pre></div></div></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__rules_post"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_post">post</span> <span class="parent"></span>/v1/api/accounts/{accountId}/rules</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Create a Rule</strong></p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__rules_post_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__rules_post_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__rules_post_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "rule",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 255
+    },
+    "externalId": {
+      "type": "string",
+      "required": false,
+      "maxLength": 255
+    },
+    "description": {
+      "type": "string",
+      "required": false,
+      "maxLength": 1000
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Regular"
+      ],
+      "required": true
+    },
+    "resetType": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "Automatic"
+      ],
+      "required": true
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "Low",
+        "Medium",
+        "High"
+      ],
+      "required": true
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "Archived",
+        "On-hold"
+      ],
+      "required": true
+    },
+    "population": {
+      "type": "object",
+      "required": true,
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "ids": {
+          "type": "array",
+          "required": false,
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "required": false,
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "attributes": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": false
+        }
+      }
+    },
+    "conditions": {
+      "type": "object",
+      "required": true,
+      "additionalProperties": false,
+      "properties": {
+        "operator": {
+          "type": "string",
+          "enum": [
+            "AND",
+            "OR"
+          ],
+          "required": true
+        },
+        "values": {
+          "type": "array",
+          "required": true,
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "component": {
+                "type": "object",
+                "required": true,
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": false
+                  },
+                  "dataType": {
+                    "type": "string",
+                    "enum": [
+                      "Number",
+                      "String",
+                      "Boolean",
+                      "ByteArray"
+                    ],
+                    "required": true
+                  },
+                  "cid": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "required": false
+                  }
+                }
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "basic",
+                  "time",
+                  "statistics"
+                ],
+                "required": true
+              },
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "&gt;",
+                  "&lt;",
+                  "&lt;=",
+                  "&gt;=",
+                  "Not Equal",
+                  "Equal",
+                  "Between",
+                  "Not Between",
+                  "Like"
+                ],
+                "required": true
+              },
+              "values": {
+                "type": "array",
+                "required": true,
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "timeLimit": {
+                "type": "number",
+                "required": false
+              },
+              "baselineCalculationLevel": {
+                "type": "string",
+                "enum": [
+                  "Device level"
+                ],
+                "required": false
+              },
+              "baselineSecondsBack": {
+                "type": "number",
+                "required": false
+              },
+              "baselineMinimalInstances": {
+                "type": "number",
+                "required": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "required": true,
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "mail",
+              "http",
+              "actuation"
+            ],
+            "required": true
+          },
+          "target": {
+            "type": "array",
+            "required": true,
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "http_headers": {
+            "type": "object",
+            "minProperties": 0,
+            "maxProperties": 5
+          }
+        }
+      }
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "name": "Test Rule",
+  "description": "This is a test rule",
+  "priority": "Medium",
+  "type": "Regular",
+  "status": "Active",
+  "resetType": "Automatic",
+  "actions": [
+  {
+    "type": "mail",
+    "target": [
+    "test@example.com"
+    ]
+  }
+  ],
+  "population": {
+    "ids": [ "685.1.1.1" ],
+    "attributes": null
+  },
+  "conditions": {
+    "operator": "OR",
+    "values": [
+    {
+      "component": {
+        "dataType": "Number",
+        "name": "Temp.01.1"
+      },
+      "type": "basic",
+      "values": [ "25" ],
+      "operator": "&gt;"
+    }
+    ]
+  }
+}
+</code></pre></div></div><div class="tab-pane" id="v1_api_accounts__accountid__rules_post_response"><h2>HTTP status code <a href="http://httpstatus.es/201" target="_blank">201</a></h2><p>CREATED</p></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_accounts__accountid__rules__ruleid_"><span class="parent">/v1/api/accounts/{accountId}/rules</span>/{ruleId}</a> <span class="methods"><a href="#v1_api_accounts__accountid__rules__ruleid__get"><span class="badge badge_get">get</span></a> <a href="#v1_api_accounts__accountid__rules__ruleid__put"><span class="badge badge_put">put</span></a></span></h4></div><div id="panel_v1_api_accounts__accountid__rules__ruleid_" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_accounts__accountid__rules__ruleid__get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"><p><strong>Get one Rule information</strong></p><p>Get specific rule details for the account.</p></div><div class="clearfix"></div></div><div onclick="window.location.href = '#v1_api_accounts__accountid__rules__ruleid__put'" class="list-group-item"><span class="badge badge_put">put</span><div class="method_description"><p><strong>Update a Rule</strong></p><p>If rule doesn&#39;t exist it create a new one. Cannot be used for update of a draft rule.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__rules__ruleid__get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent">/v1/api/accounts/{accountId}/rules</span>/{ruleId}</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Get one Rule information</strong></p><p>Get specific rule details for the account.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__rules__ruleid__get_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__rules__ruleid__get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__rules__ruleid__get_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li><li><strong>ruleId</strong>: <em>required (string)</em><p>The ID of a Rule</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>2c6cbf002516cf81913471da4d41daed212bde8f</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_accounts__accountid__rules__ruleid__get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "id": "541c09dd63de1a9f63216f63",
+  "creationDate": 1411123677425,
+  "domainId": "0d66c8b6-9f4d-4551-a9c8-d356c2dd033d",
+  "externalId": "9bd17edc04e3a07f636af4b7be72a0967c19f0ac",
+  "lastUpdateDate": 1411123677425,
+  "name": "draft2",
+  "owner": "test@example.com",
+  "status": "Draft"
+}</code></pre></div></div></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__rules__ruleid__put"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_put">put</span> <span class="parent">/v1/api/accounts/{accountId}/rules</span>/{ruleId}</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Update a Rule</strong></p><p>If rule doesn&#39;t exist it create a new one. Cannot be used for update of a draft rule.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__rules__ruleid__put_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__rules__ruleid__put_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__rules__ruleid__put_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li><li><strong>ruleId</strong>: <em>required (string)</em><p>The ID of a Rule</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>2c6cbf002516cf81913471da4d41daed212bde8f</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "rule",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 255
+    },
+    "externalId": {
+      "type": "string",
+      "required": false,
+      "maxLength": 255
+    },
+    "description": {
+      "type": "string",
+      "required": false,
+      "maxLength": 1000
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Regular"
+      ],
+      "required": true
+    },
+    "resetType": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "Automatic"
+      ],
+      "required": true
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "Low",
+        "Medium",
+        "High"
+      ],
+      "required": true
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "Archived",
+        "On-hold"
+      ],
+      "required": true
+    },
+    "population": {
+      "type": "object",
+      "required": true,
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "ids": {
+          "type": "array",
+          "required": false,
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "required": false,
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "attributes": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": false
+        }
+      }
+    },
+    "conditions": {
+      "type": "object",
+      "required": true,
+      "additionalProperties": false,
+      "properties": {
+        "operator": {
+          "type": "string",
+          "enum": [
+            "AND",
+            "OR"
+          ],
+          "required": true
+        },
+        "values": {
+          "type": "array",
+          "required": true,
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "component": {
+                "type": "object",
+                "required": true,
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": false
+                  },
+                  "dataType": {
+                    "type": "string",
+                    "enum": [
+                      "Number",
+                      "String",
+                      "Boolean",
+                      "ByteArray"
+                    ],
+                    "required": true
+                  },
+                  "cid": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "required": false
+                  }
+                }
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "basic",
+                  "time",
+                  "statistics"
+                ],
+                "required": true
+              },
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "&gt;",
+                  "&lt;",
+                  "&lt;=",
+                  "&gt;=",
+                  "Not Equal",
+                  "Equal",
+                  "Between",
+                  "Not Between",
+                  "Like"
+                ],
+                "required": true
+              },
+              "values": {
+                "type": "array",
+                "required": true,
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "timeLimit": {
+                "type": "number",
+                "required": false
+              },
+              "baselineCalculationLevel": {
+                "type": "string",
+                "enum": [
+                  "Device level"
+                ],
+                "required": false
+              },
+              "baselineSecondsBack": {
+                "type": "number",
+                "required": false
+              },
+              "baselineMinimalInstances": {
+                "type": "number",
+                "required": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "required": true,
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "mail",
+              "http",
+              "actuation"
+            ],
+            "required": true
+          },
+          "target": {
+            "type": "array",
+            "required": true,
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "http_headers": {
+            "type": "object",
+            "minProperties": 0,
+            "maxProperties": 5
+          }
+        }
+      }
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "name": "Test Rule",
+  "description": "This is a test rule",
+  "priority": "Medium",
+  "type": "Regular",
+  "status": "Active",
+  "actions": [
+  {
+    "type": "http",
+    "target": [
+      "http://test.com"
+    ],
+    "http_headers":
+    {
+      "header1": "value1",
+      "header2": "value2"
+    }
+  }
+  ],
+  "conditions": {
+    "operator": "OR",
+    "values": [
+    {
+      "component": {
+        "dataType": "Number",
+        "name": "Temp.01.1"
+      },
+      "type": "basic",
+      "values": [
+        "25"
+      ],
+      "operator": "&gt;"
+    }
+    ]
+  },
+  "resetType": "Automatic",
+  "population": {
+    "ids": [
+      "685.1.1.1"
+    ],
+    "attributes": null
+  }
+}
+</code></pre></div></div><div class="tab-pane" id="v1_api_accounts__accountid__rules__ruleid__put_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "externalId": "6831",
+  "domainId": "0d66c8b6-9f4d-4551-a9c8-d356c2dd033d",
+  "creationDate": 1411129409587,
+  "lastUpdateDate": 1411127836926,
+  "status": "Active",
+  "actions": [
+  {
+    "type": "mail",
+    "target": [
+      "test@example.com"
+    ]
+  }
+  ],
+  "id": "541c2041b3700bcbe9c76fc4"
+}
+</code></pre></div></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_accounts__accountid__rules__ruleid__status"><span class="parent">/v1/api/accounts/{accountId}/rules/{ruleId}</span>/status</a> <span class="methods"><a href="#v1_api_accounts__accountid__rules__ruleid__status_put"><span class="badge badge_put">put</span></a></span></h4></div><div id="panel_v1_api_accounts__accountid__rules__ruleid__status" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_accounts__accountid__rules__ruleid__status_put'" class="list-group-item"><span class="badge badge_put">put</span><div class="method_description"><p><strong>Update a Status of a Rule</strong></p><p>Update the status of the rule. Cannot be used for changing the status of draft rule. Status value should be one of the following: ["Active", "Archived", "On-hold"]</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__rules__ruleid__status_put"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_put">put</span> <span class="parent">/v1/api/accounts/{accountId}/rules/{ruleId}</span>/status</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Update a Status of a Rule</strong></p><p>Update the status of the rule. Cannot be used for changing the status of draft rule. Status value should be one of the following: ["Active", "Archived", "On-hold"]</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__rules__ruleid__status_put_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__rules__ruleid__status_put_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__rules__ruleid__status_put_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li><li><strong>ruleId</strong>: <em>required (string)</em><p>The ID of a Rule</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>2c6cbf002516cf81913471da4d41daed212bde8f</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "rule-status",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "Archived",
+        "On-hold"
+      ],
+      "required": true
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "status": "Archived"
+}
+</code></pre></div></div><div class="tab-pane" id="v1_api_accounts__accountid__rules__ruleid__status_put_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "id": "541bfa1eb3700bcbe9c76fc2",
+  "actions": [
+  {
+    "type": "mail",
+    "target": [
+      "test@example.com"
+    ]
+  }
+  ],
+  "creationDate": 1411119645083,
+  "domainId": "0d66c8b6-9f4d-4551-a9c8-d356c2dd033d",
+  "externalId": "6831",
+  "lastUpdateDate": 1411127836926,
+  "status": "Archived"
+}
+</code></pre></div></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_accounts__accountid__rules_draft"><span class="parent">/v1/api/accounts/{accountId}/rules</span>/draft</a> <span class="methods"><a href="#v1_api_accounts__accountid__rules_draft_put"><span class="badge badge_put">put</span></a></span></h4></div><div id="panel_v1_api_accounts__accountid__rules_draft" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_accounts__accountid__rules_draft_put'" class="list-group-item"><span class="badge badge_put">put</span><div class="method_description"><p><strong>Create a Rule as a Draft</strong></p><p>Create a rule with a status - "Draft" for the specified account.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__rules_draft_put"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_put">put</span> <span class="parent">/v1/api/accounts/{accountId}/rules</span>/draft</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Create a Rule as a Draft</strong></p><p>Create a rule with a status - "Draft" for the specified account.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__rules_draft_put_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__rules_draft_put_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__rules_draft_put_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "rule-draft",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "required": false
+    },
+    "creationDate": {
+      "type": "number",
+      "required": false
+    },
+    "domainId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "required": false
+    },
+    "externalId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "required": false
+    },
+    "lastUpdateDate": {
+      "type": "number",
+      "required": false
+    },
+    "owner": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "required": false
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 255
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "required": false,
+      "maxLength": 1000
+    },
+    "type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Regular"
+      ],
+      "required": false
+    },
+    "resetType": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Manual",
+        "Automatic"
+      ],
+      "required": false
+    },
+    "priority": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Low",
+        "Medium",
+        "High"
+      ],
+      "required": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft"
+      ],
+      "required": false
+    },
+    "population": {
+      "type": "object",
+      "required": false,
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "ids": {
+          "type": "array",
+          "required": false,
+          "minItems": 0,
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "required": false,
+          "minItems": 0,
+          "items": {
+            "type": "string"
+          }
+        },
+        "attributes": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": false
+        }
+      }
+    },
+    "conditions": {
+      "type": "object",
+      "required": false,
+      "additionalProperties": false,
+      "properties": {
+        "operator": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "AND",
+            "OR"
+          ],
+          "required": false
+        },
+        "values": {
+          "type": "array",
+          "required": false,
+          "minItems": 0,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "component": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "required": false
+                  },
+                  "dataType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "Number",
+                      "String",
+                      "Boolean",
+                      "ByteArray"
+                    ],
+                    "required": false
+                  },
+                  "cid": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "required": false
+                  }
+                }
+              },
+              "type": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "basic",
+                  "time",
+                  "statistics"
+                ],
+                "required": false
+              },
+              "operator": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "&gt;",
+                  "&lt;",
+                  "&lt;=",
+                  "&gt;=",
+                  "Not Equal",
+                  "Equal",
+                  "Between",
+                  "Not Between",
+                  "Like"
+                ],
+                "required": false
+              },
+              "values": {
+                "type": "array",
+                "required": false,
+                "minItems": 0,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "timeLimit": {
+                "type": "number",
+                "required": false
+              },
+              "baselineCalculationLevel": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "Device level"
+                ],
+                "required": false
+              },
+              "baselineSecondsBack": {
+                "type": "number",
+                "required": false
+              },
+              "baselineMinimalInstances": {
+                "type": "number",
+                "required": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "required": false,
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "http_headers": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+              "^": {
+                "type": "string"
+              }
+            },
+            "required": false
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "mail",
+              "http",
+              "actuation"
+            ],
+            "required": false
+          },
+          "target": {
+            "type": "array",
+            "required": false,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "name": "draftRule"
+}
+</code></pre></div></div><div class="tab-pane" id="v1_api_accounts__accountid__rules_draft_put_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "id": "541c09dd63de1a9f63216f63",
+  "creationDate": 1411123677425,
+  "domainId": "0d66c8b6-9f4d-4551-a9c8-d356c2dd033d",
+  "externalId": "9bd17edc04e3a07f636af4b7be72a0967c19f0ac",
+  "lastUpdateDate": 1411123677425,
+  "name": "draftRule",
+  "owner": "test@example.com",
+  "status": "Draft"
+}</code></pre></div></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_accounts__accountid__rules_draft__ruleid_"><span class="parent">/v1/api/accounts/{accountId}/rules/draft</span>/{ruleId}</a> <span class="methods"><a href="#v1_api_accounts__accountid__rules_draft__ruleid__delete"><span class="badge badge_delete">delete</span></a></span></h4></div><div id="panel_v1_api_accounts__accountid__rules_draft__ruleid_" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_accounts__accountid__rules_draft__ruleid__delete'" class="list-group-item"><span class="badge badge_delete">delete</span><div class="method_description"><p><strong>Delete a draft rule</strong></p><p>Delete a specific draft rule for account</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__rules_draft__ruleid__delete"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_delete">delete</span> <span class="parent">/v1/api/accounts/{accountId}/rules/draft</span>/{ruleId}</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Delete a draft rule</strong></p><p>Delete a specific draft rule for account</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__rules_draft__ruleid__delete_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__rules_draft__ruleid__delete_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__rules_draft__ruleid__delete_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li><li><strong>ruleId</strong>: <em>required (string)</em><p>The ID of a Rule</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>2c6cbf002516cf81913471da4d41daed212bde8f</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_accounts__accountid__rules_draft__ruleid__delete_response"><h2>HTTP status code <a href="http://httpstatus.es/204" target="_blank">204</a></h2><p>OK</p></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_accounts__accountid__rules_clone__ruleid_"><span class="parent">/v1/api/accounts/{accountId}/rules</span>/clone/{ruleId}</a> <span class="methods"><a href="#v1_api_accounts__accountid__rules_clone__ruleid__post"><span class="badge badge_post">post</span></a></span></h4></div><div id="panel_v1_api_accounts__accountid__rules_clone__ruleid_" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_accounts__accountid__rules_clone__ruleid__post'" class="list-group-item"><span class="badge badge_post">post</span><div class="method_description"></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_accounts__accountid__rules_clone__ruleid__post"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_post">post</span> <span class="parent">/v1/api/accounts/{accountId}/rules</span>/clone/{ruleId}</h4></div><div class="modal-body"><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_accounts__accountid__rules_clone__ruleid__post_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_accounts__accountid__rules_clone__ruleid__post_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_accounts__accountid__rules_clone__ruleid__post_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li><li><strong>ruleId</strong>: <em>required (string)</em><p>The ID of a Rule</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>2c6cbf002516cf81913471da4d41daed212bde8f</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_accounts__accountid__rules_clone__ruleid__post_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p></div></div></div></div></div></div></div></div></div></div><div class="panel panel-default"><div class="panel-heading"><h3 id="v1_api_account__accountid__alerts" class="panel-title"><h2>Alert Management</h2></h3></div><div class="panel-body"><div class="top-resource-description"><p>The Alert API is a REST Interface for handling alerts.</p></div><div class="panel-group"><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_account__accountid__alerts"><span class="parent"></span>/v1/api/account/{accountId}/alerts</a> <span class="methods"><a href="#v1_api_account__accountid__alerts_get"><span class="badge badge_get">get</span></a></span></h4></div><div id="panel_v1_api_account__accountid__alerts" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_account__accountid__alerts_get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"><p><strong>Get List of Alerts</strong></p><p>Get a list of all alerts for the specified account.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_account__accountid__alerts_get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent"></span>/v1/api/account/{accountId}/alerts</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Get List of Alerts</strong></p><p>Get a list of all alerts for the specified account.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_account__accountid__alerts_get_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_account__accountid__alerts_get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_account__accountid__alerts_get_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_account__accountid__alerts_get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>[
+{
+  "accountId": "0d66c8b6-9f4d-4551-a9c8-d356c2dd033d",
+  "alertId": "75",
+  "deviceId": "00-00-00-00-a8-9c",
+  "ruleId": 6832,
+  "ruleName": "rule 2 - basic condition new",
+  "priority": "Low", 
+  "triggered": 1402580459000,
+  "created": 1411130946286,
+  "naturalLangAlert": "temperature &gt; 17.2",
+  "conditions": [
+  {
+    "sequence": 1,
+    "condition": "temperature &gt; 17.2"
+  }
+  ],
+  "status": "New",
+  "updated": 1411130946286,
+  "_id": "541c2642b3700bcbe9c76fc5"
+}
+]
+</code></pre></div></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_account__accountid__alerts__alertid_"><span class="parent">/v1/api/account/{accountId}/alerts</span>/{alertId}</a> <span class="methods"><a href="#v1_api_account__accountid__alerts__alertid__get"><span class="badge badge_get">get</span></a></span></h4></div><div id="panel_v1_api_account__accountid__alerts__alertid_" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_account__accountid__alerts__alertid__get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"><p><strong>Get Alert information</strong></p><p>Get specific alert details connected with the account.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_account__accountid__alerts__alertid__get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent">/v1/api/account/{accountId}/alerts</span>/{alertId}</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Get Alert information</strong></p><p>Get specific alert details connected with the account.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_account__accountid__alerts__alertid__get_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_account__accountid__alerts__alertid__get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_account__accountid__alerts__alertid__get_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li><li><strong>alertId</strong>: <em>required (string)</em></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_account__accountid__alerts__alertid__get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "accountId": "0d66c8b6-9f4d-4551-a9c8-d356c2dd033d",
+  "alertId": "75",
+  "deviceId": "00-00-00-00-a8-9c",
+  "ruleId": 6832,
+  "ruleName": "rule 2 - basic condition new",
+  "priority": "Low",
+  "triggered": 1402580459000,
+  "created": 1411130946286,
+  "naturalLangAlert": "temperature &gt; 17.2",
+  "conditions": [
+  {
+    "sequence": 1,
+    "condition": "temperature &gt; 17.2",
+    "components": [
+    {
+      "componentId": "e5f09130-c70e-4082-9801-49833c853493",
+      "dataType": "Number",
+      "componentName": "GA9c-3-Temp.Sensor",
+      "valuePoints": [
+      {
+        "timestamp": 1402580459000,
+        "value": "21"
+      }
+      ]
+    }
+    ]
+  }
+  ],
+  "status": "New",
+  "updated": 1411130946286,
+  "_id": "541c2642b3700bcbe9c76fc5"
+}
+</code></pre></div></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_account__accountid__alerts__alertid__reset"><span class="parent">/v1/api/account/{accountId}/alerts/{alertId}</span>/reset</a> <span class="methods"><a href="#v1_api_account__accountid__alerts__alertid__reset_put"><span class="badge badge_put">put</span></a></span></h4></div><div id="panel_v1_api_account__accountid__alerts__alertid__reset" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_account__accountid__alerts__alertid__reset_put'" class="list-group-item"><span class="badge badge_put">put</span><div class="method_description"><p><strong>Reset Alert</strong></p><p>Change alert status to - "Closed". Alert won&#39;t be active any more.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_account__accountid__alerts__alertid__reset_put"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_put">put</span> <span class="parent">/v1/api/account/{accountId}/alerts/{alertId}</span>/reset</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Reset Alert</strong></p><p>Change alert status to - "Closed". Alert won&#39;t be active any more.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_account__accountid__alerts__alertid__reset_put_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_account__accountid__alerts__alertid__reset_put_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_account__accountid__alerts__alertid__reset_put_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li><li><strong>alertId</strong>: <em>required (string)</em></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_account__accountid__alerts__alertid__reset_put_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_account__accountid__alerts__alertid__status__statusname_"><span class="parent">/v1/api/account/{accountId}/alerts/{alertId}</span>/status/{statusName}</a> <span class="methods"><a href="#v1_api_account__accountid__alerts__alertid__status__statusname__put"><span class="badge badge_put">put</span></a></span></h4></div><div id="panel_v1_api_account__accountid__alerts__alertid__status__statusname_" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_account__accountid__alerts__alertid__status__statusname__put'" class="list-group-item"><span class="badge badge_put">put</span><div class="method_description"></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_account__accountid__alerts__alertid__status__statusname__put"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_put">put</span> <span class="parent">/v1/api/account/{accountId}/alerts/{alertId}</span>/status/{statusName}</h4></div><div class="modal-body"><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_account__accountid__alerts__alertid__status__statusname__put_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_account__accountid__alerts__alertid__status__statusname__put_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_account__accountid__alerts__alertid__status__statusname__put_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li><li><strong>alertId</strong>: <em>required (string)</em></li><li><strong>statusName</strong>: <em>required (string)</em><p>The Name of a new alert status.</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Closed</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_account__accountid__alerts__alertid__status__statusname__put_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_account__accountid__alerts__alertid__comments"><span class="parent">/v1/api/account/{accountId}/alerts/{alertId}</span>/comments</a> <span class="methods"><a href="#v1_api_account__accountid__alerts__alertid__comments_post"><span class="badge badge_post">post</span></a></span></h4></div><div id="panel_v1_api_account__accountid__alerts__alertid__comments" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_account__accountid__alerts__alertid__comments_post'" class="list-group-item"><span class="badge badge_post">post</span><div class="method_description"><p><strong>Add comments to the Alert</strong></p><p>Add list of comments to the alert.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_account__accountid__alerts__alertid__comments_post"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_post">post</span> <span class="parent">/v1/api/account/{accountId}/alerts/{alertId}</span>/comments</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Add comments to the Alert</strong></p><p>Add list of comments to the alert.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_account__accountid__alerts__alertid__comments_post_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_account__accountid__alerts__alertid__comments_post_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_account__accountid__alerts__alertid__comments_post_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li><li><strong>alertId</strong>: <em>required (string)</em></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "alert-comment",
+  "type": "array",
+  "required": true,
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "user": {
+        "type": "string",
+        "required": true
+      },
+      "timestamp": {
+        "type": "number",
+        "required": true
+      },
+      "text": {
+        "type": "string",
+        "required": true
+      }
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>[
+  {
+    "user": "test@example.com",
+    "timestamp": 123233231221,
+    "text": "comment"
+  }
+]</code></pre></div></div><div class="tab-pane" id="v1_api_account__accountid__alerts__alertid__comments_post_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p></div></div></div></div></div></div></div></div></div></div><div class="panel panel-default"><div class="panel-heading"><h3 id="v1_api_account__accountid__devices" class="panel-title"><h2>Device Management</h2></h3></div><div class="panel-body"><div class="panel-group"><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_account__accountid__devices"><span class="parent"></span>/v1/api/account/{accountId}/devices</a> <span class="methods"><a href="#v1_api_account__accountid__devices_get"><span class="badge badge_get">get</span></a> <a href="#v1_api_account__accountid__devices_post"><span class="badge badge_post">post</span></a></span></h4></div><div id="panel_v1_api_account__accountid__devices" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_account__accountid__devices_get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"><p><strong>List all Devices</strong></p><p>If no query paramters are given, then it will retrieve a list of all devices for the specified account, with minimal data for each device. Otherwise, the query parameters will filter the desired result.</p></div><div class="clearfix"></div></div><div onclick="window.location.href = '#v1_api_account__accountid__devices_post'" class="list-group-item"><span class="badge badge_post">post</span><div class="method_description"><p><strong>Create a Device</strong></p><p>Used to create a device. The access token in the header will be used to authenticate the account on the URL for which this operation is being performed.</p><p>Device ID should consist only A-Z, a-z, 0-9 and - characters Location is optional and only makes sense for stationary devices. It should be sent as [decimal latitude, decimal longitude, (optional) height in meters] using WGS84 Datum.</p><p>Device attributes should be sent as key:value pairs, where both key and value are string</p><p>Device attributes collection can not contain keys: deviceId, deviceName, gatewayId, tags, location, components.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_account__accountid__devices_get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent"></span>/v1/api/account/{accountId}/devices</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>List all Devices</strong></p><p>If no query paramters are given, then it will retrieve a list of all devices for the specified account, with minimal data for each device. Otherwise, the query parameters will filter the desired result.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_account__accountid__devices_get_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_account__accountid__devices_get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_account__accountid__devices_get_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul><h3>Query Parameters</h3><ul><li><strong>sort</strong>: <em>(string)</em><p>Result will be sorted by this field. Can be "deviceId","gatewayId", "name" or "status"</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>deviceId</code></pre></div></li><li><strong>order</strong>: <em>(string)</em><p>Sorting order. Can be "asc" for ascendning or "desc" for descrending</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>asc</code></pre></div></li><li><strong>limit</strong>: <em>(integer - minimum: 0)</em><p>Maximum number of returned devices</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>5</code></pre></div></li><li><strong>skip</strong>: <em>(integer - minimum: 0)</em><p>Returned list offset - if 10 provided, result won&#39;t contain first 10 list elements retrieved from database. Default is 0</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>10</code></pre></div></li><li><strong>deviceId</strong>: <em>(string)</em><p>Filter the result by deviceId</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>24-a5-80-21-5b-3a</code></pre></div></li><li><strong>gatewayId</strong>: <em>(string)</em><p>Filter the result by gatewayId</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>24-a5-80-21-5b-3a</code></pre></div></li><li><strong>name</strong>: <em>(string)</em><p>Filter the result by device name</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Device #3</code></pre></div></li><li><strong>status</strong>: <em>(string)</em><p>Filter the result by statuse (example</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>created</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_account__accountid__devices_get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><p>OK</p><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>[
+  {
+    "deviceId": "24-a5-80-21-5b-29",
+    "gatewayId": "24-a5-80-21-5b-29",
+    "name": "Device #1",
+    "tags": [
+      "Israel",
+      "Tel Aviv"
+    ],
+    "status": "created"
+  },
+  {
+    "deviceId": "24-a5-80-21-5b-30",
+    "gatewayId": "24-a5-80-21-5b-30",
+    "name": "Device #2",
+    "tags": [
+      "US",
+      "Oregon",
+      "Portland"
+    ],
+    "status": "active"
+  },
+  {
+    "deviceId": "24-a5-80-21-5b-3a",
+    "gatewayId": "24-a5-80-21-5b-3a",
+    "name": "Device #3",
+    "tags": [
+      "US",
+      "California",
+      "Folsom"
+    ],
+    "status": "created"
+  }
+]</code></pre></div></div></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_account__accountid__devices_post"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_post">post</span> <span class="parent"></span>/v1/api/account/{accountId}/devices</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Create a Device</strong></p><p>Used to create a device. The access token in the header will be used to authenticate the account on the URL for which this operation is being performed.</p><p>Device ID should consist only A-Z, a-z, 0-9 and - characters Location is optional and only makes sense for stationary devices. It should be sent as [decimal latitude, decimal longitude, (optional) height in meters] using WGS84 Datum.</p><p>Device attributes should be sent as key:value pairs, where both key and value are string</p><p>Device attributes collection can not contain keys: deviceId, deviceName, gatewayId, tags, location, components.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_account__accountid__devices_post_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_account__accountid__devices_post_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_account__accountid__devices_post_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "device",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "deviceId": {
+      "type": "string",
+      "required": true
+    },
+    "gatewayId": {
+      "type": "string",
+      "required": true
+    },
+    "domainId": {
+      "type": "string",
+      "required": false
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "tags": {
+      "type": "array",
+      "required": false,
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "loc": {
+      "type": "array",
+      "required": false,
+      "minItems": 2,
+      "maxItems": 3,
+      "items": {
+        "type": "number"
+      }
+    },
+    "attributes": {
+      "type": "object",
+      "required": false
+    },
+    "description": {
+      "type": "string",
+      "required": false
+    },
+    "contact": {
+      "type": "object",
+      "required": false,
+      "additionalProperties": false,
+      "properties": {
+        "phone": {
+          "type": "string",
+          "required": false
+        },
+        "email": {
+          "type": "string",
+          "required": false
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "required": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{ 
+  "deviceId": "24-a5-80-21-5b-29",
+  "gatewayId": "24-a5-80-21-5b-29",
+  "name": "Device #1",            
+  "tags": ["US", "California", "Sacramento"],
+  "loc": [ 45.5434085, -122.654422, 124.3 ],
+  "attributes": {
+    "vendor": "intel",
+    "platform": "x86",
+    "os": "linux"
+  }
+}
+</code></pre></div></div><div class="tab-pane" id="v1_api_account__accountid__devices_post_response"><h2>HTTP status code <a href="http://httpstatus.es/201" target="_blank">201</a></h2><p>CREATED</p><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{ 
+  "deviceId": "24-a5-80-21-5b-29",
+  "gatewayId": "24-a5-80-21-5b-29",
+  "name": "Device #1",            
+  "tags": ["US", "California", "Sacramento"],
+  "loc": [ 45.5434085, -122.654422, 124.3 ],
+  "created": 1354741966688,
+  "status": "created",
+  "attributes": {
+    "vendor": "intel",
+    "platform": "x86",
+    "os": "linux"
+  }
+}
+</code></pre></div><h2>HTTP status code <a href="http://httpstatus.es/400" target="_blank">400</a></h2><p>Invalid activation code (did code expire?)</p><h2>HTTP status code <a href="http://httpstatus.es/409" target="_blank">409</a></h2><p>Device already exists</p></div></div></div></div></div></div></div><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_v1_api_account__accountid__devices__deviceid_"><span class="parent">/v1/api/account/{accountId}/devices</span>/{deviceId}</a> <span class="methods"><a href="#v1_api_account__accountid__devices__deviceid__get"><span class="badge badge_get">get</span></a> <a href="#v1_api_account__accountid__devices__deviceid__put"><span class="badge badge_put">put</span></a></span></h4></div><div id="panel_v1_api_account__accountid__devices__deviceid_" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#v1_api_account__accountid__devices__deviceid__get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"><p><strong>Get one Device</strong></p><p>Get full detail for specific device for the specified account.</p></div><div class="clearfix"></div></div><div onclick="window.location.href = '#v1_api_account__accountid__devices__deviceid__put'" class="list-group-item"><span class="badge badge_put">put</span><div class="method_description"><p><strong>Update One Device</strong></p><p>Update a single device. The device ID (deviceId) cannot be updated as it is the key. If the device id does not exist, an error will be returned. The list of components represents the entire list of components for the device.</p></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_account__accountid__devices__deviceid__get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent">/v1/api/account/{accountId}/devices</span>/{deviceId}</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Get one Device</strong></p><p>Get full detail for specific device for the specified account.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_account__accountid__devices__deviceid__get_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_account__accountid__devices__deviceid__get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_account__accountid__devices__deviceid__get_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li><li><strong>deviceId</strong>: <em>required (string)</em><p>The ID of a Device</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>24-a5-80-21-5b-29</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul></div><div class="tab-pane" id="v1_api_account__accountid__devices__deviceid__get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "deviceId": "24-a5-80-21-5b-29",
+  "gatewayId": "24-a5-80-21-5b-29",
+  "name": "Device 1",
+  "status": "active",
+  "created": 1404250013693,
+  "components": [
+  {
+    "cid": "73f9fe37-bd9e-4139-b678-afdd716e7dda",
+    "name": "temp",
+    "type": "temperature.v1.0"
+  }
+  ],
+  "attributes": {
+    "vendor": "intel",
+    "platform": "x86",
+    "os": "linux"
+  }
+}
+</code></pre></div></div></div></div></div></div></div><div class="modal fade" tabindex="0" id="v1_api_account__accountid__devices__deviceid__put"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_put">put</span> <span class="parent">/v1/api/account/{accountId}/devices</span>/{deviceId}</h4></div><div class="modal-body"><div class="alert alert-info"><p><strong>Update One Device</strong></p><p>Update a single device. The device ID (deviceId) cannot be updated as it is the key. If the device id does not exist, an error will be returned. The list of components represents the entire list of components for the device.</p></div><ul class="nav nav-tabs"><li class="active"><a href="#v1_api_account__accountid__devices__deviceid__put_request" data-toggle="tab">Request</a></li><li><a href="#v1_api_account__accountid__devices__deviceid__put_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="v1_api_account__accountid__devices__deviceid__put_request"><h3>URI Parameters</h3><ul><li><strong>accountId</strong>: <em>required (string)</em><p>The ID of an Account. In order to obtain the Account Id, we need first obtain an Authorization Token and then get the Authorization Token Info</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>321ef007-8449-477f-9ea0-d702d77e64b9</code></pre></div></li><li><strong>deviceId</strong>: <em>required (string)</em><p>The ID of a Device</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>24-a5-80-21-5b-29</code></pre></div></li></ul><h3>Headers</h3><ul><li><strong>Authorization</strong>: <em>required (string)</em><p>This header is used to transmit a valid JWT as follows: Bearer JWT</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>Authorization: Bearer eyJ0eXAi..</code></pre></div></li></ul><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>:</p><pre><code>{
+  "name": "device",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "gatewayId": {
+      "type": "string",
+      "required": false
+    },
+    "name": {
+      "type": "string",
+      "required": false
+    },
+    "tags": {
+      "type": "array",
+      "required": false,
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "loc": {
+      "type": "array",
+      "required": false,
+      "minItems": 2,
+      "maxItems": 3,
+      "items": {
+        "type": "number"
+      }
+    },
+    "attributes": {
+      "type": "object",
+      "required": false
+    },
+    "description": {
+      "type": "string",
+      "required": false
+    },
+    "contact": {
+      "type": "object",
+      "required": false,
+      "properties": {
+        "phone": {
+          "type": "string",
+          "required": false
+        },
+        "email": {
+          "type": "string",
+          "required": false
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "required": false
+    },
+    "domainId": {
+      "type": "string",
+      "required": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-03/schema"
+}</code></pre><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "gatewayId": "24-a5-80-21-5b-29",
+  "name": "Device #1",
+  "loc": [ 45.5434085, -122.654422, 124.3 ],  
+  "tags": ["Arizona", "Phoenix"],            
+  "attributes": {
+    "vendor": "intel",
+    "platform": "x86",
+    "os": "linux"
+  }
+}
+</code></pre></div></div><div class="tab-pane" id="v1_api_account__accountid__devices__deviceid__put_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+  "gatewayId": "24-a5-80-21-5b-29",
+  "name": "Device #1",
+  "loc": [ 45.5434085, -122.654422, 124.3 ],  
+  "tags": ["Arizona", "Phoenix"],            
+  "attributes": {
+    "vendor": "intel",
+    "platform": "x86",
+    "os": "linux"
+    }
+  } 
+</code></pre></div><h2>HTTP status code <a href="http://httpstatus.es/404" target="_blank">404</a></h2><p>Device does not exist</p></div></div></div></div></div></div></div></div></div></div></div><div class="col-md-3"><div id="sidebar" class="hidden-print affix" role="complementary"><ul class="nav nav-pills nav-stacked"><li><a href="#v1_api_auth"><h2>Authorization</h2></a></li><li><a href="#v1_api_users"><h2>User Management</h2></a></li><li><a href="#v1_api_accounts"><h2>Account Management</h2></a></li><li><a href="#v1_api_accounts__accountid__rules"><h2>Rule Management</h2></a></li><li><a href="#v1_api_account__accountid__alerts"><h2>Alert Management</h2></a></li><li><a href="#v1_api_account__accountid__devices"><h2>Device Management</h2></a></li></ul></div></div></div></div></body></html>
