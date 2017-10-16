@@ -29,7 +29,6 @@
 	@$(call msg,"Initializing ..."); 
 	git submodule init
 	git submodule update --remote --merge
-	cp ./setup-environment.example.sh ./setup-environment.sh
 	sudo usermod -aG docker ${USER}
 	if [ -f iotanalytics-dashboard/public-interface/keys/private.pem ]; then echo "private keys in dashboard existing. Not updated"; else \
 		openssl genpkey -algorithm RSA -out iotanalytics-dashboard/public-interface/keys/private.pem -pkeyopt rsa_keygen_bits:2048;\
