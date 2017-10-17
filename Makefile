@@ -29,12 +29,24 @@
 	@$(call msg,"Initializing ..."); 
 	git submodule init
 	git submodule update --remote --merge
+ifeq ($(wildcard ./setup-environment.sh ),) 
+	@tput setaf 1
+	@while true; do \
+		read -r -p "Use the default config in setup-environment.example.sh file ? [y/N]: " response; \
+		case $$response in \
+		   	[Yy]* ) cp ./setup-environment.example.sh setup-environment.sh; break;; \
+       		[Nn]* ) break;; \
+			* ) echo "Please answer yes or no.";; \
+    		esac \
+	done ; 
+	@tput sgr0
+endif
 	sudo usermod -aG docker ${USER}
-	if [ -f iotanalytics-dashboard/public-interface/keys/private.pem ]; then echo "private keys in dashboard existing. Not updated"; else \
+	@if [ -f iotanalytics-dashboard/public-interface/keys/private.pem ]; then echo "private keys in dashboard existing. Not updated"; else \
 		openssl genpkey -algorithm RSA -out iotanalytics-dashboard/public-interface/keys/private.pem -pkeyopt rsa_keygen_bits:2048;\
 		openssl rsa -pubout -in iotanalytics-dashboard/public-interface/keys/private.pem -out iotanalytics-dashboard/public-interface/keys/public.pem; \
 	fi;
-	if [ -f iotanalytics-websocket-server/security/private.pem ]; then echo "private keys in websocket-server existing. Not updated!"; else \
+	@if [ -f iotanalytics-websocket-server/security/private.pem ]; then echo "private keys in websocket-server existing. Not updated!"; else \
 		openssl genpkey -algorithm RSA -out iotanalytics-websocket-server/security/private.pem -pkeyopt rsa_keygen_bits:2048;\
 		openssl rsa -pubout -in iotanalytics-websocket-server/security/private.pem -out iotanalytics-websocket-server/security/public.pem;\
 	fi
