@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-# export ZOOKEEPER=`cat ${SCRIPT_DIR}/docker/container_ip.tmp`
-
 export ZOOKEEPER='hbase:2181'
 export ZOOKEEPER_PORT='2181'
 export POSTGRES='postgres'
@@ -10,7 +7,7 @@ export POSTGRES_PORT='5432'
 export KAFKA='kafka:9092'
 export GEARPUMP='gearpump:8090'
 export BACKEND='backend:8080'
-export NGINX='nginx:80'
+export NGINX='nginx'
 export REDIS='redis'
 export REDIS_PORT='6379'
 

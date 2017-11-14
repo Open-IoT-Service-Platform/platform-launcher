@@ -41,7 +41,6 @@ ifeq ($(wildcard ./setup-environment.sh ),)
 	done ; 
 	@tput sgr0
 endif
-	sudo usermod -aG docker ${USER}
 	@if [ -f iotanalytics-dashboard/public-interface/keys/private.pem ]; then echo "private keys in dashboard existing. Not updated"; else \
 		openssl genpkey -algorithm RSA -out iotanalytics-dashboard/public-interface/keys/private.pem -pkeyopt rsa_keygen_bits:2048;\
 		openssl rsa -pubout -in iotanalytics-dashboard/public-interface/keys/private.pem -out iotanalytics-dashboard/public-interface/keys/public.pem; \

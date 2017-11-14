@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #install docker
-apt-get update
+sudo apt-get update
 sudo apt-get install \
     linux-image-extra-$(uname -r) \
     linux-image-extra-virtual
@@ -23,4 +23,6 @@ sudo curl -L https://github.com/docker/compose/releases/download/1.14.0/docker-c
 sudo chmod +x /usr/local/bin/docker-compose
 
 #other packages needed
-apt-get install make git
+sudo apt-get install make git
+
+sudo usermod -aG docker ${USER}

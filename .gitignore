@@ -1,2 +1,4 @@
 setup-environment.sh
 .init
+.prepare
+data
