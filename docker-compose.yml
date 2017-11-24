@@ -87,10 +87,12 @@ services:
       - postgres
     volumes:
       - ./iotanalytics-websocket-server:/app
+      - ./data/keys:/app/keys
     working_dir: /app
     environment:
       - VCAP_SERVICES=${VCAP_SERVICES}
       - VCAP_APPLICATION=${VCAP_APPLICATION}
+      - NODE_ENV=local
     command: ./wait-for-it.sh postgres:5432 -t 300 -- ./scripts/docker-start.sh
   dashboard:
     build:
@@ -106,6 +108,7 @@ services:
     command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh redis:6379 -t 300 -- ./scripts/docker-start.sh
     volumes:
       - ./iotanalytics-dashboard/public-interface:/app
+      - ./data/keys:/app/keys
     environment:
       - VCAP_SERVICES=${VCAP_SERVICES}
       - VCAP_APPLICATION=${VCAP_APPLICATION}

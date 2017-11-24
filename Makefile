@@ -41,14 +41,10 @@ ifeq ($(wildcard ./setup-environment.sh ),)
 	done ; 
 	@tput sgr0
 endif
-	@if [ -f iotanalytics-dashboard/public-interface/keys/private.pem ]; then echo "private keys in dashboard existing. Not updated"; else \
-		openssl genpkey -algorithm RSA -out iotanalytics-dashboard/public-interface/keys/private.pem -pkeyopt rsa_keygen_bits:2048;\
-		openssl rsa -pubout -in iotanalytics-dashboard/public-interface/keys/private.pem -out iotanalytics-dashboard/public-interface/keys/public.pem; \
+	@if [ -f data/keys/private.pem ]; then echo "RSA keys existing already"; else \
+		openssl genpkey -algorithm RSA -out data/keys/private.pem -pkeyopt rsa_keygen_bits:2048;\
+		openssl rsa -pubout -in data/keys/private.pem -out data/keys/public.pem; \
 	fi;
-	@if [ -f iotanalytics-websocket-server/security/private.pem ]; then echo "private keys in websocket-server existing. Not updated!"; else \
-		openssl genpkey -algorithm RSA -out iotanalytics-websocket-server/security/private.pem -pkeyopt rsa_keygen_bits:2048;\
-		openssl rsa -pubout -in iotanalytics-websocket-server/security/private.pem -out iotanalytics-websocket-server/security/public.pem;\
-	fi
 	@touch $@
 
 build: .init 
@@ -71,7 +67,8 @@ start: build .prepare
 
 stop: 
 	@$(call msg,"Stopping IoT connector ..."); 
-	@sudo /bin/bash -c "./docker.sh stop "
+	@sudo /bin/bash -c "./docker.sh stop"
+	@sudo /bin/bash -c "docker stop redsocks"
 
 update:
 	@$(call msg,"Git Update ..."); 
