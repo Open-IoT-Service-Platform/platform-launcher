@@ -42,7 +42,8 @@ ifeq ($(wildcard ./setup-environment.sh ),)
 	@tput sgr0
 endif
 	@if [ -f data/keys/private.pem ]; then echo "RSA keys existing already"; else \
-		openssl genpkey -algorithm RSA -out data/keys/private.pem -pkeyopt rsa_keygen_bits:2048;\
+		mkdir -p data/keys; \
+		openssl genpkey -algorithm RSA -out data/keys/private.pem -pkeyopt rsa_keygen_bits:2048; \
 		openssl rsa -pubout -in data/keys/private.pem -out data/keys/public.pem; \
 	fi;
 	@touch $@
