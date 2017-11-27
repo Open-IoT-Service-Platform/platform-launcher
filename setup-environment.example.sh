@@ -1,9 +1,13 @@
 #!/bin/bash
 
-export ZOOKEEPER='hbase:2181'
-export ZOOKEEPER_PORT='2181'
+export ZOOKEEPER_KAFKA='kafka'
+export ZOOKEEPER_KAFKA_PORT='2181'
+export ZOOKEEPER_HBASE='hbase'
+export ZOOKEEPER_HBASE_PORT='2181'
 export POSTGRES='postgres'
 export POSTGRES_PORT='5432'
+export POSTGRES_USERNAME='postgres'
+export POSTGRES_PASSWORD='intel123'
 export KAFKA='kafka:9092'
 export GEARPUMP='gearpump:8090'
 export BACKEND='backend:8080'
@@ -14,45 +18,45 @@ export REDIS_PORT='6379'
 export VCAP_SERVICES='{
 "postgresql93": [{
     "credentials": {
-        "dbname": "iot",
-        "hostname": "'$POSTGRES'",
-        "password": "intel123",
-        "port": "'$POSTGRES_PORT'",
-        "username": "postgres"
+    "dbname": "iot",
+    "hostname": "'$POSTGRES'",
+    "port": "'$POSTGRES_PORT'",
+    "username": "'$POSTGRES_USERNAME'",
+    "password": "'$POSTGRES_PASSWORD'"
     },
     "name": "mypostgres"
 }],
 "hbase": [{
     "credentials": {
-        "HADOOP_CONFIG_KEY": {
-            "hadoop.security.authentication": "simple",
-            "hadoop.security.authorization": "false",
-            "hbase.security.authentication": "simple",
-            "ha.zookeeper.quorum": "'$ZOOKEEPER'",
-            "hbase.zookeeper.property.clientPort": "'$ZOOKEEPER_PORT'",
-            "hbase.zookeeper.quorum": "'$ZOOKEEPER'"
-        }
+    "HADOOP_CONFIG_KEY": {
+        "hadoop.security.authentication": "simple",
+        "hadoop.security.authorization": "false",
+        "hbase.security.authentication": "simple",
+        "ha.zookeeper.quorum": "'$ZOOKEEPER_HBASE'",
+        "hbase.zookeeper.property.clientPort": "'$ZOOKEEPER_HBASE_PORT'",
+        "hbase.zookeeper.quorum": "'$ZOOKEEPER_HBASE'"
+    }
     },
     "name": "myhbase"
 }],
 "hdfs": [{
     "credentials": {
-        "HADOOP_CONFIG_KEY": {
-            "ha.zookeeper.quorum": "'$ZOOKEEPER'",
-            "hadoop.security.authorization": "false"
-        }
+    "HADOOP_CONFIG_KEY": {
+        "ha.zookeeper.quorum": "'${ZOOKEEPER_HBASE}':'${ZOOKEEPER_HBASE_PORT}'",
+        "hadoop.security.authorization": "false"
+    }
     },
     "name": "myhdfs"
 }],
 "kafka": [{
     "credentials": {
-        "uri": "'$KAFKA'"
+    "uri": "'$KAFKA'"
     },
     "name": "mykafka"
 }],
 "zookeeper": [{
     "credentials": {
-     "zk.cluster": "'$ZOOKEEPER'",
+     "zk.cluster": "'${ZOOKEEPER_KAFKA}:${ZOOKEEPER_KAFKA_PORT}'",
      "zk.node": "/tmp"
     },
     "label": "zookeeper",
@@ -94,73 +98,73 @@ export VCAP_SERVICES='{
   ],
 "user-provided": [{
     "credentials": {
-        "kdc": "localhost",
-        "kpassword": "pass",
-        "krealm": "realm",
-        "kuser": "user"
+    "kdc": "localhost",
+    "kpassword": "pass",
+    "krealm": "realm",
+    "kuser": "user"
     },
     "name": "kerberos-service"
 },
 {
     "credentials": {
-        "enabled": true,
-        "partitions": 1,
-        "replication": 1,
-        "timeout_ms": 10000,
-        "topic": "metrics"
+    "enabled": true,
+    "partitions": 1,
+    "replication": 1,
+    "timeout_ms": 10000,
+    "topic": "metrics"
     },
     "name": "kafka-ups"
 },
 {
     "credentials": {
-        "host": "http://'$NGINX'",
-        "strictSSL": false
+    "host": "http://'$NGINX'",
+    "strictSSL": false
     },
     "name": "dashboard-endpoint-ups"
 },
 {
     "credentials": {
-        "captcha_test_code": "s09ef48213s8fe8fw8rwer5489wr8wd5",
-        "interaction_token_permision_key": "password",
-        "private_pem_path": "./keys/private.pem",
-        "public_pem_path": "./keys/public.pem"
+    "captcha_test_code": "s09ef48213s8fe8fw8rwer5489wr8wd5",
+    "interaction_token_permision_key": "password",
+    "private_pem_path": "./keys/private.pem",
+    "public_pem_path": "./keys/public.pem"
     },
     "name": "dashboard-security-ups"
 },
 {
     "credentials": {
-        "deviceMeasurementTableName": "LOCAL-AA-BACKEND_DEVICE_MEASUREMENT",
-        "host": "http://'$BACKEND'"
+    "deviceMeasurementTableName": "LOCAL-AA-BACKEND_DEVICE_MEASUREMENT",
+    "host": "http://'$BACKEND'"
 
     },
     "name": "backend-ups"
 },
 {
     "credentials": {
-        "sender": "sysadmin@localhost"
+    "sender": "sysadmin@localhost"
     },
     "name": "mail-ups"
 },
 {
     "credentials": {
-        "password": "7d501829lhbl1or0bb1784462c97bcad6",
-        "username": "gateway@intel.com"
+    "password": "7d501829lhbl1or0bb1784462c97bcad6",
+    "username": "gateway@intel.com"
 
     },
     "name": "gateway-credentials-ups"
 },
 {
     "credentials": {
-        "password": "7d501829lhbl1or0bb1784462c97bcad6",
-        "username": "rule_engine@intel.com"
+    "password": "7d501829lhbl1or0bb1784462c97bcad6",
+    "username": "rule_engine@intel.com"
 
     },
     "name": "rule-engine-credentials-ups"
 },
 {
     "credentials": {
-        "password": "AgjY7H3eXztyA6AmNjI2rte446gdttgattwRRF61",
-        "username": "api_actuator"
+    "password": "AgjY7H3eXztyA6AmNjI2rte446gdttgattwRRF61",
+    "username": "api_actuator"
     },
     "name": "websocket-ups"
 }]
