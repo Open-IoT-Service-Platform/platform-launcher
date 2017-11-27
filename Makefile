@@ -73,7 +73,7 @@ stop:
 update:
 	@$(call msg,"Git Update ..."); 
 	@git pull
-	@@git submodule update
+	@git submodule foreach git pull origin master
 
 clean:
 	@$(call msg,"Cleaning ..."); 
