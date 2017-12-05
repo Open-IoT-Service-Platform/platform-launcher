@@ -53,7 +53,7 @@ build: .init
 	@/bin/bash -c "./docker.sh create "
 
 .prepare:
-	/bin/bash -c 'docker run -it -v ${PWD}/iotanalytics-dashboard:/app openiotconnector_dashboard /bin/bash -c \
+	@/bin/bash -c 'docker run -it -v ${PWD}/iotanalytics-dashboard:/app openiotconnector_dashboard /bin/bash -c \
 	"/app/public-interface/scripts/docker-prepare.sh"'
 	@touch $@
 
@@ -63,13 +63,11 @@ build-force: .init
 
 start: build .prepare
 	@$(call msg,"Starting IoT connector ..."); 
-	@sudo /bin/bash -c "( (service --status-all | grep -q redis-server) && (systemctl stop redis-server) ) || true"
-	@sudo /bin/bash -c "./docker.sh up -d"
+	@/bin/bash -c "./docker.sh up -d"
 
 stop: 
 	@$(call msg,"Stopping IoT connector ..."); 
-	@sudo /bin/bash -c "./docker.sh stop"
-	@sudo /bin/bash -c "docker stop redsocks"
+	@/bin/bash -c "./docker.sh stop"
 
 update:
 	@$(call msg,"Git Update ..."); 
