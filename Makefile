@@ -25,20 +25,22 @@
 # targets
 #----------------------------------------------------------------------------------------------------------------------
 
+SHELL:=/bin/bash
+
 .init:
-	@$(call msg,"Initializing ..."); 
+	@$(call msg,"Initializing ...");
 	git submodule init
 	git submodule update --remote --merge
-ifeq ($(wildcard ./setup-environment.sh ),) 
+ifeq ($(wildcard ./setup-environment.sh ),)
 	@tput setaf 1
 	@while true; do \
 		read -r -p "Use the default config in setup-environment.example.sh file ? [y/N]: " response; \
 		case $$response in \
 		   	[Yy]* ) cp ./setup-environment.example.sh setup-environment.sh; break;; \
-       		[Nn]* ) break;; \
+		[Nn]* ) break;; \
 			* ) echo "Please answer yes or no.";; \
-    		esac \
-	done ; 
+		esac \
+	done ;
 	@tput sgr0
 endif
 	@if [ -f data/keys/private.pem ]; then echo "RSA keys existing already"; else \
@@ -48,38 +50,38 @@ endif
 	fi;
 	@touch $@
 
-build: .init 
-	@$(call msg,"Building IoT connector ..."); 
-	@/bin/bash -c "./docker.sh create "
+build: .init
+	@$(call msg,"Building IoT connector ...");
+	@./docker.sh create
 
 .prepare:
-	@/bin/bash -c 'docker run -it -v ${PWD}/iotanalytics-dashboard:/app openiotconnector_dashboard /bin/bash -c \
-	"/app/public-interface/scripts/docker-prepare.sh"'
+	@docker run -it -v $(shell pwd)/iotanalytics-dashboard:/app openiotconnector_dashboard /bin/bash \
+		-c /app/public-interface/scripts/docker-prepare.sh
 	@touch $@
 
 build-force: .init
-	@$(call msg,"Building IoT connector ..."); 
-	@/bin/bash -c "./docker.sh create --force-recreate "
+	@$(call msg,"Building IoT connector ...");
+	@./docker.sh create --force-recreate
 
 start: build .prepare
-	@$(call msg,"Starting IoT connector ..."); 
-	@/bin/bash -c "./docker.sh up -d"
+	@$(call msg,"Starting IoT connector ...");
+	@./docker.sh up -d
 
-stop: 
-	@$(call msg,"Stopping IoT connector ..."); 
-	@/bin/bash -c "./docker.sh stop"
+stop:
+	@$(call msg,"Stopping IoT connector ...");
+	@./docker.sh stop
 
 update:
-	@$(call msg,"Git Update ..."); 
+	@$(call msg,"Git Update ...");
 	@git pull
 	@git submodule foreach git pull origin master
 
 clean:
-	@$(call msg,"Cleaning ..."); 
+	@$(call msg,"Cleaning ...");
 	@rm -f .init .prepare
 
 distclean: clean
-	@/bin/bash -c "./docker.sh down "
+	@./docker.sh down
 	@rm -rf ./data
 
 
@@ -89,8 +91,8 @@ distclean: clean
 
 define msg
 	tput setaf 2 && \
-	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo -n "\n" && \
-	echo "\t"$1 && \
-	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo "\n" && \
+	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo "" && \
+	echo -e "\t"$1 && \
+	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo "" && \
 	tput sgr0
 endef
