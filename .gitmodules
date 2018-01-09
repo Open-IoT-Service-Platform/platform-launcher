@@ -10,3 +10,6 @@
 [submodule "iotanalytics-websocket-server"]
 	path = iotanalytics-websocket-server
 	url = git@github.com:emea-ssg-drd/iotanalytics-websocket-server.git
+[submodule "iotkit-agent"]
+	path = tests/iotkit-agent
+	url = git@github.com:emea-ssg-drd/iotkit-agent.git

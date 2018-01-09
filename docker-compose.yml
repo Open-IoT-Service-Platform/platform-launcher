@@ -29,12 +29,13 @@ services:
     image: "postgres:9.4.10"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+      - ./iotanalytics-dashboard/public-interface/scripts/database:/docker-entrypoint-initdb.d
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_DB=iot
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=intel123
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
   kafka:
     image: spotify/kafkaproxy
     ports:
@@ -107,6 +108,7 @@ services:
     environment:
       - VCAP_SERVICES=${VCAP_SERVICES}
       - VCAP_APPLICATION=${VCAP_APPLICATION}
+      - TEST=${TEST}
       - NODE_ENV=local
     command: ./wait-for-it.sh postgres:5432 -t 300 -- ./scripts/docker-start.sh
   dashboard:
@@ -127,6 +129,7 @@ services:
     environment:
       - VCAP_SERVICES=${VCAP_SERVICES}
       - VCAP_APPLICATION=${VCAP_APPLICATION}
+      - TEST=${TEST}
       - NODE_ENV=local
   backend:
     build:

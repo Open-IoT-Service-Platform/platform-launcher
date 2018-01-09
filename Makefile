@@ -61,6 +61,10 @@ start: build .prepare
 	@$(call msg,"Starting IoT connector ...");
 	@./docker.sh up -d
 
+start-test: build .prepare
+	@$(call msg,"Starting IoT connector (test mode) ..."); 
+	@env TEST="1" ./docker.sh up -d
+
 stop:
 	@$(call msg,"Stopping IoT connector ...");
 	@./docker.sh stop
@@ -68,7 +72,12 @@ stop:
 update:
 	@$(call msg,"Git Update ...");
 	@git pull
+	@git submodule init
+	@git submodule update --remote --merge
 	@git submodule foreach git pull origin master
+
+test: start-test
+	@cd tests && make && make test
 
 clean:
 	@$(call msg,"Cleaning ...");
@@ -77,6 +86,7 @@ clean:
 distclean: clean
 	@./docker.sh down
 	@rm -rf ./data
+
 
 
 #----------------------------------------------------------------------------------------------------------------------
