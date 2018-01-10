@@ -1,0 +1,147 @@
+#
+# Copyright (c) 2017 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3'
+
+services:
+  hbase:
+    image: "dajobe/hbase"
+    ports:
+      - 2181:2181
+      - 9090:9090
+      - 60000:60000
+      - 60020:60020
+    volumes:
+      - ./data/hbase-logs:/opt/hbase/logs
+  postgres:
+    image: "postgres:9.4.10"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./iotanalytics-dashboard/public-interface/scripts/database:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  kafka:
+    image: spotify/kafkaproxy
+    ports:
+      - 9092:9092
+    links:
+      - hbase
+    environment:
+      - ZK_CONNECT=hbase:2181
+    depends_on:
+      - hbase
+  gearpump:
+    build:
+      context: ./iotanalytics-gearpump-rule-engine
+      dockerfile: Dockerfile-gearpump
+    ports:
+      - 8090:8090
+    links:
+      - nginx
+      - hbase
+  redis:
+    image: redis:3.0
+    volumes:
+      - ./data/redis:/data
+    ports:
+      - 6379:6379
+  rules-engine-build:
+    build:
+      context: ./iotanalytics-gearpump-rule-engine
+      dockerfile: Dockerfile
+    links:
+      - gearpump
+      - nginx
+      - hbase
+    depends_on:
+      - gearpump
+      - nginx
+      - hbase
+    working_dir: /app
+    environment:
+      - VCAP_SERVICES=${VCAP_SERVICES}
+      - VCAP_APPLICATION=${VCAP_APPLICATION}
+    command: ./wait-for-it.sh gearpump:8090 -t 300 -- ./wait-for-it.sh nginx:80 -t 300 -- ./local-push-to-gearpump.sh
+  nginx:
+    build:
+      context: ./iotanalytics-dashboard/public-interface/nginx
+      args:
+        - WEBSOCKET_SERVER=websocket-server:5000
+        - DASHBOARD_SERVER=dashboard:4001
+    ports:
+      - 80:80
+      - 443:443
+    links:
+      - websocket-server
+      - dashboard
+    volumes:
+      - ./iotanalytics-dashboard/public-interface:/app
+  websocket-server:
+    build:
+      context: ./iotanalytics-websocket-server
+    ports:
+      - 5000:5000
+    links:
+      - postgres
+    depends_on:
+      - postgres
+    volumes:
+      - ./iotanalytics-websocket-server:/app
+      - ./data/keys:/app/keys
+    working_dir: /app
+    environment:
+      - VCAP_SERVICES=${VCAP_SERVICES}
+      - VCAP_APPLICATION=${VCAP_APPLICATION}
+      - TEST=${TEST}
+      - NODE_ENV=local
+    command: ./wait-for-it.sh postgres:5432 -t 300 -- ./scripts/docker-start.sh
+  dashboard:
+    build:
+      context: ./iotanalytics-dashboard/public-interface
+    ports:
+      - 4001:4001
+    links:
+      - postgres
+      - redis
+    depends_on:
+      - postgres
+      - redis
+    command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh redis:6379 -t 300 -- ./scripts/docker-start.sh
+    volumes:
+      - ./iotanalytics-dashboard/public-interface:/app
+      - ./data/keys:/app/keys
+    environment:
+      - VCAP_SERVICES=${VCAP_SERVICES}
+      - VCAP_APPLICATION=${VCAP_APPLICATION}
+      - TEST=${TEST}
+      - NODE_ENV=local
+  backend:
+    build:
+      context: ./iotanalytics-backend
+    ports:
+      - 8080:8080
+    links:
+      - hbase
+    depends_on:
+      - hbase
+    command: ./wait-for-it.sh hbase:2181 -t 300 -- make runjar
+    working_dir: /app
+    environment:
+      - VCAP_SERVICES=${VCAP_SERVICES}
+      - VCAP_APPLICATION=${VCAP_APPLICATION}

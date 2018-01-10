@@ -1,0 +1,18 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "E2E test with server",
+  "main": "test.js",
+  "scripts": {
+    "test": "mocha oisp-tests.js --exit"
+  },
+  "author": "Intel SSG-DRD",
+  "license": "ISC",
+  "dependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^4.0.1",
+    "uuid": "^3.1.0",
+    "getmac": "^1.2.1",
+    "oisp-sdk-js": "./iotkit-agent/sdk"
+  }
+}
