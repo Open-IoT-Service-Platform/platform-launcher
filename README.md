@@ -1,4 +1,4 @@
-# Open IoT Connector
+# Open IoT Service Platform (OISP)
 
 This project is designed to provide Cloud Service Providers with a platform for enabling and supporting IoT developers to create IoT solutions with both edge devices and the cloud.
 
@@ -11,16 +11,16 @@ Key features:
  * Full RESTful JSON API supported
  * Realtime actuations (cloud -> IoT device)
 
-## Getting started
+## Getting started with OISP
 
 The platform consists of multiple components (services) each designed and optimised for a specific usecase. For example, the rules engine (built on top of Gearpump) runs seperately to the rest of the system and ingests telemetry data from a Kafka queue.
 
 To get platform running quickly we recommened using Docker. First ensure you have the latest version of Docker installed on your computer.
 
-## Cloning the Open IoT Connector
+## Cloning OISP platform launcher
 
 ```shell
-# git clone https://github.com/emea-ssg-drd/open-iot-connector.git
+# git clone https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 ```
 
 ## Starting from scratch
@@ -31,10 +31,10 @@ We have created a shell script to install all the dependencies including Git, Do
 # ./docker-platform-setup/install-docker-ubuntu16.04.sh
 ```
 
-## Creating the IoT Connector
+## Creating and launching OISP
 
 ```shell
-# cd open-iot-connector
+# cd platform-launcher
 # cp setup-environment.example.sh setup-environment.sh
 ```
 **Now modify the setup-environment.sh shell script with parameters valid for your needs.** For example the SMTP settings require you to have an SMTP server.
@@ -57,7 +57,7 @@ Once all the containers have been built and are running, you can access the appl
 
 ## Other make commands
 
-#### Stop the IoT connector
+#### Stop OISP
 The following command will stop all the Open IoT Connector containers:
 ```shell
 # make stop
@@ -69,7 +69,7 @@ The following command will pull latest changes to the Open IoT Connector **and**
 # make update
 ```
 
-#### Destroy the IoT connector (including data)
+#### Destroy OISP (including data)
 The following command will stop and remove the containers and images:
 ```shell
 # make distclean
