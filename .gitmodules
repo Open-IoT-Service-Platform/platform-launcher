@@ -1,15 +1,15 @@
-[submodule "iotanalytics-dashboard"]
-	path = iotanalytics-dashboard
-	url = git@github.com:Open-IoT-Service-Platform/iotanalytics-dashboard.git
-[submodule "iotanalytics-backend"]
-	path = iotanalytics-backend
-	url = git@github.com:Open-IoT-Service-Platform/iotanalytics-backend.git
-[submodule "iotanalytics-gearpump-rule-engine"]
-	path = iotanalytics-gearpump-rule-engine
-	url = git@github.com:Open-IoT-Service-Platform/iotanalytics-gearpump-rule-engine.git
-[submodule "iotanalytics-websocket-server"]
-	path = iotanalytics-websocket-server
-	url = git@github.com:Open-IoT-Service-Platform/iotanalytics-websocket-server.git
+[submodule "oisp-dashboard"]
+	path = oisp-dashboard
+	url = git@github.com:Open-IoT-Service-Platform/oisp-dashboard.git
+[submodule "oisp-backend"]
+	path = oisp-backend
+	url = git@github.com:Open-IoT-Service-Platform/oisp-backend.git
+[submodule "oisp-gearpump-rule-engine"]
+	path = oisp-gearpump-rule-engine
+	url = git@github.com:Open-IoT-Service-Platform/oisp-gearpump-rule-engine.git
+[submodule "oisp-websocket-server"]
+	path = oisp-websocket-server
+	url = git@github.com:Open-IoT-Service-Platform/oisp-websocket-server.git
 [submodule "iotkit-agent"]
 	path = tests/iotkit-agent
 	url = git@github.com:Open-IoT-Service-Platform/iotkit-agent.git
