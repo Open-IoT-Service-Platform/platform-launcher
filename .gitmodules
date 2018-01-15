@@ -1,15 +1,15 @@
 [submodule "iotanalytics-dashboard"]
 	path = iotanalytics-dashboard
-	url = git@github.com:emea-ssg-drd/iotanalytics-dashboard.git
+	url = git@github.com:Open-IoT-Service-Platform/iotanalytics-dashboard.git
 [submodule "iotanalytics-backend"]
 	path = iotanalytics-backend
-	url = git@github.com:emea-ssg-drd/iotanalytics-backend.git
+	url = git@github.com:Open-IoT-Service-Platform/iotanalytics-backend.git
 [submodule "iotanalytics-gearpump-rule-engine"]
 	path = iotanalytics-gearpump-rule-engine
-	url = git@github.com:emea-ssg-drd/iotanalytics-gearpump-rule-engine.git
+	url = git@github.com:Open-IoT-Service-Platform/iotanalytics-gearpump-rule-engine.git
 [submodule "iotanalytics-websocket-server"]
 	path = iotanalytics-websocket-server
-	url = git@github.com:emea-ssg-drd/iotanalytics-websocket-server.git
+	url = git@github.com:Open-IoT-Service-Platform/iotanalytics-websocket-server.git
 [submodule "iotkit-agent"]
 	path = tests/iotkit-agent
-	url = git@github.com:emea-ssg-drd/iotkit-agent.git
+	url = git@github.com:Open-IoT-Service-Platform/iotkit-agent.git
