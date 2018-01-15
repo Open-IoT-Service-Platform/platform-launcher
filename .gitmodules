@@ -1,6 +1,6 @@
-[submodule "oisp-dashboard"]
-	path = oisp-dashboard
-	url = git@github.com:Open-IoT-Service-Platform/oisp-dashboard.git
+[submodule "oisp-frontend"]
+	path = oisp-frontend
+	url = git@github.com:Open-IoT-Service-Platform/oisp-frontend.git
 [submodule "oisp-backend"]
 	path = oisp-backend
 	url = git@github.com:Open-IoT-Service-Platform/oisp-backend.git

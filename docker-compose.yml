@@ -29,7 +29,7 @@ services:
     image: "postgres:9.4.10"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
-      - ./oisp-dashboard/public-interface/scripts/database:/docker-entrypoint-initdb.d
+      - ./oisp-frontend/public-interface/scripts/database:/docker-entrypoint-initdb.d
     ports:
       - 5432:5432
     environment:
@@ -80,7 +80,7 @@ services:
     command: ./wait-for-it.sh gearpump:8090 -t 300 -- ./wait-for-it.sh nginx:80 -t 300 -- ./local-push-to-gearpump.sh
   nginx:
     build:
-      context: ./oisp-dashboard/public-interface/nginx
+      context: ./oisp-frontend/public-interface/nginx
       args:
         - WEBSOCKET_SERVER=websocket-server:5000
         - DASHBOARD_SERVER=dashboard:4001
@@ -91,7 +91,7 @@ services:
       - websocket-server
       - dashboard
     volumes:
-      - ./oisp-dashboard/public-interface:/app
+      - ./oisp-frontend/public-interface:/app
   websocket-server:
     build:
       context: ./oisp-websocket-server
@@ -113,7 +113,7 @@ services:
     command: ./wait-for-it.sh postgres:5432 -t 300 -- ./scripts/docker-start.sh
   dashboard:
     build:
-      context: ./oisp-dashboard/public-interface
+      context: ./oisp-frontend/public-interface
     ports:
       - 4001:4001
     links:
@@ -124,7 +124,7 @@ services:
       - redis
     command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh redis:6379 -t 300 -- ./scripts/docker-start.sh
     volumes:
-      - ./oisp-dashboard/public-interface:/app
+      - ./oisp-frontend/public-interface:/app
       - ./data/keys:/app/keys
     environment:
       - VCAP_SERVICES=${VCAP_SERVICES}
