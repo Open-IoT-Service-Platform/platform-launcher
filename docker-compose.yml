@@ -29,7 +29,7 @@ services:
     image: "postgres:9.4.10"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
-      - ./iotanalytics-dashboard/public-interface/scripts/database:/docker-entrypoint-initdb.d
+      - ./oisp-dashboard/public-interface/scripts/database:/docker-entrypoint-initdb.d
     ports:
       - 5432:5432
     environment:
@@ -48,7 +48,7 @@ services:
       - hbase
   gearpump:
     build:
-      context: ./iotanalytics-gearpump-rule-engine
+      context: ./oisp-gearpump-rule-engine
       dockerfile: Dockerfile-gearpump
     ports:
       - 8090:8090
@@ -63,7 +63,7 @@ services:
       - 6379:6379
   rules-engine-build:
     build:
-      context: ./iotanalytics-gearpump-rule-engine
+      context: ./oisp-gearpump-rule-engine
       dockerfile: Dockerfile
     links:
       - gearpump
@@ -80,7 +80,7 @@ services:
     command: ./wait-for-it.sh gearpump:8090 -t 300 -- ./wait-for-it.sh nginx:80 -t 300 -- ./local-push-to-gearpump.sh
   nginx:
     build:
-      context: ./iotanalytics-dashboard/public-interface/nginx
+      context: ./oisp-dashboard/public-interface/nginx
       args:
         - WEBSOCKET_SERVER=websocket-server:5000
         - DASHBOARD_SERVER=dashboard:4001
@@ -91,10 +91,10 @@ services:
       - websocket-server
       - dashboard
     volumes:
-      - ./iotanalytics-dashboard/public-interface:/app
+      - ./oisp-dashboard/public-interface:/app
   websocket-server:
     build:
-      context: ./iotanalytics-websocket-server
+      context: ./oisp-websocket-server
     ports:
       - 5000:5000
     links:
@@ -102,7 +102,7 @@ services:
     depends_on:
       - postgres
     volumes:
-      - ./iotanalytics-websocket-server:/app
+      - ./oisp-websocket-server:/app
       - ./data/keys:/app/keys
     working_dir: /app
     environment:
@@ -113,7 +113,7 @@ services:
     command: ./wait-for-it.sh postgres:5432 -t 300 -- ./scripts/docker-start.sh
   dashboard:
     build:
-      context: ./iotanalytics-dashboard/public-interface
+      context: ./oisp-dashboard/public-interface
     ports:
       - 4001:4001
     links:
@@ -124,7 +124,7 @@ services:
       - redis
     command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh redis:6379 -t 300 -- ./scripts/docker-start.sh
     volumes:
-      - ./iotanalytics-dashboard/public-interface:/app
+      - ./oisp-dashboard/public-interface:/app
       - ./data/keys:/app/keys
     environment:
       - VCAP_SERVICES=${VCAP_SERVICES}
@@ -133,7 +133,7 @@ services:
       - NODE_ENV=local
   backend:
     build:
-      context: ./iotanalytics-backend
+      context: ./oisp-backend
     ports:
       - 8080:8080
     links:
