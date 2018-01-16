@@ -22,7 +22,7 @@ MAKEFILE_DIR := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR  :=  $(patsubst %/,%,$(dir $(MAKEFILE_DIR)))
 
 
-USERNAME = "oisp@testing.com"
+USERNAME = "oisp.testing@streammyiot.com"
 PASSWORD = "OispTesting1"
 ROLE = "admin"
 
@@ -36,10 +36,10 @@ all:
 
 test:
 	@$(call msg,"Resetting database ..."); 
-	@docker exec -it openiotconnector_dashboard_1 node /app/admin resetDB
+	@docker exec -it platformlauncher_dashboard_1 node /app/admin resetDB
 	
 	@$(call msg,"Adding a user for testing ..."); 
-	@docker exec -it openiotconnector_dashboard_1 node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE)
+	@docker exec -it platformlauncher_dashboard_1 node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE)
 	
 	@$(call msg,"Starting the e2e testing ..."); 
 	@env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm test 
