@@ -20,35 +20,35 @@ To get platform running quickly we recommened using Docker. First ensure you hav
 ## Cloning OISP platform launcher
 
 ```shell
-# git clone https://github.com/Open-IoT-Service-Platform/platform-launcher.git
+$ git clone https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 ```
 
 ## Starting from scratch
 To get started quickly we suggest you use Docker.
 We have created a shell script to install all the dependencies including Git, Docker, docker-compose, etc for Ubuntu 16.04:
 ```shell
-# cd open-iot-connector
-# ./docker-platform-setup/install-docker-ubuntu16.04.sh
+$ cd open-iot-connector
+$ ./docker-platform-setup/install-docker-ubuntu16.04.sh
 ```
 
 ## Creating and launching OISP
 
 ```shell
-# cd platform-launcher
-# cp setup-environment.example.sh setup-environment.sh
+$ cd platform-launcher
+$ cp setup-environment.example.sh setup-environment.sh
 ```
 **Now modify the setup-environment.sh shell script with parameters valid for your needs.** For example the SMTP settings require you to have an SMTP server.
 
 To build all the images,run:
 ```shell
-# make
+$ make
 ```
 
 ## Starting application using Docker
 
 Now that all the images are built, we can create (if not already) and start all the neccessary containers:
 ```shell
-# make start
+$ make start
 ```
 
 **Note:** If your environment requries a proxy. Ensure you have set the *http_proxy* and *https_proxy* enviornment variables before running the script above.
@@ -60,19 +60,19 @@ Once all the containers have been built and are running, you can access the appl
 #### Stop OISP
 The following command will stop all the Open IoT Connector containers:
 ```shell
-# make stop
+$ make stop
 ```
 
 #### Update (including submodules) the project
 The following command will pull latest changes to the Open IoT Connector **and** the latest changes from the submodules:
 ```shell
-# make update
+$ make update
 ```
 
 #### Destroy OISP (including data)
 The following command will stop and remove the containers and images:
 ```shell
-# make distclean
+$ make distclean
 ```
 
 The project has been structured using Git submodules according to recommendations made here: https://www.philosophicalhacker.com/post/using-git-submodules-effectively/
