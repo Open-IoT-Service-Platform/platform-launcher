@@ -49,7 +49,7 @@ build: .init
 	@./docker.sh create
 
 .prepare:
-	@docker run -it -v $(shell pwd)/oisp-frontend:/app openiotconnector_dashboard /bin/bash \
+	@docker run -it -v $(shell pwd)/oisp-frontend:/app platformlauncher_dashboard /bin/bash \
 		-c /app/public-interface/scripts/docker-prepare.sh
 	@touch $@
 
