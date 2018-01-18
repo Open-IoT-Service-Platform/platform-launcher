@@ -130,7 +130,10 @@ export VCAP_SERVICES='{
     "partitions": 1,
     "replication": 1,
     "timeout_ms": 10000,
-    "topic": "metrics"
+    "topics": {
+                    "observations": "metrics",
+                    "rule_engine": "rules-update"
+                }
     },
     "name": "kafka-ups"
 },
