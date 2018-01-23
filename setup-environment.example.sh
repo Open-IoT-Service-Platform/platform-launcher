@@ -126,6 +126,7 @@ export VCAP_SERVICES='{
 },
 {
     "credentials": {
+    "hosts": "'$KAFKA'",
     "enabled": true,
     "partitions": 1,
     "replication": 1,

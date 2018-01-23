@@ -122,7 +122,7 @@ services:
     depends_on:
       - postgres
       - redis
-    command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh redis:6379 -t 300 -- ./scripts/docker-start.sh
+    command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh redis:6379 -t 300 -- ./wait-for-it.sh hbase:2181 -t 300 -- ./scripts/docker-start.sh
     volumes:
       - ./oisp-frontend/public-interface:/app
       - ./data/keys:/app/keys
