@@ -225,7 +225,7 @@ function createCommand(name, paramName, value, userToken, accountId, deviceId, a
     });
 }
 
-function createRule(ruleConfig, waitingTime, userToken, accountId, deviceId, cb) {
+function createRule(ruleConfig, userToken, accountId, deviceId, cb) {
     if (!cb) {
         throw "Callback required";
     }

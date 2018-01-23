@@ -240,7 +240,7 @@ describe("OISP E2E Testing", function() {
 
         rules[switchOnCmdName].cid = componentId;
 
-        helpers.createRule(rules[switchOnCmdName], 10, userToken, accountId, deviceId, function(err, id) {
+        helpers.createRule(rules[switchOnCmdName], userToken, accountId, deviceId, function(err, id) {
             if (err) {
                 done(new Error("Cannot create switch-on rule: " + err));
             } else {
@@ -256,7 +256,7 @@ describe("OISP E2E Testing", function() {
 
         rules[switchOffCmdName].cid = componentId;
 
-        helpers.createRule(rules[switchOffCmdName], 10, userToken, accountId, deviceId, function(err, id) {
+        helpers.createRule(rules[switchOffCmdName], userToken, accountId, deviceId, function(err, id) {
             if (err) {
                 done(new Error("Cannot create switch-off rule: " + err));
             } else {
@@ -338,11 +338,7 @@ describe("OISP E2E Testing", function() {
             });
         }
 
-        // Wait 20 seconds for rules to get loaded into rules engine
-        // TODO remove this delay once rules engine gets immediate updates
-        setTimeout(function(){
-            sendObservationAndCheckRules(index);
-        }, 20 * 1000);
+        sendObservationAndCheckRules(index);
 
     }).timeout(120000)
 
