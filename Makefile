@@ -111,6 +111,15 @@ else
 	)
  endif
 
+
+logs:
+	$(eval LOGS_ARCHIVE := platform-launcher-logs_$(shell date +'%Y-%m-%d_%H-%M-%S'))
+	@$(call msg,"Making one archive file with all the containers logs within ( ./$(LOGS_ARCHIVE).zip ) ...");
+	@rm -rf /tmp/$(LOGS_ARCHIVE)* && mkdir -p /tmp/$(LOGS_ARCHIVE)
+	@docker-compose config --services  2> /dev/null | xargs -r  -n 1 sh -c './docker.sh logs "$$@"  >  /tmp/$(LOGS_ARCHIVE)/"$$@".logs ' logs
+	@cd /tmp && zip -q -r ./$(LOGS_ARCHIVE).zip $(LOGS_ARCHIVE)/*.logs
+	@mv /tmp/$(LOGS_ARCHIVE).zip .
+
 clean:
 	@$(call msg,"Cleaning ...");
 	@rm -f .init .prepare
