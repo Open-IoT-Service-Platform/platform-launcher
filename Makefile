@@ -70,11 +70,11 @@ stop:
 	@./docker.sh stop
 
 update:
-	@$(call msg,"Git Update ...");
+	@$(call msg,"Git Update (dev. only) ...");
 	@git pull
 	@git submodule init
 	@git submodule update --remote --merge
-	@git submodule foreach git pull origin master
+	@git submodule foreach git pull origin develop
 
 test: start-test
 	@cd tests && make && make test
