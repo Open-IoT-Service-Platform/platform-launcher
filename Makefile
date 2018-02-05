@@ -24,7 +24,7 @@ SHELL:=/bin/bash
 .init:
 	@$(call msg,"Initializing ...");
 	git submodule init
-	git submodule update --remote --merge
+	git submodule update
 ifeq ($(wildcard ./setup-environment.sh ),)
 	@tput setaf 1
 	@while true; do \
