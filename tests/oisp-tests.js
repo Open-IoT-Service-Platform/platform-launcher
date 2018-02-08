@@ -275,6 +275,8 @@ describe("OISP E2E Testing", function() {
 
         var index = 0;
         var nbActuations = 0;
+        var serverReadyTimeout = 120000;
+        var startTime = new Date().getTime();
 
         for (var i = 0; i < temperatureValues.length; i++) {
             temperatureValues[i].ts = null;
@@ -328,8 +330,25 @@ describe("OISP E2E Testing", function() {
                     firstObservationTime = temperatureValues[index].ts;
                 }
 
-                if (err) {
-                    done(new Error("Cannot send observation: " + err));
+                 if (err) {
+                    var err = "Cannot send observation: "+err;
+                    if ( index == 0 ) // wait for the server to start
+                    {
+                        var now = new Date().getTime();
+                        if ( ( now - startTime) < serverReadyTimeout )
+                        {
+                            err = null;
+                            setTimeout( function ()
+                            {
+                                sendObservationAndCheckRules(0);
+                            }, 1000 )
+                        }
+                    }
+
+                    if ( err )
+                    {
+                        done(err);
+                    }
                 }
 
                 if (temperatureValues[index].expectedActuation == null) {
@@ -338,11 +357,10 @@ describe("OISP E2E Testing", function() {
             });
         }
 
-        // Wait 20 seconds for rules to get loaded into rules engine
-        // TODO remove this delay once rules engine gets immediate updates
         setTimeout(function(){
             sendObservationAndCheckRules(index);
         }, 20 * 1000);
+
 
     }).timeout(120000)
 
