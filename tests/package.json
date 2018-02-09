@@ -13,6 +13,6 @@
     "mocha": "^4.0.1",
     "uuid": "^3.1.0",
     "getmac": "^1.2.1",
-    "oisp-sdk-js": "./iotkit-agent/sdk"
+    "oisp-sdk-js": "./oisp-iot-agent/sdk"
   }
 }
