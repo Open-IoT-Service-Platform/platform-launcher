@@ -10,6 +10,6 @@
 [submodule "oisp-websocket-server"]
 	path = oisp-websocket-server
 	url = https://github.com/Open-IoT-Service-Platform/oisp-websocket-server.git
-[submodule "iotkit-agent"]
-	path = tests/iotkit-agent
-	url = https://github.com/Open-IoT-Service-Platform/iotkit-agent.git
+[submodule "tests/oisp-iot-agent"]
+	path = tests/oisp-iot-agent
+	url = https://github.com/Open-IoT-Service-Platform/oisp-iot-agent.git
