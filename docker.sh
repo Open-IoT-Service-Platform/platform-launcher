@@ -17,6 +17,7 @@
 # Set env for application
 . ./setup-environment.sh
 
+export COMPOSE_PROJECT_NAME=$([ -z "$(printenv COMPOSE_PROJECT_NAME)" ] && echo "oisp" || echo "$(printenv COMPOSE_PROJECT_NAME)")
 redsocks_container_name='redsocks'
 
 if [ -n "$http_proxy" ] && [ -n "$https_proxy" ] && [ "$1" == "up" ]; then

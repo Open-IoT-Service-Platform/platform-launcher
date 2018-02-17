@@ -91,7 +91,7 @@ services:
       - 443:443
     links:
       - websocket-server
-      - dashboard
+      - frontend
     volumes:
       - ./oisp-frontend/public-interface:/app
   websocket-server:
@@ -113,7 +113,7 @@ services:
       - TEST=${TEST}
       - NODE_ENV=local
     command: ./wait-for-it.sh postgres:5432 -t 300 -- ./scripts/docker-start.sh
-  dashboard:
+  frontend:
     build:
       context: ./oisp-frontend/public-interface
     ports:

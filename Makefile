@@ -21,6 +21,7 @@
 
 SHELL:=/bin/bash
 export TEST = 0
+COMPOSE_PROJECT_NAME?="oisp"
 
 .init:
 	@$(call msg,"Initializing ...");
@@ -50,8 +51,7 @@ build: .init
 	@./docker.sh create
 
 .prepare:
-	@docker run -i -v $(shell pwd)/oisp-frontend:/app platformlauncher_dashboard /bin/bash \
-		-c /app/public-interface/scripts/docker-prepare.sh
+	@docker run -i -v $(shell pwd)/oisp-frontend:/app "$${COMPOSE_PROJECT_NAME}_frontend" /bin/bash -c /app/public-interface/scripts/docker-prepare.sh
 	@touch $@
 
 build-force: .init
