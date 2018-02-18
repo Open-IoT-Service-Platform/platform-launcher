@@ -93,6 +93,7 @@ services:
       - websocket-server
       - dashboard
     volumes:
+      - ./data/keys/ssl:/etc/ssl
       - ./oisp-frontend/public-interface:/app
   websocket-server:
     build:
