@@ -20,6 +20,8 @@
 #----------------------------------------------------------------------------------------------------------------------
 
 SHELL:=/bin/bash
+export TEST = 0
+SSL_CERT_PATH:=data/keys/ssl
 
 .init:
 	@$(call msg,"Initializing ...");
@@ -41,6 +43,11 @@ endif
 		mkdir -p data/keys; \
 		openssl genpkey -algorithm RSA -out data/keys/private.pem -pkeyopt rsa_keygen_bits:2048; \
 		openssl rsa -pubout -in data/keys/private.pem -out data/keys/public.pem; \
+	fi;
+	@if [ -f ${SSL_CERT_PATH}/server.key ]; then echo "SSL key existing already. Skipping creating self signed cert."; else \
+		echo "Creating self signed SSL certificate."; \
+		mkdir -p ${SSL_CERT_PATH}; \
+		openssl req  -nodes -new -x509  -keyout ${SSL_CERT_PATH}/server.key -out ${SSL_CERT_PATH}/server.cert -subj "/C=UK/ST=NRW/L=London/O=My Inc/OU=DevOps/CN=www.streammyiot.com/emailAddress=donotreply@www.streammyiot.com"; \
 	fi;
 	@touch $@
 
