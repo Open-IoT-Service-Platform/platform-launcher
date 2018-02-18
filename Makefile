@@ -69,7 +69,8 @@ start: build .prepare
 	@./docker.sh up -d
 
 start-test: build .prepare
-	@$(call msg,"Starting IoT connector (test mode) ..."); 
+	@./docker.sh down
+	@$(call msg,"Starting IoT connector (test mode) ...");
 	@env TEST="1" ./docker.sh up -d
 
 stop:
@@ -84,6 +85,7 @@ update:
 	@git submodule foreach git pull origin develop
 
 test: start-test
+	@sleep 10
 	@cd tests && make && make test
 
 clean:
