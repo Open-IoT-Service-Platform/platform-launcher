@@ -20,7 +20,7 @@
 
 MAKEFILE_DIR := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR  :=  $(patsubst %/,%,$(dir $(MAKEFILE_DIR)))
-
+COMPOSE_PROJECT_NAME?="oisp"
 
 USERNAME = "oisp@testing.com"
 PASSWORD = "OispTesting1"
@@ -36,10 +36,10 @@ all:
 
 test:
 	@$(call msg,"Resetting database ..."); 
-	@docker exec -i platformlauncher_dashboard_1 node /app/admin resetDB
+	@docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin resetDB
 	
 	@$(call msg,"Adding a user for testing ..."); 
-	@docker exec -i platformlauncher_dashboard_1 node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE)
+	@docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE)
 	
 	@$(call msg,"Starting the e2e testing ..."); 
 	@env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm test 
