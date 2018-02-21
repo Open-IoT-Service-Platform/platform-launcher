@@ -85,7 +85,7 @@ services:
       context: ./oisp-frontend/public-interface/nginx
       args:
         - WEBSOCKET_SERVER=websocket-server:5000
-        - DASHBOARD_SERVER=dashboard:4001
+        - DASHBOARD_SERVER=frontend:4001
     ports:
       - 80:80
       - 443:443
