@@ -20,10 +20,19 @@
 #----------------------------------------------------------------------------------------------------------------------
 
 SHELL:=/bin/bash
+BRANCH:=$(shell git branch| grep \*| cut -d ' ' -f2)
 export TEST = 0
 
 .init:
 	@$(call msg,"Initializing ...");
+	@$(call msg,"Currently on branch ${BRANCH}");
+	@if [ "${BRANCH}"x = developx ]; then \
+		$(call msg, "develop branch detected! Did you 'make update' to get the most recent develop submodules???"); \
+		read -r -p "Continue? [Y/n]: " response; \
+		case $$response in \
+		   [Nn]* ) echo "Bye!"; exit 1; \
+		esac \
+	fi;
 	git submodule init
 	git submodule update
 ifeq ($(wildcard ./setup-environment.sh ),)
@@ -59,8 +68,8 @@ build-force: .init
 	@./docker.sh create --force-recreate
 
 ifeq (start,$(firstword $(MAKECMDGOALS)))
- 	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
- 	$(eval $(CMD_ARGS):;@:)
+	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+	$(eval $(CMD_ARGS):;@:)
 endif
 
 start: build .prepare
@@ -72,8 +81,8 @@ start-test: build .prepare
 	@env TEST="1" ./docker.sh up -d 
 
 ifeq (stop,$(firstword $(MAKECMDGOALS)))
- 	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
- 	$(eval $(CMD_ARGS):;@:)
+	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+	$(eval $(CMD_ARGS):;@:)
 endif
 
 stop:
@@ -81,19 +90,19 @@ stop:
 	@./docker.sh stop $(CMD_ARGS)
 
 update:
-	@$(call msg,"Git Update (dev. only) ...");
+	@$(call msg,"Git Update (dev only) ...");
 	@git pull
 	@git submodule init
-	@git submodule update --remote --merge
-	@git submodule foreach git pull origin develop
+	@git submodule foreach git fetch origin
+	@git submodule foreach git checkout origin/develop
 
 test: start-test
 	@cd tests && make && make test
 
 
 ifeq (remove,$(firstword $(MAKECMDGOALS)))
- 	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
- 	$(eval $(CMD_ARGS):;@:)
+	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+	$(eval $(CMD_ARGS):;@:)
 endif
 
 remove:
