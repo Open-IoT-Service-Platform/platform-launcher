@@ -27,14 +27,15 @@ export TEST = 0
 	@$(call msg,"Initializing ...");
 	@$(call msg,"Currently on branch ${BRANCH}");
 	@if [ "${BRANCH}"x = developx ]; then \
-		$(call msg, "develop branch detected! Did you 'make update' to get the most recent develop submodules???"); \
+		$(call msg, "develop branch detected! Submodules will not be updated automatically. You have to 'make update' to get the most recent develop submodules!"); \
 		read -r -p "Continue? [Y/n]: " response; \
 		case $$response in \
 		   [Nn]* ) echo "Bye!"; exit 1; \
 		esac \
+	else \
+	git submodule init; \
+	git submodule update; \
 	fi;
-	git submodule init
-	git submodule update
 ifeq ($(wildcard ./setup-environment.sh ),)
 	@tput setaf 1
 	@while true; do \
