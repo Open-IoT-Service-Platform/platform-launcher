@@ -48,6 +48,9 @@ services:
       - ZK_CONNECT=hbase:2181
     depends_on:
       - hbase
+    environment:
+      - ADVERTISED_HOST=${HOST_IP_ADDRESS}
+      - ADVERTISED_PORT=9092
   gearpump:
     build:
       context: ./oisp-gearpump-rule-engine
