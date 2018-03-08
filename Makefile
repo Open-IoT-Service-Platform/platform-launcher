@@ -22,7 +22,8 @@
 SHELL:=/bin/bash
 BRANCH:=$(shell git branch| grep \*| cut -d ' ' -f2)
 export TEST = 0
-
+export HOST_IP_ADDRESS=$(shell ifconfig docker0 | sed -En 's/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
+	
 .init:
 	@$(call msg,"Initializing ...");
 	@$(call msg,"Currently on branch ${BRANCH}");
@@ -111,13 +112,13 @@ remove:
 ifeq ($(CMD_ARGS),)
 	@./docker.sh stop $(docker ps -a -q);
 	@./docker.sh rm -f $(docker ps -a -q);
-	@/bin/bash -c "docker images -q | xargs -n 1 -I {} docker rmi {}"
+	@/bin/bash -c "docker images -q | xargs -n 1 -I {} docker rmi -f {}"
 
 else
 	@$(foreach container,$(CMD_ARGS), \
 		./docker.sh stop $(container); \
 		./docker.sh rm -f -v $(container); \
-		docker images | grep  "^.*$(container)" | awk '{print $$3}' | xargs -n 1 -I {} docker rmi {}; \
+		docker images | grep  "^.*$(container)" | awk '{print $$3}' | xargs -n 1 -I {} docker rmi -f {}; \
 	)
  endif
 
