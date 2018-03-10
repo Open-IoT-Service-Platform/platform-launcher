@@ -20,13 +20,24 @@
 #----------------------------------------------------------------------------------------------------------------------
 
 SHELL:=/bin/bash
+BRANCH:=$(shell git branch| grep \*| cut -d ' ' -f2)
 export TEST = 0
 COMPOSE_PROJECT_NAME?="oisp"
+export HOST_IP_ADDRESS=$(shell ifconfig docker0 | sed -En 's/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
 
 .init:
 	@$(call msg,"Initializing ...");
-	git submodule init
-	git submodule update
+	@$(call msg,"Currently on branch ${BRANCH}");
+	@if [ "${BRANCH}"x = developx ]; then \
+		$(call msg, "develop branch detected! Submodules will not be updated automatically. You have to 'make update' to get the most recent develop submodules!"); \
+		read -r -p "Continue? [Y/n]: " response; \
+		case $$response in \
+		   [Nn]* ) echo "Bye!"; exit 1; \
+		esac \
+	else \
+	git submodule init; \
+	git submodule update; \
+	fi;
 ifeq ($(wildcard ./setup-environment.sh ),)
 	@tput setaf 1
 	@while true; do \
@@ -59,8 +70,8 @@ build-force: .init
 	@./docker.sh create --force-recreate
 
 ifeq (start,$(firstword $(MAKECMDGOALS)))
- 	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
- 	$(eval $(CMD_ARGS):;@:)
+	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+	$(eval $(CMD_ARGS):;@:)
 endif
 
 start: build .prepare
@@ -72,8 +83,8 @@ start-test: build .prepare
 	@env TEST="1" ./docker.sh up -d 
 
 ifeq (stop,$(firstword $(MAKECMDGOALS)))
- 	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
- 	$(eval $(CMD_ARGS):;@:)
+	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+	$(eval $(CMD_ARGS):;@:)
 endif
 
 stop:
@@ -81,19 +92,19 @@ stop:
 	@./docker.sh stop $(CMD_ARGS)
 
 update:
-	@$(call msg,"Git Update (dev. only) ...");
+	@$(call msg,"Git Update (dev only) ...");
 	@git pull
 	@git submodule init
-	@git submodule update --remote --merge
-	@git submodule foreach git pull origin develop
+	@git submodule foreach git fetch origin
+	@git submodule foreach git checkout origin/develop
 
 test: start-test
 	@cd tests && make && make test
 
 
 ifeq (remove,$(firstword $(MAKECMDGOALS)))
- 	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
- 	$(eval $(CMD_ARGS):;@:)
+	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+	$(eval $(CMD_ARGS):;@:)
 endif
 
 remove:
@@ -101,13 +112,13 @@ remove:
 ifeq ($(CMD_ARGS),)
 	@./docker.sh stop $(docker ps -a -q);
 	@./docker.sh rm -f $(docker ps -a -q);
-	@/bin/bash -c "docker images -q | xargs -n 1 -I {} docker rmi {}"
+	@/bin/bash -c "docker images -q | xargs -n 1 -I {} docker rmi -f {}"
 
 else
 	@$(foreach container,$(CMD_ARGS), \
 		./docker.sh stop $(container); \
 		./docker.sh rm -f -v $(container); \
-		docker images | grep  "^.*$(container)" | awk '{print $$3}' | xargs -n 1 -I {} docker rmi {}; \
+		docker images | grep  "^.*$(container)" | awk '{print $$3}' | xargs -n 1 -I {} docker rmi -f {}; \
 	)
  endif
 

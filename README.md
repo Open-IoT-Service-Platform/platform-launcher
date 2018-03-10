@@ -77,3 +77,5 @@ $ make distclean
 ```
 
 The project has been structured using Git submodules according to recommendations made here: https://www.philosophicalhacker.com/post/using-git-submodules-effectively/
+
+Please check out our [Wiki](https://github.com/Open-IoT-Service-Platform/platform-launcher/wiki) for more details.
