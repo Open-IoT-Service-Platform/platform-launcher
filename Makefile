@@ -23,7 +23,7 @@ SHELL:=/bin/bash
 BRANCH:=$(shell git branch| grep \*| cut -d ' ' -f2)
 export TEST = 0
 export HOST_IP_ADDRESS=$(shell ifconfig docker0 | sed -En 's/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
-	
+
 .init:
 	@$(call msg,"Initializing ...");
 	@$(call msg,"Currently on branch ${BRANCH}");
@@ -95,6 +95,7 @@ update:
 	@$(call msg,"Git Update (dev only) ...");
 	@git pull
 	@git submodule init
+	@git submodule update
 	@git submodule foreach git fetch origin
 	@git submodule foreach git checkout origin/develop
 
