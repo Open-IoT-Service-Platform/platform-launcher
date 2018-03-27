@@ -20,6 +20,7 @@
 #----------------------------------------------------------------------------------------------------------------------
 
 SHELL:=/bin/bash
+CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BRANCH:=$(shell git branch| grep \*| cut -d ' ' -f2)
 export TEST = 0
 export HOST_IP_ADDRESS=$(shell ifconfig docker0 | sed -En 's/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
@@ -98,8 +99,21 @@ update:
 	@git submodule foreach git fetch origin
 	@git submodule foreach git checkout origin/develop
 
-test: start-test
-	@cd tests && make && make test
+ifeq (test,$(firstword $(MAKECMDGOALS)))
+ 	NB_TESTS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+ifeq ($(NB_TESTS),)
+	NB_TESTS :=  1
+endif
+ 	$(eval $(NB_TESTS):;@:)
+endif
+
+test: 
+	@for ((i=0; i < ${NB_TESTS}; i++)) do \
+		cd $(CURRENT_DIR) && \
+		sudo make distclean && \
+		make start-test && \
+		cd tests && make && make test; \
+	done
 
 
 ifeq (remove,$(firstword $(MAKECMDGOALS)))
