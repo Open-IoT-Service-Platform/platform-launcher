@@ -133,7 +133,11 @@ export VCAP_SERVICES='{
     "timeout_ms": 10000,
     "topics": {
                     "observations": "metrics",
-                    "rule_engine": "rules-update"
+                    "rule_engine": "rules-update",
+                    "heartbeat": {
+                        "name": "heartbeat",
+                        "interval": 5
+                    }
                 }
     },
     "name": "kafka-ups"
