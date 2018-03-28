@@ -19,8 +19,7 @@ var chai = require('chai');
 var assert = chai.assert;
 var expect = chai.expect;
 
-var oispSdk = require("oisp-sdk-js");
-var api = oispSdk.api.rest;
+var oispSdk = require("@open-iot-service-platform/oisp-sdk-js");
 var proxyConnector = oispSdk.lib.proxies.getControlConnector('ws');
 var kafka = require('kafka-node');
 var cfenvReader = require('./lib/cfenv/reader');
