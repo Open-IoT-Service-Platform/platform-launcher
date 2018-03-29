@@ -136,7 +136,7 @@ export VCAP_SERVICES='{
                     "rule_engine": "rules-update",
                     "heartbeat": {
                         "name": "heartbeat",
-                        "interval": 5
+                        "interval": 5000
                     }
                 }
     },
