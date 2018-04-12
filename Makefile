@@ -71,8 +71,8 @@ build-force: .init
 	@./docker.sh create --force-recreate
 
 ifeq (start,$(firstword $(MAKECMDGOALS)))
-	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-	$(eval $(CMD_ARGS):;@:)
+ 	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+ 	$(eval $(CMD_ARGS):;@:)
 endif
 
 start: build .prepare
@@ -84,8 +84,8 @@ start-test: build .prepare
 	@env TEST="1" ./docker.sh up -d 
 
 ifeq (stop,$(firstword $(MAKECMDGOALS)))
-	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-	$(eval $(CMD_ARGS):;@:)
+ 	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+ 	$(eval $(CMD_ARGS):;@:)
 endif
 
 stop:
@@ -118,8 +118,8 @@ test:
 
 
 ifeq (remove,$(firstword $(MAKECMDGOALS)))
-	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-	$(eval $(CMD_ARGS):;@:)
+ 	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+ 	$(eval $(CMD_ARGS):;@:)
 endif
 
 remove:
