@@ -9,10 +9,13 @@
   "author": "Intel SSG-DRD",
   "license": "ISC",
   "dependencies": {
-    "@open-iot-service-platform/oisp-sdk-js": "^1.0.0-alpha1",
     "chai": "^4.1.2",
-    "getmac": "^1.2.1",
     "mocha": "^4.0.1",
-    "uuid": "^3.1.0"
+    "uuid": "^3.1.0",
+    "getmac": "^1.2.1",
+    "colors": "^1.2.1",
+    "cfenv": "^1.0.0",
+    "kafka-node": "^2.4.0",
+    "@open-iot-service-platform/oisp-sdk-js": "^1.0.0-alpha1"
   }
 }

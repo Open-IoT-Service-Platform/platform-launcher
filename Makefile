@@ -20,6 +20,7 @@
 #----------------------------------------------------------------------------------------------------------------------
 
 SHELL:=/bin/bash
+CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BRANCH:=$(shell git branch| grep \*| cut -d ' ' -f2)
 export TEST = 0
 COMPOSE_PROJECT_NAME?="oisp"
@@ -70,8 +71,8 @@ build-force: .init
 	@./docker.sh create --force-recreate
 
 ifeq (start,$(firstword $(MAKECMDGOALS)))
-	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-	$(eval $(CMD_ARGS):;@:)
+ 	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+ 	$(eval $(CMD_ARGS):;@:)
 endif
 
 start: build .prepare
@@ -83,8 +84,8 @@ start-test: build .prepare
 	@env TEST="1" ./docker.sh up -d 
 
 ifeq (stop,$(firstword $(MAKECMDGOALS)))
-	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-	$(eval $(CMD_ARGS):;@:)
+ 	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+ 	$(eval $(CMD_ARGS):;@:)
 endif
 
 stop:
@@ -95,16 +96,30 @@ update:
 	@$(call msg,"Git Update (dev only) ...");
 	@git pull
 	@git submodule init
+	@git submodule update
 	@git submodule foreach git fetch origin
 	@git submodule foreach git checkout origin/develop
 
-test: start-test
-	@cd tests && make && make test
+ifeq (test,$(firstword $(MAKECMDGOALS)))
+ 	NB_TESTS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+ifeq ($(NB_TESTS),)
+	NB_TESTS :=  1
+endif
+ 	$(eval $(NB_TESTS):;@:)
+endif
+
+test: 
+	@for ((i=0; i < ${NB_TESTS}; i++)) do \
+		cd $(CURRENT_DIR) && \
+		sudo make distclean && \
+		make start-test && \
+		cd tests && make && make test; \
+	done
 
 
 ifeq (remove,$(firstword $(MAKECMDGOALS)))
-	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-	$(eval $(CMD_ARGS):;@:)
+ 	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+ 	$(eval $(CMD_ARGS):;@:)
 endif
 
 remove:

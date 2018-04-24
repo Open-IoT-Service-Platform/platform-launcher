@@ -20,10 +20,13 @@ var assert = chai.assert;
 var expect = chai.expect;
 
 var oispSdk = require("@open-iot-service-platform/oisp-sdk-js");
-var api = oispSdk.api.rest;
 var proxyConnector = oispSdk.lib.proxies.getControlConnector('ws');
-
+var kafka = require('kafka-node');
+var cfenvReader = require('./lib/cfenv/reader');
 var helpers = require("./lib/helpers");
+var colors = require('colors');
+
+var exec = require('child_process').exec;
 
 var accountName = "oisp-tests";
 var deviceName = "oisp-tests-device"
@@ -58,61 +61,66 @@ rules[switchOffCmdName] = {
 //-------------------------------------------------------------------------------------------------------
 // Tests
 //-------------------------------------------------------------------------------------------------------
+var userToken;
+var accountId;
+var deviceId;
+var deviceToken;
+var componentId;
+var actuatorId;
+var ruleId;
+var componentParamName;
+var firstObservationTime;
 
-describe("OISP E2E Testing", function() {
-    var userToken;
-    var accountId;
-    var deviceId;
-    var deviceToken;
-    var componentId;
-    var actuatorId;
-    var ruleId;
-    var componentParamName;
-    var firstObservationTime;
+var temperatureValues = [{
+        value: -15,
+        expectedActuation: 1 // swich on
+    },
+    {
+        value: -5,
+        expectedActuation: 1 // swich on
+    },
+    {
+        value: 5,
+        expectedActuation: 1 // swich on
+    },
+    {
+        value: 15,
+        expectedActuation: 1 // swich on
+    },
+    {
+        value: 25,
+        expectedActuation: null // do nothing (no actuation)
+    },
+    {
+        value: 30,
+        expectedActuation: 0 // swich off
+    },
+    {
+        value: 20,
+        expectedActuation: null // do nothing (no actuation)
+    },
+    {
+        value: 14,
+        expectedActuation: 1 // swich on
+    },
+    {
+        value: 20,
+        expectedActuation: null // do nothing (no actuation)
+    },
+    {
+        value: 28,
+        expectedActuation: 0 // swich off
+    }
+];
 
-    var temperatureValues = [{
-            value: -15,
-            expectedActuation: 1 // swich on
-        },
-        {
-            value: -5,
-            expectedActuation: 1 // swich on
-        },
-        {
-            value: 5,
-            expectedActuation: 1 // swich on
-        },
-        {
-            value: 15,
-            expectedActuation: 1 // swich on
-        },
-        {
-            value: 25,
-            expectedActuation: null // do nothing (no actuation)
-        },
-        {
-            value: 30,
-            expectedActuation: 0 // swich off
-        },
-        {
-            value: 20,
-            expectedActuation: null // do nothing (no actuation)
-        },
-        {
-            value: 14,
-            expectedActuation: 1 // swich on
-        },
-        {
-            value: 20,
-            expectedActuation: null // do nothing (no actuation)
-        },
-        {
-            value: 28,
-            expectedActuation: 0 // swich off
-        }
-    ];
+process.stdout.write("_____________________________________________________________________\n".bold);
+process.stdout.write("                                                                     \n");
+process.stdout.write("                           OISP E2E TESTING                          \n".green.bold);
+process.stdout.write("_____________________________________________________________________\n".bold);
 
 
+describe("Waiting to OISP services to be ready ...\n".bold, function() {
+    
     before(function(done) {
         userToken = null;
         accountId = null;
@@ -126,6 +134,70 @@ describe("OISP E2E Testing", function() {
 
         done();
     });
+
+    it('Shall wait for oisp services to start', function(done) {
+        var kafkaConsumer;
+        var kafka_credentials = cfenvReader.getServiceCredentials("kafka-ups");
+        var topic = kafka_credentials.topics.heartbeat.name;
+        var partition = 0;
+        var kafkaClient = new kafka.KafkaClient({kafkaHost: "localhost:9092"});
+        var kafkaOffset = new kafka.Offset(kafkaClient);
+
+        var getKafkaOffset = function(topic_, partition_, cb) {
+            kafkaOffset.fetchLatestOffsets([topic_], function (error, offsets) {
+                if (!error) {
+                    cb(offsets[topic_][partition_])
+                }
+                else {
+                    setTimeout( function() {
+                        getKafkaOffset(topic_, partition_, cb);
+                    }, 1000)
+                }
+            })
+        };
+
+        getKafkaOffset(topic, partition, function(offset) {
+            if ( offset >= 0 ) {
+                var topics = [{ topic: topic, offset: offset+1, partition: partition}]
+                var options = { autoCommit: true, fromOffset: true};
+
+                kafkaConsumer = new kafka.Consumer(kafkaClient, topics, options)
+
+                var oispServicesToMonitor = ['rules-engine'];
+                process.stdout.write("    ");
+                kafkaConsumer.on('message', function (message) {
+                    process.stdout.write(".".green);
+                    if ( kafkaConsumer ) {
+                        var now = new Date().getTime();
+                        var i=0;
+                        for(i=0; i<oispServicesToMonitor.length; i++) {
+                            if ( oispServicesToMonitor[i] != null && oispServicesToMonitor[i].trim() === message.value.trim() ) {
+                                oispServicesToMonitor[i] = null;
+                            }
+                        }
+                        for(i=0; i<oispServicesToMonitor.length; i++) {
+                            if ( oispServicesToMonitor[i] != null ) {
+                                break;
+                            }
+                        }
+                        if ( i == oispServicesToMonitor.length ) {
+                            kafkaConsumer.close(true);
+                            kafkaConsumer = null;
+                            process.stdout.write("\n");
+                            done();
+                        }
+                    }
+                });
+            }
+            else {
+                done("Cannot get Kafka offset ")
+            }
+        });
+       
+    }).timeout(2*60*1000);
+})
+
+describe("Creating account and device ...\n".bold, function() {
 
     it('Shall authenticate', function(done) {
         var username = process.env.USERNAME;
@@ -181,6 +253,9 @@ describe("OISP E2E Testing", function() {
             }
         })
     })
+})
+
+describe("Creating components and rules ... \n".bold, function() {
 
     it('Shall create component', function(done) {
         assert.notEqual(deviceToken, null, "Invalid device token")
@@ -266,6 +341,9 @@ describe("OISP E2E Testing", function() {
         })
 
     }).timeout(20000);
+})
+
+describe("Sending observations and cheking rules ...\n".bold, function() {
 
     it('Shall send observation and check rules', function(done) {
         assert.notEqual(componentId, null, "Invalid component id")
@@ -275,9 +353,8 @@ describe("OISP E2E Testing", function() {
 
         var index = 0;
         var nbActuations = 0;
-        var serverReadyTimeout = 120000;
-        var startTime = new Date().getTime();
-
+        
+        process.stdout.write("    ");
 
         for (var i = 0; i < temperatureValues.length; i++) {
             temperatureValues[i].ts = null;
@@ -290,6 +367,7 @@ describe("OISP E2E Testing", function() {
             index++;
 
             if (index == temperatureValues.length) {
+                process.stdout.write("\n");
                 done();
             } else {
                 sendObservationAndCheckRules(index);
@@ -324,6 +402,9 @@ describe("OISP E2E Testing", function() {
         });
 
         var sendObservationAndCheckRules = function(index) {
+            
+            process.stdout.write(".".green);
+
             helpers.sendObservation(temperatureValues[index].value, deviceToken, accountId, deviceId, componentId, function(err, ts) {
                 temperatureValues[index].ts = ts;
 
@@ -332,24 +413,7 @@ describe("OISP E2E Testing", function() {
                 }
 
                 if (err) {
-                    var err = "Cannot send observation: "+err;
-                    if ( index == 0 ) // wait for the server to start
-                    {
-                        var now = new Date().getTime();
-                        if ( ( now - startTime) < serverReadyTimeout )
-                        {
-                            err = null;
-                            setTimeout( function ()
-                            {
-                                sendObservationAndCheckRules(0);
-                            }, 1000 )
-                        }
-                    }
-
-                    if ( err )
-                    {
-                        done(err);
-                    }
+                    done( "Cannot send observation: "+err)
                 }
 
                 if (temperatureValues[index].expectedActuation == null) {
