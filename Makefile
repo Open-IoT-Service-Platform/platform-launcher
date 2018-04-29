@@ -63,7 +63,8 @@ build: .init
 
 .prepare:
 	@docker run -i -v $(shell pwd)/oisp-frontend:/app platformlauncher_dashboard /bin/bash \
-		-c /app/public-interface/scripts/docker-prepare.sh
+		-c /app/public-interface/scripts/docker-prepare.sh 
+	cp ./oisp-frontend/public-interface/deploy/postgres/base/*.sql ./oisp-frontend/public-interface/scripts/database 
 	@touch $@
 
 build-force: .init
