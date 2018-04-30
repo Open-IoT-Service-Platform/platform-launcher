@@ -31,24 +31,24 @@ ROLE = "admin"
 #----------------------------------------------------------------------------------------------------------------------
 
 all:
-	@$(call msg,"Installing npm packages ..."); 
+	@$(call msg,"Installing npm packages ...");
 	@cd $(CURRENT_DIR) && npm install > /dev/null
 
 test:
-	@$(call msg,"Resetting databases ..."); 
-	@docker exec -i platformlauncher_dashboard_1 node /app/admin resetDB 
-	
-	@$(call msg,"Adding a user for testing ..."); 
-	@docker exec -i platformlauncher_dashboard_1 node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE)  > /dev/null
-	
-	@$(call msg,"Starting the e2e testing ..."); 
-	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm test 
+	@$(call msg,"Resetting databases ...");
+	@docker exec -i platform-launcher_dashboard_1 node /app/admin resetDB
+
+	@$(call msg,"Adding a user for testing ...");
+	@docker exec -i platform-launcher_dashboard_1 node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE)  > /dev/null
+
+	@$(call msg,"Starting the e2e testing ...");
+	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm test
 
 clean:
-	@$(call msg,"Cleaning ..."); 
+	@$(call msg,"Cleaning ...");
 
 distclean: clean
-	@$(call msg,"Dist cleaning ..."); 
+	@$(call msg,"Dist cleaning ...");
 	@rm -rf $(CURRENT_DIR)/iotkit-agent
 
 #----------------------------------------------------------------------------------------------------------------------

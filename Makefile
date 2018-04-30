@@ -62,7 +62,7 @@ build: .init
 	@./docker.sh create
 
 .prepare:
-	@docker run -i -v $(shell pwd)/oisp-frontend:/app platformlauncher_dashboard /bin/bash \
+	@docker run -i -v $(shell pwd)/oisp-frontend:/app platform-launcher_dashboard /bin/bash \
 		-c /app/public-interface/scripts/docker-prepare.sh
 	@touch $@
 
@@ -80,8 +80,8 @@ start: build .prepare
 	@./docker.sh up -d $(CMD_ARGS)
 
 start-test: build .prepare
-	@$(call msg,"Starting IoT connector (test mode) ..."); 
-	@env TEST="1" ./docker.sh up -d 
+	@$(call msg,"Starting IoT connector (test mode) ...");
+	@env TEST="1" ./docker.sh up -d
 
 ifeq (stop,$(firstword $(MAKECMDGOALS)))
  	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -108,7 +108,7 @@ endif
  	$(eval $(NB_TESTS):;@:)
 endif
 
-test: 
+test:
 	@for ((i=0; i < ${NB_TESTS}; i++)) do \
 		cd $(CURRENT_DIR) && \
 		sudo make distclean && \
