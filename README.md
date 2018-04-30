@@ -1,3 +1,4 @@
+
 # Open IoT Service Platform (OISP)
 
 This project is designed to provide Cloud Service Providers with a platform for enabling and supporting IoT developers to create IoT solutions with both edge devices and the cloud.
@@ -63,7 +64,7 @@ The following command will stop all the Open IoT Connector containers:
 $ make stop
 ```
 
-#### Update (including submodules) the project
+#### Update (including submodules) the project - Development only
 The following command will pull latest changes to the Open IoT Connector **and** the latest changes from the submodules:
 ```shell
 $ make update
@@ -76,3 +77,5 @@ $ make distclean
 ```
 
 The project has been structured using Git submodules according to recommendations made here: https://www.philosophicalhacker.com/post/using-git-submodules-effectively/
+
+Please check out our [Wiki](https://github.com/Open-IoT-Service-Platform/platform-launcher/wiki) for more details.

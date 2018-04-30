@@ -20,12 +20,24 @@
 #----------------------------------------------------------------------------------------------------------------------
 
 SHELL:=/bin/bash
+CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+BRANCH:=$(shell git branch| grep \*| cut -d ' ' -f2)
 export TEST = 0
+export HOST_IP_ADDRESS=$(shell ifconfig docker0 | sed -En 's/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
 
 .init:
 	@$(call msg,"Initializing ...");
-	git submodule init
-	git submodule update --remote --merge
+	@$(call msg,"Currently on branch ${BRANCH}");
+	@if [ "${BRANCH}"x = developx ]; then \
+		$(call msg, "develop branch detected! Submodules will not be updated automatically. You have to 'make update' to get the most recent develop submodules!"); \
+		read -r -p "Continue? [Y/n]: " response; \
+		case $$response in \
+		   [Nn]* ) echo "Bye!"; exit 1; \
+		esac \
+	else \
+	git submodule init; \
+	git submodule update; \
+	fi;
 ifeq ($(wildcard ./setup-environment.sh ),)
 	@tput setaf 1
 	@while true; do \
@@ -50,8 +62,9 @@ build: .init
 	@./docker.sh create
 
 .prepare:
-	@docker run -it -v $(shell pwd)/oisp-frontend:/app platformlauncher_dashboard /bin/bash \
-		-c /app/public-interface/scripts/docker-prepare.sh
+	@docker run -i -v $(shell pwd)/oisp-frontend:/app platformlauncher_dashboard /bin/bash \
+		-c /app/public-interface/scripts/docker-prepare.sh 
+	cp ./oisp-frontend/public-interface/deploy/postgres/base/*.sql ./oisp-frontend/public-interface/scripts/database 
 	@touch $@
 
 build-force: .init
@@ -81,14 +94,28 @@ stop:
 	@./docker.sh stop $(CMD_ARGS)
 
 update:
-	@$(call msg,"Git Update ...");
+	@$(call msg,"Git Update (dev only) ...");
 	@git pull
 	@git submodule init
-	@git submodule update --remote --merge
-	@git submodule foreach git pull origin master
+	@git submodule update
+	@git submodule foreach git fetch origin
+	@git submodule foreach git checkout origin/develop
 
-test: start-test
-	@cd tests && make && make test
+ifeq (test,$(firstword $(MAKECMDGOALS)))
+ 	NB_TESTS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+ifeq ($(NB_TESTS),)
+	NB_TESTS :=  1
+endif
+ 	$(eval $(NB_TESTS):;@:)
+endif
+
+test: 
+	@for ((i=0; i < ${NB_TESTS}; i++)) do \
+		cd $(CURRENT_DIR) && \
+		sudo make distclean && \
+		make start-test && \
+		cd tests && make && make test; \
+	done
 
 
 ifeq (remove,$(firstword $(MAKECMDGOALS)))
@@ -101,13 +128,13 @@ remove:
 ifeq ($(CMD_ARGS),)
 	@./docker.sh stop $(docker ps -a -q);
 	@./docker.sh rm -f $(docker ps -a -q);
-	@/bin/bash -c "docker images -q | xargs -n 1 -I {} docker rmi {}"
+	@/bin/bash -c "docker images -q | xargs -n 1 -I {} docker rmi -f {}"
 
 else
 	@$(foreach container,$(CMD_ARGS), \
 		./docker.sh stop $(container); \
 		./docker.sh rm -f -v $(container); \
-		docker images | grep  "^.*$(container)" | awk '{print $$3}' | xargs -n 1 -I {} docker rmi {}; \
+		docker images | grep  "^.*$(container)" | awk '{print $$3}' | xargs -n 1 -I {} docker rmi -f {}; \
 	)
  endif
 

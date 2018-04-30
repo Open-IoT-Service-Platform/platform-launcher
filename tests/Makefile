@@ -32,17 +32,17 @@ ROLE = "admin"
 
 all:
 	@$(call msg,"Installing npm packages ..."); 
-	cd $(CURRENT_DIR) && npm install
+	@cd $(CURRENT_DIR) && npm install > /dev/null
 
 test:
-	@$(call msg,"Resetting database ..."); 
-	@docker exec -it platformlauncher_dashboard_1 node /app/admin resetDB
+	@$(call msg,"Resetting databases ..."); 
+	@docker exec -i platformlauncher_dashboard_1 node /app/admin resetDB 
 	
 	@$(call msg,"Adding a user for testing ..."); 
-	@docker exec -it platformlauncher_dashboard_1 node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE)
+	@docker exec -i platformlauncher_dashboard_1 node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE)  > /dev/null
 	
 	@$(call msg,"Starting the e2e testing ..."); 
-	@env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm test 
+	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm test 
 
 clean:
 	@$(call msg,"Cleaning ..."); 

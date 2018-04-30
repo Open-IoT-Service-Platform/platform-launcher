@@ -24,7 +24,7 @@ var uuid = require('uuid/v4');
 var chai = require('chai');
 var assert = chai.assert;
 
-var oispSdk = require("oisp-sdk-js");
+var oispSdk = require("@open-iot-service-platform/oisp-sdk-js");
 var api = oispSdk.api.rest;
 
 function createComponentId() {
@@ -225,6 +225,32 @@ function createCommand(name, paramName, value, userToken, accountId, deviceId, a
     });
 }
 
+function isRuleSynchronized(userToken, accountId, ruleId, cb) {
+    if (!cb) {
+        throw "Callback required";
+    }
+    var data = {
+        userToken: userToken,
+        accountId: accountId,
+        ruleId: ruleId
+    };
+
+    api.rules.getRuleDetails(data, function(err, response) {
+        if (err) {
+            cb(err)
+        } else {
+            if ( response.id == ruleId ) {
+                {
+                    cb(null, response.synchronizationStatus == "Sync" ? true : false)
+                }
+            }
+            else {
+                cb("rule "+ruleId + " not found ");
+            }
+        }
+    });
+} 
+
 function createRule(ruleConfig, userToken, accountId, deviceId, cb) {
     if (!cb) {
         throw "Callback required";
@@ -277,9 +303,26 @@ function createRule(ruleConfig, userToken, accountId, deviceId, cb) {
         if (err) {
             cb(err)
         } else {
-            cb(null, response.id);
+            var ruleId = response.id;
+            var syncInterval = setInterval( function(id) {
+                isRuleSynchronized(userToken, accountId, ruleId, function(err, status) {
+                    if (err) {
+                        clearInterval(syncInterval);
+                        cb(err)
+                    }
+                    else {
+                        if ( status == true ) {
+                            clearInterval(syncInterval);
+                            cb(null, ruleId)
+                        }
+                    }
+                })
+            }, 500)
         }
     });
+
+    
+
 }
 
 function sendObservation(value, deviceToken, accountId, deviceId, cid, cb) {
