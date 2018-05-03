@@ -29,6 +29,16 @@ export BACKEND='backend:8080'
 export NGINX='nginx'
 export REDIS='redis'
 export REDIS_PORT='6379'
+if [ "$COMPOSE_PROJECT_NAME"x == "platformlauncher"x ]; then
+    echo "COMPOSE_PROJECT_NAME is already set and correct"
+        elif [ "$COMPOSE_PROJECT_NAME"x == "x" ];
+then
+    echo "COMPOSE_PROJECT_NAME has already be set to = $COMPOSE_PROJECT_NAME, it should be set to platformlauncher for OISP to work "
+else
+    export COMPOSE_PROJECT_NAME=platformlauncher
+fi
+
+
 
 export VCAP_SERVICES='{
 "postgresql93": [{
