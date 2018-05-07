@@ -29,7 +29,7 @@ export HOST_IP_ADDRESS=$(shell ifconfig docker0 | sed -En 's/.*inet (addr:)?(([0
 	@$(call msg,"Initializing ...");
 	@$(call msg,"Currently on branch ${BRANCH}");
 	@if [ "${BRANCH}" != master ]; then \
-		$(call msg, "Non-master branch detected! Submodules will not be updated automatically. \n You have to run 'make update' for submodules from develop branch, and update manually otherwise"); \
+		echo -e "Non-master branch detected! Submodules will not be updated automatically. \nYou have to run 'make update' for submodules from develop branch and update manually otherwise"; \
 		read -r -p "Continue? [Y/n]: " response; \
 		case $$response in \
 		   [Nn]* ) echo "Bye!"; exit 1; \
