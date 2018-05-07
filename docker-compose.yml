@@ -85,13 +85,13 @@ services:
       context: ./oisp-frontend/public-interface/nginx
       args:
         - WEBSOCKET_SERVER=websocket-server:5000
-        - DASHBOARD_SERVER=dashboard:4001
+        - DASHBOARD_SERVER=frontend:4001
     ports:
       - 80:80
       - 443:443
     depends_on:
       - websocket-server
-      - dashboard
+      - frontend
     volumes:
       - ./oisp-frontend/public-interface:/app
   websocket-server:
@@ -111,8 +111,8 @@ services:
       - VCAP_APPLICATION=${VCAP_APPLICATION}
       - TEST=${TEST}
       - NODE_ENV=local
-    command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- ./scripts/docker-start.sh
-  dashboard:
+    command: ./wait-for-it.sh postgres:5432 -t 300 -- ./scripts/docker-start.sh
+  frontend:
     build:
       context: ./oisp-frontend/public-interface
     ports:
