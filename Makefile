@@ -29,8 +29,8 @@ export HOST_IP_ADDRESS=$(shell ifconfig docker0 | sed -En 's/.*inet (addr:)?(([0
 .init:
 	@$(call msg,"Initializing ...");
 	@$(call msg,"Currently on branch ${BRANCH}");
-	@if [ "${BRANCH}"x = developx ]; then \
-		$(call msg, "develop branch detected! Submodules will not be updated automatically. You have to 'make update' to get the most recent develop submodules!"); \
+	@if [ "${BRANCH}" != master ]; then \
+		$(call msg, "Non-master branch detected! Submodules will not be updated automatically. \n You have to run 'make update' for submodules from develop branch, and update manually otherwise"); \
 		read -r -p "Continue? [Y/n]: " response; \
 		case $$response in \
 		   [Nn]* ) echo "Bye!"; exit 1; \
@@ -64,6 +64,7 @@ build: .init
 
 .prepare:
 	@docker run -i -v $(shell pwd)/oisp-frontend:/app "$${COMPOSE_PROJECT_NAME}_frontend" /bin/bash -c /app/public-interface/scripts/docker-prepare.sh
+	cp ./oisp-frontend/public-interface/deploy/postgres/base/*.sql ./oisp-frontend/public-interface/scripts/database
 	@touch $@
 
 build-force: .init
@@ -80,8 +81,8 @@ start: build .prepare
 	@./docker.sh up -d $(CMD_ARGS)
 
 start-test: build .prepare
-	@$(call msg,"Starting IoT connector (test mode) ..."); 
-	@env TEST="1" ./docker.sh up -d 
+	@$(call msg,"Starting IoT connector (test mode) ...");
+	@env TEST="1" ./docker.sh up -d
 
 ifeq (stop,$(firstword $(MAKECMDGOALS)))
  	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -108,7 +109,7 @@ endif
  	$(eval $(NB_TESTS):;@:)
 endif
 
-test: 
+test:
 	@for ((i=0; i < ${NB_TESTS}; i++)) do \
 		cd $(CURRENT_DIR) && \
 		sudo make distclean && \
