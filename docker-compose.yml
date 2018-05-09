@@ -74,12 +74,12 @@ services:
       - nginx
       - hbase
       - kafka
-      - dashboard
+      - frontend
     working_dir: /app
     environment:
       - VCAP_SERVICES=${VCAP_SERVICES}
       - VCAP_APPLICATION=${VCAP_APPLICATION}
-    command: ./wait-for-it.sh gearpump:8090 -t 300 -- ./wait-for-it.sh nginx:80 -t 300 -- ./wait-for-it.sh hbase:2181 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- ./wait-for-it.sh dashboard:4001 -t 300 -- ./local-push-to-gearpump.sh
+    command: ./wait-for-it.sh gearpump:8090 -t 300 -- ./wait-for-it.sh nginx:80 -t 300 -- ./wait-for-it.sh hbase:2181 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- ./wait-for-it.sh frontend:4001 -t 300 -- ./local-push-to-gearpump.sh
   nginx:
     build:
       context: ./oisp-frontend/public-interface/nginx

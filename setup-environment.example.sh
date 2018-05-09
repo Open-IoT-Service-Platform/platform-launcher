@@ -29,6 +29,7 @@ export BACKEND='backend:8080'
 export NGINX='nginx'
 export REDIS='redis'
 export REDIS_PORT='6379'
+export COMPOSE_PROJECT_NAME="oisp"
 
 export VCAP_SERVICES='{
 "postgresql93": [{

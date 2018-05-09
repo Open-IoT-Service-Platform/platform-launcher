@@ -17,13 +17,12 @@
 # Set env for application
 . ./setup-environment.sh
 
-export COMPOSE_PROJECT_NAME=$([ -z "$(printenv COMPOSE_PROJECT_NAME)" ] && echo "oisp" || echo "$(printenv COMPOSE_PROJECT_NAME)")
 redsocks_container_name='redsocks'
 
 if [ -n "$http_proxy" ] && [ -n "$https_proxy" ] && [ "$1" == "up" ]; then
 	# Run redsocks to allow containers to use proxy
 
-	
+
 	if ! [[ $(docker ps -f "name=$redsocks_container_name" --format '{{.Names}}') == $redsocks_container_name ]]; then
 		echo "Starting redsocks..."
 
