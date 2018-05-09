@@ -24,6 +24,7 @@ CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BRANCH:=$(shell git branch| grep \*| cut -d ' ' -f2)
 export TEST = 0
 export HOST_IP_ADDRESS=$(shell ifconfig docker0 | sed -En 's/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
+COMPOSE_PROJECT_NAME?="oisp"
 
 .init:
 	@$(call msg,"Initializing ...");
@@ -62,8 +63,7 @@ build: .init
 	@./docker.sh create
 
 .prepare:
-	@docker run -i -v $(shell pwd)/oisp-frontend:/app platformlauncher_dashboard /bin/bash \
-		-c /app/public-interface/scripts/docker-prepare.sh
+	source setup-environment.sh && 	docker run -i -v $(shell pwd)/oisp-frontend:/app "$${COMPOSE_PROJECT_NAME}_frontend" /bin/bash -c /app/public-interface/scripts/docker-prepare.sh
 	cp ./oisp-frontend/public-interface/deploy/postgres/base/*.sql ./oisp-frontend/public-interface/scripts/database
 	@touch $@
 
