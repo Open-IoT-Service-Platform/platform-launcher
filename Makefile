@@ -69,7 +69,7 @@ build: .init
 	@./docker.sh create
 
 .prepare:
-	@docker run -i -v $(shell pwd)/oisp-frontend:/app "$${COMPOSE_PROJECT_NAME}_frontend" /bin/bash -c /app/public-interface/scripts/docker-prepare.sh
+	source setup-environment.sh && 	docker run -i -v $(shell pwd)/oisp-frontend:/app "$${COMPOSE_PROJECT_NAME}_frontend" /bin/bash -c /app/public-interface/scripts/docker-prepare.sh
 	cp ./oisp-frontend/public-interface/deploy/postgres/base/*.sql ./oisp-frontend/public-interface/scripts/database
 	@touch $@
 
