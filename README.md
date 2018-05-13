@@ -28,12 +28,13 @@ $ git clone https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 To get started quickly we suggest you use Docker.
 We have created a shell script to install all the dependencies including Git, Docker, docker-compose, etc for Ubuntu 16.04:
 ```shell
-$ cd open-iot-connector
-$ ./docker-platform-setup/install-docker-ubuntu16.04.sh
+$ cd platform-launcher
+$ sh ./docker-platform-setup/install-docker-ubuntu16.04.sh
 ```
 
 ## Creating and launching OISP
 
+Make sure you are either on master branch or using a pre-release tag.
 ```shell
 $ cd platform-launcher
 $ cp setup-environment.example.sh setup-environment.sh
@@ -71,7 +72,7 @@ $ make update
 ```
 
 #### Destroy OISP (including data)
-The following command will stop and remove the containers and images:
+The following command will stop and remove the containers, keys, databases, but preserves the images:
 ```shell
 $ make distclean
 ```
@@ -79,3 +80,25 @@ $ make distclean
 The project has been structured using Git submodules according to recommendations made here: https://www.philosophicalhacker.com/post/using-git-submodules-effectively/
 
 Please check out our [Wiki](https://github.com/Open-IoT-Service-Platform/platform-launcher/wiki) for more details.
+
+## Development
+
+### Development Process
+Community contributions are welcome!
+All PRs have to be applied to the develop branches in the ``platform-launcher`` repository or the sub repositories. At least one review and approval of a project admin is needed to merge it in.
+Before submitting a PRs make sure that you checked out the most recent develop state.
+The master branches are only getting PRs from the respective develop branches.
+
+### How to checkout and build most recent development state from scratch
+
+Assumptions:
+  * No Docker Containers, i.e. ``docker ps -a`` is empty
+  * No Docker Images, i.e. ``docker images`` is empty
+  
+```shell
+$ git clone https://github.com/Open-IoT-Service-Platform/platform-launcher.git
+$ cd platform-launcher
+$ git checkout develop
+$ make update
+$ make
+```
