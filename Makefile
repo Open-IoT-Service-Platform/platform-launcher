@@ -26,6 +26,7 @@ export TEST = 0
 export HOST_IP_ADDRESS=$(shell ifconfig docker0 | sed -En 's/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
 SSL_CERT_PATH:=data/keys/ssl
 COMPOSE_PROJECT_NAME?="oisp"
+DOCKER_REGISTRY=localhost:5000/
 
 .init:
 	@$(call msg,"Initializing ...");
@@ -77,6 +78,10 @@ build-force: .init
 	@$(call msg,"Building IoT connector ...");
 	@./docker.sh create --force-recreate
 
+build-quick: .init
+	@$(call msg,"Building IoT connector by pulling images...");
+	@./docker.sh -f docker-compose-quick.yml create
+
 ifeq (start,$(firstword $(MAKECMDGOALS)))
  	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
  	$(eval $(CMD_ARGS):;@:)
@@ -89,6 +94,10 @@ start: build .prepare
 start-test: build .prepare
 	@$(call msg,"Starting IoT connector (test mode) ...");
 	@env TEST="1" ./docker.sh up -d
+
+start-quick: build-quick .prepare
+	@$(call msg,"Starting IoT connector using pulled images...");
+	@./docker.sh -f docker-compose-quick.yml up -d $(CMD_ARGS)
 
 ifeq (stop,$(firstword $(MAKECMDGOALS)))
  	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -161,6 +170,12 @@ distclean: clean
 	@./docker.sh down
 	@rm -rf ./data
 
+push-docker-images:
+	source setup-environment.sh && \
+	for img in $$(docker images | grep -oEi $$COMPOSE_PROJECT_NAME"_(\S*)" | cut -d _ -f 2); do \
+		docker tag $${COMPOSE_PROJECT_NAME}_$${img} ${DOCKER_REGISTRY}$${COMPOSE_PROJECT_NAME}/$${img}; \
+		docker push ${DOCKER_REGISTRY}$${COMPOSE_PROJECT_NAME}/$${img}; \
+	done
 
 
 #----------------------------------------------------------------------------------------------------------------------
