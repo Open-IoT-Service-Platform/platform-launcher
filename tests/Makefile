@@ -34,6 +34,9 @@ all:
 	@cd $(CURRENT_DIR) && npm install > /dev/null
 
 test:
+	@$(call msg,"Waiting for frontend");
+	@. ../setup-environment.sh && until kafkacat -b localhost:9092 -t heartbeat -e 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
+
 	@$(call msg,"Resetting database ...");
 	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin resetDB
 
@@ -56,8 +59,8 @@ distclean: clean
 
 define msg
 	tput setaf 2 && \
-	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo -n "\n" && \
-	echo "\t"$1 && \
-	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo "\n" && \
+	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo "" && \
+	echo -e "\t"$1 && \
+	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo "" && \
 	tput sgr0
 endef
