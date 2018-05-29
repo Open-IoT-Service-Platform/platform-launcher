@@ -24,5 +24,9 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 #other packages needed
 sudo apt-get install make git
+sudo apt install kafkacat
+
 
 sudo usermod -aG docker ${USER}
+
+
