@@ -25,11 +25,16 @@ $ git clone https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 ```
 
 ## Starting from scratch
-To get started quickly we suggest you use Docker.
-We have created a shell script to install all the dependencies including Git, Docker, docker-compose, etc for Ubuntu 16.04:
+Precondtion for building is to have the following installed
+* Docker and Docker-Compose
+* Git
+* Make
+* Kafkacat
+
+As an example for *Ubuntu 16.04*, we have created a shell script to install all the dependencies.
 ```shell
 $ cd platform-launcher
-$ sh ./docker-platform-setup/install-docker-ubuntu16.04.sh
+$ sh ./platform-setup/setup-ubuntu16.04.sh
 ```
 
 ## Creating and launching OISP
