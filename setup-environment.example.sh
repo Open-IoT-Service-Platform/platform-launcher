@@ -24,6 +24,7 @@ export POSTGRES_PORT='5432'
 export POSTGRES_USERNAME='postgres'
 export POSTGRES_PASSWORD='intel123'
 export KAFKA='kafka:9092'
+export KAFKA_HEARTBEAT_TOPIC='heartbeat'
 export GEARPUMP='gearpump:8090'
 export BACKEND='backend:8080'
 export NGINX='nginx'
@@ -136,7 +137,7 @@ export VCAP_SERVICES='{
                     "observations": "metrics",
                     "rule_engine": "rules-update",
                     "heartbeat": {
-                        "name": "heartbeat",
+                        "name": "'$KAFKA_HEARTBEAT_TOPIC'",
                         "interval": 5000
                     }
                 }
