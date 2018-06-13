@@ -99,7 +99,7 @@ export VCAP_SERVICES='{
      "host": "auth.smtp.1and1.co.uk",
      "port": "587",
      "protocol": "smtp",
-     "username": "info@streammyiot.com",
+     "username": "test.sender@streammyiot.com",
      "password": "smtp-password-goes-here"
     },
     "label": "smtp",
@@ -170,7 +170,7 @@ export VCAP_SERVICES='{
 },
 {
     "credentials": {
-    "sender": "sysadmin@localhost"
+    "sender": "test.sender@streammyiot.com"
     },
     "name": "mail-ups"
 },
