@@ -100,7 +100,7 @@ export VCAP_SERVICES='{
      "port": "587",
      "protocol": "smtp",
      "username": "test.sender@streammyiot.com",
-     "password": "OISP123!!"
+     "password": "smtp-password-goes-here"
     },
     "label": "smtp",
     "name": "mysmtp"
