@@ -466,6 +466,39 @@ function getData(from, userToken, accountId, deviceId, cid, cb) {
     });
 }
 
+function addUser(email, password, cb) {
+    if(!cb) {
+      throw "Callback required";
+    }
+
+    var data = {
+        body: {
+            email: email,
+            password: password
+        }
+    };
+
+    api.users.addUser(data, function(err, response) {
+      cb(err, response);
+    });
+}
+
+function activateUser(actToken, cb) {
+    if(!cb) {
+      throw "Callback required";
+    }
+
+    var data = {
+        body: {
+            token: actToken
+        }
+    };
+
+    api.users.activateUser(data, function(err, response) {
+      cb(err, response);
+    });
+}
+
 module.exports = {
     createComponentId: createComponentId,
     getActivationCode: getActivationCode,
@@ -480,5 +513,7 @@ module.exports = {
     sendObservation: sendObservation,
     getActuationsForComponent: getActuationsForComponent,
     getObservation: getObservation,
-    getData: getData
+    getData: getData,
+    addUser: addUser,
+    activateUser: activateUser
 };
