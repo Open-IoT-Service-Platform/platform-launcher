@@ -19,8 +19,9 @@ var chai = require('chai');
 var assert = chai.assert;
 var expect = chai.expect;
 
+var config = require("./test-config.json");
 var oispSdk = require("@open-iot-service-platform/oisp-sdk-js");
-var proxyConnector = oispSdk.lib.proxies.getControlConnector('ws');
+var proxyConnector = oispSdk(config).lib.proxies.getControlConnector('ws');
 var kafka = require('kafka-node');
 var cfenvReader = require('./lib/cfenv/reader');
 var helpers = require("./lib/helpers");
@@ -119,7 +120,7 @@ process.stdout.write("                           OISP E2E TESTING               
 process.stdout.write("_____________________________________________________________________\n".bold);
 
 
-describe("Waiting to OISP services to be ready ...\n".bold, function() {
+describe("Waiting for OISP services to be ready ...\n".bold, function() {
     
     before(function(done) {
         userToken = null;
@@ -343,7 +344,7 @@ describe("Creating components and rules ... \n".bold, function() {
     }).timeout(20000);
 })
 
-describe("Sending observations and cheking rules ...\n".bold, function() {
+describe("Sending observations and checking rules ...\n".bold, function() {
 
     it('Shall send observation and check rules', function(done) {
         assert.notEqual(componentId, null, "Invalid component id")

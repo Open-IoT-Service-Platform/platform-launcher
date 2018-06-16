@@ -24,12 +24,15 @@ CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BRANCH:=$(shell git branch| grep \*| cut -d ' ' -f2)
 export TEST = 0
 export HOST_IP_ADDRESS=$(shell ifconfig docker0 | sed -En 's/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
+SSL_CERT_PATH:=data/keys/ssl
+COMPOSE_PROJECT_NAME?="oisp"
+DOCKER_REGISTRY=localhost:5000/
 
 .init:
 	@$(call msg,"Initializing ...");
 	@$(call msg,"Currently on branch ${BRANCH}");
-	@if [ "${BRANCH}"x = developx ]; then \
-		$(call msg, "develop branch detected! Submodules will not be updated automatically. You have to 'make update' to get the most recent develop submodules!"); \
+	@if [ "${BRANCH}" != master ]; then \
+		echo -e "Non-master branch detected! Submodules will not be updated automatically. \nYou have to run 'make update' for submodules from develop branch and update manually otherwise"; \
 		read -r -p "Continue? [Y/n]: " response; \
 		case $$response in \
 		   [Nn]* ) echo "Bye!"; exit 1; \
@@ -55,6 +58,11 @@ endif
 		openssl genpkey -algorithm RSA -out data/keys/private.pem -pkeyopt rsa_keygen_bits:2048; \
 		openssl rsa -pubout -in data/keys/private.pem -out data/keys/public.pem; \
 	fi;
+	@if [ -f ${SSL_CERT_PATH}/server.key ]; then echo "SSL key existing already. Skipping creating self signed cert."; else \
+		echo "Creating self signed SSL certificate."; \
+		mkdir -p ${SSL_CERT_PATH}; \
+		openssl req  -nodes -new -x509  -keyout ${SSL_CERT_PATH}/server.key -out ${SSL_CERT_PATH}/server.cert -subj "/C=UK/ST=NRW/L=London/O=My Inc/OU=DevOps/CN=www.streammyiot.com/emailAddress=donotreply@www.streammyiot.com"; \
+	fi;
 	@touch $@
 
 build: .init
@@ -62,14 +70,17 @@ build: .init
 	@./docker.sh create
 
 .prepare:
-	@docker run -i -v $(shell pwd)/oisp-frontend:/app platformlauncher_dashboard /bin/bash \
-		-c /app/public-interface/scripts/docker-prepare.sh 
-	cp ./oisp-frontend/public-interface/deploy/postgres/base/*.sql ./oisp-frontend/public-interface/scripts/database 
+	source setup-environment.sh && 	docker run -i -v $(shell pwd)/oisp-frontend:/app "$${COMPOSE_PROJECT_NAME}_frontend" /bin/bash -c /app/public-interface/scripts/docker-prepare.sh
+	cp ./oisp-frontend/public-interface/deploy/postgres/base/*.sql ./oisp-frontend/public-interface/scripts/database
 	@touch $@
 
 build-force: .init
 	@$(call msg,"Building IoT connector ...");
 	@./docker.sh create --force-recreate
+
+build-quick: .init
+	@$(call msg,"Building IoT connector by pulling images...");
+	@./docker.sh -f docker-compose-quick.yml create
 
 ifeq (start,$(firstword $(MAKECMDGOALS)))
  	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -81,8 +92,12 @@ start: build .prepare
 	@./docker.sh up -d $(CMD_ARGS)
 
 start-test: build .prepare
-	@$(call msg,"Starting IoT connector (test mode) ..."); 
-	@env TEST="1" ./docker.sh up -d 
+	@$(call msg,"Starting IoT connector (test mode) ...");
+	@env TEST="1" ./docker.sh up -d
+
+start-quick: build-quick .prepare
+	@$(call msg,"Starting IoT connector using pulled images...");
+	@./docker.sh -f docker-compose-quick.yml up -d $(CMD_ARGS)
 
 ifeq (stop,$(firstword $(MAKECMDGOALS)))
  	CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -109,7 +124,7 @@ endif
  	$(eval $(NB_TESTS):;@:)
 endif
 
-test: 
+test:
 	@for ((i=0; i < ${NB_TESTS}; i++)) do \
 		cd $(CURRENT_DIR) && \
 		sudo make distclean && \
@@ -155,6 +170,12 @@ distclean: clean
 	@./docker.sh down
 	@rm -rf ./data
 
+push-docker-images:
+	source setup-environment.sh && \
+	for img in $$(docker images | grep -oEi $$COMPOSE_PROJECT_NAME"_(\S*)" | cut -d _ -f 2); do \
+		docker tag $${COMPOSE_PROJECT_NAME}_$${img} ${DOCKER_REGISTRY}$${COMPOSE_PROJECT_NAME}/$${img}; \
+		docker push ${DOCKER_REGISTRY}$${COMPOSE_PROJECT_NAME}/$${img}; \
+	done
 
 
 #----------------------------------------------------------------------------------------------------------------------
