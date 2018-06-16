@@ -24,8 +24,9 @@ var uuid = require('uuid/v4');
 var chai = require('chai');
 var assert = chai.assert;
 
+var config = require("../test-config.json");
 var oispSdk = require("@open-iot-service-platform/oisp-sdk-js");
-var api = oispSdk.api.rest;
+var api = oispSdk(config).api.rest;
 
 function createComponentId() {
     return uuid();

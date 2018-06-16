@@ -21,7 +21,6 @@
 MAKEFILE_DIR := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR  :=  $(patsubst %/,%,$(dir $(MAKEFILE_DIR)))
 
-
 USERNAME = "oisp@testing.com"
 PASSWORD = "OispTesting1"
 ROLE = "admin"
@@ -31,24 +30,27 @@ ROLE = "admin"
 #----------------------------------------------------------------------------------------------------------------------
 
 all:
-	@$(call msg,"Installing npm packages ..."); 
+	@$(call msg,"Installing npm packages ...");
 	@cd $(CURRENT_DIR) && npm install > /dev/null
 
 test:
-	@$(call msg,"Resetting databases ..."); 
-	@docker exec -i platformlauncher_dashboard_1 node /app/admin resetDB 
-	
-	@$(call msg,"Adding a user for testing ..."); 
-	@docker exec -i platformlauncher_dashboard_1 node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE)  > /dev/null
-	
-	@$(call msg,"Starting the e2e testing ..."); 
-	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm test 
+	@$(call msg,"Waiting for frontend");
+	@. ../setup-environment.sh && until kafkacat -b localhost:9092 -t heartbeat -e 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
+
+	@$(call msg,"Resetting database ...");
+	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin resetDB
+
+	@$(call msg,"Adding a user for testing ...");
+	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
+
+	@$(call msg,"Starting the e2e testing ...");
+	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm test
 
 clean:
-	@$(call msg,"Cleaning ..."); 
+	@$(call msg,"Cleaning ...");
 
 distclean: clean
-	@$(call msg,"Dist cleaning ..."); 
+	@$(call msg,"Dist cleaning ...");
 	@rm -rf $(CURRENT_DIR)/iotkit-agent
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -57,8 +59,8 @@ distclean: clean
 
 define msg
 	tput setaf 2 && \
-	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo -n "\n" && \
-	echo "\t"$1 && \
-	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo "\n" && \
+	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo "" && \
+	echo -e "\t"$1 && \
+	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo "" && \
 	tput sgr0
 endef

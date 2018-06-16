@@ -16,6 +16,6 @@
     "colors": "^1.2.1",
     "cfenv": "^1.0.0",
     "kafka-node": "^2.4.0",
-    "@open-iot-service-platform/oisp-sdk-js": "^1.0.0-alpha1"
+    "@open-iot-service-platform/oisp-sdk-js": "^1.0.0-beta1"
   }
 }

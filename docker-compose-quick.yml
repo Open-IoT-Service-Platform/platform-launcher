@@ -17,8 +17,7 @@ version: '3'
 
 services:
   hbase:
-    build:
-      context: ./docker-hbase/
+    image: "${DOCKER_REGISTRY}${COMPOSE_PROJECT_NAME}/hbase"
     ports:
       - 2181:2181
       - 9090:9090
@@ -38,8 +37,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USERNAME}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
   kafka:
-    build:
-      context: ./docker-kafka/
+    image: "${DOCKER_REGISTRY}${COMPOSE_PROJECT_NAME}/kafka"
     ports:
       - 9092:9092
     environment:
@@ -50,18 +48,23 @@ services:
       - ADVERTISED_HOST=${HOST_IP_ADDRESS}
       - ADVERTISED_PORT=9092
       - AUTO_CREATE_TOPICS=true
-
+  gearpump:
+    image: "${DOCKER_REGISTRY}${COMPOSE_PROJECT_NAME}/gearpump"
+    ports:
+      - 8090:8090
+    depends_on:
+      - nginx
+      - hbase
   redis:
     image: redis:3.0
     volumes:
       - ./data/redis:/data
     ports:
       - 6379:6379
-  gearpump:
-    build:
-      context: ./oisp-gearpump-rule-engine
-      dockerfile: Dockerfile
+  rules-engine-build:
+    image: "${DOCKER_REGISTRY}${COMPOSE_PROJECT_NAME}/rules-engine-build"
     depends_on:
+      - gearpump
       - nginx
       - hbase
       - kafka
@@ -70,18 +73,9 @@ services:
     environment:
       - VCAP_SERVICES=${VCAP_SERVICES}
       - VCAP_APPLICATION=${VCAP_APPLICATION}
-      - KAFKA=${KAFKA}
-      - KAFKA_HEARTBEAT_TOPIC=${KAFKA_HEARTBEAT_TOPIC}
-      - GEARPUMP=${GEARPUMP}
-    ports:
-      - 8090:8090
-    command: bash bootstrap.sh
+    command: ./wait-for-it.sh gearpump:8090 -t 300 -- ./wait-for-it.sh nginx:80 -t 300 -- ./wait-for-it.sh hbase:2181 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- ./wait-for-it.sh frontend:4001 -t 300 -- ./local-push-to-gearpump.sh
   nginx:
-    build:
-      context: ./oisp-frontend/public-interface/nginx
-      args:
-        - WEBSOCKET_SERVER=websocket-server:5000
-        - DASHBOARD_SERVER=frontend:4001
+    image: "${DOCKER_REGISTRY}${COMPOSE_PROJECT_NAME}/nginx"
     ports:
       - 80:80
       - 443:443
@@ -92,8 +86,7 @@ services:
       - ./data/keys/ssl:/etc/ssl
       - ./oisp-frontend/public-interface:/app
   websocket-server:
-    build:
-      context: ./oisp-websocket-server
+    image: "${DOCKER_REGISTRY}${COMPOSE_PROJECT_NAME}/websocket-server"
     ports:
       - 5000:5000
     depends_on:
@@ -110,8 +103,7 @@ services:
       - NODE_ENV=local
     command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- ./scripts/docker-start.sh
   frontend:
-    build:
-      context: ./oisp-frontend/public-interface
+    image: "${DOCKER_REGISTRY}${COMPOSE_PROJECT_NAME}/frontend"
     ports:
       - 4001:4001
 
@@ -131,8 +123,7 @@ services:
       - TEST=${TEST}
       - NODE_ENV=local
   backend:
-    build:
-      context: ./oisp-backend
+    image: "${DOCKER_REGISTRY}${COMPOSE_PROJECT_NAME}/backend"
     ports:
       - 8080:8080
     depends_on:
