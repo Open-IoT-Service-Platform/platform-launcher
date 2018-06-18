@@ -18,6 +18,8 @@
 var chai = require('chai');
 var assert = chai.assert;
 var expect = chai.expect;
+var Imap = require("imap");
+var MailParser = require("mailparser").MailParser;
 
 var config = require("./test-config.json");
 var oispSdk = require("@open-iot-service-platform/oisp-sdk-js");
@@ -71,6 +73,10 @@ var actuatorId;
 var ruleId;
 var componentParamName;
 var firstObservationTime;
+var receiverEmail = "test.receiver@streammyiot.com";
+var receiverPassword = "IotTest123";
+var receiverUserId;
+
 
 var temperatureValues = [{
         value: -15,
@@ -462,4 +468,121 @@ describe("Sending observations and checking rules ...\n".bold, function() {
         })
     }).timeout(10000);
 
+});
+
+describe("Adding user ,posting email and change password...\n".bold, function() {
+    var activationToken = "";
+    var imap = new Imap({
+        user: config.imap.username,
+        password: config.imap.password,
+        host: config.imap.host,
+        port: config.imap.port,
+        tls: true
+    });
+    function openInbox(cb) {
+        imap.openBox("INBOX", false, cb);
+    }
+    var getEmail = function(flag, cb) {
+        imap.once("ready", function() {
+            openInbox(function(err, box) {
+                if (err) throw err;
+                imap.search([ "UNSEEN", [ "SINCE", "June 01, 2018" ] ], function(err, results) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    try {
+                        var f = imap.fetch(results, {
+                            HEADER: "OISP verification",
+                            bodies: "",
+                            markSeen: true
+                        });
+                        f.on("message", function(msg, seqno) {
+                            var mailparser = new MailParser();
+                            msg.on("body", function(stream, info) {
+                                stream.pipe(mailparser);
+                                mailparser.on("headers", function(headers) {});
+                                mailparser.on("data", function(data) {
+                                    if (data.type === "text") {
+                                        var emailBody = data.html;
+                                        try {
+                                            var activationUrl = emailBody.split('href="')[1].split('">')[0];
+                                            activationToken = activationUrl.split("token=")[1];
+                                        } catch (e) {
+                                            console.log("can't get activate token");
+                                            imap.end();
+                                        }
+                                    }
+                                    if (data.type === "attachment") {}
+                                });
+                            });
+                            msg.once("end", function() {
+                                imap.end();
+                            });
+                        });
+                        f.once("error", function(err) {
+                            console.log("fetch error:" + err);
+                        });
+                        f.once("end", function() {
+                            imap.end();
+                        });
+                    } catch (e) {
+                        imap.end();
+                    }
+                });
+            });
+        });
+        imap.once("error", function(err) {
+            console.log(err);
+        });
+        imap.once("end", function() {
+            if ("clear" == flag) {
+                activationToken = "";
+                cb("clear all unread emails");
+            } else if ("get" == flag) {
+                process.stdout.write(".".green);
+                if (activationToken == "") {
+                    setTimeout(function() {
+                        getEmail("get", cb);
+                    }, 1000);
+                } else {
+                    cb(activationToken);
+                }
+            }
+        });
+        imap.connect();
+    };
+
+    before(function(done) {
+        getEmail("clear", function(res) {
+            console.log("    ", res);
+            done();
+        });
+    });
+
+    it("Shall add a new user and post email", function(done) {
+        assert.isNotEmpty(receiverEmail, "no email provided");
+        assert.isNotEmpty(receiverPassword, "no password provided");
+        helpers.addUser(receiverEmail, receiverPassword, function(err, response) {
+            if (err) {
+                done(new Error("Cannot create new user: " + err));
+            } else {
+                done();
+            }
+        });
+    });
+
+
+    it("Shall activate user with token", function(done) {
+        process.stdout.write("    receiving email...".green);
+        getEmail("get", function(token) {
+            assert.isNotEmpty(token, "get activate token failed");
+            helpers.activateUser(token, function(err, response) {
+                if (err) {
+                    done(new Error("Cannot activate user: " + err));
+                } else {
+                    done();
+                }
+            });
+        });
+    }).timeout(1 * 60 * 1000);
 });

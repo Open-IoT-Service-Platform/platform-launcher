@@ -31,5 +31,12 @@
 				"port": false
 			}
 		}
-	}
+	},
+        "imap": {
+            "host": "imap.1and1.co.uk",
+            "port": "993",
+            "protocol": "smtp",
+            "username": "test.receiver@streammyiot.com",
+            "password": "smtp-password-goes-here"
+        }
 }
