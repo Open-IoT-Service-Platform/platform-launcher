@@ -15,6 +15,8 @@ nodemailer.createTestAccount((err, account) => {
         fs.appendFileSync(outputFile, 'export SMTP_PORT='+account.smtp.port+'\n');
         fs.appendFileSync(outputFile, 'export SMTP_USERNAME='+account.user+'\n');
         fs.appendFileSync(outputFile, 'export SMTP_PASSWORD='+account.pass+'\n');
+        fs.appendFileSync(outputFile, 'export IMAP_USERNAME='+account.user+'\n');
+        fs.appendFileSync(outputFile, 'export IMAP_PASSWORD='+account.pass+'\n');
         fs.appendFileSync(outputFile, 'export IMAP_HOST='+account.imap.host+'\n');
         fs.appendFileSync(outputFile, 'export IMAP_PORT='+account.imap.port+'\n');
     }
