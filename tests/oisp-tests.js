@@ -41,6 +41,8 @@ var actuatorType = "powerswitch.v1.0"
 var switchOnCmdName = "switch-on"
 var switchOffCmdName = "switch-off"
 
+var recipientEmail = "jamal.el.youssefi@intel.com"
+
 var rules = [];
 
 rules[switchOnCmdName] = {
@@ -48,7 +50,16 @@ rules[switchOnCmdName] = {
     conditionComponent: componentName,
     basicConditionOperator: "<=",
     basicConditionValue: "15",
-    actuationCmd: switchOnCmdName
+    actions: [
+                {
+                    type: "actuation",
+                    target: [ switchOnCmdName ]
+                },
+                {
+                    type: "mail",
+                    target: [ recipientEmail ]
+                }
+            ],
 };
 
 rules[switchOffCmdName] = {
@@ -56,7 +67,16 @@ rules[switchOffCmdName] = {
     conditionComponent: componentName,
     basicConditionOperator: ">",
     basicConditionValue: "25",
-    actuationCmd: switchOffCmdName
+    actions: [
+                {
+                    type: "actuation",
+                    target: [ switchOffCmdName ]
+                },
+                {
+                    type: "mail",
+                    target: [ recipientEmail ]
+                }
+            ],
 };
 
 //-------------------------------------------------------------------------------------------------------
@@ -74,43 +94,53 @@ var firstObservationTime;
 
 var temperatureValues = [{
         value: -15,
-        expectedActuation: 1 // swich on
+        expectedActuation: 1, // swich on
+        expectedEmailReason: "temperature-sensor <= 15"
     },
     {
         value: -5,
-        expectedActuation: 1 // swich on
+        expectedActuation: 1, // swich on
+        expectedEmailReason: "temperature-sensor <= 15"
     },
     {
         value: 5,
-        expectedActuation: 1 // swich on
+        expectedActuation: 1, // swich on
+        expectedEmailReason: "temperature-sensor <= 15"
     },
     {
         value: 15,
-        expectedActuation: 1 // swich on
+        expectedActuation: 1, // swich on
+        expectedEmailReason: "temperature-sensor <= 15"
     },
     {
         value: 25,
-        expectedActuation: null // do nothing (no actuation)
+        expectedActuation: null, // do nothing (no actuation)
+        expectedEmailReason: null,
     },
     {
         value: 30,
-        expectedActuation: 0 // swich off
+        expectedActuation: 0, // swich off
+        expectedEmailReason: "temperature-sensor > 25"
     },
     {
         value: 20,
-        expectedActuation: null // do nothing (no actuation)
+        expectedActuation: null, // do nothing (no actuation)
+        expectedEmailReason: null
     },
     {
         value: 14,
-        expectedActuation: 1 // swich on
+        expectedActuation: 1, // swich on
+        expectedEmailReason: "temperature-sensor <= 15"
     },
     {
         value: 20,
-        expectedActuation: null // do nothing (no actuation)
+        expectedActuation: null, // do nothing (no actuation)
+        expectedEmailReason: null
     },
     {
         value: 28,
-        expectedActuation: 0 // swich off
+        expectedActuation: 0, // swich off
+        expectedEmailReason: "temperature-sensor > 25"
     }
 ];
 
@@ -354,6 +384,7 @@ describe("Sending observations and checking rules ...\n".bold, function() {
 
         var index = 0;
         var nbActuations = 0;
+        var emailNum = 1;
         
         process.stdout.write("    ");
 
@@ -375,10 +406,11 @@ describe("Sending observations and checking rules ...\n".bold, function() {
             }
         };
 
+
         helpers.wsConnect(proxyConnector, deviceToken, deviceId, function(message) {
             --nbActuations;
 
-            var expectedValue = temperatureValues[index].expectedActuation.toString();
+            var expectedActuationValue = temperatureValues[index].expectedActuation.toString();
             var componentParam = message.content.params.filter(function(param){
                 return param.name == componentParamName;
             });
@@ -387,13 +419,39 @@ describe("Sending observations and checking rules ...\n".bold, function() {
                 var param = componentParam[0];
                 var paramValue = param.value.toString();
 
-                if(paramValue == expectedValue)
+                if(paramValue == expectedActuationValue)
                 {
-                    step();
+                    helpers.getEmailMessage(process.env.SMTP_USERNAME, process.env.SMTP_PASSWORD, 
+                                process.env.IMAP_HOST, process.env.IMAP_PORT, emailNum, function(err, message) {
+                        if (!err) {
+                            var lines = message.toString().split("\n");
+                            var i;
+                            for(i=0; i<lines.length; i++) {
+                                var reExecReason = /^- Reason:.*/;
+                                if ( reExecReason.test(lines[i]) ) {
+                                    var reason = lines[i].split(":")[1].trim();
+                                    if ( reason == temperatureValues[index].expectedEmailReason ) {
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if ( i==lines.length ) {
+                                done(new Error("Wrong email " + message ))
+                            }
+                            else {
+                                emailNum++;
+                                step();
+                            }
+                        }
+                        else {
+                            done(new Error("Wrong email " + err ))
+                        }
+                    })
                 }
                 else
                 {
-                    done(new Error("Param value wrong. Expected: " + expectedValue + " Received: " + paramValue));
+                    done(new Error("Param value wrong. Expected: " + expectedActuationValue + " Received: " + paramValue));
                 }
             }
             else

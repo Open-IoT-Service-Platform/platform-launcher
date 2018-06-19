@@ -20,8 +20,8 @@
 //-------------------------------------------------------------------------------------------------------
 
 var uuid = require('uuid/v4');
-
 var chai = require('chai');
+var Imap = require('imap');
 var assert = chai.assert;
 
 var config = require("../test-config.json");
@@ -269,13 +269,7 @@ function createRule(ruleConfig, userToken, accountId, deviceId, cb) {
             status: "Active",
             resetType: "Automatic",
 
-            actions: [{
-                type: "actuation",
-                target: [
-                    ruleConfig.actuationCmd
-                ]
-            }],
-
+            actions: ruleConfig.actions,
 
             population: {
                 ids: [deviceId],
@@ -466,6 +460,62 @@ function getData(from, userToken, accountId, deviceId, cid, cb) {
     });
 }
 
+function getEmailMessage(user, password, host, port, num, cb) {
+    if (!cb) {
+        throw "Callback required";
+    }
+    var imap = new Imap({
+        user: user,
+        password: password,
+        host: host,
+        port: port,
+        tls: true,
+        tlsOptions: { rejectUnauthorized: false }
+    });
+
+    imap.once('ready', function() {
+        imap.openBox('INBOX', true, function(err, box) {
+            if ( !err ) {
+                var f = imap.seq.fetch(num, {
+                            bodies: ['HEADER.FIELDS (TO)', '1'],
+                            struct: true
+                        });
+
+                f.on('message', function(msg, seqno) {
+                    var buffer = '';
+                    msg.on('body', function(stream, info) {
+
+                        stream.on('data', function(chunk) {
+                            buffer += chunk.toString('utf8');
+                        });
+                    });
+
+                    msg.once('end', function() {
+                        buffer = buffer.replace("&lt;","<");
+                        buffer = buffer.replace("&gt;",">");
+                        cb(null, buffer);
+                        imap.closeBox(() => {
+                                                imap.destroy();
+                                                imap.end();
+                                            });
+                    });
+                });
+            }
+            else {
+                cb(err);
+            }
+        });
+    });
+
+    imap.once('error', function(err) {
+        cb(err);
+    });
+
+    imap.connect();
+
+}
+
+
 module.exports = {
     createComponentId: createComponentId,
     getActivationCode: getActivationCode,
@@ -480,5 +530,6 @@ module.exports = {
     sendObservation: sendObservation,
     getActuationsForComponent: getActuationsForComponent,
     getObservation: getObservation,
-    getData: getData
+    getData: getData,
+    getEmailMessage: getEmailMessage
 };
