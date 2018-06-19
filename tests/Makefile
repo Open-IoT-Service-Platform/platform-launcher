@@ -46,6 +46,15 @@ test:
 	@$(call msg,"Starting the e2e testing ...");
 	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm test
 
+ifeq (email-account,$(firstword $(MAKECMDGOALS)))
+ 	OUTPUT_FILE := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+ 	$(eval $(OUTPUT_FILE):;@:)
+endif
+
+email-account: 
+	@$(call msg,"Creating ethereal email account");
+	@node ./ethereal.js $(OUTPUT_FILE)
+
 clean:
 	@$(call msg,"Cleaning ...");
 
