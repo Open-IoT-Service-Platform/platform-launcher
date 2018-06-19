@@ -41,7 +41,7 @@ var actuatorType = "powerswitch.v1.0"
 var switchOnCmdName = "switch-on"
 var switchOffCmdName = "switch-off"
 
-var recipientEmail = "jamal.el.youssefi@intel.com"
+var recipientEmail = "test.receiver@streammyiot.com"
 
 var rules = [];
 
