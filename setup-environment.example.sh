@@ -30,12 +30,6 @@ export BACKEND='backend:8080'
 export NGINX='nginx'
 export REDIS='redis'
 export REDIS_PORT='6379'
-
-export SMTP_HOST="${SMTP_HOST:-auth.smtp.1and1.co.uk}"
-export SMTP_PORT="${SMTP_PORT:-587}"
-export SMTP_USERNAME="${SMTP_USERNAME:-test.sender@streammyiot.com}"
-export SMTP_PASSWORD="${SMTP_PASSWORD:-xxxxx}"
-
 export COMPOSE_PROJECT_NAME="oisp"
 
 export VCAP_SERVICES='{
@@ -102,11 +96,11 @@ export VCAP_SERVICES='{
 "smtp": [
    {
     "credentials": {
-     "host": "'$SMTP_HOST'",
-     "port": "'$SMTP_PORT'",
+     "host": "auth.smtp.1and1.co.uk",
+     "port": "587",
      "protocol": "smtp",
-     "username": "'$SMTP_USERNAME'",
-     "password": "'$SMTP_PASSWORD'"
+     "username": "test.sender@streammyiot.com",
+     "password": "smtp-password-goes-here"
     },
     "label": "smtp",
     "name": "mysmtp"

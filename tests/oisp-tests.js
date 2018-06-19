@@ -43,11 +43,6 @@ var switchOffCmdName = "switch-off"
 
 var recipientEmail = "test.receiver@streammyiot.com"
 
-var imap_username = process.env.IMAP_USERNAME;
-var imap_password = process.env.IMAP_PASSWORD; 
-var imap_host     = process.env.IMAP_HOST;
-var imap_port     = process.env.IMAP_PORT;
-
 var rules = [];
 
 rules[switchOnCmdName] = {
@@ -426,7 +421,8 @@ describe("Sending observations and checking rules ...\n".bold, function() {
 
                 if(paramValue == expectedActuationValue)
                 {
-                    helpers.getEmailMessage(imap_username, imap_password, imap_host, imap_port, emailNum, function(err, message) {
+                    helpers.getEmailMessage(process.env.SMTP_USERNAME, process.env.SMTP_PASSWORD, 
+                                process.env.IMAP_HOST, process.env.IMAP_PORT, emailNum, function(err, message) {
                         if (!err) {
                             var lines = message.toString().split("\n");
                             var i;
