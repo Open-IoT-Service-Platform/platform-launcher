@@ -93,7 +93,8 @@ start: build .prepare
 
 start-test: build .prepare
 	@$(call msg,"Starting IoT connector (test mode) ...");
-	@env TEST="1" ./docker.sh up -d
+	@make -C tests email-account $(shell pwd)/tests/.env 
+	@env TEST="1" /bin/bash -c "source ./tests/.env  && ./docker.sh up -d"
 
 start-quick: build-quick .prepare
 	@$(call msg,"Starting IoT connector using pulled images...");
@@ -129,7 +130,7 @@ test:
 		cd $(CURRENT_DIR) && \
 		sudo make distclean && \
 		make start-test && \
-		cd tests && make && make test; \
+		source ./tests/.env && cd tests && make && make test; \
 	done
 
 
