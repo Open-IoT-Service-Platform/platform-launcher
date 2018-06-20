@@ -75,7 +75,7 @@ services:
       - GEARPUMP=${GEARPUMP}
     ports:
       - 8090:8090
-    command: bash bootstrap.sh
+    command: bash wait-for-it.sh kafka:9092 -t 300 -- bash bootstrap.sh
   nginx:
     build:
       context: ./oisp-frontend/public-interface/nginx
