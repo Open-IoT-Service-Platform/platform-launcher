@@ -268,6 +268,7 @@ function createRule(ruleConfig, userToken, accountId, deviceId, cb) {
             type: "Regular",
             status: "Active",
             resetType: "Automatic",
+            synchronizationStatus: "NotSync",
 
             actions: ruleConfig.actions,
 
