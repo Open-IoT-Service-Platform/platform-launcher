@@ -52,7 +52,7 @@ ifeq (email-account,$(firstword $(MAKECMDGOALS)))
  	$(eval $(OUTPUT_FILE):;@:)
 endif
 
-email-account: 
+email-account: all
 	@$(call msg,"Creating ethereal email account");
 	@node ./ethereal.js $(OUTPUT_FILE)
 
