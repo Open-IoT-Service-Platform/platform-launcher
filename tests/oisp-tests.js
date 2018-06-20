@@ -41,7 +41,7 @@ var actuatorType = "powerswitch.v1.0"
 var switchOnCmdName = "switch-on"
 var switchOffCmdName = "switch-off"
 
-var recipientEmail = "test.receiver@streammyiot.com"
+var emailRecipient = "test.receiver@streammyiot.com"
 
 var imap_username = process.env.IMAP_USERNAME;
 var imap_password = process.env.IMAP_PASSWORD; 
@@ -62,7 +62,7 @@ rules[switchOnCmdName] = {
                 },
                 {
                     type: "mail",
-                    target: [ recipientEmail ]
+                    target: [ emailRecipient ]
                 }
             ],
 };
@@ -79,7 +79,7 @@ rules[switchOffCmdName] = {
                 },
                 {
                     type: "mail",
-                    target: [ recipientEmail ]
+                    target: [ emailRecipient ]
                 }
             ],
 };
@@ -428,24 +428,48 @@ describe("Sending observations and checking rules ...\n".bold, function() {
                 {
                     helpers.getEmailMessage(imap_username, imap_password, imap_host, imap_port, emailNum, function(err, message) {
                         if (!err) {
+                            var regExps = [
+                                {
+                                    value: /^To:.*/,
+                                    expected: emailRecipient,
+                                    found: false
+                                },
+                                {
+                                    value: /^- Device:.*/,
+                                    expected: deviceId,
+                                    found: false
+                                },
+                                {
+                                    value: /^- Reason:.*/,
+                                    expected: temperatureValues[index].expectedEmailReason,
+                                    found: false
+                                }
+                            ];
                             var lines = message.toString().split("\n");
                             var i;
+
                             for(i=0; i<lines.length; i++) {
-                                var reExecReason = /^- Reason:.*/;
-                                if ( reExecReason.test(lines[i]) ) {
-                                    var reason = lines[i].split(":")[1].trim();
-                                    if ( reason == temperatureValues[index].expectedEmailReason ) {
-                                        break;
+                                regExps.forEach(function(regExp) {
+                                    if ( regExp.value.test(lines[i]) ) {
+                                        var value = lines[i].split(":")[1].trim();
+                                        if ( value ==  regExp.expected ) {
+                                            regExp.found = true;
+                                        }
                                     }
-                                }
+                                })
                             }
 
-                            if ( i==lines.length ) {
-                                done(new Error("Wrong email " + message ))
+                            for(i=0; i<regExps.length; i++) {
+                                if ( regExps[i].found == false ) {
+                                    break;
+                                }
                             }
-                            else {
+                            if ( i == regExps.length ) {
                                 emailNum++;
                                 step();
+                            }
+                            else {
+                                done(new Error("Wrong email " + message ))
                             }
                         }
                         else {
