@@ -41,12 +41,12 @@ var actuatorType = "powerswitch.v1.0"
 var switchOnCmdName = "switch-on"
 var switchOffCmdName = "switch-off"
 
-var emailRecipient = "test.receiver@streammyiot.com"
-
 var imap_username = process.env.IMAP_USERNAME;
 var imap_password = process.env.IMAP_PASSWORD; 
 var imap_host     = process.env.IMAP_HOST;
 var imap_port     = process.env.IMAP_PORT;
+
+var emailRecipient = imap_username;
 
 var rules = [];
 

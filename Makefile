@@ -129,6 +129,7 @@ test:
 	@for ((i=0; i < ${NB_TESTS}; i++)) do \
 		cd $(CURRENT_DIR) && \
 		sudo make distclean && \
+		cd tests && make && cd ..&&\
 		make start-test && \
 		source ./tests/.env && cd tests && make && make test; \
 	done
