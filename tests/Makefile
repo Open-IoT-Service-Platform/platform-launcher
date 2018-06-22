@@ -30,11 +30,11 @@ ROLE = "admin"
 # targets
 #----------------------------------------------------------------------------------------------------------------------
 
-all:
+npm-install:
 	@$(call msg,"Installing npm packages ...");
 	@cd $(CURRENT_DIR) && npm install > /dev/null
 
-test:
+test: npm-install
 	@$(call msg,"Waiting for frontend");
 	@. ../setup-environment.sh && until kafkacat -b localhost:9092 -t heartbeat -e 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
 
@@ -52,7 +52,7 @@ ifeq (email-account,$(firstword $(MAKECMDGOALS)))
  	$(eval $(OUTPUT_FILE):;@:)
 endif
 
-email-account: all
+email-account: npm-install
 	@$(call msg,"Creating ethereal email account");
 	@node ./ethereal.js $(OUTPUT_FILE)
 

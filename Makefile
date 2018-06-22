@@ -30,13 +30,19 @@ DOCKER_REGISTRY=localhost:5000/
 
 .init:
 	@$(call msg,"Initializing ...");
+	@if [ ! -f ".firstRun" ]; then \
+		make docker-clean && \
+		touch .firstRun;\
+	fi
 	@$(call msg,"Currently on branch ${BRANCH}");
 	@if [ "${BRANCH}" != master ]; then \
-		echo -e "Non-master branch detected! Submodules will not be updated automatically. \nYou have to run 'make update' for submodules from develop branch and update manually otherwise"; \
-		read -r -p "Continue? [Y/n]: " response; \
-		case $$response in \
-		   [Nn]* ) echo "Bye!"; exit 1; \
-		esac \
+		if [ "${TEST}" != "1" ]; then \
+			echo -e "Non-master branch detected! Submodules will not be updated automatically. \nYou have to run 'make update' for submodules from develop branch and update manually otherwise"; \
+			read -r -p "Continue? [Y/n]: " response; \
+			case $$response in \
+			   [Nn]* ) echo "Bye!"; exit 1; \
+			esac \
+		fi; \
 	else \
 	git submodule init; \
 	git submodule update; \
@@ -91,10 +97,11 @@ start: build .prepare
 	@$(call msg,"Starting IoT connector ...");
 	@./docker.sh up -d $(CMD_ARGS)
 
+start-test: export TEST := "1"
 start-test: build .prepare
 	@$(call msg,"Starting IoT connector (test mode) ...");
 	@make -C tests email-account $(shell pwd)/tests/.env 
-	@env TEST="1" /bin/bash -c "source ./tests/.env  && ./docker.sh up -d"
+	@source ./tests/.env  && ./docker.sh up -d
 
 start-quick: build-quick .prepare
 	@$(call msg,"Starting IoT connector using pulled images...");
@@ -117,6 +124,11 @@ update:
 	@git submodule foreach git fetch origin
 	@git submodule foreach git checkout origin/develop
 
+docker-clean:
+	@$(call msg,"Removing docker images and containers ...");
+	@make remove
+
+
 ifeq (test,$(firstword $(MAKECMDGOALS)))
  	NB_TESTS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 ifeq ($(NB_TESTS),)
@@ -125,12 +137,13 @@ endif
  	$(eval $(NB_TESTS):;@:)
 endif
 
+test: export TEST := "1"
 test:
 	@for ((i=0; i < ${NB_TESTS}; i++)) do \
 		cd $(CURRENT_DIR) && \
 		sudo make distclean && \
 		make start-test && \
-		source ./tests/.env && cd tests && make && make test; \
+		source ./tests/.env && cd tests && make test; \
 	done
 
 
