@@ -19,6 +19,6 @@
     "nodemailer": "^4.6.6",
     "imap": "^0.8.19",
     "mailparser": "^2.2.0",
-    "@open-iot-service-platform/oisp-sdk-js":"https://github.com/chuan9/oisp-sdk-js.git#fc6722efbe6cf5c7c2730b9cb0cce7cbb1ad69a1"
+    "@open-iot-service-platform/oisp-sdk-js":"https://github.com/chuan9/oisp-sdk-js.git#b1d093f6854e204cbd8b82a7c16ea96d259e86b1"
   }
 }

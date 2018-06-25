@@ -937,8 +937,8 @@ describe("update rules and create draft rules ... \n".bold, function(){
     var cloneruleId;
 
     it('Shall clone a rule', function(done){
-        var rulename_clone = rulelist[1].name + ' - cloned'
-        
+        var rulename_clone = rulelist[1].name + ' - cloned';
+ 
         helpers.rules.cloneRule (userToken, accountId, rulelist[1].id, function(err, response) {
             if (err) {
                 done(new Error("cannot clone a rule " + err));
@@ -955,6 +955,7 @@ describe("update rules and create draft rules ... \n".bold, function(){
                 
         var newrule = {
             name: "oisp-tests-rule-high-temp-new",
+            synchronizationStatus: "NotSync",
             conditionComponent: componentName,
             basicConditionOperator: ">",
             basicConditionValue: "28",
@@ -1007,7 +1008,8 @@ describe("Adding user and posting email ...\n".bold, function() {
             if (err) {
                 done(new Error("Cannot create new user: " + err));
             } else {
-                console.dir(response)
+		assert.equal(response.email, imap_username, 'add wrong user')
+		assert.equal(response.type, 'user', 'response type wrong')
                 done();
             }
         })
@@ -1018,7 +1020,7 @@ describe("Adding user and posting email ...\n".bold, function() {
         helpers.mail.getEmailMessage(imap_username, imap_password, imap_host, imap_port, emailNum, function(err, message) {
             if (!err) {
                 
-                console.log("email message:", message.toString())
+                //console.log("email message:", message.toString())
 
                 var regexp = /token=\w*?\r/
                 var activationline = regexp.exec(message.toString());
@@ -1072,6 +1074,7 @@ describe("Adding user and posting email ...\n".bold, function() {
 });
 
 describe("Invite receiver ...\n".bold, function() {
+    var inviteId = null;
 
     it('Shall create invitation', function(done){
         // a mail will be sent to receiver
@@ -1120,7 +1123,9 @@ describe("Invite receiver ...\n".bold, function() {
     })
 
     it('Shall get specific invitations', function(done){
-        //login first, get new token 
+        //login first, get new token
+        console.log("getting invitations ...");
+        var getInvitation = function(cb){
         helpers.auth.login(imap_username, imap_password, function(err, token) {
             if (err) {
                 done(new Error("Cannot authenticate: " + err));
@@ -1128,25 +1133,34 @@ describe("Invite receiver ...\n".bold, function() {
                 receiverToken = token;
                 helpers.invitation.getInvitations(receiverToken, receiveraccountId, imap_username, function(err, response) {
                     if (err) {
-                        console.log(err)
-                        done();
+                        cb(err, null);
                     } else {
-                        console.log(response)
-                        done();
+                        if (response != null){
+                          cb(null, response)
+                        } else {
+                            console.log(".");
+                            setTimeout(function(){
+                                getInvitation(cb);
+                            }, 500);
+                        }
                     }
                 })
             }   
         })
-    })
+        };
+       getInvitation(function(err, response){
+           assert.equal(err, null, "get invitation error");
+           inviteId = response[0]._id;
+           done();
+       });
+    }).timeout(2 * 60 * 1000);
 
     it('Shall accept specific invitations', function(done){
-        // can not get invite id so far
-        helpers.invitation.acceptInvitation(userToken, accountId, imap_username, inviteId, function(err, response) {
+        helpers.invitation.acceptInvitation(receiverToken, accountId, inviteId, function(err, response) {
             if (err) {
-                console.log(err)
-                done();
+                done(new Error('cannot accept invitetion :' + err));
             } else {
-                console.log(response)
+                assert.equal(response.accountName, accountName, 'accept wrong invitation')
                 done();
             }
         })
@@ -1157,11 +1171,10 @@ describe("Invite receiver ...\n".bold, function() {
 
         helpers.users.requestUserActivation(username, function(err, response) {
             if (err) {
-                console.log(err)
-                done();
+                done(new Error('cannot request activation:' + err));
             } else {
-                console.log(response)
-                done();
+                assert.equal(response.status, 'OK')
+		done();
             }
         })
     })
@@ -1172,14 +1185,11 @@ describe("Invite receiver ...\n".bold, function() {
                 done(new Error("Cannot get token info: " + err));
             } else {
                 receiveruserId = response.payload.sub
-                console.log('receiver userId is :')
-                console.log(receiveruserId)
-
                 helpers.accounts.changeAccountUser(accountId, userToken, receiveruserId, function (err, response) {
                     if (err) {
                         done(new Error("Cannot change another user privilege to your account: " + err));
                     } else {
-                        console.dir(response)
+                	assert.equal(response.status, 'OK')
                         done();
                     }
                 })
@@ -1194,8 +1204,8 @@ describe("Invite receiver ...\n".bold, function() {
             if (err) {
                 done(new Error("Cannot list users for account: " + err));
             } else {
-                console.dir(response)
-                done();
+                assert.equal(response.length, 2, 'error account numbers')
+		done();
             }
         })
     })
@@ -1218,8 +1228,8 @@ describe("change password and delete receiver ... \n".bold, function(){
     it('Shall update receiver password', function(done) {
         process.stdout.write("receiving email...");
         helpers.mail.getEmailMessage(imap_username, imap_password, imap_host, imap_port, emailNum, function(err, message) {
-                
-            console.log("email message:", message.toString())
+               
+            //console.log("email message:", message.toString())
 
             var regexp = /token=\w*?\r/
             var activationline = regexp.exec(message.toString());
@@ -1238,10 +1248,9 @@ describe("change password and delete receiver ... \n".bold, function(){
 
                 helpers.users.updateUserPassword(activationToken, imap_password, function(err, response) {
                     if (err) {
-                        console.log(err)
-                        done();
+                        done(new Error("Cannot update receiver password : " + err));
                     } else {
-                        console.log(response)
+                	assert.equal(response.status, 'OK', 'status error')
                         done();
                     }
                 })
