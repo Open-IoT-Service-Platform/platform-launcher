@@ -67,7 +67,7 @@ function getAllInvitations(userToken, accountId, cb){
     });
 }
 
-function getInvitations(userToken, accountId, receiveremail, cb){
+function getInvitations(userToken, accountId, email, cb){
     if (!cb) {
         throw "Callback required";
     }
@@ -75,11 +75,10 @@ function getInvitations(userToken, accountId, receiveremail, cb){
     var data = {
         userToken: userToken,
         accountId: accountId,
-        email: receiveremail
+        email: email
     };
 
     api.invitation.getInvitations(data, function(err, response) {
-        assert.notEqual(response, null, 'response is null')
         if (err) {
             cb(err)
         } else {
@@ -88,7 +87,7 @@ function getInvitations(userToken, accountId, receiveremail, cb){
     });
 }
 
-function acceptInvitation(userToken, accountId, receiveremail, inviteId, cb){
+function acceptInvitation(userToken, accountId, inviteId, cb){
     if (!cb) {
         throw "Callback required";
     }
@@ -96,12 +95,13 @@ function acceptInvitation(userToken, accountId, receiveremail, inviteId, cb){
     var data = {
         userToken: userToken,
         accountId: accountId,
-        email: receiveremail,
-        inviteId: inviteId
+        inviteId: inviteId,
+        body: {
+            accept: true
+        }
     };
 
     api.invitation.acceptInvitation(data, function(err, response) {
-        assert.notEqual(response, null, 'response is null')
         if (err) {
             cb(err)
         } else {

@@ -158,6 +158,7 @@ function updateRule(ruleConfig, userToken, accountId, ruleId, cb) {
             type: "Regular",
             status: "Active",
             resetType: "Automatic",
+            synchronizationStatus: ruleConfig.synchronizationStatus,
 
             actions: [{
                 type: "actuation",
@@ -239,6 +240,7 @@ function createDraftRule (draftname, userToken, accountId, cb) {
             type: null,
             resetType: null,
             name: draftname,
+            synchronizationStatus: "NotSync",
             
             actions:[{
                 type:"mail",
