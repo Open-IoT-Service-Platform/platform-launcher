@@ -16,8 +16,9 @@
     "colors": "^1.2.1",
     "cfenv": "^1.0.0",
     "kafka-node": "^2.4.0",
-    "@open-iot-service-platform/oisp-sdk-js": "^1.0.0-beta1",
     "nodemailer": "^4.6.6",
-    "imap": "^0.8.19"
+    "imap": "^0.8.19",
+    "mailparser": "^2.2.0",
+    "@open-iot-service-platform/oisp-sdk-js":"https://github.com/Open-IoT-Service-Platform/oisp-sdk-js.git#fdd16923d2d244027638f0b42909d8c29c5444f6"
   }
 }
