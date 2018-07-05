@@ -37,6 +37,9 @@ function getEmailMessage(user, password, host, port, num, cb) {
     imap.once('ready', function() {
         imap.openBox('INBOX', true, function(err, box) {
             if ( !err ) {
+                if ( num <= 0 ) {
+                    num = box.messages.total;
+                }
                 var f = imap.seq.fetch(num, {
                             bodies: ['HEADER.FIELDS (TO)', '1'],
                             struct: true
