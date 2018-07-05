@@ -50,7 +50,6 @@ var imap_host     = process.env.IMAP_HOST;
 var imap_port     = process.env.IMAP_PORT;
 
 var recipientEmail = imap_username; 
-var emailNum = 1;
 
 var rules = [];
 
@@ -749,7 +748,7 @@ describe("Sending observations and checking rules ...\n".bold, function() {
 
                 if(paramValue == expectedActuationValue)
                 {
-                    helpers.mail.getEmailMessage(imap_username, imap_password, imap_host, imap_port, emailNum, function(err, message) {
+                    helpers.mail.getEmailMessage(imap_username, imap_password, imap_host, imap_port, -1, function(err, message) {
                         if (!err) {
                             var lines = message.toString().split("\n");
                             var i;
@@ -767,7 +766,6 @@ describe("Sending observations and checking rules ...\n".bold, function() {
                                 done(new Error("Wrong email " + message ))
                             }
                             else {
-                                emailNum++;
                                 step();
                             }
                         }
@@ -1014,8 +1012,7 @@ describe("Adding user and posting email ...\n".bold, function() {
     })
 
     it("Shall activate user with token", function(done) {
-        process.stdout.write("    receiving email for activation token...");
-        helpers.mail.getEmailMessage(imap_username, imap_password, imap_host, imap_port, emailNum, function(err, message) {
+        helpers.mail.getEmailMessage(imap_username, imap_password, imap_host, imap_port, -1, function(err, message) {
             if (!err) {
                 var regexp = /token=\w*?\r/
                 var activationline = regexp.exec(message.toString());
@@ -1028,7 +1025,6 @@ describe("Adding user and posting email ...\n".bold, function() {
                 }
                 else {
                     assert.isString(activationToken,'activationToken is not string')
-                    emailNum++;
 
                     helpers.users.activateUser(activationToken, function(err, response) {
                         if (err) {
@@ -1079,7 +1075,6 @@ describe("Invite receiver ...\n".bold, function() {
             if (err) {
                 done(new Error("Cannot create invitation: " + err));
             } else {
-                emailNum++;
                 assert.equal(response.email, imap_username, 'send invite to wrong name')
                 done();
             }
@@ -1109,7 +1104,6 @@ describe("Invite receiver ...\n".bold, function() {
                     if (err) {
                         done(new Error("Cannot create invitation: " + err));
                     } else {
-                        emailNum++;
                         assert.equal(response.email, imap_username, 'send invite to wrong name')
                         done();
                     }
@@ -1119,7 +1113,6 @@ describe("Invite receiver ...\n".bold, function() {
     })
 
     it('Shall get specific invitations', function(done){
-        process.stdout.write("    receiving email for invitations...");
         var getInvitation = function(cb){
         helpers.auth.login(imap_username, imap_password, function(err, token) {
             if (err) {
@@ -1220,8 +1213,7 @@ describe("change password and delete receiver ... \n".bold, function(){
     })
 
     it('Shall update receiver password', function(done) {
-        process.stdout.write("    receiving email for new password token...");
-        helpers.mail.getEmailMessage(imap_username, imap_password, imap_host, imap_port, emailNum, function(err, message) {
+        helpers.mail.getEmailMessage(imap_username, imap_password, imap_host, imap_port, -1, function(err, message) {
             var regexp = /token=\w*?\r/
             var activationline = regexp.exec(message.toString());
             var rawactivation = activationline[0].split("token=")[1].toString();
@@ -1233,7 +1225,6 @@ describe("change password and delete receiver ... \n".bold, function(){
             }
             else {
                 assert.isString(activationToken,'activationToken is not string')
-                emailNum++;
 
                 imap_password = 'Receiver12345'
 
@@ -1259,7 +1250,6 @@ describe("change password and delete receiver ... \n".bold, function(){
                 done(new Error("Cannot change password: " + err));
             } else {
                 assert.equal(response.password, 'oispnewpasswd2', 'new password error')
-                emailNum++;
                 done();
             }
         })
