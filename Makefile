@@ -100,7 +100,7 @@ start: build .prepare
 start-test: export TEST := "1"
 start-test: build .prepare
 	@$(call msg,"Starting IoT connector (test mode) ...");
-	@make -C tests email-account $(shell pwd)/tests/.env 
+	@make -C tests email-account $(shell pwd)/tests/.env
 	@source ./tests/.env  && ./docker.sh up -d
 
 start-quick: build-quick .prepare
@@ -119,6 +119,9 @@ stop:
 update:
 	@$(call msg,"Git Update (dev only) ...");
 	@git pull
+	@if [ -f setup-environment.sh ]; then \
+		mv setup-environment.sh config-backup/setup-environment-$$(date +%Y-%m-%d-%H%M%S).sh.bak; \
+	fi;
 	@git submodule init
 	@git submodule update
 	@git submodule foreach git fetch origin

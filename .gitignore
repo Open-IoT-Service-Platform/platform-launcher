@@ -2,3 +2,7 @@ setup-environment.sh
 .init
 .prepare
 data
+config-backup/
+.firstRun
+tests/.env
+tests/package-lock.json
