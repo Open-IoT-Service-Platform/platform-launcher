@@ -44,21 +44,39 @@ DOCKER_REGISTRY=localhost:5000/
 			esac \
 		fi; \
 	else \
-	git submodule init; \
-	git submodule update; \
+		git submodule init; \
+		git submodule update; \
 	fi;
 ifeq ($(wildcard ./setup-environment.sh ),)
-	@tput setaf 1
-	@while true; do \
-		read -r -p "Use the default config in setup-environment.example.sh file ? [y/N]: " response; \
-		case $$response in \
-		   	[Yy]* ) cp ./setup-environment.example.sh setup-environment.sh; break;; \
-		[Nn]* ) break;; \
-			* ) echo "Please answer yes or no.";; \
-		esac \
-	done ;
-	@tput sgr0
+	@if [ "${TEST}" != "1" ]; then \
+		tput setaf 1; \
+		while true; do \
+			read -r -p "Use the default config in setup-environment.example.sh file ? [y/N]: " response; \
+			case $$response in \
+			   	[Yy]* ) cp ./setup-environment.example.sh setup-environment.sh; break;; \
+			[Nn]* ) break;; \
+				* ) echo "Please answer yes or no.";; \
+			esac \
+		done ; \
+		tput sgr0; \
+	else \
+		cp ./setup-environment.example.sh setup-environment.sh;	\
+	fi
 endif
+
+	@if [ "${TEST}" == "1" ]; then \
+		if [ -d ./data ] && [ ! -f ./data/.forTest ]; then \
+			sudo rm -rf data-backup; \
+			sudo mv data data-backup; \
+		fi; \
+		mkdir -p ./data && touch ./data/.forTest; \
+	else \
+		if [ -d ./data-backup ]; then \
+			sudo rm -rf data; \
+			sudo mv data-backup data; \
+		fi; \
+	fi
+	
 	@if [ -f data/keys/private.pem ]; then echo "RSA keys existing already"; else \
 		mkdir -p data/keys; \
 		openssl genpkey -algorithm RSA -out data/keys/private.pem -pkeyopt rsa_keygen_bits:2048; \
@@ -76,8 +94,8 @@ build: .init
 	@./docker.sh create
 
 .prepare:
-	source setup-environment.sh && 	docker run -i -v $(shell pwd)/oisp-frontend:/app "$${COMPOSE_PROJECT_NAME}_frontend" /bin/bash -c /app/public-interface/scripts/docker-prepare.sh
-	cp ./oisp-frontend/public-interface/deploy/postgres/base/*.sql ./oisp-frontend/public-interface/scripts/database
+	@source setup-environment.sh && 	docker run -i -v $(shell pwd)/oisp-frontend:/app "$${COMPOSE_PROJECT_NAME}_frontend" /bin/bash -c /app/public-interface/scripts/docker-prepare.sh
+	@cp ./oisp-frontend/public-interface/deploy/postgres/base/*.sql ./oisp-frontend/public-interface/scripts/database
 	@touch $@
 
 build-force: .init
@@ -184,8 +202,12 @@ clean:
 	@rm -f .init .prepare
 
 distclean: clean
-	@./docker.sh down
-	@rm -rf ./data
+	@if [ -f setup-environment.sh ]; then \
+		./docker.sh down; \
+	fi
+	@if [ -f ./data/.forTest ]; then \
+		sudo rm -rf ./data; \
+	fi
 
 push-docker-images:
 	source setup-environment.sh && \
