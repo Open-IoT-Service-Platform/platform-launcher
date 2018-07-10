@@ -76,7 +76,7 @@ endif
 			sudo mv data-backup data; \
 		fi; \
 	fi
-	
+
 	@if [ -f data/keys/private.pem ]; then echo "RSA keys existing already"; else \
 		mkdir -p data/keys; \
 		openssl genpkey -algorithm RSA -out data/keys/private.pem -pkeyopt rsa_keygen_bits:2048; \
@@ -134,7 +134,7 @@ stop:
 	@$(call msg,"Stopping IoT connector ...");
 	@./docker.sh stop $(CMD_ARGS)
 
-update:
+update: distclean
 	@$(call msg,"Git Update (dev only) ...");
 	@git pull
 	@if [ -f setup-environment.sh ]; then \
