@@ -17,6 +17,7 @@
 #----------------------------------------------------------------------------------------------------------------------
 # Configs
 #----------------------------------------------------------------------------------------------------------------------
+SHELL:=/bin/bash
 
 MAKEFILE_DIR := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR  :=  $(patsubst %/,%,$(dir $(MAKEFILE_DIR)))
@@ -29,11 +30,11 @@ ROLE = "admin"
 # targets
 #----------------------------------------------------------------------------------------------------------------------
 
-all:
+npm-install:
 	@$(call msg,"Installing npm packages ...");
 	@cd $(CURRENT_DIR) && npm install > /dev/null
 
-test:
+test: npm-install
 	@$(call msg,"Waiting for frontend");
 	@. ../setup-environment.sh && until kafkacat -b localhost:9092 -t heartbeat -e 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
 
@@ -45,6 +46,15 @@ test:
 
 	@$(call msg,"Starting the e2e testing ...");
 	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm test
+
+ifeq (email-account,$(firstword $(MAKECMDGOALS)))
+ 	OUTPUT_FILE := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+ 	$(eval $(OUTPUT_FILE):;@:)
+endif
+
+email-account: npm-install
+	@$(call msg,"Creating ethereal email account");
+	@node ./ethereal.js $(OUTPUT_FILE)
 
 clean:
 	@$(call msg,"Cleaning ...");
