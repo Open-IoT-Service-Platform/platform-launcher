@@ -26,10 +26,9 @@ services:
     volumes:
       - ./data/hbase-logs:/opt/hbase/logs
   postgres:
-    image: "postgres:9.4.10"
+    image: "${DOCKER_REGISTRY}${COMPOSE_PROJECT_NAME}/postgres"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
-      - ./oisp-frontend/public-interface/scripts/database:/docker-entrypoint-initdb.d
     ports:
       - 5432:5432
     environment:
@@ -49,7 +48,7 @@ services:
       - ADVERTISED_PORT=9092
       - AUTO_CREATE_TOPICS=true
   gearpump:
-  image: "${DOCKER_REGISTRY}{COMPOSE_PROJECT_NAME}/gearpump"
+    image: "${DOCKER_REGISTRY}${COMPOSE_PROJECT_NAME}/gearpump"
     depends_on:
       - nginx
       - hbase

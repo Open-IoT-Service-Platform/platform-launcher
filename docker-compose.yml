@@ -27,10 +27,11 @@ services:
     volumes:
       - ./data/hbase-logs:/opt/hbase/logs
   postgres:
-    image: "postgres:9.4.10"
+    build:
+      context: .
+      dockerfile: docker-postgres/Dockerfile
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
-      - ./oisp-frontend/public-interface/scripts/database:/docker-entrypoint-initdb.d
     ports:
       - 5432:5432
     environment:
