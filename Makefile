@@ -93,10 +93,6 @@ build: .init
 	@$(call msg,"Building IoT connector ...");
 	@./docker.sh create
 
-.prepare:
-	@cp ./oisp-frontend/public-interface/deploy/postgres/base/*.sql ./oisp-frontend/public-interface/scripts/database
-	@touch $@
-
 build-force: .init
 	@$(call msg,"Building IoT connector ...");
 	@./docker.sh create --force-recreate
@@ -110,17 +106,17 @@ ifeq (start,$(firstword $(MAKECMDGOALS)))
  	$(eval $(CMD_ARGS):;@:)
 endif
 
-start: build .prepare
+start: build
 	@$(call msg,"Starting IoT connector ...");
 	@./docker.sh up -d $(CMD_ARGS)
 
 start-test: export TEST := "1"
-start-test: build .prepare
+start-test: build
 	@$(call msg,"Starting IoT connector (test mode) ...");
 	@make -C tests email-account $(shell pwd)/tests/.env
 	@source ./tests/.env  && ./docker.sh up -d
 
-start-quick: build-quick .prepare
+start-quick: build-quick
 	@$(call msg,"Starting IoT connector using pulled images...");
 	@./docker.sh -f docker-compose-quick.yml up -d $(CMD_ARGS)
 
@@ -198,7 +194,7 @@ logs:
 
 clean:
 	@$(call msg,"Cleaning ...");
-	@rm -f .init .prepare
+	@rm -f .init
 
 distclean: clean
 	@if [ -f setup-environment.sh ]; then \
