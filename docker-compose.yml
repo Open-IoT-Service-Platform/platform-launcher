@@ -101,7 +101,6 @@ services:
       - postgres
       - kafka
     volumes:
-      - ./oisp-websocket-server:/app
       - ./data/keys:/app/keys
     working_dir: /app
     environment:
