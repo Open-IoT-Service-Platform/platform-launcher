@@ -91,7 +91,6 @@ services:
       - frontend
     volumes:
       - ./data/keys/ssl:/etc/ssl
-      - ./oisp-frontend/public-interface:/app
   websocket-server:
     build:
       context: ./oisp-websocket-server
