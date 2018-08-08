@@ -6,3 +6,4 @@ config-backup/
 .firstRun
 tests/.env
 tests/package-lock.json
+data-backup/

@@ -17,6 +17,7 @@ version: '3'
 
 services:
   hbase:
+    image: oisp/hbase
     build:
       context: ./docker-hbase/
     ports:
@@ -27,6 +28,7 @@ services:
     volumes:
       - ./data/hbase-logs:/opt/hbase/logs
   postgres:
+    image: oisp/postgres
     build:
       context: .
       dockerfile: docker-postgres/Dockerfile
@@ -39,6 +41,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USERNAME}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
   kafka:
+    image: oisp/kafka
     build:
       context: ./docker-kafka/
     ports:
@@ -59,6 +62,7 @@ services:
     ports:
       - 6379:6379
   gearpump:
+    image: oisp/gearpump
     build:
       context: ./oisp-gearpump-rule-engine
       dockerfile: Dockerfile
@@ -78,6 +82,7 @@ services:
       - 8090:8090
     command: bash wait-for-it.sh kafka:9092 -t 300 -- bash bootstrap.sh
   nginx:
+    image: oisp/nginx
     build:
       context: ./oisp-frontend/public-interface/nginx
       args:
@@ -92,6 +97,7 @@ services:
     volumes:
       - ./data/keys/ssl:/etc/ssl
   websocket-server:
+    image: oisp/websocket-server
     build:
       context: ./oisp-websocket-server
     ports:
@@ -110,6 +116,7 @@ services:
       - NODE_ENV=local
     command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- ./scripts/docker-start.sh
   frontend:
+    image: oisp/frontend
     build:
       context: ./oisp-frontend/public-interface
     ports:
@@ -130,6 +137,7 @@ services:
       - TEST=${TEST}
       - NODE_ENV=local
   backend:
+    image: oisp/backend
     build:
       context: ./oisp-backend
     ports:

@@ -93,6 +93,10 @@ build: .init
 	@$(call msg,"Building IoT connector ...");
 	@./docker.sh create
 
+pull:
+	@$(call msg, "Pulling OISP containers");
+	@./docker.sh pull
+
 build-force: .init
 	@$(call msg,"Building IoT connector ...");
 	@./docker.sh create --force-recreate
@@ -106,7 +110,7 @@ ifeq (start,$(firstword $(MAKECMDGOALS)))
  	$(eval $(CMD_ARGS):;@:)
 endif
 
-start: build
+start: 
 	@$(call msg,"Starting IoT connector ...");
 	@./docker.sh up -d $(CMD_ARGS)
 
