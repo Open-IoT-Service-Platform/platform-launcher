@@ -35,7 +35,7 @@ services:
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_DB=${POSTGRES_DB_REGULAR}
       - POSTGRES_USER=${POSTGRES_USERNAME}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
   kafka:

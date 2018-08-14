@@ -157,7 +157,6 @@ test: export TEST := "1"
 test:
 	@for ((i=0; i < ${NB_TESTS}; i++)) do \
 		cd $(CURRENT_DIR) && \
-		sudo make distclean && \
 		make start-test && \
 		source ./tests/.env && cd tests && make test; \
 	done
