@@ -65,7 +65,7 @@ rules[switchOnCmdName] = {
                 },
                 {
                     type: "mail",
-                    target: [ recipientEmail ]
+                    target: [ emailRecipient ]
                 }
             ],
 };
@@ -82,7 +82,7 @@ rules[switchOffCmdName] = {
                 },
                 {
                     type: "mail",
-                    target: [ recipientEmail ]
+                    target: [ emailRecipient ]
                 }
             ],
 };
@@ -161,6 +161,17 @@ process.stdout.write("__________________________________________________________
 process.stdout.write("                                                                     \n");
 process.stdout.write("                           OISP E2E TESTING                          \n".green.bold);
 process.stdout.write("_____________________________________________________________________\n".bold);
+//Callback for WSS
+var cbManager = function(){
+
+    var wssCB = null;
+    return {
+	"cb": function(message){
+	    wssCB(message)
+	},
+	"set": function(newCB){wssCB = newCB}
+    }
+}();
 
 
 describe("Waiting for OISP services to be ready ...\n".bold, function() {
@@ -235,7 +246,7 @@ describe("Waiting for OISP services to be ready ...\n".bold, function() {
                 });
             }
             else {
-                done("Cannot get Kafka offset ")
+                  done(new Error("Cannot get Kafka offset "))
             }
         });
        
@@ -699,8 +710,8 @@ describe("Creating rules ... \n".bold, function() {
             }
         })
 
-    }).timeout(20000);    
-}); 
+    }).timeout(20000);
+});
 
 describe("Sending observations and checking rules ...\n".bold, function() {
 
@@ -733,7 +744,7 @@ describe("Sending observations and checking rules ...\n".bold, function() {
             }
         };
 
-        helpers.connector.wsConnect(proxyConnector, deviceToken, deviceId, function(message) {
+	cbManager.set(function(message) {
             --nbActuations;
 
             var expectedActuationValue = temperatureValues[index].expectedActuation.toString();
@@ -760,9 +771,10 @@ describe("Sending observations and checking rules ...\n".bold, function() {
                 done(new Error("Did not find component param: " + componentParamName))
             }
         });
+	helpers.connector.wsConnect(proxyConnector, deviceToken, deviceId, cbManager.cb);
 
         var sendObservationAndCheckRules = function(index) {
-            
+
             process.stdout.write(".".green);
 
             helpers.devices.submitData(temperatureValues[index].value, deviceToken, accountId, deviceId, componentId, function(err, ts) {
@@ -809,7 +821,7 @@ describe("Sending observations and checking rules ...\n".bold, function() {
 		})
 		assert.equal(temperatureValuesCopy.length, 3, "Received emails do not match expected emails sent from rule-engine");
 		done();
-	    }).catch( (err) => {done(new Error("Error in Rule Engine Emails: ", err))});
+	    }).catch( (err) => {done(err)});
     }).timeout(30 * 1000);
 
     it('Shall check observation', function(done) {
@@ -858,6 +870,23 @@ describe("Sending observations and checking rules ...\n".bold, function() {
     }).timeout(10000);
     
 });
+
+describe("Do statistics rule subtests ...".bold,
+	 function() {
+	     var test;
+	     var descriptions = require("./subtests/statistic-rule-tests").descriptions;
+	     it(descriptions.createStatisticsRules,function(done) {
+		 test = require("./subtests/statistic-rule-tests").test(userToken, accountId, deviceId, deviceToken, cbManager);
+		 test.createStatisticsRules(done);
+             }).timeout(10000)
+	     it(descriptions.sendObservations,function(done) {
+		 test.sendObservations(done);
+             }).timeout(50000);
+	     it(descriptions.cleanup,function(done) {
+		 test.cleanup(done);
+	     }).timeout(10000);
+         });
+
 
 describe("Geting and manage alerts ... \n".bold, function(){
 
@@ -1043,7 +1072,7 @@ describe("Adding user and posting email ...\n".bold, function() {
                         }
 		    });
                 }
-            }).catch(function(err){done(new Error("No mail received: " + err))});
+            }).catch(function(err){done(err)});
     }).timeout( 60 * 1000);
 
     it('Shall create receiver account', function(done) {
@@ -1074,7 +1103,7 @@ describe("Invite receiver ...\n".bold, function() {
                 assert.equal(response.email, imap_username, 'send invite to wrong name');
 		helpers.mail.waitAndConsumeEmailMessage(imap_username, imap_password, imap_host, imap_port).then(function(message){
                     done();
-		}). catch(function(err){done(new Error("Mail not received: " + err))});
+		}). catch(function(err){done(err)});
             }
         })
     }).timeout( 30 * 1000);
@@ -1240,7 +1269,7 @@ describe("change password and delete receiver ... \n".bold, function(){
 			}
                     })
 		}
-            }).catch(function(err){done(new Error("No mail received: " + err))});
+            }).catch(function(err){done(err)});
     }).timeout(2 * 60 * 1000);
 
     it('Shall change password', function(done) {

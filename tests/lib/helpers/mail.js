@@ -88,7 +88,7 @@ function waitForNewEmail(user, password, host, port, num){
 			timeoutcount++;
 		    }
 		    else if (timeoutcount == TIMEOUTS) {
-			reject("Timeout")
+			reject(new Error("Timeout"))
 		    }
 		});
 	    };
