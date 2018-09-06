@@ -36,7 +36,10 @@ npm-install:
 
 test: npm-install
 	@$(call msg,"Waiting for frontend");
-	@. ../setup-environment.sh && until kafkacat -b localhost:9092 -t heartbeat -e 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
+# fill in separator to avoid accidentially dashboard being most recent heartbeat.
+# Then look always for latest heartbeat
+	@ (for i in {1..4}; do echo new-test ; done) | kafkacat -P -b localhost:9092 -t heartbeat;
+	@. ../setup-environment.sh && until kafkacat -b localhost:9092 -t heartbeat -e -o -4 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
 
 	@$(call msg,"Resetting database ...");
 	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin resetDB
