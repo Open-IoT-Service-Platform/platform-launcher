@@ -127,7 +127,7 @@ start:
 	@./docker.sh up -d $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
 
 start-test: export TEST := "1"
-start-test:
+start-test: .init
 	@$(call msg,"Starting OISP (test mode)");
 	@make -C tests email-account $(shell pwd)/tests/.env
 	@source ./tests/.env  && ./docker.sh up -d
