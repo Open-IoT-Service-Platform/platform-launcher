@@ -13,12 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-version: '3'
+version: '3.7'
 
 services:
   hbase:
+    image: oisp/hbase:${DOCKER_TAG}
     build:
       context: ./docker-hbase/
+      labels:
+        - oisp=true
+        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
     ports:
       - 2181:2181
       - 9090:9090
@@ -27,9 +31,13 @@ services:
     volumes:
       - ./data/hbase-logs:/opt/hbase/logs
   postgres:
+    image: oisp/postgres:${DOCKER_TAG}
     build:
       context: .
       dockerfile: docker-postgres/Dockerfile
+      labels:
+        - oisp=true
+        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     ports:
@@ -39,8 +47,12 @@ services:
       - POSTGRES_USER=${POSTGRES_USERNAME}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
   kafka:
+    image: oisp/kafka:${DOCKER_TAG}
     build:
       context: ./docker-kafka/
+      labels:
+        - oisp=true
+        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
     ports:
       - 9092:9092
     environment:
@@ -59,9 +71,13 @@ services:
     ports:
       - 6379:6379
   gearpump:
+    image: oisp/gearpump:${DOCKER_TAG}
     build:
       context: ./oisp-gearpump-rule-engine
       dockerfile: Dockerfile
+      labels:
+        - oisp=true
+        - oisp.git_commit=${GIT_COMMIT_GEARPUMP}
     depends_on:
       - nginx
       - hbase
@@ -78,11 +94,15 @@ services:
       - 8090:8090
     command: bash wait-for-it.sh kafka:9092 -t 300 -- bash bootstrap.sh
   nginx:
+    image: oisp/nginx:${DOCKER_TAG}
     build:
       context: ./oisp-frontend/public-interface/nginx
       args:
         - WEBSOCKET_SERVER=websocket-server:5000
         - DASHBOARD_SERVER=frontend:4001
+      labels:
+        - oisp=true
+        - oisp.git_commit=${GIT_COMMIT_FRONTEND}
     ports:
       - 80:80
       - 443:443
@@ -92,8 +112,12 @@ services:
     volumes:
       - ./data/keys/ssl:/etc/ssl
   websocket-server:
+    image: oisp/websocket-server:${DOCKER_TAG}
     build:
       context: ./oisp-websocket-server
+      labels:
+        - oisp=true
+        - oisp.git_commit=${GIT_COMMIT_WEBSOCKET_SERVER}
     ports:
       - 5000:5000
     depends_on:
@@ -109,11 +133,14 @@ services:
       - NODE_ENV=local
     command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- ./scripts/docker-start.sh
   frontend:
+    image: oisp/frontend:${DOCKER_TAG}
     build:
       context: ./oisp-frontend/public-interface
+      labels:
+        - oisp=true
+        - ois.git_commit=${GIT_COMMIT_FRONTEND}
     ports:
       - 4001:4001
-
     depends_on:
       - postgres
       - redis
@@ -129,8 +156,12 @@ services:
       - TEST=${TEST}
       - NODE_ENV=local
   backend:
+    image: oisp/backend:${DOCKER_TAG}
     build:
       context: ./oisp-backend
+      labels:
+        - oisp=true
+        - oisp.git_commit=${GIT_COMMIT_BACKEND}
     ports:
       - 8080:8080
     depends_on:
