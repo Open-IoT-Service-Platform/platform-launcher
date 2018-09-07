@@ -1182,6 +1182,17 @@ describe("Invite receiver ...\n".bold, function() {
             }
         })
     })
+    
+    it('Shall not accept non-existing invitations, or crash', function(done){
+    	inviteId = 0;
+        helpers.invitation.acceptInvitation(receiverToken, accountId, inviteId, function(err, response) {
+            if (err) {
+                done();
+            } else {
+                done(new Error('non-existing invitation accepted' + response));
+            }
+        })
+    })
 
     it('Shall request activation', function(done) {
         var username = process.env.USERNAME;
