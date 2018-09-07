@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+export DOCKER_TAG=${DOCKER_TAG:-'latest'}
+
 export ZOOKEEPER_KAFKA='kafka'
 export ZOOKEEPER_KAFKA_PORT='2181'
 export ZOOKEEPER_HBASE='hbase'
