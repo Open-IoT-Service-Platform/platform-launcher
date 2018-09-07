@@ -35,9 +35,10 @@ npm-install:
 	@cd $(CURRENT_DIR) && npm install > /dev/null
 
 test: npm-install
-	@$(call msg,"Waiting for frontend");
+	@$(call msg,"Waiting for frontend and test Kafka readiness");
 # fill in separator to avoid accidentially dashboard being most recent heartbeat.
 # Then look always for latest heartbeat
+	@until echo new-test | kafkacat -P -b localhost:9092 -t heartbeat ; do echo "Kafka not ready. Waiting ..."; sleep 1; done
 	@ (for i in {1..4}; do echo new-test ; done) | kafkacat -P -b localhost:9092 -t heartbeat;
 	@. ../setup-environment.sh && until kafkacat -b localhost:9092 -t heartbeat -e -o -4 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
 
