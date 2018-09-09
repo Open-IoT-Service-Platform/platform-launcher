@@ -23,7 +23,7 @@
 var helpers = require("../lib/helpers");
 
 
-var checkObservations = function(tempValues, cid, cbManager, deviceToken, accountId, deviceId, componentParamName){
+var checkObservations = function(tempValues, cid, cbManager, deviceToken, accountId, deviceId, componentParamName, waitBetweenSendingSamples=0){
     var firstObservationTime;
     return new Promise((resolve, reject) => {
 	var index = 0;
@@ -51,7 +51,7 @@ var checkObservations = function(tempValues, cid, cbManager, deviceToken, accoun
 		}
 
 		if (tempValues[index].expectedActuation === null) {
-		    step();
+		    setTimeout(step, waitBetweenSendingSamples);
 		}
 	    });
 	};
@@ -59,7 +59,10 @@ var checkObservations = function(tempValues, cid, cbManager, deviceToken, accoun
 	    index++;
 	    if (index === tempValues.length) {
 		process.stdout.write("\n");
-		resolve();
+		if (nbActuations === 0){
+		    resolve();
+		}
+		else reject(new Error("Wrong number of actuations"));
 	    } else {
 		sendObservationAndCheckRules(index);
 	    }
@@ -148,6 +151,19 @@ var createStatisticRule = (rule, userToken, accountId, deviceId) => {
     });
 };
 
+var createTbRule = (rule, userToken, accountId, deviceId) => {
+    return new Promise(function(resolve, reject){
+	helpers.rules.createTbRule(rule, userToken, accountId, deviceId, function(err, id) {
+	    if (err) {
+		reject(err);
+	    } else {
+		rule.id = id;
+		resolve();
+	    }
+	});
+    });
+};
+
 var deleteComponent = function(userToken, accountId, deviceId, componentId){
     return new Promise((resolve, reject) => {
 	helpers.devices.deleteDeviceComponent (userToken, accountId, deviceId, componentId, function(err, response){
@@ -177,6 +193,7 @@ module.exports = {
     addActuator: addActuator,
     createCommand: createCommand,
     createStatisticRule: createStatisticRule,
+    createTbRule: createTbRule,
     deleteComponent: deleteComponent,
     deleteRule: deleteRule
 };

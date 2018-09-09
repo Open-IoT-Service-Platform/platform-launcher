@@ -871,6 +871,24 @@ describe("Sending observations and checking rules ...\n".bold, function() {
     
 });
 
+
+describe("Do time based rule subtests ...".bold,
+	 function() {
+	     var test;
+	     var descriptions = require("./subtests/timebased-rule-tests").descriptions;
+	     it(descriptions.createTbRules,function(done) {
+		 test = require("./subtests/timebased-rule-tests").test(userToken, accountId, deviceId, deviceToken, cbManager);
+		 test.createTbRules(done);
+             }).timeout(10000);
+	     it(descriptions.sendObservations,function(done) {
+		 test.sendObservations(done);
+             }).timeout(60000);
+	     it(descriptions.cleanup,function(done) {
+		 test.cleanup(done);
+	     }).timeout(10000);
+         });
+
+
 describe("Do statistics rule subtests ...".bold,
 	 function() {
 	     var test;
@@ -886,6 +904,7 @@ describe("Do statistics rule subtests ...".bold,
 		 test.cleanup(done);
 	     }).timeout(10000);
          });
+
 
 
 describe("Geting and manage alerts ... \n".bold, function(){
@@ -1371,3 +1390,4 @@ describe("change password and delete receiver ... \n".bold, function(){
     })
  
 })   
+

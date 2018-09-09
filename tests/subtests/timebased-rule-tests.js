@@ -23,12 +23,12 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     var chai = require('chai');
     var assert = chai.assert;
     var helpers = require("../lib/helpers");
-    var componentName = "temperature-sensor-srt";
+    var componentName = "temperature-sensor-tbrt";
     var componentType = "temperature.v1.0";
-    var actuatorName = "powerswitch-actuator-srt";
+    var actuatorName = "powerswitch-actuator-tbrt";
     var actuatorType = "powerswitch.v1.0";
-    var switchOnCmdName = "switch-on-srt";
-    var switchOffCmdName = "switch-off-srt";
+    var switchOnCmdName = "switch-on-tbrt";
+    var switchOffCmdName = "switch-off-tbrt";
     var promtests = require('./promise-wrap');
     var rules = [];
     var componentId;
@@ -36,12 +36,11 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     var componentParamName = "LED";
 
     rules[switchOnCmdName] = {
-	name: "oisp-tests-rule-statistic-2stddef",
-	conditionComponent: componentName,
-	statisticConditionOperator: ">=",
-	statisticConditionValue: "2", //2*stddev
-	statisticMinimalInstances: 9,
-	statisticSecondsBack: 60, //number of seconds to look back when collecting the data
+	name: "oisp-tests-rule-tb-gt20-30s",
+	tbComponent: componentName,
+	tbConditionOperator: ">=",
+	tbConditionValue: "20", //>=20 temp
+	tbTimelimit: 30, //wait 30s 
 	actions: [
             {
                 type: "actuation",
@@ -51,12 +50,11 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     };
 
     rules[switchOffCmdName] = {
-	name: "oisp-tests-rule-statistic-3stddef",
-	conditionComponent: componentName,
-	statisticConditionOperator: "<",
-	statisticConditionValue: "-3", //-3*stddev
-	statisticMinimalInstances: 9,
-	statisticSecondsBack: 60, //number of seconds to look back when collecting the relevant data
+	name: "oisp-tests-rule-tb-lower20-30s",
+	tbComponent: componentName,
+	tbConditionOperator: "<",
+	tbConditionValue: "20", //temp < 20
+	tbTimelimit: 10,
 	actions: [
             {
                 type: "actuation",
@@ -66,68 +64,192 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     };
     var temperatureValues = [
 	{
-            value: 17.1,
+            value: 20,
             expectedActuation: null
 	},
 	{
-	    value: 17.0,
-	    expectedActuation: null,
-	},
-	{
-	    value: 17.9,
-	    expectedActuation: null,
-	},
-	{
-	    value: 17.5,
-	    expectedActuation: null,
-	},
-	{
-	    value: 18.1,
-	    expectedActuation: null,
-	},
-	{
-	    value: 16.8,
-	    expectedActuation: null,
-	},
-	{
-	    value: 17.3,
-	    expectedActuation: null,
-	},
-	{
-	    value: 16.9,
+	    value: 21,
 	    expectedActuation: null
 	},
 	{
-	    value: 17,
-	    expectedActuation: null,
-	},
-	{
-	    value: 18.6,
-	    expectedActuation: 1 // switch on
-	},
-	{
-	    value: 15.0,
+	    value: 22,
 	    expectedActuation: null
 	},
 	{
-	    value: 10.0,
-	    expectedActuation: 0 //switch off
-	},
-	{
-	    value: 17.0,
+	    value: 23,
 	    expectedActuation: null
 	},
 	{
-	    value: 17.0,
+	    value: 24,
 	    expectedActuation: null
-	}
+	},
+	{
+	    value: 25,
+	    expectedActuation: null
+	},
+	{
+	    value: 26,
+	    expectedActuation: null
+	},
+	{
+	    value: 27,
+	    expectedActuation: null
+	},
+	{
+	    value: 28,
+	    expectedActuation: null
+	},
+	{
+	    value: 29,
+	    expectedActuation: null
+	},
+	{
+	    value: 30,
+	    expectedActuation: null
+	},
+	{
+	    value: 31,
+	    expectedActuation: null
+	},
+	{
+            value: 32,
+            expectedActuation: null
+	},
+	{
+	    value: 33,
+	    expectedActuation: null
+	},
+	{
+	    value: 34,
+	    expectedActuation: null
+	},
+	{
+	    value: 35,
+	    expectedActuation: null
+	},
+	{
+	    value: 36,
+	    expectedActuation: null
+	},
+	{
+	    value: 37,
+	    expectedActuation: null
+	},
+	{
+	    value: 38,
+	    expectedActuation: null
+	},
+	{
+	    value: 39,
+	    expectedActuation: null
+	},
+	{
+	    value: 40,
+	    expectedActuation: null
+	},
+	{
+	    value: 41,
+	    expectedActuation: null
+	},
+	{
+	    value: 42,
+	    expectedActuation: null
+	},
+	{
+	    value: 43,
+	    expectedActuation: null
+	},
+	{
+	    value: 44,
+	    expectedActuation: null
+	},
+	{
+	    value: 45,
+	    expectedActuation: null
+	},
+	{
+	    value: 46,
+	    expectedActuation: null
+	},
+	{
+	    value: 47,
+	    expectedActuation: null
+	},
+	{
+	    value: 48,
+	    expectedActuation: null
+	},
+	{
+	    value: 49,
+	    expectedActuation: 1
+	},
+	{
+	    value: 50,
+	    expectedActuation: 1
+	},
+	{
+	    value: 51,
+	    expectedActuation: 1
+	},
+	{
+	    value: 19,
+	    expectedActuation: null
+	},
+	{
+	    value: 19,
+	    expectedActuation: null
+	},
+	{
+	    value: 19,
+	    expectedActuation: null
+	},
+	{
+	    value: 19,
+	    expectedActuation: null
+	},
+	{
+	    value: 19,
+	    expectedActuation: null
+	},
+	{
+	    value: 19,
+	    expectedActuation: null
+	},
+	{
+	    value: 19,
+	    expectedActuation: null
+	},
+	{
+	    value: 19,
+	    expectedActuation: null
+	},
+	{
+	    value: 19,
+	    expectedActuation: null
+	},
+	{
+	    value: 19,
+	    expectedActuation: null
+	},
+	{
+	    value: 19,
+	    expectedActuation: 0
+	},
+	{
+	    value: 20,
+	    expectedActuation: null
+	},
+	{
+	    value: 20,
+	    expectedActuation: null
+	},
     ];
 
 
     //********************* Main Object *****************//
     //---------------------------------------------------//
     return {
-	"createStatisticsRules": function(done) {
+	"createTbRules": function(done) {
 	    //To be independent of main tests, own sensors, actuators, and commands have to be created
 	    promtests.addComponent(componentName, componentType, deviceToken, accountId, deviceId)
 		.then((id) => {componentId = id; rules[switchOffCmdName].cid = componentId; rules[switchOnCmdName].cid = componentId;})
@@ -135,8 +257,8 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
 		.then((id) => {actuatorId = id;})
 		.then(()   => promtests.createCommand(switchOffCmdName, componentParamName, 0, userToken, accountId, deviceId, actuatorId))
 		.then(()   => promtests.createCommand(switchOnCmdName, componentParamName, 1, userToken, accountId, deviceId, actuatorId))
-		.then(()   => promtests.createStatisticRule(rules[switchOffCmdName], userToken, accountId, deviceId))
-		.then(()   => promtests.createStatisticRule(rules[switchOnCmdName], userToken, accountId, deviceId))
+		.then(()   => promtests.createTbRule(rules[switchOffCmdName], userToken, accountId, deviceId))
+		.then(()   => promtests.createTbRule(rules[switchOnCmdName], userToken, accountId, deviceId))
 		.then(()   => {done();})
 		.catch((err) => {done(err);});
 	},
@@ -148,7 +270,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
 	    assert.notEqual(deviceToken, null, "Device Token not defined");
 	    assert.notEqual(deviceId, null, "DeviceId not defined");
 
-	    promtests.checkObservations(temperatureValues, rules[switchOnCmdName].cid, cbManager, deviceToken, accountId, deviceId, componentParamName)
+	    promtests.checkObservations(temperatureValues, rules[switchOnCmdName].cid, cbManager, deviceToken, accountId, deviceId, componentParamName, 1000)
 		.then(() => {done();})
 		.catch((err) => { done(err);});
 	},
@@ -178,7 +300,8 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
 		.then((alerts) => {
 		    var prm1 = helpers.alerts.deleteAlert(userToken, accountId, alerts[0].alertId);
 		    var prm2 = helpers.alerts.deleteAlert(userToken, accountId, alerts[1].alertId);
-		    return Promise.all([prm1, prm2]);
+		    var prm3 = helpers.alerts.deleteAlert(userToken, accountId, alerts[2].alertId);
+		    return Promise.all([prm1, prm2, prm3]);
 		})
 		.then(() => {done();})
 		.catch((err) => {done(err);});
@@ -187,7 +310,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
 };
 
 var descriptions = {
-    "createStatisticsRules": "Shall create statisics rules and wait for synchronization with RE",
+    "createTbRules": "Shall create time based rules and wait for synchronization with RE",
     "sendObservations": "Shall send observations and trigger event for statistics rules",
     "cleanup": "Cleanup components, commands, rules created for subtest"
 };
