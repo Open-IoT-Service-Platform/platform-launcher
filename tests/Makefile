@@ -45,6 +45,7 @@ test: npm-install
 # fill in separator to avoid accidentially dashboard being most recent heartbeat.
 # Then look always for latest heartbeat
 	@until echo new-test | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat ; do echo "Kafka not ready. Waiting ..."; sleep 1; done
+	@$(call msg, "Came so far");
 	@ (for i in {1..4}; do echo new-test ; done) | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat;
 	@. ../setup-environment.sh && until kafkacat -b l$(KAFKA_BROKER) -t heartbeat -e -o -4 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
 
