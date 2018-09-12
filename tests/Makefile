@@ -31,7 +31,7 @@ KAFKA_BROKER="localhost:9092"
 else
 KAFKA_BROKER="kafka:9092"
 NAMESPACE=oisp
-export DASHBOARD_POD=$(kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
+export DASHBOARD_POD=$(kubectl -n oisp get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
 endif
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -43,10 +43,10 @@ npm-install:
 	@cd $(CURRENT_DIR) && npm install > /dev/null
 
 test: npm-install
+ifeq ($(TESTING_PLATFORM), docker)
 	@$(call msg,"Waiting for frontend and test Kafka readiness");
 # fill in separator to avoid accidentially dashboard being most recent heartbeat.
 # Then look always for latest heartbeat
-ifeq ($(TESTING_PLATFORM), docker)
 	@until echo new-test | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat ; do echo "Kafka not ready. Waiting ..."; sleep 1; done
 	@ (for i in {1..4}; do echo new-test ; done) | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat;
 	@. ../setup-environment.sh && until kafkacat -b l$(KAFKA_BROKER) -t heartbeat -e -o -4 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
