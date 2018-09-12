@@ -543,6 +543,20 @@ describe("Creating and getting components ... \n".bold, function() {
             }
         })
     }).timeout(10000);
+    
+    it('Shall not add device a component with the name that a component of the device already has, or crash', function(done) {
+    	
+        helpers.devices.addDeviceComponent(componentName, componentType, deviceToken, accountId, deviceId, function(err, id) {
+            if (err) {
+                done(new Error("Cannot create or try to create component: " + err));
+            } else if (id === undefined) {
+            	// Response with code 409, id should be undefined
+            	done();
+            } else {
+                done(new Error("No error is thrown and the component is added successfully: " + id));
+            }
+        })
+    }).timeout(10000);
 
     it('Shall add device an actuator', function(done) {
 
