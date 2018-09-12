@@ -33,7 +33,7 @@ DOCKER_COMPOSE_ARGS?=""
 PULL_IMAGES?=false
 
 # Can be docker or kubernetes
-TESTING_PLATFORM?=docker
+export TESTING_PLATFORM?=docker
 
 .init:
 	@$(call msg,"Initializing ...");
@@ -131,7 +131,7 @@ start:
 
 start-test: export TEST := "1"
 start-test:
-	@$(call msg,"Starting OISP (test mode: $TESTING_PLATFORM)");
+	@$(call msg,"Starting OISP (test mode: $(TESTING_PLATFORM) )");
 	@make -C tests email-account $(shell pwd)/tests/.env
 ifeq  ($(TESTING_PLATFORM),docker)
 	@source ./tests/.env  && ./docker.sh up -d

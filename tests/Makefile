@@ -26,6 +26,12 @@ USERNAME = "oisp@testing.com"
 PASSWORD = "OispTesting1"
 ROLE = "admin"
 
+ifeq ($(TESTING_PLATFORM), docker)
+KAFKA_BROKER="localhost:9092"
+else
+KAFKA_BROKER="kafka:9092"
+endif
+
 #----------------------------------------------------------------------------------------------------------------------
 # targets
 #----------------------------------------------------------------------------------------------------------------------
@@ -38,9 +44,9 @@ test: npm-install
 	@$(call msg,"Waiting for frontend and test Kafka readiness");
 # fill in separator to avoid accidentially dashboard being most recent heartbeat.
 # Then look always for latest heartbeat
-	@until echo new-test | kafkacat -P -b localhost:9092 -t heartbeat ; do echo "Kafka not ready. Waiting ..."; sleep 1; done
-	@ (for i in {1..4}; do echo new-test ; done) | kafkacat -P -b localhost:9092 -t heartbeat;
-	@. ../setup-environment.sh && until kafkacat -b localhost:9092 -t heartbeat -e -o -4 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
+	@until echo new-test | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat ; do echo "Kafka not ready. Waiting ..."; sleep 1; done
+	@ (for i in {1..4}; do echo new-test ; done) | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat;
+	@. ../setup-environment.sh && until kafkacat -b l$(KAFKA_BROKER) -t heartbeat -e -o -4 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
 
 	@$(call msg,"Resetting database ...");
 	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin resetDB
