@@ -177,7 +177,7 @@ docker-clean:
 ##
 test: export TEST := "1"
 test: .init
-	make start-test && source ./tests/.env && cd tests && make test;
+	make start-test && source ./tests/.env && cd tests && make test TESTING_PLATFORM=$(TESTING_PLATFORM);
 
 ## remove: Remove all OISP images from local machine.
 ##     $CONTAINERS arg (as whitespace seperated list) specifies which containers should be removed,
