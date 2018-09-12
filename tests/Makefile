@@ -30,7 +30,8 @@ ifeq ($(TESTING_PLATFORM), docker)
 KAFKA_BROKER="localhost:9092"
 else
 KAFKA_BROKER="kafka:9092"
-DASHBOARD_POD=$(kubectl -n $NAMESPACE get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
+NAMESPACE=oisp
+DASHBOARD_POD=$(kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
 endif
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -56,6 +57,7 @@ ifeq ($(TESTING_PLATFORM), docker)
 	@$(call msg,"Adding a user for testing ...");
 	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
 else
+	echo $(DASHBOARD_POD)
 	@$(call msg,"Resetting database ...");
 	kubectl exec -i $(DASHBOARD_POD) --  node /app/admin resetDB
 
