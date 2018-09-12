@@ -31,7 +31,7 @@ KAFKA_BROKER="localhost:9092"
 else
 KAFKA_BROKER="kafka:9092"
 NAMESPACE=oisp
-DASHBOARD_POD=$${kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1}
+DASHBOARD_POD=${kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1}
 endif
 
 #----------------------------------------------------------------------------------------------------------------------
