@@ -42,7 +42,9 @@ npm-install:
 	@$(call msg,"Installing npm packages ...");
 	@cd $(CURRENT_DIR) && npm install > /dev/null
 
+
 test: npm-install
+	cp test-config-$(TESTING_PLATFORM).json test-config.json
 ifeq ($(TESTING_PLATFORM), docker)
 	@$(call msg,"Waiting for frontend and test Kafka readiness");
 # fill in separator to avoid accidentially dashboard being most recent heartbeat.

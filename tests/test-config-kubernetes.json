@@ -1,0 +1,39 @@
+{
+	"logger": {
+		"LEVEL": "info",
+		"PATH": "/tmp/",
+		"MAX_SIZE": 134217728
+	},
+	"default_connector": "rest+ws",
+	"connector": {
+		"rest": {
+			"host": "dashboard",
+			"port": 4001,
+			"protocol": "http",
+			"strictSSL": false,
+			"timeout": 30000,
+			"proxy": {
+				"host": false,
+				"port": false
+			}
+		},
+		"ws": {
+			"host": "websocket-server",
+			"port": 5000,
+			"minRetryTime": 2500,
+			"maxRetryTime": 600000,
+			"testTimeout": 40000,
+			"pingPongIntervalMs": 30000,
+			"enablePingPong": true,
+			"secure": false,
+			"proxy": {
+				"host": false,
+				"port": false
+			}
+		},
+	        "kafka": {
+		        "host": "kafka",
+		        "port": 9092
+		}	    
+	}
+}
