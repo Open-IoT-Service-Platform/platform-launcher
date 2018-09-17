@@ -4,7 +4,7 @@
   "description": "E2E test with server",
   "main": "test.js",
   "scripts": {
-    "test": "mocha oisp-tests.js --exit"
+    "test": "mocha oisp-tests.js --timeout 5000 --exit"
   },
   "author": "Intel SSG-DRD",
   "license": "ISC",
