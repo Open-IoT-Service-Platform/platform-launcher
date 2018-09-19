@@ -121,7 +121,7 @@ pull: .init
 ##     if it is left blank, all containers will be started.
 ##     This command also accepts the argument $DOCKER_COMPOSE_ARGS, which is passed directly to compose.
 ##
-start:
+start: .init
 	@$(call msg,"Starting OISP");
 	@if [ "${PULL_IMAGES}" = "true" ]; then make pull; fi;
 	@./docker.sh up -d $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
