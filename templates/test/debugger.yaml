@@ -1,0 +1,69 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  creationTimestamp: null
+  generation: 1
+  labels:
+    app: debugger
+  name: debugger
+  selfLink: /apis/extensions/v1beta1/namespaces/cloudfest-1/deployments/debugger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: dashboard
+    spec:
+      containers:
+      - image: oisp/debugger
+        imagePullPolicy: Always
+        name: debugger
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      imagePullSecrets:
+        - name: dockercred
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status: {}
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  namespace: oisp
+  name: pod-reader
+rules:
+ - apiGroups: [""] # "" indicates the core API group
+   resources: ["pods"]
+   verbs: ["get", "list", "exec"]
+ - apiGroups: [""]
+   resources: ["pods/exec"]
+   verbs: ["create"]
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: pod-reader-binding
+  namespace: oisp
+subjects:
+  - kind: ServiceAccount
+    name: "default"
+    namespace: oisp
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io

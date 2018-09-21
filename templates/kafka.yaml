@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+spec:
+  ports:
+  - name: kafka
+    port: 9092
+  - name: zookeeper
+    port: 2181
+  selector:
+    app: kafka
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka
+  labels:
+    app: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      hostname: kafka
+      containers:
+      - name: kafka
+        image: oisp/kafka:latest      
+        env:
+        - name: ZK_CONNECT
+          value: hbase:2181
+        - name: ADVERTISED_HOST
+          value: "kafka"
+        - name: ADVERTISED_PORT
+          value: "9092"
+        - name: AUTO_CREATE_TOPICS
+          value: "true"
+        ports:
+        - containerPort: 9092
+      imagePullSecrets:
+        - name: dockercred	
