@@ -45,14 +45,16 @@ npm-install:
 
 test: npm-install
 	cp test-config-$(TESTING_PLATFORM).json test-config.json
-ifeq ($(TESTING_PLATFORM), docker)
+
 	@$(call msg,"Waiting for frontend and test Kafka readiness");
 # fill in separator to avoid accidentially dashboard being most recent heartbeat.
 # Then look always for latest heartbeat
 	@until echo new-test | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat ; do echo "Kafka not ready. Waiting ..."; sleep 1; done
+	@echo "Kafka ready"
 	@ (for i in {1..4}; do echo new-test ; done) | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat;
-	@. ../setup-environment.sh && until kafkacat -b l$(KAFKA_BROKER) -t heartbeat -e -o -4 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
+	@. ../setup-environment.sh && until kafkacat -b $(KAFKA_BROKER) -t heartbeat -e -o -4 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
 
+ifeq ($(TESTING_PLATFORM), docker)
 	@$(call msg,"Resetting database ...");
 	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin resetDB
 
@@ -65,8 +67,8 @@ else
 
 	@$(call msg,"Adding a user for testing ...");
 	kubectl exec -i $(DASHBOARD_POD) --  node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
-
 endif
+
 	@$(call msg,"Starting the e2e testing ...");
 	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm test
 
