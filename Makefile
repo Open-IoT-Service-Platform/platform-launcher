@@ -28,9 +28,14 @@ SSL_CERT_PATH:=data/keys/ssl
 
 COMPOSE_PROJECT_NAME?="oisp"
 DOCKER_REGISTRY=""
-CONTAINERS?=""
-DOCKER_COMPOSE_ARGS?=""
+CONTAINERS?=$(shell docker-compose --log-level ERROR config --services)
+DOCKER_COMPOSE_ARGS?=
 PULL_IMAGES?=false
+DEBUG?=false
+
+ifeq  ($(DEBUG),true)
+CONTAINERS:=$(CONTAINERS) debugger
+endif
 
 .init:
 	@$(call msg,"Initializing ...");
@@ -97,34 +102,37 @@ endif
 ##     You can specify a version using the $DOCKER_TAG argument.
 ##     $CONTAINERS arg (as whitespace seperated list) specifies which containers should be built,
 ##     if it is left blank, all containers will be built.
+##     If $DEBUG is set to true, debugger will be added to CONTAINERS
 ##     This command also accepts the argument $DOCKER_COMPOSE_ARGS, which is passed directly to compose.
 ##
 build: .init
 	@$(call msg,"Building OISP containers");
-	@./docker.sh build $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
+	@./docker.sh -f docker-compose.yml -f docker-debugger/docker-compose-debugger.yml build $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
 
 ## pull: Pull OISP containers from dockerhub. Requires docker login.
 ##     You can specify a version using the $DOCKER_TAG argument.
 ##     $CONTAINERS arg (as whitespace seperated list) specifies which containers should be pulled,
 ##     if it is left blank, all containers will be pulled.
+##     If $DEBUG is set to true, debugger will be added to CONTAINERS
 ##     This command also accepts the argument $DOCKER_COMPOSE_ARGS, which is passed directly to compose.
 ##
 pull: .init
 	@$(call msg, "Pulling OISP containers");
-	@./docker.sh pull $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
+	@./docker.sh -f docker-compose.yml -f docker-debugger/docker-compose-debugger.yml pull $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
 
 ## start: Start OISP.
 ##     You can specify a version using the $DOCKER_TAG argument.
 ##     If the images are not present, this will try to pull or build them, depending on the
 ##     value of $PULL_IMAGES (true/false; defaults to false)
-##     $CONTAINERS arg (as whitespace seperated list) specifies which containers should be started,
-##     if it is left blank, all containers will be started.
+##     If DEBUG is set to true, debugger will be added to containers
+##     CONTAINERS arg (as whitespace seperated list) specifies which containers should be started,
+##     if it is left blank, all containers except `debugger` will be started.
 ##     This command also accepts the argument $DOCKER_COMPOSE_ARGS, which is passed directly to compose.
 ##
 start: .init
 	@$(call msg,"Starting OISP");
 	@if [ "${PULL_IMAGES}" = "true" ]; then make pull; fi;
-	@./docker.sh up -d $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
+	@./docker.sh -f docker-compose.yml -f docker-debugger/docker-compose-debugger.yml up -d $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
 
 start-test: export TEST := "1"
 start-test:
@@ -134,12 +142,12 @@ start-test:
 
 ## stop: Stop running OISP containers.
 ##     $CONTAINERS arg (as whitespace seperated list) specifies which containers should be stopped,
-##     if it is left blank, all containers will be stopped.
+##     if it is left blank, all containers except `debugger` will be stopped.
 ##     This command also accepts the argument $DOCKER_COMPOSE_ARGS, which is passed directly to compose.
 ##
 stop:
 	@$(call msg,"Stopping OISP containers");
-	@./docker.sh stop $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
+	@./docker.sh -f docker-compose.yml -f docker-debugger/docker-compose-debugger.yml stop $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
 
 ## update: Update all subrepositories to latest origin/develop
 ##     For competabilty, this will also backup and remove setup-environment.sh
