@@ -1,0 +1,9 @@
+version: '3.7'
+services:
+  debugger:
+    image: oisp/debugger:${DOCKER_TAG}
+    build:
+      context: docker-debugger
+      labels:
+        - oisp=true
+        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}

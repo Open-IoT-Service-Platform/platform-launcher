@@ -1,7 +1,6 @@
 FROM ubuntu:xenial
 
-RUN apt-get update
-RUN apt-get -y install nano make git kafkacat python python-pip python3-pip python3-dev python3-setuptools python-setuptools build-essential nodejs dnsutils virtualenv snapd npm wget apt-transport-https curl
+RUN apt-get update && apt-get -y install nano make git kafkacat python python-pip python3-pip python3-dev python3-setuptools python-setuptools build-essential nodejs dnsutils virtualenv snapd npm wget apt-transport-https curl
 
 # install kubectl
 RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
