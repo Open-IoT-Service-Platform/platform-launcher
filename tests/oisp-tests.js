@@ -220,7 +220,7 @@ describe("Waiting for OISP services to be ready ...\n".bold, function() {
 
                 kafkaConsumer = new kafka.Consumer(kafkaClient, topics, options)
 
-                var oispServicesToMonitor = ['dashboard'];
+                var oispServicesToMonitor = ['rules-engine'];
                 process.stdout.write("    ");
                 kafkaConsumer.on('message', function (message) {
                     process.stdout.write(".".green);
