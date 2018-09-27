@@ -52,7 +52,7 @@ test: npm-install
 	@until echo new-test | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat ; do echo "Kafka not ready. Waiting ..."; sleep 1; done
 	@echo "Kafka ready"
 	@ (for i in {1..4}; do echo new-test ; done) | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat;
-	@. ../setup-environment.sh && until kafkacat -b $(KAFKA_BROKER) -t heartbeat -e -o -4 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
+	@. ../setup-environment.sh && until kafkacat -b $(KAFKA_BROKER) -t heartbeat -e -o -4 2> /dev/null | grep -m 1 "dashboard"; do printf "\33[2K $(kafkacat -b $(KAFKA_BROKER) -t heartbeat -o -5 -c 5 -f 2>/dev/null '%o:%s\t\t') \r" && sleep 1 ; done
 
 ifeq ($(TESTING_PLATFORM), docker)
 	@$(call msg,"Resetting database ...");
