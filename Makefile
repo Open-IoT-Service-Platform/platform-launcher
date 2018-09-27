@@ -23,7 +23,7 @@ SHELL:=/bin/bash
 CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BRANCH:=$(shell git branch| grep \*| cut -d ' ' -f2)
 export TEST = 0
-export HOST_IP_ADDRESS=$(shell ifconfig docker0 | sed -En 's/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
+export HOST_IP_ADDRESS=$(shell ip -4 addr show docker0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
 SSL_CERT_PATH:=data/keys/ssl
 
 COMPOSE_PROJECT_NAME?="oisp"
