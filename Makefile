@@ -234,7 +234,7 @@ distclean: clean
 ##
 push-images:
 	@$(call msg,"Pushing docker images to registry");
-	@./docker.sh push $(CONTAINERS)
+	@./docker.sh -f docker-compose.yml -f docker-debugger/docker-compose-debugger.yml push $(CONTAINERS)
 
 ## help: Show this help message
 ##
