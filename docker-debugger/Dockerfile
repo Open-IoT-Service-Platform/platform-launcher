@@ -9,8 +9,15 @@ RUN echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/ap
 RUN apt-get update
 RUN apt-get install -y kubectl
 
-RUN alias node=nodejs
+RUN npm install --global n
+RUN n 6
+
+RUN ln -s /usr/bin/nodejs /usr/bin/node
 
 ENV OISP_REMOTE https://github.com/Open-IoT-Service-Platform/platform-launcher.git
+
+RUN mkdir /home/platform-launcher
+
+WORKDIR /home/platform-launcher
 
 CMD ["tail", "-f", "/dev/null"]
