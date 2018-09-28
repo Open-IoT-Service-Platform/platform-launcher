@@ -7,6 +7,8 @@ DEPLOYMENT?=debugger
 DEBUGGER_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep debugger | head -n 1)
 SELECTED_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep $(DEPLOYMENT) | head -n 1)
 
+TEST_REPO?=https://github.com/Open-IoT-Service-Platform/platform-launcher.git
+TEST_BRANCH?=develop
 
 test-k8s:
 	@$(call msg, "Testing on local k8s cluster");
@@ -21,11 +23,13 @@ import-debugger:
 ##
 .docker-cred:
 	@$(call msg, "(Re)creating docker credential secret.")
-	@-kubectl create namespace $(NAMESPACE)
-	@-kubectl -n $(NAMESPACE) delete secret dockercred
+	@kubectl create namespace $(NAMESPACE) 2>/dev/null || echo Namespace $(NAMESPACE) already exists
+	@kubectl -n $(NAMESPACE) delete secret dockercred 2>/dev/null ||:
 	@read -p "Docker username:" DOCKER_USERNAME; \
 	read -p "Docker e-mail:" DOCKER_EMAIL; \
 	read -s -p "Docker password:" DOCKER_PASSWORD; \
+	echo -e "\nTesting login"; \
+	docker login -u $$DOCKER_USERNAME -p $$DOCKER_PASSWORD 2>/dev/null|| exit 1; \
 	kubectl -n $(NAMESPACE) create secret docker-registry dockercred --docker-username=$$DOCKER_USERNAME --docker-password=$$DOCKER_PASSWORD --docker-email=$$DOCKER_EMAIL;
 	@touch $@
 
@@ -35,7 +39,7 @@ import-debugger:
 import-templates: .docker-cred
 	@$(call msg, "Importing into namespace:$(NAMESPACE)")
 
-	-kubectl create namespace $(NAMESPACE)
+	@kubectl create namespace $(NAMESPACE) || echo Namespace $(NAMESPACE) already exists
 
 	kubectl apply -n $(NAMESPACE) -f $(TEMPLATES_DIR)/configmaps
 	kubectl apply -n $(NAMESPACE) -f $(TEMPLATES_DIR)/secrets
@@ -71,6 +75,20 @@ open-shell:
 	@$(call msg, "Opening shell to pod: $(DEBUGGER_POD)")
 	kubectl -n $(NAMESPACE) exec -it $(SELECTED_POD) /bin/bash
 
+## prepare-tests: Pull the latest repo in the debugger pod
+##     This has no permanent effect as the pod on which the tests
+##     are prepared is mortal
+prepare-tests:
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -- /bin/bash -c "rm -rf *"
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -- /bin/bash -c "rm -rf .* || true"
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -- \
+            git clone $(TEST_REPO) -b $(TEST_BRANCH) .
+
+## Run tests
+## Platform launcher will be cloned from TEST_REPO, branch TEST_BRANCH will be used
+##
+test: prepare-tests
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -- make test TESTING_PLATFORM=kubernetes TERM=xterm
 ## help: Show this help message
 ##
 help:
