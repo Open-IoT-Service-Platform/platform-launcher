@@ -65,184 +65,79 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     var temperatureValues = [
 	{
             value: 20,
-            expectedActuation: null
+            expectedActuation: null,
+	    delay: 0
 	},
 	{
 	    value: 21,
-	    expectedActuation: null
+	    expectedActuation: null,
+	    delay: 1000
 	},
 	{
 	    value: 22,
-	    expectedActuation: null
+	    expectedActuation: null,
+	    delay: 2000
 	},
 	{
 	    value: 23,
-	    expectedActuation: null
+	    expectedActuation: null,
+	    delay: 4000
 	},
 	{
 	    value: 24,
-	    expectedActuation: null
+	    expectedActuation: null,
+	    delay: 8000
 	},
 	{
 	    value: 25,
-	    expectedActuation: null
-	},
-	{
-	    value: 26,
-	    expectedActuation: null
-	},
-	{
-	    value: 27,
-	    expectedActuation: null
-	},
-	{
-	    value: 28,
-	    expectedActuation: null
-	},
-	{
-	    value: 29,
-	    expectedActuation: null
-	},
-	{
-	    value: 30,
-	    expectedActuation: null
-	},
-	{
-	    value: 31,
-	    expectedActuation: null
-	},
-	{
-            value: 32,
-            expectedActuation: null
-	},
-	{
-	    value: 33,
-	    expectedActuation: null
-	},
-	{
-	    value: 34,
-	    expectedActuation: null
-	},
-	{
-	    value: 35,
-	    expectedActuation: null
-	},
-	{
-	    value: 36,
-	    expectedActuation: null
-	},
-	{
-	    value: 37,
-	    expectedActuation: null
-	},
-	{
-	    value: 38,
-	    expectedActuation: null
-	},
-	{
-	    value: 39,
-	    expectedActuation: null
-	},
-	{
-	    value: 40,
-	    expectedActuation: null
-	},
-	{
-	    value: 41,
-	    expectedActuation: null
-	},
-	{
-	    value: 42,
-	    expectedActuation: null
-	},
-	{
-	    value: 43,
-	    expectedActuation: null
-	},
-	{
-	    value: 44,
-	    expectedActuation: null
-	},
-	{
-	    value: 45,
-	    expectedActuation: null
-	},
-	{
-	    value: 46,
-	    expectedActuation: null
-	},
-	{
-	    value: 47,
-	    expectedActuation: null
-	},
-	{
-	    value: 48,
-	    expectedActuation: null
+	    expectedActuation: null,
+	    delay: 8000
 	},
 	{
 	    value: 49,
-	    expectedActuation: 1
+	    expectedActuation: 1,
+	    delay: 10000
 	},
 	{
 	    value: 50,
-	    expectedActuation: 1
+	    expectedActuation: 1,
+	    delay: 1000
 	},
 	{
 	    value: 51,
-	    expectedActuation: 1
+	    expectedActuation: 1,
+	    delay: 1000
 	},
 	{
 	    value: 19,
-	    expectedActuation: null
+	    expectedActuation: null,
+	    delay: 1000
 	},
 	{
 	    value: 19,
-	    expectedActuation: null
+	    expectedActuation: null,
+	    delay: 2000
 	},
 	{
 	    value: 19,
-	    expectedActuation: null
+	    expectedActuation: null,
+	    delay: 4000
 	},
 	{
 	    value: 19,
-	    expectedActuation: null
-	},
-	{
-	    value: 19,
-	    expectedActuation: null
-	},
-	{
-	    value: 19,
-	    expectedActuation: null
-	},
-	{
-	    value: 19,
-	    expectedActuation: null
-	},
-	{
-	    value: 19,
-	    expectedActuation: null
-	},
-	{
-	    value: 19,
-	    expectedActuation: null
-	},
-	{
-	    value: 19,
-	    expectedActuation: null
-	},
-	{
-	    value: 19,
-	    expectedActuation: 0
+	    expectedActuation: 0,
+	    delay: 10000
 	},
 	{
 	    value: 20,
-	    expectedActuation: null
+	    expectedActuation: null,
+	    delay: 1000
 	},
 	{
-	    value: 20,
-	    expectedActuation: null
-	},
+            value: 20,
+            expectedActuation: null,
+            delay: 1000
+        }
     ];
 
 
@@ -270,7 +165,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
 	    assert.notEqual(deviceToken, null, "Device Token not defined");
 	    assert.notEqual(deviceId, null, "DeviceId not defined");
 
-	    promtests.checkObservations(temperatureValues, rules[switchOnCmdName].cid, cbManager, deviceToken, accountId, deviceId, componentParamName, 1000)
+	    promtests.checkObservations(temperatureValues, rules[switchOnCmdName].cid, cbManager, deviceToken, accountId, deviceId, componentParamName)
 		.then(() => {done();})
 		.catch((err) => { done(err);});
 	},

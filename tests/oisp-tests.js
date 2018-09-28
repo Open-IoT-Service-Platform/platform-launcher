@@ -896,7 +896,7 @@ describe("Do time based rule subtests ...".bold,
              }).timeout(10000);
 	     it(descriptions.sendObservations,function(done) {
 		 test.sendObservations(done);
-             }).timeout(60000);
+             }).timeout(120000);
 	     it(descriptions.cleanup,function(done) {
 		 test.cleanup(done);
 	     }).timeout(10000);
