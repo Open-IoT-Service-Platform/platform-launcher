@@ -40,21 +40,30 @@ var checkObservations = function(tempValues, cid, cbManager, deviceToken, accoun
 	var step;
 	var sendObservationAndCheckRules = function(index) {
 	    process.stdout.write(".".green);
-	    helpers.devices.submitData(tempValues[index].value, deviceToken, accountId, deviceId, cid, function(err, ts) {
-		tempValues[index].ts = ts;
 
-		if (index === 0) {
-		    firstObservationTime = tempValues[index].ts;
-		}
-		if (err) {
-		    reject(err);
-		}
+            if (tempValues[index].hasOwnProperty('delay')){
+                setTimeout(sendActualObservation, tempValues[index].delay);
+            }
+            else{
+                sendActualObservation();
+            }
+            function sendActualObservation(){
+                helpers.devices.submitData(tempValues[index].value, deviceToken, accountId, deviceId, cid, function(err, ts) {
+                    tempValues[index].ts = ts;
 
-		if (tempValues[index].expectedActuation === null) {
-		    setTimeout(step, waitBetweenSendingSamples);
-		}
-	    });
-	};
+                    if (index === 0) {
+                        firstObservationTime = tempValues[index].ts;
+                    }
+                    if (err) {
+                        reject(err);
+                    }
+
+                    if (tempValues[index].expectedActuation === null) {
+                        setTimeout(step, waitBetweenSendingSamples);
+                    }
+                });
+            }
+        };
 	step = function(){
 	    index++;
 	    if (index === tempValues.length) {
