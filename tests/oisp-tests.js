@@ -195,8 +195,9 @@ describe("Waiting for OISP services to be ready ...\n".bold, function() {
         var kafkaConsumer;
         var kafka_credentials = cfenvReader.getServiceCredentials("kafka-ups");
         var topic = kafka_credentials.topics.heartbeat.name;
-        var partition = 0;
-        var kafkaClient = new kafka.KafkaClient({kafkaHost: "localhost:9092"});
+	var partition = 0;
+	var kafkaAddress = config["connector"]["kafka"]["host"] + ":" + config["connector"]["kafka"]["port"];
+        var kafkaClient = new kafka.KafkaClient({kafkaHost: kafkaAddress});
         var kafkaOffset = new kafka.Offset(kafkaClient);
 
         var getKafkaOffset = function(topic_, partition_, cb) {
@@ -1404,4 +1405,3 @@ describe("change password and delete receiver ... \n".bold, function(){
     })
  
 })   
-
