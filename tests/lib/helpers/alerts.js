@@ -149,10 +149,31 @@ function addCommentsToAlert(userToken, accountId, alertId, comments, cb) {
     });
 }
 
+
+function deleteAlert(userToken, accountId, alertId){
+    var data = {
+        userToken: userToken,
+        accountId: accountId,
+        alertId: alertId
+    }
+
+    return new Promise((resolve, reject) => {
+	api.alerts.deleteAlert(data, function(err, response){
+	    if (err){
+		reject(err);
+	    }
+	    else {
+		resolve(response);
+	    }
+	});
+    });
+}
+
 module.exports = {
     getListOfAlerts: getListOfAlerts,
     getAlertDetails: getAlertDetails,
     closeAlert: closeAlert,
     updateAlertStatus: updateAlertStatus,
-    addCommentsToAlert: addCommentsToAlert
+    addCommentsToAlert: addCommentsToAlert,
+    deleteAlert: deleteAlert
 };

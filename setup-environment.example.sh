@@ -14,12 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+export DOCKER_TAG=${DOCKER_TAG:-'latest'}
+
 export ZOOKEEPER_KAFKA='kafka'
 export ZOOKEEPER_KAFKA_PORT='2181'
 export ZOOKEEPER_HBASE='hbase'
 export ZOOKEEPER_HBASE_PORT='2181'
 export POSTGRES='postgres'
-export POSTGRES_DB='iot'
+export POSTGRES_DB_REGULAR="iot"
+export POSTGRES_DB=${POSTGRES_DB_REGULAR} # postgres needs always regular DB name for initialization. It automatically initiates the test DB as well.
+if [ "$TEST" = "1" ]; then
+    export POSTGRES_DB='test'
+    echo "Warning: Test database selected."
+fi
 export POSTGRES_PORT='5432'
 export POSTGRES_USERNAME='postgres'
 export POSTGRES_PASSWORD='intel123'
