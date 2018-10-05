@@ -36,6 +36,8 @@ spec:
       - name: postgres      
         image: oisp/postgres:latest
         env:
+        - name: PGDATA
+          value: /var/lib/postgresql/pgdata
         - name: POSTGRES_DB
           valueFrom:
             configMapKeyRef:
@@ -73,4 +75,3 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  volumeName: storage-postgres

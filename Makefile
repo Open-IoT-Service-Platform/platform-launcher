@@ -43,7 +43,6 @@ import-templates: .docker-cred
 
 	kubectl apply -n $(NAMESPACE) -f $(TEMPLATES_DIR)/configmaps
 	kubectl apply -n $(NAMESPACE) -f $(TEMPLATES_DIR)/secrets
-	kubectl apply -n $(NAMESPACE) -f $(TEMPLATES_DIR)/persistentvolumes
 	kubectl apply -n $(NAMESPACE) -f $(TEMPLATES_DIR)
 
 
@@ -62,11 +61,6 @@ clean:
 	@$(call msg, "Removing workspace $(NAMESPACE)")
 	-kubectl delete namespace $(NAMESPACE)
 	rm -f .docker-cred
-
-# Storage is created and deleted manually temporarily
-# In the future, there should be a better way to chose waht kind of storage will be used,
-# and not default 
-	kubectl delete pv storage-redis storage-hbase storage-postgres
 
 ## open-shell: Open a shell to a random pod in DEPLOYMENT.
 ##     By default thi will try to open a shell to a debugger pod.

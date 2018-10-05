@@ -77,4 +77,3 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  volumeName: storage-hbase

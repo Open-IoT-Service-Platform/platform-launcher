@@ -13,7 +13,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: dashboard
+      app: debugger
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -23,7 +23,7 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        app: dashboard
+        app: debugger
     spec:
       containers:
       - image: oisp/debugger

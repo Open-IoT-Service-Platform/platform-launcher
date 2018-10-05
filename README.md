@@ -7,7 +7,8 @@ This project contains a collection of Kubernetes templates and some helper scrip
 ## Requirements
 
  - Kubernetes 1.9
- - nginx ingress controller
+ - an ingress controller
+ - a persisten volume provisioner
  - Access to oisp Dockerhub repo
 
 ## Usage
