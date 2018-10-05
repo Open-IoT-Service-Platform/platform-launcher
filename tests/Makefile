@@ -26,6 +26,14 @@ USERNAME = "oisp@testing.com"
 PASSWORD = "OispTesting1"
 ROLE = "admin"
 
+ifeq ($(TESTING_PLATFORM), docker)
+KAFKA_BROKER="localhost:9092"
+else
+KAFKA_BROKER="kafka:9092"
+NAMESPACE=oisp
+DASHBOARD_POD:=$(shell kubectl -n oisp get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
+endif
+
 #----------------------------------------------------------------------------------------------------------------------
 # targets
 #----------------------------------------------------------------------------------------------------------------------
@@ -34,16 +42,30 @@ npm-install:
 	@$(call msg,"Installing npm packages ...");
 	@cd $(CURRENT_DIR) && npm install > /dev/null
 
-test: npm-install
-	@$(call msg,"Waiting for frontend");
-	@. ../setup-environment.sh && until kafkacat -b localhost:9092 -t heartbeat -e 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
 
+test: npm-install
+	@cp test-config-$(TESTING_PLATFORM).json test-config.json
+	@$(call msg,"Waiting for frontend and test Kafka readiness");
+# fill in separator to avoid accidentially dashboard being most recent heartbeat.
+# Then look always for latest heartbeat
+	@until echo new-test | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat; do echo "Kafka not ready. Waiting ..."; sleep 1; done
+	@ (for i in {1..4}; do echo new-test ; done) | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat;
+	@. ../setup-environment.sh && until kafkacat -C -b $(KAFKA_BROKER) -t heartbeat -e -o -4 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
+
+ifeq ($(TESTING_PLATFORM), docker)
 	@$(call msg,"Resetting database ...");
 	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin resetDB
 
 	@$(call msg,"Adding a user for testing ...");
 	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
+else
+	@$(call msg,"Resetting database ...");
+	@kubectl exec -i $(DASHBOARD_POD) --  node /app/admin resetDB
 
+	@$(call msg,"Adding a user for testing ...");
+	@kubectl exec -i $(DASHBOARD_POD) --  node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
+
+endif
 	@$(call msg,"Starting the e2e testing ...");
 	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm test
 

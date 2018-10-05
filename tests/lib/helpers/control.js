@@ -113,8 +113,29 @@ function  saveComplexCommand(name, paramName, value, userToken, accountId, devic
     });
 }
 
+
+function  deleteComplexCommand(name, userToken, accountId) {
+
+    var data = {
+        userToken: userToken,
+        accountId: accountId,
+        commandName: name,
+    };
+
+    return new Promise((resolve, reject) => {
+	api.control.deleteComplexCommand(data, function(err, response) {
+            if (err) {
+		reject(err);
+            } else {
+		resolve(response);
+            }
+	});
+    })
+}
+
 module.exports={
     saveComplexCommand: saveComplexCommand,
     pullActuations: pullActuations,
-    sendActuationCommand: sendActuationCommand
+    sendActuationCommand: sendActuationCommand,
+    deleteComplexCommand: deleteComplexCommand
 }
