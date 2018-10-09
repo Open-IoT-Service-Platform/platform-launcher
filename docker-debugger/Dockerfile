@@ -1,4 +1,4 @@
-FROM ubuntu:xenial
+FROM ubuntu:18.04
 
 RUN apt-get update && apt-get -y install nano make git kafkacat python python-pip python3-pip python3-dev python3-setuptools python-setuptools build-essential nodejs dnsutils virtualenv snapd npm wget apt-transport-https curl
 
@@ -12,12 +12,15 @@ RUN apt-get install -y kubectl
 RUN npm install --global n
 RUN n 6
 
-RUN ln -s /usr/bin/nodejs /usr/bin/node
+
+RUN pip3 install locustio oisp
 
 ENV OISP_REMOTE https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 
 RUN mkdir /home/platform-launcher
 
 WORKDIR /home/platform-launcher
+
+EXPOSE 8089 5557 5558
 
 CMD ["tail", "-f", "/dev/null"]
