@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: locust-slave
+  name: locust-slave
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: locust-slave
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: locust-slave
+    spec:
+      containers:
+      - name: locust-slave
+        image: oisp/debugger
+        volumeMounts:
+        - name: locust-volume
+          mountPath: /locust
+        workingDir: /locust
+        command: ["locust", "--slave", "--master-host", "locust-master"]
+      imagePullSecrets:
+        - name: dockercred
+      volumes:
+      - name: locust-volume
+        configMap:
+          name: locustfile
