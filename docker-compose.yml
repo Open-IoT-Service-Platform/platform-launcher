@@ -16,20 +16,50 @@
 version: '3.7'
 
 services:
-  hbase:
+  hbase-master:
     image: oisp/hbase:${DOCKER_TAG}
+    entrypoint: bash /opt/wait-for-it.sh hdfs-namenode:8020 -t 300 -- bash /opt/wait-for-it.sh zookeeper:2181 -t 300 -- /opt/entrypoint.sh
     build:
       context: ./docker-hbase/
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
     ports:
-      - 2181:2181
       - 9090:9090
+      - 8081:8080
+      - 9095:9095
+      - 16010:16010
       - 60000:60000
-      - 60020:60020
     volumes:
       - ./data/hbase-logs:/opt/hbase/logs
+    depends_on:
+      - zookeeper
+      - hdfs-namenode
+      - hdfs-datanode
+      - hbase-region
+    environment:
+      - REGIONSERVERS=hbase-region
+      - ZOOKEEPER=${ZOOKEEPER_HBASE}
+      - HDFS_NAMENODE=hdfs-namenode
+  hbase-region:
+    image: oisp/hbase:${DOCKER_TAG}
+    entrypoint: /opt/entrypoint-region.sh
+    build:
+      context: ./docker-hbase/
+      dockerfile: Dockerfile
+      labels:
+        - oisp=true
+        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
+    volumes:
+      - ./data/hbase-logs:/opt/hbase/logs
+    depends_on:
+      - zookeeper
+      - hdfs-namenode
+      - hdfs-datanode
+    environment:
+      - HBASE_MASTER=hbase-master
+      - ZOOKEEPER=${ZOOKEEPER_HBASE}
+      - HDFS_NAMENODE=hdfs-namenode
   postgres:
     image: oisp/postgres:${DOCKER_TAG}
     build:
@@ -55,15 +85,13 @@ services:
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
     ports:
       - 9092:9092
-    environment:
-      - ZK_CONNECT=hbase:2181
     depends_on:
-      - hbase
+      - zookeeper
     environment:
       - ADVERTISED_HOST=${HOST_IP_ADDRESS}
-      - ADVERTISED_PORT=9092
+      - ADVERTISED_PORT=${KAFKA_PORT}
       - AUTO_CREATE_TOPICS=true
-
+      - ZK_CONNECT=${ZOOKEEPER_KAFKA}:${ZOOKEEPER_KAFKA_PORT}
   redis:
     image: redis:3.0
     volumes:
@@ -80,7 +108,7 @@ services:
         - oisp.git_commit=${GIT_COMMIT_GEARPUMP}
     depends_on:
       - nginx
-      - hbase
+      - hbase-master
       - kafka
       - frontend
     working_dir: /app
@@ -165,10 +193,46 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - hbase
+      - hbase-master
       - kafka
-    command: ./wait-for-it.sh hbase:2181 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- make runjar
+    command: ./wait-for-it.sh hbase-master:9090 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- make runjar
     working_dir: /app
     environment:
       - VCAP_SERVICES=${VCAP_SERVICES}
       - VCAP_APPLICATION=${VCAP_APPLICATION}
+  hdfs-namenode:
+    image: singularities/hadoop
+    command: start-hadoop namenode
+    volumes:
+      - ./data/hdfs/name:/opt/hdfs
+    hostname: hdfs-namenode
+    environment:
+      HDFS_USER: root
+    ports:
+      - "8020:8020"
+      - "14000:14000"
+      - "50070:50070"
+      - "50075:50075"
+      - "10020:10020"
+      - "13562:13562"
+      - "19888:19888"
+  hdfs-datanode:
+    image: singularities/hadoop
+    command: start-hadoop datanode hdfs-namenode
+    volumes:
+      - ./data/hdfs/data:/opt/hdfs
+    environment:
+      HDFS_USER: root
+    links:
+      - hdfs-namenode
+  zookeeper:
+    image: zookeeper:3.4.13
+    hostname: zookeeper
+    volumes:
+      - ./data/zookeeper:/data
+      - ./data/zookeeper-logs:/datalog
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888

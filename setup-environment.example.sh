@@ -16,9 +16,9 @@
 
 export DOCKER_TAG=${DOCKER_TAG:-'latest'}
 
-export ZOOKEEPER_KAFKA='kafka'
+export ZOOKEEPER_KAFKA='zookeeper'
 export ZOOKEEPER_KAFKA_PORT='2181'
-export ZOOKEEPER_HBASE='hbase'
+export ZOOKEEPER_HBASE='zookeeper'
 export ZOOKEEPER_HBASE_PORT='2181'
 export POSTGRES='postgres'
 export POSTGRES_DB_REGULAR="iot"
@@ -31,6 +31,7 @@ export POSTGRES_PORT='5432'
 export POSTGRES_USERNAME='postgres'
 export POSTGRES_PASSWORD='intel123'
 export KAFKA='kafka:9092'
+export KAFKA_PORT='9092'
 export KAFKA_HEARTBEAT_TOPIC='heartbeat'
 export GEARPUMP='gearpump:8090'
 export BACKEND='backend:8080'
