@@ -1,3 +1,4 @@
+import time
 import random
 import re
 from uuid import uuid4
@@ -84,9 +85,11 @@ class LocustOispClient(Client):
 class MyTaskSet(TaskSet):
     def on_start(self):
         self.oisp_client = LocustOispClient(self.client)
-        self.oisp_client.auth("user@example.com", "password")
+        userid = random.randint(1,100)
+        self.oisp_client.auth("user{}@example.com".format(userid), "password")
         self.account = self.oisp_client.create_account("account_{}".format(self.locust))
-        self.oisp_client.auth("user@example.com", "password")
+        time.sleep(1)
+        self.oisp_client.auth("user{}@example.com".format(userid), "password")
         self.devices = [self.account.create_device("device_{}".format(uuid4()),
                                                    "device_{}".format(uuid4()))
                         for i in range(5)]
@@ -107,5 +110,5 @@ class MyTaskSet(TaskSet):
 
 class MyLocust(HttpLocust):
     task_set = MyTaskSet
-    min_wait = 100
-    max_wait = 200
+    min_wait = 500
+    max_wait = 1000

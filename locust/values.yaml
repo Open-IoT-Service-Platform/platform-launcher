@@ -4,3 +4,5 @@ imageCredentials:
     password: invalid_password
 oisp:
     url: "http://k8s.streammyiot.com"
+locust:
+    numberSlaves: 30
