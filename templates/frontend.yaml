@@ -17,12 +17,12 @@ metadata:
     app: dashboard
   name: dashboard
 spec:
-  replicas: 2
+  replicas: {{ .Values.numberReplicas.frontend }}
   selector:
     matchLabels:
       app: dashboard
   strategy:
-    type: RollingUpdate  
+    type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 1
@@ -33,9 +33,9 @@ spec:
     spec:
       containers:
       - name: dashboard
-        image: oisp/frontend:latest
+        image: oisp/frontend:limitless
         ports:
-        - containerPort: 4001	
+        - containerPort: 4001
         args:
         - ./wait-for-it.sh
         - postgres:5432
@@ -87,9 +87,6 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: dashboard-web
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.org/proxy-buffering: "false"
 spec:
   rules:
   - host: k8s.streammyiot.com

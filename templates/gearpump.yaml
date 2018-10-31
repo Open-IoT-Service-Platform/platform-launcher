@@ -18,7 +18,7 @@ metadata:
   labels:
     app: gearpump
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: gearpump
@@ -33,7 +33,7 @@ spec:
         app: gearpump
     spec:
       containers:
-      - name: gearpump      
+      - name: gearpump
         image: oisp/gearpump:latest
         command: ["/bin/bash"]
         args: ["/app/bootstrap.sh"]

@@ -33,11 +33,12 @@ spec:
         app: postgres
     spec:
       containers:
-      - name: postgres      
+      - name: postgres
         image: oisp/postgres:latest
+        args: ["postgres", "-c", "shared_buffers=512MB", "-c", "max_connections=400"]
         env:
         - name: PGDATA
-          value: /var/lib/postgresql/pgdata
+          value: /var/lib/postgresql/mount/data
         - name: POSTGRES_DB
           valueFrom:
             configMapKeyRef:
@@ -56,7 +57,7 @@ spec:
         ports:
         - containerPort: 5432
         volumeMounts:
-        - mountPath: /var/lib/postgresql/data
+        - mountPath: /var/lib/postgresql/mount/
           name: postgres-data
       imagePullSecrets:
       - name: dockercred

@@ -17,7 +17,7 @@ metadata:
   labels:
     app: backend
 spec:
-  replicas: 2
+  replicas: {{ .Values.numberReplicas.backend }}
   selector:
     matchLabels:
       app: backend
@@ -33,7 +33,7 @@ spec:
         app: backend
     spec:
       containers:
-      - name: backend      
+      - name: backend
         image: oisp/backend:latest
         ports:
         - containerPort: 8080

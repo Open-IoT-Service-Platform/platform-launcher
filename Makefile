@@ -5,6 +5,7 @@ TEMPLATES_DIR?=templates
 
 DEPLOYMENT?=debugger
 DEBUGGER_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep debugger | head -n 1)
+DASHBOARD_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
 SELECTED_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep $(DEPLOYMENT) | head -n 1)
 
 TEST_REPO?=https://github.com/Open-IoT-Service-Platform/platform-launcher.git
@@ -15,7 +16,7 @@ test-k8s:
 	kafkacat -b kafka:9092 -t heartbeat
 
 ## import-debugger: Launch or update debugger pod in NAMESPACE (default:oisp)
-## 
+##
 import-debugger:
 	kubectl apply -n $(NAMESPACE) -f $(TEMPLATES_DIR)/test
 
@@ -45,7 +46,6 @@ import-templates: .docker-cred
 	kubectl apply -n $(NAMESPACE) -f $(TEMPLATES_DIR)/secrets
 	kubectl apply -n $(NAMESPACE) -f $(TEMPLATES_DIR)
 
-
 ## export-templates: Export templates in NAMESPACE in running k8s cluster to TEMPLATES_DIR
 ##     This does not follow the exact same directory structure as in import-templates
 ##
@@ -69,6 +69,17 @@ open-shell:
 	@$(call msg, "Opening shell to pod: $(DEBUGGER_POD)")
 	kubectl -n $(NAMESPACE) exec -it $(SELECTED_POD) /bin/bash
 
+## reset-db: Reset database via admin tool in frontend
+##
+reset-db:
+	kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) -- node admin resetDB
+
+## add-test-user: Add a test user via admin tool in frontend
+##
+add-test-user:
+	for i in $(shell seq 1 100); do kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) -- node admin addUser user$${i}@example.com password admin; done;
+
+
 ## prepare-tests: Pull the latest repo in the debugger pod
 ##     This has no permanent effect as the pod on which the tests
 ##     are prepared is mortal
@@ -87,7 +98,6 @@ test: prepare-tests
 ##
 help:
 	@grep "^##" Makefile | cut -c4-
-
 
 #---------------------------------------------------------------------------------------------------
 # helper functions

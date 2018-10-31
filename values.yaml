@@ -2,3 +2,6 @@ imageCredentials:
     registry: index.docker.io
     username: invalid_username
     password: invalid_password
+numberReplicas:
+    frontend: 10
+    backend: 2
