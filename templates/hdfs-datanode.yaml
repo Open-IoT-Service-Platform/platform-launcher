@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hdfs-datanode
+spec:
+  ports:
+  - name: "8080"
+    port: 8080
+  selector:
+    app: hdfs-datanode
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: hdfs-datanode
+  name: hdfs-datanode
+spec:
+  serviceName: hdfs-datanode
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hdfs-datanode
+  template:
+    metadata:
+      labels:
+        app: hdfs-datanode
+    spec:
+      containers:
+      - image: singularities/hadoop
+        name: hdfs-namenode
+        args: ["start-hadoop", "datanode", "hdfs-namenode"]
+        env:
+          - name: HDFS_USER
+            value: hdfsuser
+        volumeMounts:
+        - mountPath: /opt/hdfs
+          name: hdfs-datanode-data
+      volumes:
+      - name: hdfs-datanode-data
+        persistentVolumeClaim:
+          claimName: hdfs-datanode-data
+  volumeClaimTemplates:
+  - metadata:
+      name: hdfs-datanode-data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
