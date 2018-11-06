@@ -33,6 +33,14 @@ DOCKER_COMPOSE_ARGS?=
 PULL_IMAGES?=false
 DEBUG?=false
 
+# Variable to remove rate limits for endpoints in frontend
+DISABLE_RATE_LIMITS?=false
+RATE_LIMIT = ''
+ifeq ($(DISABLE_RATE_LIMITS),true)
+RATE_LIMIT = '--disable-rate-limits'
+endif
+export RATE_LIMIT
+
 ifeq  ($(DEBUG),true)
 CONTAINERS:=$(CONTAINERS) debugger
 endif
