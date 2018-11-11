@@ -216,3 +216,63 @@ export VCAP_SERVICES='{
 export VCAP_APPLICATION='{
     "space_name": "local"
 }'
+
+
+#VCAP variables are left overs from Cloud Foundry times.
+#To allow a transition to Kubernetes, we will define both, VCAP and regular environment variables.
+#The following is how the configuration looks in future
+#The root variable for every service looks like OISP_SERVICE_CONFIG
+#It contains a JSON object, starting with single quote, hash names with double quotes, environmental variables with double, then single quotes, e.g. "'$VAR'"
+#References to other environmental variables which can be parsed as OBJECTS are done with "@@OISP_*_CONFIG"
+#References to other environmental variables which can be parsed as MAPS (e.g. Property Maps) are done with "%%OISP_*_PROPERTIES". MAPS contain only <String, String> pairs.
+
+export OISP_BACKEND_CONFIG=\
+'{
+  "tsdbName": "hbase",
+  "kafkaConfig": "@@OISP_KAFKA_CONFIG",
+  "zookeeperConfig": "@@OISP_ZOOKEEPER_CONFIG",
+  "kerberosConfig": "@@OISP_KERBEROS_CONFIG",
+  "hbaseConfig": "@@OISP_HBASE_CONFIG"
+}'
+
+
+export OISP_KAFKA_CONFIG=\
+'{
+  "uri": "'$KAFKA'",
+  "partitions": 1,
+  "replication": 1,
+  "timeoutMs": 10000,
+  "topicsObservations": "metrics",
+  "topicsRuleEngine": "rules-update",
+  "topicsHeartbeatName": "'$KAFKA_HEARTBEAT_TOPIC'",
+  "topicsHeartbeatInterval": 5000
+}'
+
+export OISP_ZOOKEEPER_CONFIG=\
+'{
+  "zkCluster": "'${ZOOKEEPER_KAFKA}:${ZOOKEEPER_KAFKA_PORT}'",
+  "zkNode": "/tmp"
+'}
+
+export OISP_KERBEROS_CONFIG=\
+'{
+  "kdc": "localhost",
+  "kpassword": "pass",
+  "krealm": "realm",
+  "kuser": "user"
+}'
+
+export OISP_HBASE_CONFIG=\
+'{
+  "hadoopProperties": "%%OISP_HADOOP_PROPERTIES"
+}'
+
+export OISP_HADOOP_PROPERTIES=\
+'{
+  "hadoop.security.authentication": "simple",
+  "hadoop.security.authorization": "false",
+  "hbase.security.authentication": "simple",
+  "ha.zookeeper.quorum": "'$ZOOKEEPER_HBASE'",
+  "hbase.zookeeper.property.clientPort": "'$ZOOKEEPER_HBASE_PORT'",
+  "hbase.zookeeper.quorum": "'$ZOOKEEPER_HBASE'"
+}'

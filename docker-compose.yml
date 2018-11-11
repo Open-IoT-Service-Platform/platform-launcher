@@ -198,8 +198,12 @@ services:
     command: ./wait-for-it.sh hbase-master:9090 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- make runjar
     working_dir: /app
     environment:
-      - VCAP_SERVICES=${VCAP_SERVICES}
-      - VCAP_APPLICATION=${VCAP_APPLICATION}
+      - OISP_BACKEND_CONFIG=${OISP_BACKEND_CONFIG}
+      - OISP_KAFKA_CONFIG=${OISP_KAFKA_CONFIG}
+      - OISP_ZOOKEEPER_CONFIG=${OISP_ZOOKEEPER_CONFIG}
+      - OISP_KERBEROS_CONFIG=${OISP_KERBEROS_CONFIG}
+      - OISP_HBASE_CONFIG=${OISP_HBASE_CONFIG}
+      - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
   hdfs-namenode:
     image: singularities/hadoop
     command: start-hadoop namenode
