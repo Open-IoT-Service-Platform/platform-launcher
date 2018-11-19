@@ -137,7 +137,7 @@ reset-db:
 ## add-test-user: Add a test user via admin tool in frontend
 ##
 add-test-user:
-	for i in $(shell seq 1 100); do kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) -- node admin addUser user$${i}@example.com password admin; done;
+	for i in $(shell seq 1 10); do kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) -- node admin addUser user$${i}@example.com password admin; done;
 
 
 ## prepare-tests: Pull the latest repo in the debugger pod

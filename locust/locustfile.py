@@ -85,7 +85,7 @@ class LocustOispClient(Client):
 class MyTaskSet(TaskSet):
     def on_start(self):
         self.oisp_client = LocustOispClient(self.client)
-        userid = random.randint(1,100)
+        userid = random.randint(1,10)
         self.oisp_client.auth("user{}@example.com".format(userid), "password")
         self.account = self.oisp_client.create_account("account_{}".format(self.locust))
         time.sleep(1)
@@ -98,6 +98,10 @@ class MyTaskSet(TaskSet):
             dev.singleton_cid = dev.add_component("temp", "temperature.v1.0")["cid"]
 
     @task(1)
+    def get_health(self):
+        self.oisp_client.get_server_info()
+
+    @task(1)
     def getdevs(self):
         self.account.get_devices()
 
@@ -106,6 +110,7 @@ class MyTaskSet(TaskSet):
         dev = random.choice(self.devices)
         dev.add_sample(dev.singleton_cid, random.random()*10)
         dev.submit_data()
+
 
 
 class MyLocust(HttpLocust):

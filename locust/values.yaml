@@ -5,4 +5,4 @@ imageCredentials:
 oisp:
     url: "http://k8s.streammyiot.com"
 locust:
-    numberSlaves: 30
+    numberSlaves: 10
