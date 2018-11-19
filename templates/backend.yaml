@@ -39,22 +39,42 @@ spec:
         - containerPort: 8080
         args:
         - ./wait-for-it.sh
-        - hbase:2181
+        - hbase-master:9090
         - -t
         - "300"
         - --
         - make
         - runjar
         env:
-        - name: VCAP_APPLICATION
+        - name: OISP_BACKEND_CONFIG
           valueFrom:
             configMapKeyRef:
-              key: vcap.application
+              key: backend
               name: oisp-config
-        - name: VCAP_SERVICES
+        - name: OISP_KAFKA_CONFIG
           valueFrom:
             configMapKeyRef:
-              key: vcap.services
+              key: kafka
+              name: oisp-config
+        - name: OISP_ZOOKEEPER_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: zookeeper
+              name: oisp-config
+        - name: OISP_KERBEROS_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: kerberos
+              name: oisp-config
+        - name: OISP_HBASE_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: hbase
+              name: oisp-config
+        - name: OISP_HADOOP_PROPERTIES
+          valueFrom:
+            configMapKeyRef:
+              key: hadoop
               name: oisp-config
         workingDir: /app
       imagePullSecrets:

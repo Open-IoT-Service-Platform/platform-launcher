@@ -19,6 +19,7 @@ metadata:
   labels:
     app: hbase-region
 spec:
+  serviceName: hbase-region
   replicas: 1
   selector:
     matchLabels:

@@ -8,11 +8,11 @@ data:
     "mypostgres" }], "websocket-server": [{ "server-name": "websocket-server", "name":
     "mywsserver" }], "hbase": [{ "credentials": { "HADOOP_CONFIG_KEY": { "hadoop.security.authentication":
     "simple", "hadoop.security.authorization": "false", "hbase.security.authentication":
-    "simple", "ha.zookeeper.quorum": "hbase", "hbase.zookeeper.property.clientPort":
-    "2181", "hbase.zookeeper.quorum": "hbase" } }, "name": "myhbase" }], "hdfs": [{
-    "credentials": { "HADOOP_CONFIG_KEY": { "ha.zookeeper.quorum": "hbase:2181", "hadoop.security.authorization":
+    "simple", "ha.zookeeper.quorum": "zookeeper", "hbase.zookeeper.property.clientPort":
+    "2181", "hbase.zookeeper.quorum": "zookeeper" } }, "name": "myhbase" }], "hdfs": [{
+    "credentials": { "HADOOP_CONFIG_KEY": { "ha.zookeeper.quorum": "zookeeper:2181", "hadoop.security.authorization":
     "false" } }, "name": "myhdfs" }], "kafka": [{ "credentials": { "uri": "kafka:9092"
-    }, "name": "mykafka" }], "zookeeper": [{ "credentials": { "zk.cluster": "kafka:2181",
+    }, "name": "mykafka" }], "zookeeper": [{ "credentials": { "zk.cluster": "zookeeper:2181",
     "zk.node": "/tmp" }, "label": "zookeeper", "name": "myzookeeper", "plan": "local",
     "tags": [] }], "gearpump": [{ "credentials": { "username": "admin", "password":
     "admin", "dashboardUrl": "localhost:8090" }, "name": "mygearpump" }], "smtp":
@@ -35,6 +35,51 @@ data:
     { "password": "7d501829lhbl1or0bb1784462c97bcad6", "username": "rule_engine@intel.com"
     }, "name": "rule-engine-credentials-ups" }, { "credentials": { "password": "AgjY7H3eXztyA6AmNjI2rte446gdttgattwRRF61",
     "username": "api_actuator" }, "name": "websocket-ups" }] }'
+  backend: |
+    {
+    "tsdbName": "hbase",
+    "kafkaConfig": "@@OISP_KAFKA_CONFIG",
+    "zookeeperConfig": "@@OISP_ZOOKEEPER_CONFIG",
+    "kerberosConfig": "@@OISP_KERBEROS_CONFIG",
+    "hbaseConfig": "@@OISP_HBASE_CONFIG"
+    }
+  kafka: |
+    {
+    "uri": "kafka:9092",
+    "partitions": 1,
+    "replication": 1,
+    "timeoutMs": 10000,
+    "topicsObservations": "metrics",
+    "topicsRuleEngine": "rules-update",
+    "topicsHeartbeatName": "heartbeat",
+    "topicsHeartbeatInterval": 5000
+    }
+  zookeeper: |
+    {
+    "zkCluster": "zookeeper:2181",
+    "zkNode": "/tmp"
+    }
+  kerberos: |
+    {
+    "kdc": "localhost",
+    "kpassword": "pass",
+    "krealm": "realm",
+    "kuser": "user"
+    }
+  hbase: |
+    {
+    "hadoopProperties": "%%OISP_HADOOP_PROPERTIES"
+    }
+  hadoop: |
+    {
+    "hadoop.security.authentication": "simple",
+    "hadoop.security.authorization": "false",
+    "hbase.security.authentication": "simple",
+    "ha.zookeeper.quorum": "zookeeper",
+    "hbase.zookeeper.property.clientPort": "2181",
+    "hbase.zookeeper.quorum": "zookeeper"
+    }
+
 kind: ConfigMap
 metadata:
   creationTimestamp: null

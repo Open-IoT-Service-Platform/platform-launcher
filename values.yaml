@@ -4,4 +4,4 @@ imageCredentials:
     password: invalid_password
 numberReplicas:
     frontend: 10
-    backend: 2
+    backend: 1
