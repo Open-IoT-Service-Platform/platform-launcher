@@ -17,7 +17,7 @@ metadata:
   name: hdfs-datanode
 spec:
   serviceName: hdfs-datanode
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: hdfs-datanode
@@ -32,7 +32,7 @@ spec:
         args: ["start-hadoop", "datanode", "hdfs-namenode"]
         env:
           - name: HDFS_USER
-            value: hdfsuser
+            value: root
         volumeMounts:
         - mountPath: /opt/hdfs
           name: hdfs-datanode-data

@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: hbase-region
+  name: hbase-region
+spec:
+  clusterIP: None
+  ports:
+  - name: "8020"
+    port: 8020
+  selector:
+    app: hbase-region
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hbase-region
+  labels:
+    app: hbase-region
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hbase-region
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: hbase-region
+    spec:
+      containers:
+      - name: hbase-region
+        image: oisp/hbase
+        env:
+        - name: REGIONSERVERS
+          value: hbase-region
+        - name: ZOOKEEPER
+          value: zookeeper:2181
+        - name: HDFS_NAMENODE
+          value: hdfs-namenode
+        command: ["/bin/bash", "/opt/entrypoint-region.sh"]
+        ports:
+        - containerPort: 2181
+        - containerPort: 9090
+        - containerPort: 60000
+        - containerPort: 60020
+      imagePullSecrets:
+      - name: dockercred

@@ -48,7 +48,7 @@ spec:
         - "300"
         - --
         - ./wait-for-it.sh
-        - hbase:2181
+        - hbase-master:9090
         - -t
         - "300"
         - --
