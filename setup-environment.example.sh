@@ -235,6 +235,19 @@ export OISP_BACKEND_CONFIG=\
   "hbaseConfig": "@@OISP_HBASE_CONFIG"
 }'
 
+export OISP_FRONTEND_CONFIG=\
+'{
+	"postgresConfig": "@@OISP_POSTGRES_CONFIG",
+	"redisConfig": "@@OISP_REDIS_CONFIG",
+	"kafkaConfig": "@@OISP_KAFKA_CONFIG",
+	"smtpConfig": "@@OISP_SMTP_CONFIG",
+	"dashboardSecurityConfig": "@@OISP_DASHBOARDSECURITY_CONFIG",
+	"backendHostConfig": "@@OISP_BACKENDHOST_CONFIG",
+	"websocketUserConfig": "@@OISP_WEBSOCKETUSER_CONFIG",
+	"mailConfig": "@@OISP_MAIL_CONFIG",
+	"ruleEngineConfig": "@@OISP_RULEENGINE_CONFIG",
+	"gatewayConfig": "@@OISP_GATEWAY_CONFIG"
+}'
 
 export OISP_KAFKA_CONFIG=\
 '{
@@ -252,7 +265,7 @@ export OISP_ZOOKEEPER_CONFIG=\
 '{
   "zkCluster": "'${ZOOKEEPER_KAFKA}:${ZOOKEEPER_KAFKA_PORT}'",
   "zkNode": "/tmp"
-'}
+}'
 
 export OISP_KERBEROS_CONFIG=\
 '{
@@ -275,4 +288,72 @@ export OISP_HADOOP_PROPERTIES=\
   "ha.zookeeper.quorum": "'$ZOOKEEPER_HBASE'",
   "hbase.zookeeper.property.clientPort": "'$ZOOKEEPER_HBASE_PORT'",
   "hbase.zookeeper.quorum": "'$ZOOKEEPER_HBASE'"
+}'
+
+export OISP_POSTGRES_CONFIG=\
+'{
+  "dbname": "'$POSTGRES_DB'",
+  "hostname": "'$POSTGRES'",
+  "password": "'$POSTGRES_PASSWORD'",
+  "port": "'$POSTGRES_PORT'",
+  "username": "'$POSTGRES_USERNAME'"
+}'
+
+export OISP_REDIS_CONFIG=\
+'{
+  "hostname": "'$REDIS'",
+  "port": "'$REDIS_PORT'",
+  "password": ""
+}'
+
+export OISP_SMTP_CONFIG=\
+'{
+  "host": "'$SMTP_HOST'",
+  "port": "'$SMTP_PORT'",
+  "protocol": "smtp",
+  "username": "'$SMTP_USERNAME'",
+  "password": "'$SMTP_PASSWORD'"
+}'
+
+export OISP_DASHBOARDSECURITY_CONFIG=\
+'{
+  "captcha_test_code": "s09ef48213s8fe8fw8rwer5489wr8wd5",
+  "interaction_token_permision_key": "password",
+  "private_pem_path": "./keys/private.pem",
+  "public_pem_path": "./keys/public.pem"
+}'
+
+export OISP_GATEWAY_CONFIG=\
+'{
+  "password": "7d501829lhbl1or0bb1784462c97bcad6",
+  "username": "gateway@intel.com"
+}'
+
+export OISP_BACKENDHOST_CONFIG=\
+'{
+ 	"deviceMeasurementTableName": "LOCAL-AA-BACKEND_DEVICE_MEASUREMENT",
+    "host": "http://'$BACKEND'"
+}'
+
+export OISP_MAIL_CONFIG=\
+'{
+ 	"sender": "test.sender@streammyiot.com"
+}'
+
+export OISP_RULEENGINE_CONFIG=\
+'{
+    "password": "7d501829lhbl1or0bb1784462c97bcad6",
+    "username": "rule_engine@intel.com"
+}'
+
+export OISP_GATEWAY_CONFIG=\
+'{
+    "password": "7d501829lhbl1or0bb1784462c97bcad6",
+    "username": "gateway@intel.com"
+}'
+
+export OISP_WEBSOCKETUSER_CONFIG=\
+'{
+	"password": "AgjY7H3eXztyA6AmNjI2rte446gdttgattwRRF61",
+    "username": "api_actuator"
 }'
