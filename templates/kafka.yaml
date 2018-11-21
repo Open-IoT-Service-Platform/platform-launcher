@@ -45,3 +45,6 @@ spec:
           value: "9092"
         ports:
         - containerPort: 9092
+        readinessProbe:
+          tcpSocket:
+            port: 9092

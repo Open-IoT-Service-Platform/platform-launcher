@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: dashboard
-        image: oisp/frontend:limitless
+        image: oisp/frontend
         ports:
         - containerPort: 4001
         args:
@@ -53,6 +53,7 @@ spec:
         - "300"
         - --
         - ./scripts/docker-start.sh
+        - "--disable-rate-limits"
         env:
         - name: NODE_ENV
           value: local
@@ -70,6 +71,15 @@ spec:
         - mountPath: /app/keys
           name: jwt-keys
           readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /v1/api/health
+            port: 4001
+          initialDelaySeconds: 200
+        readinessProbe:
+          httpGet:
+            path: /v1/api/health
+            port: 4001
       imagePullSecrets:
         - name: dockercred
       volumes:

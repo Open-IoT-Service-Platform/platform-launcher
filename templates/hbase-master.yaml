@@ -61,6 +61,9 @@ spec:
         volumeMounts:
         - mountPath: /data
           name: hbase-data
+        readinessProbe:
+          tcpSocket:
+            port: 9090
       imagePullSecrets:
       - name: dockercred
       hostname: hbase

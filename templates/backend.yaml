@@ -77,5 +77,8 @@ spec:
               key: hadoop
               name: oisp-config
         workingDir: /app
+        readinessProbe:
+          tcpSocket:
+            port: 8080
       imagePullSecrets:
       - name: dockercred

@@ -14,6 +14,7 @@ DEBUGGER_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metada
 DASHBOARD_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
 SELECTED_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep $(DEPLOYMENT) | head -n 1)
 LOCUST_MASTER_POD=$(shell kubectl -n $(NAMESPACE_LOCUST) get pods -o custom-columns=:metadata.name | grep master | head -n 1)
+HBASE_MASTER_POD=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep hbase-master | head -n 1)
 
 TEST_REPO?=https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 TEST_BRANCH?=develop
@@ -161,6 +162,7 @@ test: prepare-tests
 proxy:
 	-kubectl proxy &
 	-kubectl -n $(NAMESPACE_LOCUST) port-forward $(LOCUST_MASTER_POD) 8089:8089 &
+	-kubectl -n $(NAMESPACE) port-forward $(HBASE_MASTER_POD) 16010:16010
 
 ## help: Show this help message
 ##

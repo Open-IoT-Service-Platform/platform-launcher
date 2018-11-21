@@ -59,6 +59,9 @@ spec:
         volumeMounts:
         - mountPath: /var/lib/postgresql/mount/
           name: postgres-data
+        readinessProbe:
+          tcpSocket:
+            port: 5432
       imagePullSecrets:
       - name: dockercred
       volumes:
