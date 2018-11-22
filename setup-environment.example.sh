@@ -249,6 +249,14 @@ export OISP_FRONTEND_CONFIG=\
 	"gatewayConfig": "@@OISP_GATEWAY_CONFIG"
 }'
 
+export OISP_WEBSOCKET_SERVER_CONFIG=\
+'{
+	"postgresConfig": "@@OISP_POSTGRES_CONFIG",
+	"websocketUserConfig": "@@OISP_WEBSOCKETUSER_CONFIG",
+	"kafkaConfig": "@@OISP_KAFKA_CONFIG",
+	"uri": ""
+}'
+
 export OISP_KAFKA_CONFIG=\
 '{
   "uri": "'$KAFKA'",
