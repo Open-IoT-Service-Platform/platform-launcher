@@ -728,6 +728,7 @@ describe("Creating rules ... \n".bold, function() {
     }).timeout(20000);
 });
 
+
 describe("Sending observations and checking rules ...\n".bold, function() {
 
     it('Shall send observation and check rules', function(done) {
@@ -840,50 +841,41 @@ describe("Sending observations and checking rules ...\n".bold, function() {
     }).timeout(30 * 1000);
 
     it('Shall check observation', function(done) {
-        helpers.data.searchData(firstObservationTime, userToken, accountId, deviceId, componentId, function(err, data) {
+        helpers.data.searchData(firstObservationTime, -1, userToken, accountId, deviceId, componentId, false, {}, function(err, result) {
             if (err) {
                 done(new Error("Cannot get data: " + err))
             }
 
-            if (data && data.length >= temperatureValues.length) {
-                for (var i = 0; i < data.length; i++) {
-                    for (var j = 0; j < temperatureValues.length; j++) {
-                        if (temperatureValues[j].ts == data[i].ts && temperatureValues[j].value == data[i].value) {
-                            temperatureValues[j].ts = null;
-                        }
+	    var data = {}
+            if (result && result.series && result.series.length == 1){
+		data = result.series[0].points;
+            }
+	    else {
+		done(new Error("Cannot get data."));
+	    }
+            if (data && data.length == temperatureValues.length) {
+		for (var j = 0; j < temperatureValues.length; j++) {
+                    if (temperatureValues[j].ts == data[j].ts && temperatureValues[j].value == data[j].value) {
+			temperatureValues[j].ts = null;
                     }
-                }
+		}
+            }
 
-                var err = "";
-                for (var i = 0; i < temperatureValues.length; i++) {
-                    if (temperatureValues[i].ts != null) {
-                        err += "[" + i + "]=" + temperatureValues[i].value + " ";
-                    }
+	    var err = "";
+            for (var i = 0; i < temperatureValues.length; i++) {
+		if (temperatureValues[i].ts != null) {
+                    err += "[" + i + "]=" + temperatureValues[i].value + " ";
                 }
-                if (err.length == 0) {
-                    done();
-                } else {
-                    done(new Error("Got wrong data for " + err))
-                }
+            }
+            if (err.length == 0) {
+		done();
             } else {
-                done(new Error("Cannot get data"))
+                done(new Error("Got wrong data for " + err))
             }
 
         })
     }).timeout(10000);
 
-    it('Shall check observation in advance ways', function(done) {
-        helpers.data.searchDataAdvanced(firstObservationTime, userToken, accountId, deviceId, componentId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot get data: " + err))
-            }else {
-                assert.equal(response.data[0].deviceId, deviceId, 'advance search fail')
-                done()
-            }
-
-        })
-    }).timeout(10000);
-    
 });
 
 
@@ -921,6 +913,36 @@ describe("Do statistics rule subtests ...".bold,
          });
 
 
+describe("Do data sending subtests ...".bold,
+  function() {
+    var test;
+    var descriptions = require("./subtests/data-sending-tests").descriptions;
+     it(descriptions.sendAggregatedDataPoints,function(done) {
+       test = require("./subtests/data-sending-tests").test(userToken, accountId, deviceId, deviceToken, cbManager);
+       test.sendAggregatedDataPoints(done);
+     }).timeout(10000);
+     it(descriptions.receiveAggregatedDataPoints,function(done) {
+       test.receiveAggregatedDataPoints(done);
+     }).timeout(10000);
+     it(descriptions.sendAggregatedMultipleDataPoints,function(done) {
+       test.sendAggregatedMultipleDataPoints(done);
+     }).timeout(10000);
+     it(descriptions.receiveAggregatedMultipleDataPoints,function(done) {
+       test.receiveAggregatedMultipleDataPoints(done);
+     }).timeout(10000);
+     it(descriptions.sendDataPointsWithLoc,function(done) {
+       test.sendDataPointsWithLoc(done);
+     }).timeout(10000);
+     it(descriptions.receiveDataPointsWithLoc,function(done) {
+       test.receiveDataPointsWithLoc(done);
+     }).timeout(10000);
+     it(descriptions.sendDataPointsWithAttributes,function(done) {
+       test.sendDataPointsWithAttributes(done);
+     }).timeout(10000);
+     it(descriptions.receiveDataPointsWithAttributes,function(done) {
+       test.receiveDataPointsWithAttributes(done);
+     }).timeout(10000);
+   });
 
 describe("Geting and manage alerts ... \n".bold, function(){
 
@@ -1405,3 +1427,4 @@ describe("change password and delete receiver ... \n".bold, function(){
     })
  
 })   
+

@@ -196,6 +196,57 @@ var deleteRule = function(userToken, accountId, ruleId){
     });
 };
 
+var submitDataList = function(valueList, deviceToken, accountId, deviceId, cidList){
+    return new Promise((resolve, reject) => {
+	helpers.data.submitDataList(valueList, deviceToken, accountId, deviceId, cidList, function(err, response){
+	    if (err) {
+		reject(err);
+	    } else {
+		resolve(response);
+	    }
+	});
+    });
+}
+
+
+var submitData = function(value, deviceToken, accountId, deviceId, cid){
+    return new Promise((resolve, reject) => {
+	helpers.data.submitData(value, deviceToken, accountId, deviceId, cid, function(err, response){
+	    if (err) {
+		reject(err);
+	    } else {
+		resolve(response);
+	    }
+	});
+    });
+}
+
+
+var searchData = function(from, to, userToken, accountId, deviceId, cid, queryMeasureLocation, targetFilter){
+    return new Promise((resolve, reject) => {
+	helpers.data.searchData(from, to, userToken, accountId, deviceId, cid, queryMeasureLocation, targetFilter, function(err, response){
+	    if (err) {
+		reject(err);
+	    } else {
+		resolve(response);
+	    }
+	});
+    });
+}
+
+
+var searchDataAdvanced = function(from, to, userToken, accountId, deviceId, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly){
+    return new Promise((resolve, reject) => {
+	helpers.data.searchDataAdvanced(from, to, userToken, accountId, deviceId, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly, function(err, response){
+	    if (err) {
+		reject(err);
+	    } else {
+		resolve(response);
+	    }
+	});
+    });
+}
+
 module.exports = {
     checkObservations: checkObservations,
     addComponent: addComponent,
@@ -204,5 +255,9 @@ module.exports = {
     createStatisticRule: createStatisticRule,
     createTbRule: createTbRule,
     deleteComponent: deleteComponent,
-    deleteRule: deleteRule
+    deleteRule: deleteRule,
+    submitDataList: submitDataList,
+    submitData: submitData,
+    searchData: searchData,
+    searchDataAdvanced: searchDataAdvanced
 };
