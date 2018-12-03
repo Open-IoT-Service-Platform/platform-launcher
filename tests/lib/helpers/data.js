@@ -217,6 +217,9 @@ function searchDataAdvanced(from, to, userToken, accountId, deviceId, cidList, s
     if (countOnly !== undefined) {
       data.body.countOnly = countOnly;
     }
+    if (to != undefined) {
+      data.body.to = to;
+    }
 
     api.data.searchDataAdvanced(data, function(err, response) {
         if (err) {

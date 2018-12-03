@@ -728,7 +728,6 @@ describe("Creating rules ... \n".bold, function() {
     }).timeout(20000);
 });
 
-
 describe("Sending observations and checking rules ...\n".bold, function() {
 
     it('Shall send observation and check rules', function(done) {
@@ -912,7 +911,6 @@ describe("Do statistics rule subtests ...".bold,
 	     }).timeout(10000);
          });
 
-
 describe("Do data sending subtests ...".bold,
   function() {
     var test;
@@ -941,6 +939,24 @@ describe("Do data sending subtests ...".bold,
      }).timeout(10000);
      it(descriptions.receiveDataPointsWithAttributes,function(done) {
        test.receiveDataPointsWithAttributes(done);
+     }).timeout(10000);
+     it(descriptions.receiveDataPointsWithSelectedAttributes,function(done) {
+       test.receiveDataPointsWithSelectedAttributes(done);
+     }).timeout(10000);
+     it(descriptions.receiveDataPointsCount,function(done) {
+       test.receiveDataPointsCount(done);
+     }).timeout(10000);
+     it(descriptions.receiveAggregations,function(done) {
+       test.receiveAggregations(done);
+     }).timeout(10000);
+     it(descriptions.receiveSubset,function(done) {
+       test.receiveSubset(done);
+     }).timeout(10000);
+     it(descriptions.sendMaxAmountOfSamples,function(done) {
+       test.sendMaxAmountOfSamples(done);
+     }).timeout(10000);
+     it(descriptions.receiveMaxAmountOfSamples,function(done) {
+       test.receiveMaxAmountOfSamples(done);
      }).timeout(10000);
    });
 
