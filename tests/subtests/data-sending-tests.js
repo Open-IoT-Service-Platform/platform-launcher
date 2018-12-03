@@ -33,6 +33,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
   var dataValues3Time;
   var dataValues4Time;
   const MIN_NUMBER = 0.0001;
+  const MAX_SAMPLES = 1000;
 
   var dataValues1 = [
     [{
@@ -255,6 +256,14 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     }]
   ];
 
+  var aggregation = {
+    MAX: 0,
+    MIN: 1,
+    COUNT: 2,
+    SUM: 3,
+    SUMOFSQUARES: 4
+  }
+
   var createObjectFromData = function(sample, sampleHeader){
     var o = {};
     sample.forEach(function(element, index) {
@@ -271,7 +280,12 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     return o;
   }
 
-  var locEqual = function(dataValue, element) {
+  var locEqual = function(dataValue, element, onlyExistingAttr) {
+    if (onlyExistingAttr) {
+      if (element.lat === undefined && element.long === undefined) {
+        return true;
+      }
+    }
     if (dataValue.loc == undefined) {
       if ((element.lat == undefined || element.lat === "") && (element.lat == undefined || element.lon === "") && (element.alt == undefined || element.alt === "")) {
         return true;
@@ -288,26 +302,31 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     }
   }
 
-var attrEqual = function(dataValue, element) {
+var attrEqual = function(dataValue, element, onlyExistingAttr) {
   var result = true;
   if (dataValue.attributes !== undefined) {
     Object.keys(dataValue.attributes).forEach(function(el) {
-      if (element[el] != dataValue.attributes[el]) {
+      if (!onlyExistingAttr && element[el] != dataValue.attributes[el]) {
         result = false;
+      } else {
+        if (element[el] !== undefined && element[el] != dataValue.attributes[el]){
+          result = false;
+        }
       }
     })
   }
   return result;
 }
 
-  var comparePoints = function(dataValues, points) {
+  var comparePoints = function(dataValues, points, onlyExistingAttributes) {
     var result = true;
     var reason = "";
+    var onlyExistingAttr = onlyExistingAttributes == undefined ? false : onlyExistingAttributes;
     points.forEach(function(element, index) {
       if ((element.ts != dataValues[index].ts) ||
         (element.value != dataValues[index].value) ||
-        !locEqual(dataValues[index], element) ||
-        !attrEqual(dataValues[index], element)) {
+        !locEqual(dataValues[index], element, onlyExistingAttr) ||
+        !attrEqual(dataValues[index], element, onlyExistingAttr)) {
         result = false;
         reason = "Point " + JSON.stringify(element) + " does not fit to expected value " +
           JSON.stringify(dataValues[index]);
@@ -327,6 +346,21 @@ var attrEqual = function(dataValue, element) {
     return results;
   }
 
+  var calcAggregationsPerComponent = function(flattenedArray){
+
+    return flattenedArray.reduce(function(acc, val) {
+        if (val.value > acc[val.component][aggregation.MAX]) {
+          acc[val.component][aggregation.MAX] = val.value;
+        }
+        if (val.value < acc[val.component][aggregation.MIN]) {
+          acc[val.component][aggregation.MIN] = val.value;
+        }
+        acc[val.component][aggregation.COUNT]++;
+        acc[val.component][aggregation.SUM] += val.value;
+        acc[val.component][aggregation.SUMOFSQUARES] += val.value * val.value;
+        return acc;
+    }, [[Number.MIN_VALUE, Number.MAX_VALUE, 0, 0, 0], [Number.MIN_VALUE, Number.MAX_VALUE, 0, 0, 0]])
+  }
 
   //********************* Main Object *****************//
   //---------------------------------------------------//
@@ -493,6 +527,132 @@ var attrEqual = function(dataValue, element) {
         });
 
     },
+    "receiveDataPointsWithSelectedAttributes": function(done) {
+      var flattenedDataValues = flattenArray(dataValues4);
+      promtests.searchDataAdvanced(dataValues4Time, -1, deviceToken, accountId, deviceId, [componentId[1]], false, ["key1"], undefined, undefined)
+        .then((result) => {
+          if (result.data[0].components.length != 1) done("Wrong number of point series!");
+          var compIndex = 0;
+
+          var resultObjects = result.data[0].components[compIndex].samples.map(
+            (element) =>
+            createObjectFromData(element, result.data[0].components[compIndex].samplesHeader)
+          );
+          var comparisonResult = comparePoints(flattenedDataValues, resultObjects, true);
+          if (comparisonResult !== true) {
+            done(comparisonResult);
+          } else {
+            done();
+          }
+        })
+        .catch((err) => {
+          done(err);
+        });
+    },
+    "receiveDataPointsCount": function(done) {
+      var expectedRowCount = flattenArray(dataValues1).length
+        + flattenArray(dataValues2).length
+        + flattenArray(dataValues3).length
+        + flattenArray(dataValues4).length;
+      promtests.searchDataAdvanced(dataValues1Time, -1, deviceToken, accountId, deviceId, componentId, false, undefined, undefined, true)
+        .then((result) => {
+          if (result.data[0].components.length != 2) done("Wrong number of point series!");
+
+          assert.equal(result.rowCount, expectedRowCount);
+          done();
+        })
+        .catch((err) => {
+          done(err);
+        });
+    },
+    "receiveAggregations": function(done) {
+      var aggr1 = calcAggregationsPerComponent(flattenArray(dataValues1));
+      var aggr2 = calcAggregationsPerComponent(flattenArray(dataValues2));
+      var aggr3 = calcAggregationsPerComponent(flattenArray(dataValues3));
+      var aggr4 = calcAggregationsPerComponent(flattenArray(dataValues4));
+      var allAggregation = [aggr1, aggr2, aggr3, aggr4].reduce(function(acc, val){
+        [0, 1].forEach(function(index){
+            if (acc[index][aggregation.MAX] < val[index][aggregation.MAX]) {
+              acc[index][aggregation.MAX] = val[index][aggregation.MAX];
+            }
+            if (val[index][aggregation.COUNT]
+              && acc[index][aggregation.MIN] > val[index][aggregation.MIN]) {
+              acc[index][aggregation.MIN] = val[index][aggregation.MIN];
+            }
+            acc[index][aggregation.COUNT] += val[index][aggregation.COUNT];
+            acc[index][aggregation.SUM] += val[index][aggregation.SUM];
+            acc[index][aggregation.SUMOFSQUARES] += val[index][aggregation.SUMOFSQUARES];
+        });
+        return acc;
+      },[[Number.MIN_VALUE, Number.MAX_VALUE, 0, 0, 0], [Number.MIN_VALUE, Number.MAX_VALUE, 0, 0, 0]])
+
+      promtests.searchDataAdvanced(dataValues1Time, -1, deviceToken, accountId, deviceId, componentId, false, undefined, "only", false)
+        .then((result) => {
+          if (result.data[0].components.length != 2) done("Wrong number of point series!");
+          var mapping = [0, 1];
+          if (result.data[0].components[0].componentId !== componentId[0]) {
+            mapping = [1, 0];
+          }
+          [0, 1].forEach(function(index){
+            assert.equal(allAggregation[index][aggregation.MAX], result.data[0].components[mapping[index]].max);
+            assert.equal(allAggregation[index][aggregation.MIN], result.data[0].components[mapping[index]].min);
+            assert.equal(allAggregation[index][aggregation.COUNT], result.data[0].components[mapping[index]].count);
+            assert.equal(allAggregation[index][aggregation.SUM], result.data[0].components[mapping[index]].sum);
+            assert.equal(allAggregation[index][aggregation.SUMOFSQUARES], result.data[0].components[mapping[index]].sumOfSquares);
+          })
+          done();
+        })
+        .catch((err) => {
+          done(err);
+        });
+    },
+    "receiveSubset": function(done) {
+      promtests.searchDataAdvanced(dataValues2Time + 30, dataValues2Time + 60, deviceToken, accountId, deviceId, [componentId[0]], false, undefined, undefined, false)
+        .then((result) => {
+          if (result.data[0].components.length != 1) done("Wrong number of point series!");
+          assert.equal(result.rowCount, 3);
+          done();
+        })
+        .catch((err) => {
+          done(err);
+        });
+    },
+    "sendMaxAmountOfSamples": function(done) {
+      var dataList = [];
+
+      for (var i = 0; i < MAX_SAMPLES; i++){
+        var ts = (i + 1) * 1000000
+        var obj = {
+          component:0,
+          ts: ts,
+          value: i
+        }
+        dataList.push(obj);
+      }
+      promtests.submitDataList(dataList, deviceToken, accountId, deviceId, componentId)
+        .then(() => {
+          done()
+        })
+        .catch((err) => {
+          done(err);
+        });
+    },
+    "receiveMaxAmountOfSamples": function(done) {
+      promtests.searchDataAdvanced(1000000, MAX_SAMPLES * 1000000, deviceToken, accountId, deviceId, [componentId[0]], false, undefined, undefined, false)
+        .then((result) => {
+          if (result.data[0].components.length != 1) done("Wrong number of point series!");
+          assert.equal(result.rowCount, MAX_SAMPLES);
+          var samples = result.data[0].components[0].samples;
+          samples.forEach(function(element, i){
+              assert.equal(element[1], i);
+              assert.equal(element[0], (i + 1) * 1000000);
+          })
+          done();
+        })
+        .catch((err) => {
+          done(err);
+        });
+      },
     "cleanup": function(done) { }
   };
 };
@@ -505,7 +665,13 @@ var descriptions = {
   "sendDataPointsWithLoc": "Sending data points with location metadata",
   "receiveDataPointsWithLoc": "Receiving data points with location metadata",
   "sendDataPointsWithAttributes": "Sending data points with attributes",
-  "receiveDataPointsWithAttributes": "Receiving data points with attributes",
+  "receiveDataPointsWithAttributes": "Receiving data points with all attributes",
+  "receiveDataPointsCount": "Receive only count of points",
+  "receiveAggregations": "Receive Max, Min, etc. aggregations",
+  "receiveSubset": "receive subset based on timestamps",
+  "sendMaxAmountOfSamples": "Send maximal allowed samples per request",
+  "receiveMaxAmountOfSamples": "Receive maximal allowed samples per request",
+  "receiveDataPointsWithSelectedAttributes": "Receiving data points with selected attributes",
   "cleanup": "Cleanup components, commands, rules created for subtest"
 };
 
