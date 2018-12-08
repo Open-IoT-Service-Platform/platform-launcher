@@ -263,3 +263,21 @@ services:
       - 9411:9411
     environment:
       COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+  opentsdb:
+    image: oisp/opentsdb:${DOCKER_TAG}
+    build:
+      context: ./docker-opentsdb
+      labels:
+        - oisp=true
+        - ois.git_commit=${GIT_COMMIT_OPENTSDB}
+    ports:
+      - 4242:4242
+    depends_on:
+      - hbase-master
+      - zookeeper
+    command: /opt/wait-for-it.sh hbase-master:9090 -t 300 -- /opt/wait-for-it.sh zookeeper:2181 -t 300 -- /opt/tsdb-startup.sh
+    environment:
+      - OISP_ZOOKEEPER_CONFIG=${OISP_ZOOKEEPER_CONFIG}
+      - OISP_OPENTSDB_CONFIG=${OISP_OPENTSDB_CONFIG}
+      - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
+

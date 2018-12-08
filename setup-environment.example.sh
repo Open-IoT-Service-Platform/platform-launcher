@@ -20,6 +20,8 @@ export ZOOKEEPER_KAFKA='zookeeper'
 export ZOOKEEPER_KAFKA_PORT='2181'
 export ZOOKEEPER_HBASE='zookeeper'
 export ZOOKEEPER_HBASE_PORT='2181'
+
+HBASE_ROOTDIR=/hbase
 export POSTGRES='postgres'
 export POSTGRES_DB_REGULAR="iot"
 export POSTGRES_DB=${POSTGRES_DB_REGULAR} # postgres needs always regular DB name for initialization. It automatically initiates the test DB as well.
@@ -38,6 +40,8 @@ export BACKEND='backend:8080'
 export NGINX='nginx'
 export REDIS='redis'
 export REDIS_PORT='6379'
+
+OPENTSDB_PORT=4242
 
 export SMTP_HOST="${SMTP_HOST:-auth.smtp.1and1.co.uk}"
 export SMTP_PORT="${SMTP_PORT:-587}"
@@ -271,9 +275,8 @@ export OISP_KAFKA_CONFIG=\
 
 export OISP_ZOOKEEPER_CONFIG=\
 '{
-  "zkCluster": "'${ZOOKEEPER_KAFKA}:${ZOOKEEPER_KAFKA_PORT}'",
-  "zkNode": "/tmp"
-}'
+  "zkCluster": "'${ZOOKEEPER_KAFKA}:${ZOOKEEPER_KAFKA_PORT}'"
+'}
 
 export OISP_KERBEROS_CONFIG=\
 '{
@@ -295,7 +298,13 @@ export OISP_HADOOP_PROPERTIES=\
   "hbase.security.authentication": "simple",
   "ha.zookeeper.quorum": "'$ZOOKEEPER_HBASE'",
   "hbase.zookeeper.property.clientPort": "'$ZOOKEEPER_HBASE_PORT'",
-  "hbase.zookeeper.quorum": "'$ZOOKEEPER_HBASE'"
+  "hbase.zookeeper.quorum": "'$ZOOKEEPER_HBASE'",
+  "hbase.rootdir": "'$HBASE_ROOTDIR'"
+}'
+
+export OISP_OPENTSDB_CONFIG=\
+'{
+  "port": '$OPENTSDB_PORT'
 }'
 
 export OISP_POSTGRES_CONFIG=\
