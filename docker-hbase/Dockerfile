@@ -76,4 +76,4 @@ EXPOSE 2181
 # HBase Master web UI at :16010/master-status;  ZK at :16010/zk.jsp
 EXPOSE 16010
 
-ENTRYPOINT ["/opt/entrypoint.sh"]
+#ENTRYPOINT ["/opt/entrypoint.sh"]
