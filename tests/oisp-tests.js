@@ -919,11 +919,17 @@ describe("Do data sending subtests ...".bold,
        test = require("./subtests/data-sending-tests").test(userToken, accountId, deviceId, deviceToken, cbManager);
        test.sendAggregatedDataPoints(done);
      }).timeout(10000);
+     it(descriptions.waitForBackendSynchronization,function(done) {
+       test.waitForBackendSynchronization(done);
+     }).timeout(10000);
      it(descriptions.receiveAggregatedDataPoints,function(done) {
        test.receiveAggregatedDataPoints(done);
      }).timeout(10000);
      it(descriptions.sendAggregatedMultipleDataPoints,function(done) {
        test.sendAggregatedMultipleDataPoints(done);
+     }).timeout(10000);
+     it(descriptions.waitForBackendSynchronization,function(done) {
+       test.waitForBackendSynchronization(done);
      }).timeout(10000);
      it(descriptions.receiveAggregatedMultipleDataPoints,function(done) {
        test.receiveAggregatedMultipleDataPoints(done);
@@ -931,11 +937,17 @@ describe("Do data sending subtests ...".bold,
      it(descriptions.sendDataPointsWithLoc,function(done) {
        test.sendDataPointsWithLoc(done);
      }).timeout(10000);
+     it(descriptions.waitForBackendSynchronization,function(done) {
+       test.waitForBackendSynchronization(done);
+     }).timeout(10000);
      it(descriptions.receiveDataPointsWithLoc,function(done) {
        test.receiveDataPointsWithLoc(done);
      }).timeout(10000);
      it(descriptions.sendDataPointsWithAttributes,function(done) {
        test.sendDataPointsWithAttributes(done);
+     }).timeout(10000);
+     it(descriptions.waitForBackendSynchronization,function(done) {
+       test.waitForBackendSynchronization(done);
      }).timeout(10000);
      it(descriptions.receiveDataPointsWithAttributes,function(done) {
        test.receiveDataPointsWithAttributes(done);
@@ -955,8 +967,14 @@ describe("Do data sending subtests ...".bold,
      it(descriptions.sendMaxAmountOfSamples,function(done) {
        test.sendMaxAmountOfSamples(done);
      }).timeout(10000);
+     it(descriptions.waitForBackendSynchronization,function(done) {
+       test.waitForBackendSynchronization(done);
+     }).timeout(10000);
      it(descriptions.receiveMaxAmountOfSamples,function(done) {
        test.receiveMaxAmountOfSamples(done);
+     }).timeout(10000);
+     it(descriptions.cleanup,function(done) {
+       test.cleanup(done);
      }).timeout(10000);
    });
 
@@ -1443,4 +1461,3 @@ describe("change password and delete receiver ... \n".bold, function(){
     })
  
 })   
-
