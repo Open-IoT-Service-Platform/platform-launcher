@@ -13,6 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+CONFIG_FILE=/etc/opentsdb/opentsdb.conf
+CONFIG_SRC=/opt/opentsdb/src/opentsdb.conf
+mkdir -p /etc/opentsdb
+cp ${CONFIG_SRC} ${CONFIG_FILE}
+
+function replace_config {
+  config_line=$1
+  replacement="${config_line} = ${2//\//\\/}"
+  line_start=$3
+  echo sed -i "s/${line_start}.*${config_line} =.*$/${replacement}/" ${CONFIG_FILE}
+  sed -i "s/${line_start}.*${config_line} =.*$/${replacement}/" ${CONFIG_FILE}
+}
+
+function add_config {
+  config_line=$1
+  replacement="${config_line} = $2"
+  echo ${replacement} >> ${CONFIG_FILE}
+}
+
 echo "Starting $0"
 ZKCLUSTER=$(echo ${OISP_ZOOKEEPER_CONFIG} | jq   '.zkCluster' | tr -d '"')
 ZKBASE=$(echo ${OISP_HADOOP_PROPERTIES} | jq   '.["hbase.rootdir"]' | tr -d '"')
@@ -25,7 +44,13 @@ export HBASE_HOME=/opt/hbase
 export COMPRESSION=NONE
 echo status | /opt/hbase/bin/hbase shell
 sleep 10
+# update the config file
+replace_config "tsd.storage.hbase.zk_basedir" ${ZKBASE} "#"
+replace_config "tsd.storage.hbase.zk_quorum" ${ZKCLUSTER} "#"
+replace_config "tsd.network.port" ${PORT} ""
+replace_config "tsd.core.auto_create_metrics" "true" "#"
+add_config "tsd.http.request.enable_chunked" "true"
+
 /opt/opentsdb/src/create_table.sh
 echo "Result $?"
-echo tsdb tsd $@ --auto-metric --cachedir=/tmp --staticroot=/usr/share/opentsdb/static/ --zkquorum=${ZKCLUSTER} --zkbasedir=${ZKBASE} --port=${PORT}
-tsdb tsd $@ --auto-metric --cachedir=/tmp --staticroot=/usr/share/opentsdb/static/ --zkquorum=${ZKCLUSTER} --zkbasedir=${ZKBASE} --port=${PORT}
+tsdb tsd $@ --auto-metric --cachedir=/tmp --staticroot=/usr/share/opentsdb/static/
