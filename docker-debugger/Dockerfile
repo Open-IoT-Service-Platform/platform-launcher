@@ -10,14 +10,16 @@ RUN apt-get update
 RUN apt-get install -y kubectl
 
 RUN npm install --global n
-RUN n 6
-
+RUN n 8
 
 RUN pip3 install locustio oisp
 
 ENV OISP_REMOTE https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 
 RUN mkdir /home/platform-launcher
+RUN wget https://github.com/tsenart/vegeta/releases/download/cli%2Fv12.1.0/vegeta-12.1.0-linux-amd64.tar.gz && \
+    tar -xzvf vegeta-12.1.0-linux-amd64.tar.gz && \
+    cp vegeta /usr/bin/vegeta
 
 WORKDIR /home/platform-launcher
 

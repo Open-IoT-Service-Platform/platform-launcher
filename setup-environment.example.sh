@@ -252,7 +252,7 @@ export OISP_ZOOKEEPER_CONFIG=\
 '{
   "zkCluster": "'${ZOOKEEPER_KAFKA}:${ZOOKEEPER_KAFKA_PORT}'",
   "zkNode": "/tmp"
-'}
+}'
 
 export OISP_KERBEROS_CONFIG=\
 '{
