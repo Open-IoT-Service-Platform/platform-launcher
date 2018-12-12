@@ -3,6 +3,6 @@ imageCredentials:
     username: invalid_username
     password: invalid_password
 oisp:
-    url: "http://k8s.streammyiot.com"
+    url: "http://dashboard.oisp:4001"
 locust:
-    numberSlaves: 10
+    numberSlaves: 3

@@ -27,6 +27,11 @@ spec:
           mountPath: /locust
         workingDir: /locust
         command: ["locust", "--slave", "--master-host", "locust-master"]
+        resources:
+          limits:
+            cpu: "1"
+          requests:
+            cpu: "1"
       imagePullSecrets:
         - name: dockercred
       volumes:

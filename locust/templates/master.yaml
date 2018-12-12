@@ -44,6 +44,9 @@ spec:
           mountPath: /locust
         workingDir: /locust
         command: ["locust", "--host", "{{.Values.oisp.url}}", "--master"]
+        resources:
+          requests:
+            cpu: "200m"
       imagePullSecrets:
         - name: dockercred
       volumes:
