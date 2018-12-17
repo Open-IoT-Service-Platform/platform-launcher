@@ -36,6 +36,28 @@ spec:
             cpu: "2"
           limits:
             cpu: "2"
+      - name: jaeger-agent
+        image: jaegertracing/jaeger-agent:1.6.0
+        ports:
+        - containerPort: 5775
+          protocol: UDP
+        - containerPort: 5778
+          protocol: TCP
+        - containerPort: 6831
+          protocol: UDP
+        - containerPort: 6832
+          protocol: UDP
+        command:
+          - "/go/bin/agent-linux"
+          - "--collector.host-port=jaeger-collector:14267"
+        resources:
+          limits:
+            memory: 50M
+            cpu: 100m
+          requests:
+            memory: 50M
+            cpu: 100m
+
       imagePullSecrets:
         - name: dockercred
       dnsPolicy: ClusterFirst
@@ -43,7 +65,7 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
-status: {}
+
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
