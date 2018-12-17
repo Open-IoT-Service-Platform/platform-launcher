@@ -14,7 +14,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: websocket-server    
+  name: websocket-server
   labels:
     app: websocket-server
 spec:
@@ -38,7 +38,7 @@ spec:
         image: oisp/websocket-server:latest
         ports:
         - containerPort: 5000
-          protocol: TCP      	
+          protocol: TCP
         args:
         - ./wait-for-it.sh
         - postgres:5432
@@ -49,16 +49,26 @@ spec:
         env:
         - name: NODE_ENV
           value: local
-        - name: VCAP_APPLICATION
+        - name: OISP_WEBSOCKET_SERVER_CONFIG
           valueFrom:
             configMapKeyRef:
-              key: vcap.application
               name: oisp-config
-        - name: VCAP_SERVICES
+              key: websocket-server
+        - name: OISP_POSTGRES_CONFIG
           valueFrom:
             configMapKeyRef:
-              key: vcap.services
               name: oisp-config
+              key: postgres
+        - name: OISP_KAFKA_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: kafka
+        - name: OISP_WEBSOCKETUSER_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: websocket-user
         volumeMounts:
         - mountPath: /app/keys
           name: jwt-keys
@@ -81,7 +91,7 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: dashboard-ws  
+  name: dashboard-ws
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.org/proxy-connect-timeout: "3600"
