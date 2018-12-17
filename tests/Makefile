@@ -60,10 +60,10 @@ ifeq ($(TESTING_PLATFORM), docker)
 	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
 else
 	@$(call msg,"Resetting database ...");
-	@kubectl exec -i $(DASHBOARD_POD) --  node /app/admin resetDB
+	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin resetDB
 
 	@$(call msg,"Adding a user for testing ...");
-	@kubectl exec -i $(DASHBOARD_POD) --  node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
+	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
 
 endif
 	@$(call msg,"Starting the e2e testing ...");
