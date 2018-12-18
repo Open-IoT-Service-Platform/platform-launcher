@@ -2,7 +2,20 @@ imageCredentials:
     registry: index.docker.io
     username: invalid_username
     password: invalid_password
+
+smtp:
+    host: smtp.ethereal.email
+    port: 586
+    username: username
+    password: password
+
+imap:
+    host: imap.ethereal.email
+    port: 993
+    username: username
+    password: password
+
 numberReplicas:
     frontend: 4
     backend: 1
-    debugger: 1
+    debugger: 0

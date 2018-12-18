@@ -1,2 +1,5 @@
 .DS_Store
 .docker-cred
+util/ethereal_creds
+node_modules/
+package-lock.json

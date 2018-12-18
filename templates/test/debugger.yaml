@@ -31,6 +31,15 @@ spec:
         name: debugger
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
+        env:
+        - name: IMAP_USERNAME
+          value: "{{ .Values.imap.username }}"
+        - name: IMAP_PASSWORD
+          value: "{{ .Values.imap.password }}"
+        - name: IMAP_HOST
+          value: "{{ .Values.imap.host }}"
+        - name: IMAP_PORT
+          value: "{{ .Values.imap.port }}"
         resources:
           requests:
             cpu: "2"
@@ -57,7 +66,6 @@ spec:
           requests:
             memory: 50M
             cpu: 100m
-
       imagePullSecrets:
         - name: dockercred
       dnsPolicy: ClusterFirst

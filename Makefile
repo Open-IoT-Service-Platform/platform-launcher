@@ -91,6 +91,26 @@ check-docker-cred-env:
 		echo "DOCKERPASS env var is undefined"; exit 1; \
 	fi
 
+## deploy-oisp-test: Deploy repository as HELM chart,
+## create an ethereal address, and make sure there is
+## a debugger container.
+##
+deploy-oisp-test: check-docker-cred-env
+	node ./util/ethereal.js util/ethereal_creds;
+	. util/ethereal_creds && \
+		helm install . --name $(NAME) --namespace $(NAMESPACE) \
+		--set imageCredentials.username="$$DOCKERUSER" \
+		--set imageCredentials.password="$$DOCKERPASS" \
+		--set smtp.host="$$SMTP_HOST" \
+		--set smtp.port="$$SMTP_PORT" \
+		--set smtp.username="$$SMTP_USERNAME" \
+		--set smtp.password="$$SMTP_PASSWORD" \
+		--set imap.host="$$IMAP_HOST" \
+		--set imap.port="$$IMAP_PORT" \
+		--set imap.username="$$IMAP_USERNAME" \
+		--set imap.password="$$IMAP_PASSWORD" \
+		--set numberReplicas.debugger=1;
+
 ## deploy-oisp: Deploy repository as HELM chart
 ##
 deploy-oisp: check-docker-cred-env
@@ -138,16 +158,16 @@ reset-db:
 ## add-test-user: Add a test user via admin tool in frontend
 ##
 add-test-user:
-	for i in $(shell seq 1 10); do kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) -- node admin addUser user$${i}@example.com password admin; done;
+	for i in $(shell seq 1 10); do kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) -c dashboard -- node admin addUser user$${i}@example.com password admin; done;
 
 
 ## prepare-tests: Pull the latest repo in the debugger pod
 ##     This has no permanent effect as the pod on which the tests
 ##     are prepared is mortal
 prepare-tests:
-	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -- /bin/bash -c "rm -rf *"
-	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -- /bin/bash -c "rm -rf .* || true"
-	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -- \
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger -- /bin/bash -c "rm -rf *"
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger -- /bin/bash -c "rm -rf .* || true"
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger -- \
             git clone $(TEST_REPO) -b $(TEST_BRANCH) .
 
 ## test: Run tests
@@ -155,7 +175,8 @@ prepare-tests:
 ## Assumes that the platform is already deployed
 ##
 test: prepare-tests
-	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -- make test TESTING_PLATFORM=kubernetes TERM=xterm
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger \
+		-- /bin/bash -c "cp setup-environment.example.sh setup-environment.sh && cd tests && n 6 && make test TESTING_PLATFORM=kubernetes TERM=xterm"
 
 ## proxy: Run kubectl proxy and port-forwarding of various pods
 ##

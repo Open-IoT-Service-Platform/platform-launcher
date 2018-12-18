@@ -116,11 +116,11 @@ data:
 # TODO fix this, plaintext password
   smtp: |
     {
-    "host": "auth.smtp.1and1.co.uk",
-    "port": "587",
+    "host": "{{ .Values.smtp.host }}",
+    "port": "{{ .Values.smtp.port }}",
     "protocol": "smtp",
-    "username": "test.sender@streammyiot.com",
-    "password": "xxxxx"
+    "username": "{{ .Values.smtp.username }}",
+    "password": "{{ .Values.smtp.password }}"
     }
   dashboard-security: |
     {
