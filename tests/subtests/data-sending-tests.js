@@ -26,12 +26,24 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
   var componentNames = ["temperature-sensor-sdt", "humidity-sensor-sdt"];
   var componentTypes = ["temperature.v1.0", "humidity.v1.0"];
   var promtests = require('./promise-wrap');
+  var uuidv4 = require('uuid/v4');
   var rules = [];
   var componentId = [];
   var dataValues1Time;
   var dataValues2Time;
   var dataValues3Time;
   var dataValues4Time;
+  var dataValues5StartTime;
+  var dataValues5StopTime;
+  var dataValues6StartTime;
+  var dataValues6StopTime;
+  var accountId2;
+  var accountName2 = "badAccount";
+  var userToken2;
+  var username2 = process.env.USERNAME2;
+  var password2 = process.env.PASSWORD2;
+  var newDeviceId = "d-e-v-i-c-e";
+  var newComponentId;
   const MIN_NUMBER = 0.0001;
   const MAX_SAMPLES = 1000;
   const BASE_TIMESTAMP = 1000000000000
@@ -190,7 +202,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
       component: 0,
       value: 11,
       ts: 20000 + BASE_TIMESTAMP,
-      loc: [9.8765, 432.1, 09.876]
+      loc: [9.8765, 432.1, 9.876]
     }],
     [{
       component: 0,
@@ -257,6 +269,66 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     }]
   ];
 
+  var dataValues5 = [
+    [{
+      component: 2,
+      value: 10.1,
+      ts: 1100000000 + BASE_TIMESTAMP
+    }],
+    [{
+      component: 0,
+      value: 10,
+      ts: 1100020000 + BASE_TIMESTAMP
+    },
+    {
+      component: 2,
+      value: 12.3,
+      ts: 1100030000 + BASE_TIMESTAMP
+    }
+    ],
+    [{
+      component: 0,
+      value: 13.4,
+      ts: 1100040000 + BASE_TIMESTAMP
+    },
+    {
+      component: 0,
+      value: 20,
+      ts: 1100050000 + BASE_TIMESTAMP
+    },
+    {
+      component: 2,
+      value: 15.6,
+      ts: 1100060000 + BASE_TIMESTAMP
+    }]
+  ];
+
+  var dataValues6 = [
+    {
+      component: 0,
+      value: 1,
+      ts: 1200000000 + BASE_TIMESTAMP
+    },
+    {
+      component: 0,
+      value: 2,
+      ts: 1200020000 + BASE_TIMESTAMP
+    }
+  ]
+
+  var dataValues7 = [
+    {
+      component: 0,
+      value: 101,
+      ts: 1200000001 + BASE_TIMESTAMP
+    },
+    {
+      component: 0,
+      value: 102,
+      ts: 1200020001 + BASE_TIMESTAMP
+    }
+  ]
+
   var aggregation = {
     MAX: 0,
     MIN: 1,
@@ -265,7 +337,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     SUMOFSQUARES: 4
   }
 
-  var createObjectFromData = function(sample, sampleHeader){
+  var createObjectFromData = function(sample, sampleHeader) {
     var o = {};
     sample.forEach(function(element, index) {
       if (element != "") {
@@ -303,21 +375,21 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     }
   }
 
-var attrEqual = function(dataValue, element, onlyExistingAttr) {
-  var result = true;
-  if (dataValue.attributes !== undefined) {
-    Object.keys(dataValue.attributes).forEach(function(el) {
-      if (!onlyExistingAttr && element[el] != dataValue.attributes[el]) {
-        result = false;
-      } else {
-        if (element[el] !== undefined && element[el] != dataValue.attributes[el]){
+  var attrEqual = function(dataValue, element, onlyExistingAttr) {
+    var result = true;
+    if (dataValue.attributes !== undefined) {
+      Object.keys(dataValue.attributes).forEach(function(el) {
+        if (!onlyExistingAttr && element[el] != dataValue.attributes[el]) {
           result = false;
+        } else {
+          if (element[el] !== undefined && element[el] != dataValue.attributes[el]) {
+            result = false;
+          }
         }
-      }
-    })
+      })
+    }
+    return result;
   }
-  return result;
-}
 
   var comparePoints = function(dataValues, points, onlyExistingAttributes) {
     var result = true;
@@ -350,19 +422,19 @@ var attrEqual = function(dataValue, element, onlyExistingAttr) {
     return results;
   }
 
-  var calcAggregationsPerComponent = function(flattenedArray){
+  var calcAggregationsPerComponent = function(flattenedArray) {
 
     return flattenedArray.reduce(function(acc, val) {
-        if (val.value > acc[val.component][aggregation.MAX]) {
-          acc[val.component][aggregation.MAX] = val.value;
-        }
-        if (val.value < acc[val.component][aggregation.MIN]) {
-          acc[val.component][aggregation.MIN] = val.value;
-        }
-        acc[val.component][aggregation.COUNT]++;
-        acc[val.component][aggregation.SUM] += val.value;
-        acc[val.component][aggregation.SUMOFSQUARES] += val.value * val.value;
-        return acc;
+      if (val.value > acc[val.component][aggregation.MAX]) {
+        acc[val.component][aggregation.MAX] = val.value;
+      }
+      if (val.value < acc[val.component][aggregation.MIN]) {
+        acc[val.component][aggregation.MIN] = val.value;
+      }
+      acc[val.component][aggregation.COUNT]++;
+      acc[val.component][aggregation.SUM] += val.value;
+      acc[val.component][aggregation.SUMOFSQUARES] += val.value * val.value;
+      return acc;
     }, [[Number.MIN_VALUE, Number.MAX_VALUE, 0, 0, 0], [Number.MIN_VALUE, Number.MAX_VALUE, 0, 0, 0]])
   }
 
@@ -516,7 +588,7 @@ var attrEqual = function(dataValue, element, onlyExistingAttr) {
           }
           var resultObjects = result.data[0].components[compIndex].samples.map(
             (element) =>
-            createObjectFromData(element, result.data[0].components[compIndex].samplesHeader)
+              createObjectFromData(element, result.data[0].components[compIndex].samplesHeader)
           );
           var comparisonResult = comparePoints(flattenedDataValues, resultObjects);
           if (comparisonResult !== true) {
@@ -539,7 +611,7 @@ var attrEqual = function(dataValue, element, onlyExistingAttr) {
 
           var resultObjects = result.data[0].components[compIndex].samples.map(
             (element) =>
-            createObjectFromData(element, result.data[0].components[compIndex].samplesHeader)
+              createObjectFromData(element, result.data[0].components[compIndex].samplesHeader)
           );
           var comparisonResult = comparePoints(flattenedDataValues, resultObjects, true);
           if (comparisonResult !== true) {
@@ -573,21 +645,21 @@ var attrEqual = function(dataValue, element, onlyExistingAttr) {
       var aggr2 = calcAggregationsPerComponent(flattenArray(dataValues2));
       var aggr3 = calcAggregationsPerComponent(flattenArray(dataValues3));
       var aggr4 = calcAggregationsPerComponent(flattenArray(dataValues4));
-      var allAggregation = [aggr1, aggr2, aggr3, aggr4].reduce(function(acc, val){
-        [0, 1].forEach(function(index){
-            if (acc[index][aggregation.MAX] < val[index][aggregation.MAX]) {
-              acc[index][aggregation.MAX] = val[index][aggregation.MAX];
-            }
-            if (val[index][aggregation.COUNT]
-              && acc[index][aggregation.MIN] > val[index][aggregation.MIN]) {
-              acc[index][aggregation.MIN] = val[index][aggregation.MIN];
-            }
-            acc[index][aggregation.COUNT] += val[index][aggregation.COUNT];
-            acc[index][aggregation.SUM] += val[index][aggregation.SUM];
-            acc[index][aggregation.SUMOFSQUARES] += val[index][aggregation.SUMOFSQUARES];
+      var allAggregation = [aggr1, aggr2, aggr3, aggr4].reduce(function(acc, val) {
+        [0, 1].forEach(function(index) {
+          if (acc[index][aggregation.MAX] < val[index][aggregation.MAX]) {
+            acc[index][aggregation.MAX] = val[index][aggregation.MAX];
+          }
+          if (val[index][aggregation.COUNT]
+            && acc[index][aggregation.MIN] > val[index][aggregation.MIN]) {
+            acc[index][aggregation.MIN] = val[index][aggregation.MIN];
+          }
+          acc[index][aggregation.COUNT] += val[index][aggregation.COUNT];
+          acc[index][aggregation.SUM] += val[index][aggregation.SUM];
+          acc[index][aggregation.SUMOFSQUARES] += val[index][aggregation.SUMOFSQUARES];
         });
         return acc;
-      },[[Number.MIN_VALUE, Number.MAX_VALUE, 0, 0, 0], [Number.MIN_VALUE, Number.MAX_VALUE, 0, 0, 0]])
+      }, [[Number.MIN_VALUE, Number.MAX_VALUE, 0, 0, 0], [Number.MIN_VALUE, Number.MAX_VALUE, 0, 0, 0]])
 
       promtests.searchDataAdvanced(dataValues1Time, -1, deviceToken, accountId, deviceId, componentId, false, undefined, "only", false)
         .then((result) => {
@@ -596,7 +668,7 @@ var attrEqual = function(dataValue, element, onlyExistingAttr) {
           if (result.data[0].components[0].componentId !== componentId[0]) {
             mapping = [1, 0];
           }
-          [0, 1].forEach(function(index){
+          [0, 1].forEach(function(index) {
             assert.closeTo(allAggregation[index][aggregation.MAX], result.data[0].components[mapping[index]].max, MIN_NUMBER);
             assert.closeTo(allAggregation[index][aggregation.MIN], result.data[0].components[mapping[index]].min, MIN_NUMBER);
             assert.closeTo(allAggregation[index][aggregation.COUNT], result.data[0].components[mapping[index]].count, MIN_NUMBER);
@@ -623,10 +695,10 @@ var attrEqual = function(dataValue, element, onlyExistingAttr) {
     "sendMaxAmountOfSamples": function(done) {
       var dataList = [];
 
-      for (var i = 0; i < MAX_SAMPLES; i++){
+      for (var i = 0; i < MAX_SAMPLES; i++) {
         var ts = (i + 1) * 1000000 + BASE_TIMESTAMP
         var obj = {
-          component:0,
+          component: 0,
           ts: ts,
           value: i
         }
@@ -646,29 +718,190 @@ var attrEqual = function(dataValue, element, onlyExistingAttr) {
           if (result.data[0].components.length != 1) done("Wrong number of point series!");
           assert.equal(result.rowCount, MAX_SAMPLES);
           var samples = result.data[0].components[0].samples;
-          samples.forEach(function(element, i){
-              assert.equal(element[1], i);
-              assert.equal(element[0], (i + 1) * 1000000 + BASE_TIMESTAMP);
+          samples.forEach(function(element, i) {
+            assert.equal(element[1], i);
+            assert.equal(element[0], (i + 1) * 1000000 + BASE_TIMESTAMP);
           })
           done();
         })
         .catch((err) => {
           done(err);
         });
-      },
-      "waitForBackendSynchronization": function(done) {
-        setTimeout(done, 2000);
+    },
+    "waitForBackendSynchronization": function(done) {
+      setTimeout(done, 2000);
 
-      },
-      "cleanup": function(done) {
-        promtests.deleteComponent(deviceToken, accountId, deviceId, componentId[0])
-        .then(() => promtests.deleteComponent(deviceToken, accountId, deviceId, componentId[1]))
-        .then(() => {done()})
+    },
+    "sendPartiallyWrongData": function(done) {
+      var proms = [];
+      var codes = [];
+      dataValues5StartTime = dataValues5[0][0].ts;
+      var dataValues5lastElement = dataValues5[dataValues5.length - 1];
+      var dataValues5lastLength = dataValues5[dataValues5.length - 1].length;
+      dataValues5StopTime = dataValues5lastElement[dataValues5lastLength - 1].ts;
+      componentId.push(uuidv4()); // 3rd id is random
+      dataValues5.forEach(function(element) {
+        proms.push(promtests.submitDataList(element, deviceToken, accountId, deviceId, componentId, {}));
+      });
+      Promise.all(proms.map(p => p.catch(e => e)))
+        .then(results => {
+          var parsedResults = results.map( (result) => {
+            //some results are string, some others objects
+            //Therefore if parsing fails, it must be an object already
+            try {
+              return JSON.parse(result);
+            } catch (e) {
+              return result;
+            }
+          })
+          assert.equal(parsedResults[0].code, 1412);
+          assert.equal(parsedResults[1].code, 6402);
+          assert.equal(parsedResults[2].code, 6402);
+          done();
+        })
+        .catch(err => done(err));
+
+    },
+    "receivePartiallySentData": function(done) {
+      var listOfExpectedResults = flattenArray(dataValues5)
+      .filter((elem) => elem.component != 2);
+      promtests.searchData(dataValues5StartTime, dataValues5StopTime, deviceToken, accountId, deviceId, componentId[0], false, {})
+        .then((result) => {
+          if (result.series.length != 1) done("Wrong number of point series!");
+          var comparisonResult = comparePoints(listOfExpectedResults, result.series[0].points);
+          if (comparisonResult === true) {
+            done();
+          } else {
+            done(comparisonResult);
+          }
+        })
         .catch((err) => {
           done(err);
         });
-      }
-    };
+    },
+    "sendDataAsAdmin": function(done) {
+      dataValues6StartTime = dataValues6[0].ts;
+      dataValues6StopTime = dataValues6[1].ts;
+      var username = process.env.USERNAME;
+      var password = process.env.PASSWORD;
+      assert.isNotEmpty(username, "no username provided");
+      assert.isNotEmpty(password, "no password provided");
+      promtests.authGetToken(username, password)
+      .then((userToken) => promtests.submitDataList(dataValues6, userToken, accountId, deviceId, componentId, {}))
+      .then(() => {
+        done()
+      })
+      .catch((err) => {
+        done(new Error(err));
+      })
+    },
+    "sendDataAsUser": function(done) {
+      var username = process.env.USERNAME;
+      var password = process.env.PASSWORD;
+      var username2 = process.env.USERNAME2;
+      var password2 = process.env.PASSWORD2;
+      var admin2Token;
+      var inviteId;
+      assert.isNotEmpty(username, "no username provided");
+      assert.isNotEmpty(password, "no password provided");
+      assert.isNotEmpty(username2, "no username provided");
+      assert.isNotEmpty(password2, "no password provided");
+      //First create a user for the account, accept the invitation and try to send data
+      promtests.authGetToken(username, password)
+      .then((userToken) => {return promtests.createInvitation(userToken, accountId, username2)})
+      .then((result) => {inviteId = result._id; return promtests.authGetToken(username2, password2)})
+      .then((userToken) => {admin2Token = userToken; return promtests.acceptInvitation(userToken, accountId, inviteId)})
+      .then(() => promtests.submitDataList(dataValues7,
+        admin2Token, accountId, deviceId, componentId, {}).catch(e => e))
+      .then((result) => {
+        var parsedResult = JSON.parse(result);
+        assert.equal(parsedResult.code, 401)
+        done()
+      })
+      .catch((err) => {
+        done(err);
+      })
+    },
+    "sendDataAsAdminWithWrongAccount": function(done) {
+      assert.isNotEmpty(username2, "no username provided");
+      assert.isNotEmpty(password2, "no password provided");
+      promtests.authGetToken(username2, password2)
+      .then((userToken) => {
+        userToken2 = userToken;
+        return promtests.createAccount(accountName2, userToken)
+      })
+      .then(() => promtests.authTokenInfo(userToken2))
+      .then((tokenInfo) => {
+        accountId2 = tokenInfo.payload.accounts[0].id;
+        return accountId2;})
+      .then((accountId2) =>
+      promtests.submitDataList(dataValues7,
+        userToken2, accountId2, deviceId, componentId, {}).catch(e => e))
+      .then((result) => {
+        var parsedResult = JSON.parse(result);
+        assert.equal(parsedResult.code, 401)
+        done()
+      })
+      .catch((err) => {
+        done(err);
+      })
+    },
+    "receiveDataFromAdmin": function(done) {
+      var listOfExpectedResults = dataValues6;
+      promtests.searchData(dataValues6StartTime, dataValues6StopTime, deviceToken, accountId, deviceId, componentId[0], false, {})
+        .then((result) => {
+          if (result.series.length != 1) done("Wrong number of point series!");
+          var comparisonResult = comparePoints(listOfExpectedResults, result.series[0].points);
+          if (comparisonResult === true) {
+            done();
+          } else {
+            done(comparisonResult);
+          }
+        })
+        .catch((err) => {
+          done(err);
+        });
+    },
+    "sendDataAsDeviceToWrongDeviceId": function(done) {
+      var username = process.env.USERNAME;
+      var password = process.env.PASSWORD;
+      var newDeviceName = "innocentDevice";
+      var componentName = "evilDeviceComponent";
+      var componentType = componentTypes[0];
+      assert.isNotEmpty(username, "no username provided");
+      assert.isNotEmpty(password, "no password provided");
+      //First create a user for the account, accept the invitation and try to send data
+      promtests.authGetToken(username, password)
+      .then((userToken) => promtests.createDevice(newDeviceName, newDeviceId, userToken, accountId))
+      .then(() => promtests.activateDevice(userToken, accountId, newDeviceId))
+      .then((result) => {
+        return promtests.addComponent(componentName, componentType, userToken, accountId, newDeviceId)
+      })
+      .then((id) => {newComponentId = id;})
+      .then(() => promtests.submitDataList(dataValues7,
+        deviceToken, accountId, newDeviceId, newComponentId, {}).catch(e => e))
+      .then((result) => {
+        var parsedResult = JSON.parse(result);
+        assert.equal(parsedResult.code, 401)
+        done()
+      })
+      .catch((err) => {
+        done(err);
+      })
+    },
+    "cleanup": function(done) {
+      promtests.deleteComponent(deviceToken, accountId, deviceId, componentId[0])
+        .then(() => promtests.deleteComponent(deviceToken, accountId, deviceId, componentId[1]))
+        .then(() => promtests.deleteComponent(userToken, accountId, newDeviceId, newComponentId))
+        .then(() => promtests.deleteDevice(userToken, accountId, newDeviceId))
+        .then(() => promtests.deleteAccount(userToken2, accountId2))
+        .then(() => promtests.deleteInvite(userToken, accountId, username2))
+        .then(() => { done() })
+        .catch((err) => {
+          done(err);
+        });
+    }
+  };
 };
 
 var descriptions = {
@@ -687,6 +920,13 @@ var descriptions = {
   "receiveMaxAmountOfSamples": "Receive maximal allowed samples per request",
   "receiveDataPointsWithSelectedAttributes": "Receiving data points with selected attributes",
   "waitForBackendSynchronization": "Waiting maximal tolerable time backend needs to flush so that points are available",
+  "sendPartiallyWrongData": "Send data with partially unknown cid's",
+  "receivePartiallySentData": "Recieve the submitted data of the partially wrong data",
+  "sendDataAsAdmin": "Send test data as admin on behalf of a device",
+  "sendDataAsUser": "Send test data with user role and get rejected",
+  "sendDataAsAdminWithWrongAccount": "Send test data as admin with wrong accountId",
+  "receiveDataFromAdmin": "Test whether data sent from admin earlier has been stored",
+  "sendDataAsDeviceToWrongDeviceId": "Test whether Device data submission is rejected if it goes to wrong device",
   "cleanup": "Cleanup components, commands, rules created for subtest"
 };
 
