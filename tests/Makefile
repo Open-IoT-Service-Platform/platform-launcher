@@ -26,6 +26,10 @@ USERNAME = "oisp@testing.com"
 PASSWORD = "OispTesting1"
 ROLE = "admin"
 
+USERNAME2 = "oisp2@testing.com"
+PASSWORD2 = "OispTesting2"
+ROLE2 = "admin"
+
 ifeq ($(TESTING_PLATFORM), docker)
 KAFKA_BROKER="localhost:9092"
 else
@@ -58,6 +62,7 @@ ifeq ($(TESTING_PLATFORM), docker)
 
 	@$(call msg,"Adding a user for testing ...");
 	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
+	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin addUser $(USERNAME2) $(PASSWORD2) $(ROLE2) > /dev/null
 else
 	@$(call msg,"Resetting database ...");
 	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin resetDB
@@ -67,7 +72,7 @@ else
 
 endif
 	@$(call msg,"Starting the e2e testing ...");
-	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm test
+	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) USERNAME2=$(USERNAME2) PASSWORD2=$(PASSWORD2) LOG_LEVEL="error" NODE_ENV="local" npm test
 
 ifeq (email-account,$(firstword $(MAKECMDGOALS)))
  	OUTPUT_FILE := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
