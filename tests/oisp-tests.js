@@ -193,8 +193,7 @@ describe("Waiting for OISP services to be ready ...\n".bold, function() {
 
     it('Shall wait for oisp services to start', function(done) {
         var kafkaConsumer;
-        var kafka_credentials = cfenvReader.getServiceCredentials("kafka-ups");
-        var topic = kafka_credentials.topics.heartbeat.name;
+	var topic = config["connector"]["kafka"]["topic"];
 	var partition = 0;
 	var kafkaAddress = config["connector"]["kafka"]["host"] + ":" + config["connector"]["kafka"]["port"];
         var kafkaClient = new kafka.KafkaClient({kafkaHost: kafkaAddress});
