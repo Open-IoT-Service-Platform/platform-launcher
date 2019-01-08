@@ -69,6 +69,7 @@ else
 
 	@$(call msg,"Adding a user for testing ...");
 	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
+	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin addUser $(USERNAME2) $(PASSWORD2) $(ROLE2) > /dev/null
 
 endif
 	@$(call msg,"Starting the e2e testing ...");
