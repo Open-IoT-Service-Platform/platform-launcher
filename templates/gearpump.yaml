@@ -38,22 +38,31 @@ spec:
         command: ["/bin/bash"]
         args: ["/app/bootstrap.sh"]
         env:
-        - name: VCAP_APPLICATION
+        - name: OISP_RULEENGINE_CONFIG
           valueFrom:
             configMapKeyRef:
-              key: vcap.application
+              key: rule-engine
               name: oisp-config
-        - name: VCAP_SERVICES
+        - name: OISP_HBASE_CONFIG
           valueFrom:
             configMapKeyRef:
-              key: vcap.services
+              key: hbase
               name: oisp-config
-        - name: KAFKA
-          value: "kafka:9092"
-        - name: KAFKA_HEARTBEAT_TOPIC
-          value: "heartbeat"
-        - name: GEARPUMP
-          value: "gearpump:8090"
+        - name: OISP_HADOOP_PROPERTIES
+          valueFrom:
+            configMapKeyRef:
+              key: hadoop
+              name: oisp-config
+        - name: OISP_ZOOKEEPER_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: zookeeper
+              name: oisp-config
+        - name: OISP_KAFKA_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: kafka
+              name: oisp-config
         ports:
         - containerPort: 8090
           protocol: TCP

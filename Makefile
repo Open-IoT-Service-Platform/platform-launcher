@@ -176,7 +176,7 @@ prepare-tests:
 ##
 test: prepare-tests
 	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger \
-		-- /bin/bash -c "cp setup-environment.example.sh setup-environment.sh && cd tests && n 6 && make test TESTING_PLATFORM=kubernetes TERM=xterm"
+		-- /bin/bash -c "cp setup-environment.example.sh setup-environment.sh && cd tests && make test TESTING_PLATFORM=kubernetes TERM=xterm"
 
 ## proxy: Run kubectl proxy and port-forwarding of various pods
 ##

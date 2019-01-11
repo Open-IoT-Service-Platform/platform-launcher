@@ -2,39 +2,7 @@ apiVersion: v1
 data:
   postgres.database: oisp
   postgres.username: oisp
-  vcap.application: '{ "space_name": "local" }'
-  vcap.services: '{ "postgresql93": [{ "credentials": { "dbname": "oisp", "hostname":
-    "postgres", "password": "password", "port": "5432", "username": "oisp" }, "name":
-    "mypostgres" }], "websocket-server": [{ "server-name": "websocket-server", "name":
-    "mywsserver" }], "hbase": [{ "credentials": { "HADOOP_CONFIG_KEY": { "hadoop.security.authentication":
-    "simple", "hadoop.security.authorization": "false", "hbase.security.authentication":
-    "simple", "ha.zookeeper.quorum": "zookeeper", "hbase.zookeeper.property.clientPort":
-    "2181", "hbase.zookeeper.quorum": "zookeeper" } }, "name": "myhbase" }], "hdfs": [{
-    "credentials": { "HADOOP_CONFIG_KEY": { "ha.zookeeper.quorum": "zookeeper:2181", "hadoop.security.authorization":
-    "false" } }, "name": "myhdfs" }], "kafka": [{ "credentials": { "uri": "kafka:9092"
-    }, "name": "mykafka" }], "zookeeper": [{ "credentials": { "zk.cluster": "zookeeper:2181",
-    "zk.node": "/tmp" }, "label": "zookeeper", "name": "myzookeeper", "plan": "local",
-    "tags": [] }], "gearpump": [{ "credentials": { "username": "admin", "password":
-    "admin", "dashboardUrl": "localhost:8090" }, "name": "mygearpump" }], "smtp":
-    [ { "credentials": { "host": "smtp.example.com", "port": "587", "protocol": "smtp",
-    "username": "username", "password": "password" }, "label": "smtp", "name": "mysmtp"
-    } ], "redis": [ { "credentials": { "hostname": "redis", "port": "6379", "password":
-    "" }, "label": "redis", "name": "myredis" } ], "user-provided": [{ "credentials":
-    { "kdc": "localhost", "kpassword": "pass", "krealm": "realm", "kuser": "user"
-    }, "name": "kerberos-service" }, { "credentials": { "hosts": "kafka:9092", "enabled":
-    true, "partitions": 1, "replication": 1, "timeout_ms": 10000, "topics": { "observations":
-    "metrics", "rule_engine": "rules-update", "heartbeat": {"name":"heartbeat", "interval":5000} } }, "name": "kafka-ups" }, { "credentials":
-    { "host": "http://dashboard:4001", "strictSSL": false }, "name": "dashboard-endpoint-ups"
-    }, { "credentials": { "captcha_test_code": "s09ef48213s8fe8fw8rwer5489wr8wd5",
-    "interaction_token_permision_key": "password", "private_pem_path": "./keys/private.pem",
-    "public_pem_path": "./keys/public.pem" }, "name": "dashboard-security-ups" },
-    { "credentials": { "deviceMeasurementTableName": "LOCAL-AA-BACKEND_DEVICE_MEASUREMENT",
-    "host": "http://backend:8080" }, "name": "backend-ups" }, { "credentials": { "sender":
-    "sysadmin@localhost" }, "name": "mail-ups" }, { "credentials": { "password": "7d501829lhbl1or0bb1784462c97bcad6",
-    "username": "gateway@intel.com" }, "name": "gateway-credentials-ups" }, { "credentials":
-    { "password": "7d501829lhbl1or0bb1784462c97bcad6", "username": "rule_engine@intel.com"
-    }, "name": "rule-engine-credentials-ups" }, { "credentials": { "password": "AgjY7H3eXztyA6AmNjI2rte446gdttgattwRRF61",
-    "username": "api_actuator" }, "name": "websocket-ups" }] }'
+
   frontend: |
     {
     "postgresConfig": "@@OISP_POSTGRES_CONFIG",
@@ -145,8 +113,15 @@ data:
     }
   rule-engine: |
     {
+    "uri": "gearpump:8090",
     "password": "7d501829lhbl1or0bb1784462c97bcad6",
-    "username": "rule_engine@intel.com"
+    "username": "rule_engine@intel.com",
+    "gearpumpUsername": "admin",
+    "gearpumpPassword": "admin",
+    "frontendUri": "dashboard:4001",
+    "hbaseConfig": "@@OISP_HBASE_CONFIG",
+    "kafkaConfig": "@@OISP_KAFKA_CONFIG",
+    "zookeeperConfig": "@@OISP_ZOOKEEPER_CONFIG"
     }
   websocket-user: |
     {
