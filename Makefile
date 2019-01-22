@@ -124,6 +124,12 @@ endif
 		mkdir -p ${SSL_CERT_PATH}; \
 		openssl req  -nodes -new -x509  -keyout ${SSL_CERT_PATH}/server.key -out ${SSL_CERT_PATH}/server.cert -subj "/C=UK/ST=NRW/L=London/O=My Inc/OU=DevOps/CN=www.streammyiot.com/emailAddress=donotreply@www.streammyiot.com"; \
 	fi;
+	@if [ -f data/keys/mqtt/mqtt_gw_secret.key ]; then echo "MQTT/GW key existing already. Skipping creating new key"; else \
+                echo "Creating MQTT/GW secret."; \
+                mkdir -p data/keys/mqtt; \
+                openssl rand -base64  16 > data/keys/mqtt/mqtt_gw_secret.key; \
+        fi;
+
 	@touch $@
 
 ## build: Build OISP images locally.
