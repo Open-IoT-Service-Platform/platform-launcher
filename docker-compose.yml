@@ -285,3 +285,33 @@ services:
       - OISP_OPENTSDB_CONFIG=${OISP_OPENTSDB_CONFIG}
       - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
       - OISP_TSDB_PROPERTIES=${OISP_TSDB_PROPERTIES}
+  mqtt-gateway:
+    build:
+      context: ./oisp-mqtt-gw
+      dockerfile: Dockerfile-gateway
+    restart: always
+    depends_on:
+      - mqtt-broker
+    working_dir: /app
+    environment:
+      - NODE_ENV=local
+      - OISP_MQTT_GATEWAY_CONFIG
+      - OISP_REDIS_CONFIG
+    volumes:
+      - ./data/keys:/app/keys
+      - ./oisp-mqtt-gw/ingestion:/app/ingestion
+      - ./oisp-mqtt-gw/lib:/app/lib
+    command: ./wait-for-it.sh broker:8883 -t 300 -- ./wait-for-it.sh redis:6379 -t 300
+  mqtt-broker:
+    build:
+      context: ./oisp-mqtt-gw
+      dockerfile: Dockerfile-broker
+    restart: always
+    ports:
+      - 8883:8883
+    working_dir: /app
+    environment:
+      - OISP_MQTT_BROKER_CONFIG
+      - OISP_REDIS_CONFIG
+    volumes:
+      - ./data/keys:/app/keys
