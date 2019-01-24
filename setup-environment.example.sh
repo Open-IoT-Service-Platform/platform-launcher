@@ -91,7 +91,8 @@ export OISP_FRONTEND_CONFIG=\
 	"websocketUserConfig": "@@OISP_WEBSOCKETUSER_CONFIG",
 	"mailConfig": "@@OISP_MAIL_CONFIG",
 	"ruleEngineConfig": "@@OISP_RULEENGINE_CONFIG",
-	"gatewayConfig": "@@OISP_GATEWAY_CONFIG"
+	"gatewayConfig": "@@OISP_GATEWAY_CONFIG",
+    "jaegerTracing": false
 }'
 
 export OISP_WEBSOCKET_SERVER_CONFIG=\
