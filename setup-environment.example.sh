@@ -71,6 +71,16 @@ OPENTSDB_PROPERTIES='{
 #It contains a JSON object, starting with single quote, hash names with double quotes, environmental variables with double, then single quotes, e.g. "'$VAR'"
 #References to other environmental variables which can be parsed as OBJECTS are done with "@@OISP_*_CONFIG"
 #References to other environmental variables which can be parsed as MAPS (e.g. Property Maps) are done with "%%OISP_*_PROPERTIES". MAPS contain only <String, String> pairs.
+export OISP_BACKEND_JAEGER_CONFIG=\
+'{
+  "serviceName": "backend",
+  "agentHost": "jaeger",
+  "agentPort": 6832,
+  "logSpans": true,
+  "samplerType": "probabilistic",
+  "samplerParam": 0.1,
+  "tracing": false
+}'
 
 export OISP_TSDB_PROPERTIES='{}'    #=${OPENTSDB_PROPERTIES} for openTSDB
 
@@ -86,7 +96,8 @@ export OISP_BACKEND_CONFIG=\
   "kafkaConfig": "@@OISP_KAFKA_CONFIG",
   "zookeeperConfig": "@@OISP_ZOOKEEPER_CONFIG",
   "kerberosConfig": "@@OISP_KERBEROS_CONFIG",
-  "hbaseConfig": "@@OISP_HBASE_CONFIG"
+  "hbaseConfig": "@@OISP_HBASE_CONFIG",
+  "jaegerConfig": "@@OISP_BACKEND_JAEGER_CONFIG"
 }'
 
 export OISP_FRONTEND_CONFIG=\
