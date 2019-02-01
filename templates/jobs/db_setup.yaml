@@ -1,0 +1,73 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dbsetup
+spec:
+  template:
+    spec:
+      containers:
+      - name: dbsetup
+        image: oisp/frontend
+        env:
+        - name: NODE_ENV
+          value: local
+        - name: OISP_FRONTEND_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: frontend
+        - name: OISP_POSTGRES_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: postgres
+        - name: OISP_REDIS_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: redis
+        - name: OISP_KAFKA_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: kafka
+        - name: OISP_SMTP_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: smtp
+        - name: OISP_DASHBOARDSECURITY_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: dashboard-security
+        - name: OISP_GATEWAY_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: gateway
+        - name: OISP_BACKENDHOST_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: backend-host
+        - name: OISP_WEBSOCKETUSER_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: websocket-user
+        - name: OISP_RULEENGINE_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: rule-engine
+        - name: OISP_MAIL_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: mail
+        command: ["node", "admin", "createDB"]
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: dockercred
+  backoffLimit: 4

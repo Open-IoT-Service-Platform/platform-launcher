@@ -14,7 +14,8 @@ data:
     "websocketUserConfig": "@@OISP_WEBSOCKETUSER_CONFIG",
     "mailConfig": "@@OISP_MAIL_CONFIG",
     "ruleEngineConfig": "@@OISP_RULEENGINE_CONFIG",
-    "gatewayConfig": "@@OISP_GATEWAY_CONFIG"
+    "gatewayConfig": "@@OISP_GATEWAY_CONFIG",
+    "jaegerTracing": false
     }
   websocket-server: |
     {
@@ -70,7 +71,8 @@ data:
   postgres: |
     {
     "dbname": "oisp",
-    "hostname": "postgres",
+    "hostname": "postgres-ro",
+    "writeHostname": "postgres",
     "port": "5432",
     "username": "oisp",
     "password": "password"

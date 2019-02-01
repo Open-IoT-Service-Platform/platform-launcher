@@ -1,0 +1,6 @@
+stolon helm chart (https://github.com/helm/charts/tree/master/stable/stolon/templates)
+The stolon helm chart is located under the Charts directory. Changes were made to the source code.
+values.yaml: Changed cluster name, database usernames and passwords
+templates/keeper-ro-service.yaml: Changed service name
+templates/proxy-service.yaml: Changed service name
+Apache 2.0 License
