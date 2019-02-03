@@ -219,6 +219,7 @@ services:
       - OISP_HBASE_CONFIG=${OISP_HBASE_CONFIG}
       - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
       - OISP_TSDB_PROPERTIES=${OISP_TSDB_PROPERTIES}
+      - OISP_BACKEND_JAEGER_CONFIG
   hdfs-namenode:
     image: singularities/hadoop
     command: start-hadoop namenode
