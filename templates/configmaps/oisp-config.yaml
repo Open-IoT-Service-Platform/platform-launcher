@@ -15,7 +15,7 @@ data:
     "mailConfig": "@@OISP_MAIL_CONFIG",
     "ruleEngineConfig": "@@OISP_RULEENGINE_CONFIG",
     "gatewayConfig": "@@OISP_GATEWAY_CONFIG",
-    "jaegerTracing": false
+    "jaegerTracing": true
     }
   websocket-server: |
     {
@@ -30,7 +30,18 @@ data:
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
     "zookeeperConfig": "@@OISP_ZOOKEEPER_CONFIG",
     "kerberosConfig": "@@OISP_KERBEROS_CONFIG",
-    "hbaseConfig": "@@OISP_HBASE_CONFIG"
+    "hbaseConfig": "@@OISP_HBASE_CONFIG",
+    "jaegerConfig": "@@OISP_BACKEND_JAEGER_CONFIG"
+    }
+  backend-jaeger: |
+    {
+    "serviceName": "backend",
+    "agentHost": "jaeger",
+    "agentPort": 6832,
+    "logSpans": true,
+    "samplerType": "probabilistic",
+    "samplerParam": 0.1,
+    "tracing": true
     }
   kafka: |
     {
