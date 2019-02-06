@@ -15,33 +15,36 @@
 # limitations under the License.
 
 export DOCKER_TAG=${DOCKER_TAG:-'latest'}
-
 export ZOOKEEPER_KAFKA='zookeeper'
 export ZOOKEEPER_KAFKA_PORT='2181'
+# This needs to be exported because hbase uses a standard container
+# which won't parse a JSON config
 export ZOOKEEPER_HBASE='zookeeper'
-export ZOOKEEPER_HBASE_PORT='2181'
+ZOOKEEPER_HBASE_PORT='2181'
 
 HBASE_ROOTDIR='/hbase'
-export POSTGRES='postgres'
+POSTGRES='postgres'
 export POSTGRES_DB_REGULAR="iot"
 export POSTGRES_DB=${POSTGRES_DB_REGULAR} # postgres needs always regular DB name for initialization. It automatically initiates the test DB as well.
 if [ "$TEST" = "1" ]; then
     export POSTGRES_DB='test'
     echo "Warning: Test database selected."
 fi
-export POSTGRES_PORT='5432'
+POSTGRES_PORT='5432'
 export POSTGRES_USERNAME='postgres'
 export POSTGRES_PASSWORD='intel123'
+
+# These needs to be exported as test scripts also read from Kafka
 export KAFKA='kafka:9092'
 export KAFKA_PORT='9092'
 export KAFKA_HEARTBEAT_TOPIC='heartbeat'
-export GEARPUMP='gearpump:8090'
-export BACKEND='backend:8080'
-export FRONTEND='frontend:4001'
-export NGINX='nginx'
+GEARPUMP='gearpump:8090'
+BACKEND='backend:8080'
+FRONTEND='frontend:4001'
+NGINX='nginx'
 NGINX_PORT='443'
-export REDIS='redis'
-export REDIS_PORT='6379'
+REDIS='redis'
+REDIS_PORT='6379'
 
 OPENTSDB_URI='opentsdb'
 OPENTSDB_PORT=4242
@@ -54,18 +57,17 @@ MQTT_BROKER_PASSWORD='8dhh1f2471'
 FRONTEND_SYSTEMUSER="gateway@intel.com"
 FRONTEND_SYSTEMPASSWORD="7d501829lhbl1or0bb1784462c97bcad6"
 
-export SMTP_HOST="${SMTP_HOST:-auth.smtp.1and1.co.uk}"
-export SMTP_PORT="${SMTP_PORT:-587}"
-export SMTP_USERNAME="${SMTP_USERNAME:-test.sender@streammyiot.com}"
-export SMTP_PASSWORD="${SMTP_PASSWORD:-xxxxx}"
-
-export COMPOSE_PROJECT_NAME="oisp"
-
+SMTP_HOST="${SMTP_HOST:-auth.smtp.1and1.co.uk}"
+SMTP_PORT="${SMTP_PORT:-587}"
+SMTP_USERNAME="${SMTP_USERNAME:-test.sender@streammyiot.com}"
+SMTP_PASSWORD="${SMTP_PASSWORD:-xxxxx}"
 
 OPENTSDB_PROPERTIES='{
   "uri": "'$OPENTSDB_URI'",
   "port": "'$OPENTSDB_PORT'"
 }'
+
+export COMPOSE_PROJECT_NAME="oisp"
 
 #The root variable for every service looks like OISP_SERVICE_CONFIG
 #It contains a JSON object, starting with single quote, hash names with double quotes, environmental variables with double, then single quotes, e.g. "'$VAR'"
