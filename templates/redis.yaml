@@ -34,6 +34,13 @@ spec:
       - image: redis:3.0
         imagePullPolicy: IfNotPresent
         name: redis
+        resources:
+          limits:
+            memory: 2G
+            cpu: 500m
+          requests:
+            memory: 2G
+            cpu: 500m
         ports:
         - containerPort: 6379
           protocol: TCP

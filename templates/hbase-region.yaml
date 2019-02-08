@@ -37,6 +37,13 @@ spec:
       containers:
       - name: hbase-region
         image: oisp/hbase
+        resources:
+          limits:
+            memory: 1G
+            cpu: 500m
+          requests:
+            memory: 1G
+            cpu: 500m
         env:
         - name: REGIONSERVERS
           value: hbase-region

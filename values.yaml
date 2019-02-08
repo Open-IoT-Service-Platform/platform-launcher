@@ -16,6 +16,6 @@ imap:
     password: password
 
 numberReplicas:
-    frontend: 4
+    frontend: 1
     backend: 1
     debugger: 0

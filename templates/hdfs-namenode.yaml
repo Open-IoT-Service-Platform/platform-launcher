@@ -47,6 +47,13 @@ spec:
       - image: singularities/hadoop
         name: hdfs-namenode
         args: ["start-hadoop", "namenode"]
+        resources:
+          limits:
+            memory: 1G
+            cpu: 500m
+          requests:
+            memory: 1G
+            cpu: 500m
         env:
           - name: HDFS_USER
             value: root

@@ -34,6 +34,10 @@ spec:
       containers:
       - name: kafka
         image: wurstmeister/kafka
+        resources:
+          requests:
+            memory: 1G
+            cpu: 1
         env:
         - name: KAFKA_ZOOKEEPER_CONNECT
           value: zookeeper:2181
