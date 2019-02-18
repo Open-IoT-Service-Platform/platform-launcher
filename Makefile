@@ -190,6 +190,21 @@ proxy:
 help:
 	@grep "^##" Makefile | cut -c4-
 
+## wait-until-ready: Wait until the platform is up and running
+## As of now, this is assumed if all dashboard and backend containers
+## are ready.
+##
+wait-until-ready:
+	@printf "Waiting for backend ";
+	@while kubectl -n oisp get pods -l=app=backend -o \
+        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
+		do printf "."; sleep 5; done;
+	@printf "\nWaiting for frontend ";
+	@while kubectl -n oisp get pods -l=app=dashboard -o \
+        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
+		do printf "."; sleep 5; done;
+	@echo
+
 #---------------------------------------------------------------------------------------------------
 # helper functions
 #---------------------------------------------------------------------------------------------------
