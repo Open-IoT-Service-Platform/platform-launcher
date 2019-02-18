@@ -36,8 +36,8 @@ data:
   backend-jaeger: |
     {
     "serviceName": "backend",
-    "agentHost": "jaeger",
-    "agentPort": 6832,
+    "agentHost": "localhost",
+    "agentPort": 6831,
     "logSpans": true,
     "samplerType": "probabilistic",
     "samplerParam": 0.1,
