@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
+
+
 
 var chai = require('chai');
 var assert = chai.assert;
@@ -26,14 +27,12 @@ var kafka = require('kafka-node');
 var cfenvReader = require('./lib/cfenv/reader');
 var helpers = require("./lib/helpers");
 var colors = require('colors');
-
 var exec = require('child_process').exec;
+var gm = require('gm').subClass({imageMagick: true});
+var { Data, Rule, Component, Components } = require('./lib/common')
 
 var accountName = "oisp-tests";
 var deviceName = "oisp-tests-device";
-
-var componentName = "temperature-sensor";
-var componentType = "temperature.v1.0";
 
 var actuatorName = "powerswitch-actuator";
 var actuatorType = "powerswitch.v1.0";
@@ -50,42 +49,128 @@ var imap_host     = process.env.IMAP_HOST;
 var imap_port     = process.env.IMAP_PORT;
 
 var recipientEmail = imap_username; 
-
 var rules = [];
 
-rules[switchOnCmdName] = {
-    name: "oisp-tests-rule-low-temp",
-    conditionComponent: componentName,
-    basicConditionOperator: "<=",
-    basicConditionValue: "15",
-    actions: [
-                {
-                    type: "actuation",
-                    target: [ switchOnCmdName ]
-                },
-                {
-                    type: "mail",
-                    target: [ emailRecipient ]
-                }
-            ],
-};
 
-rules[switchOffCmdName] = {
-    name: "oisp-tests-rule-high-temp",
-    conditionComponent: componentName,
-    basicConditionOperator: ">",
-    basicConditionValue: "25",
-    actions: [
-                {
-                    type: "actuation",
-                    target: [ switchOffCmdName ]
-                },
-                {
-                    type: "mail",
-                    target: [ emailRecipient ]
-                }
-            ],
-};
+
+//-------------------------------------------------------------------------------------------------------
+// Rules
+//-------------------------------------------------------------------------------------------------------
+var lowTemperatureRule = new Rule("oisp-tests-rule-low-temp","<=", 15);
+    lowTemperatureRule.addAction("actuation", switchOnCmdName);
+    lowTemperatureRule.addAction("mail", emailRecipient);
+
+var highTemperatureRule = new Rule("oisp-tests-rule-high-temp",">", 25);
+    highTemperatureRule.addAction("actuation", switchOffCmdName);
+    highTemperatureRule.addAction("mail", emailRecipient);
+
+//-------------------------------------------------------------------------------------------------------
+// Components
+//-------------------------------------------------------------------------------------------------------
+var components = new Components()
+
+/*components.add( new Component("temperature", "Number", "float", "Degress Celsius", "timeSeries", -150, 150, 
+                    [lowTemperatureRule, highTemperatureRule], 
+                    temperatureData, temperatureCheckData) 
+                );*/
+
+components.add( new Component("image", "ByteArray", "image", "pixel", "image/jpeg", null, null, 
+                    [], 
+                    imageData, imageCheckData) 
+                );
+
+function temperatureData(componentName) {
+   
+    var data = [
+            new Data(-15, 1, componentName + " <= 15"),
+            new Data( -5, 1, componentName + " <= 15"),
+            new Data(  5, 1, componentName + " <= 15"),
+            new Data(-15, 1, componentName + " <= 15"),
+            new Data( 15, 1, componentName + " <= 15"),
+            new Data(-15, 1, componentName + " <= 15"),
+            new Data( 25, null, null),
+            new Data( 30, 0, componentName + " > 25"),
+            new Data( 20, null, null),
+            new Data( 14, 1, componentName + " <= 15"),
+            new Data( 20, null, null),
+            new Data( 28, 0, componentName + " > 25")
+        ];
+
+    return data;
+}
+
+function temperatureCheckData(sentData, receivedData) {
+    if ( sentData.length == receivedData.length) {
+        for (var i = 0; i < sentData.length; i++) {
+            if (sentData[i].ts == receivedData[i].ts && sentData[i].value == receivedData[i].value) {
+                sentData[i].ts = null;
+            }
+        }
+    }
+
+    var err = null;
+    for (var i = 0; i < sentData.length; i++) {
+        if (sentData[i].ts != null) {
+            err += "[" + i + "]=" + sentData[i].value + " ";
+        }
+    }
+    if (err) {
+        err = "Got wrong data for " + err;
+    }
+
+    return err;
+}
+
+
+function imageData(componentName, opaque, cb) {
+    if (!cb) {
+        throw "Callback required";
+    }
+
+    var images = [
+        new gm(10, 20, "red")
+    ];
+
+    images.forEach(function(image) {
+        image.toBuffer("JPEG", function(err, buffer) {
+            if (!err) {
+                cb(opaque, new Data(buffer, null, null))
+            }
+        })
+    })
+
+    return null;
+}
+
+
+    
+
+function imageCheckData(sentData, receivedData) {
+
+    console.log("======== "+sentData.length + " : "+receivedData.length)
+    if ( sentData.length == receivedData.length) {
+        for (var i = 0; i < sentData.length; i++) {
+            buf1.equals(buf2);
+            if (sentData[i].ts == receivedData[i].ts && 
+                sentData[i].value.equals(receivedData[i].value)) {
+                sentData[i].ts = null;
+            }
+        }
+    }
+
+    var err = null;
+    for (var i = 0; i < sentData.length; i++) {
+        if (sentData[i].ts != null) {
+            err += i + " " ;
+        }
+    }
+    if (err) {
+        err = "Got wrong data for items" + err;
+    }
+
+    return err;
+    return null;
+}
 
 //-------------------------------------------------------------------------------------------------------
 // Tests
@@ -105,57 +190,6 @@ var alertlist;
 var componentParamName; 
 var firstObservationTime;
 
-var temperatureValues = [{
-        value: -15,
-        expectedActuation: 1, // swich on
-        expectedEmailReason: "temperature-sensor <= 15"
-    },
-    {
-        value: -5,
-        expectedActuation: 1, // swich on
-        expectedEmailReason: "temperature-sensor <= 15"
-    },
-    {
-        value: 5,
-        expectedActuation: 1, // swich on
-        expectedEmailReason: "temperature-sensor <= 15"
-    },
-    {
-        value: 15,
-        expectedActuation: 1, // swich on
-        expectedEmailReason: "temperature-sensor <= 15"
-    },
-    {
-        value: 25,
-        expectedActuation: null, // do nothing (no actuation)
-        expectedEmailReason: null,
-    },
-    {
-        value: 30,
-        expectedActuation: 0, // swich off
-        expectedEmailReason: "temperature-sensor > 25"
-    },
-    {
-        value: 20,
-        expectedActuation: null, // do nothing (no actuation)
-        expectedEmailReason: null
-    },
-    {
-        value: 14,
-        expectedActuation: 1, // swich on
-        expectedEmailReason: "temperature-sensor <= 15"
-    },
-    {
-        value: 20,
-        expectedActuation: null, // do nothing (no actuation)
-        expectedEmailReason: null
-    },
-    {
-        value: 28,
-        expectedActuation: 0, // swich off
-        expectedEmailReason: "temperature-sensor > 25"
-    }
-];
 
 process.stdout.write("_____________________________________________________________________\n".bold);
 process.stdout.write("                                                                     \n");
@@ -530,32 +564,136 @@ describe("Creating account and device ...\n".bold, function() {
     })
 })
 
-describe("Creating and getting components ... \n".bold, function() {
+describe("Managing components catalog ... \n".bold, function() {
 
-    it('Shall add device a component', function(done) {
-
-        helpers.devices.addDeviceComponent(componentName, componentType, deviceToken, accountId, deviceId, function(err, id) {
-            if (err) {
-                done(new Error("Cannot create component: " + err));
+    it('Shall create new custom Components Types', function(done) {
+        var createCatalog = function(component) {
+            if ( component ) {
+                helpers.cmpcatalog.createCatalog(userToken, accountId, component.catalog, function(err, response) {
+                    if (err) {
+                        done(new Error("Cannot create component: " + err));
+                    } else {
+                        component.cId = response.id;
+                      //  assert.equal(response.id, component.cId, 'cannot create new component type')
+                        createCatalog(component.next);
+                    }
+                })
             } else {
-                componentId = id;
+                done()
+            }
+        }
+        createCatalog(components.first);
+    }).timeout(10000);
+
+    it('Shall list all component types for account', function(done) {
+        helpers.cmpcatalog.getCatalog(userToken, accountId, function(err, response) {
+            if (err) {
+                done(new Error("Cannot list component: " + err));
+            } else {
+                assert.equal(response.length, components.size + 3, 'get wrong number of components ')
                 done();
             }
         })
     }).timeout(10000);
+
+    it('Shall get component type details', function(done) {
+        var getCatalogDetail = function(component) {
+            if ( component ) {
+                if ( component.catalog.max ) {
+                    helpers.cmpcatalog.getCatalogDetail(userToken, accountId, component.cId, function(err, response) {
+                        if (err) {
+                            done(new Error("Cannot get component type details " + err));
+                        } else {
+                            assert.equal(response.id, component.cId, 'cannot get component '+component.name)
+                            assert.equal(response.max, component.catalog.max)
+                            getCatalogDetail(component.next)
+                        }
+                    })
+                } else {
+                    getCatalogDetail(component.next)
+                }
+            } else {
+                done()
+            }
+        }
+        getCatalogDetail(components.first)
+    }).timeout(10000);
+
+    it('Shall update a component type', function(done) {
+        var updateCatalog = function(component) {
+            if ( component ) {
+                if ( component.catalog.min != null && 
+                     component.catalog.max != null )  {
+                    var newmin = 10;
+                    var newmax = 1000;
+
+                    helpers.cmpcatalog.updateCatalog(userToken, accountId, component.cId, newmin, newmax, function(err, response) {
+                        if (err) {
+                            done(new Error("Cannot get component type details " + err));
+                        } else {
+                            if ( component.upgradeVersion() == false ) {
+                                done(new Error("Cannot upgrade version for component " + component.name))
+                            }
+                            assert.equal(response.id, component.cId, 'cannot update '+component.name+' component to '+component.catalog.version)
+                            assert.equal(response.max, newmax)
+                            updateCatalog(component.next)
+                        }
+                    })
+                } else {
+                    updateCatalog(component.next)
+                }
+            } else {
+                done()
+            }
+        }
+        updateCatalog(components.first)
+    }).timeout(10000);
+})
+
+describe("Creating and getting components ... \n".bold, function() {
+
+    it('Shall add device a component', function(done) {
+        var addDeviceComponent = function(component) {
+            if ( component ) {
+                helpers.devices.addDeviceComponent(component.name, component.type, deviceToken, accountId, deviceId, function(err, id) {
+                    if (err) {
+                        done(new Error("Cannot create component  " +  component + " : " +err));
+                    } else {
+                        if ( id ) {
+                            component.id = id;
+                            addDeviceComponent(component.next);
+                        }
+                        else {
+                            done(new Error("Wrong id for component  " +  component ));
+                        }
+                    }
+                })
+            }
+            else {
+                done();
+            }
+        }
+        addDeviceComponent(components.first);
+
+    }).timeout(10000);
     
     it('Shall not add device a component with the name that a component of the device already has, or crash', function(done) {
-    	
-        helpers.devices.addDeviceComponent(componentName, componentType, deviceToken, accountId, deviceId, function(err, id) {
-            if (err) {
-                done(new Error("Cannot create or try to create component: " + err));
-            } else if (id === undefined) {
-            	// Response with code 409, id should be undefined
-            	done();
-            } else {
-                done(new Error("No error is thrown and the component is added successfully: " + id));
+        var addDeviceComponent = function(component) {
+            if ( component ) {
+                helpers.devices.addDeviceComponent(component.name, component.type, deviceToken, accountId, deviceId, function(err, id) {
+                    if (err) {
+                        addDeviceComponent(component.next);
+                    } else {
+                        done(new Error("No error is thrown and the component is added successfully: " + id));
+                    }
+                })
             }
-        })
+            else {
+                done();
+            }
+        }
+        addDeviceComponent(components.first);
+
     }).timeout(10000);
 
     it('Shall add device an actuator', function(done) {
@@ -631,94 +769,61 @@ describe("Creating and getting components ... \n".bold, function() {
     
 });
 
-describe("Getting components catalog ... \n".bold, function() {
-
-    it('Shall create a new custom Component Type', function(done) {
-        helpers.cmpcatalog.createCatalog(userToken, accountId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot create component: " + err));
-            } else {
-                assert.equal(response.id, 'speed.v1.0', 'cannot create new component type')
-                done();
-            }
-        })
-    }).timeout(10000);
-
-    it('Shall list all component types for account', function(done) {
-        helpers.cmpcatalog.getCatalog(userToken, accountId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot list component: " + err));
-            } else {
-                assert.equal(response.length, 4, 'get wrong number of component types')
-                done();
-            }
-        })
-    }).timeout(10000);
-
-    it('Shall get component type details', function(done) {
-        helpers.cmpcatalog.getCatalogDetail(userToken, accountId, 'speed.v1.0', function(err, response) {
-            if (err) {
-                done(new Error("Cannot get component type details " + err));
-            } else {
-                assert.equal(response.id, 'speed.v1.0', 'cannot get speed component')
-                assert.equal(response.max, 500)
-                done();
-            }
-        })
-    }).timeout(10000);
-
-    it('Shall update a component type', function(done) {
-        var newmin = 10;
-        var newmax = 1000;
-        helpers.cmpcatalog.updateCatalog(userToken, accountId, 'speed.v1.0', newmin, newmax, function(err, response) {
-            if (err) {
-                done(new Error("Cannot get component type details " + err));
-            } else {
-                assert.equal(response.id, 'speed.v1.1', 'cannot update speed component to v1.1')
-                assert.equal(response.max, 1000)
-                done();
-            }
-        })
-    }).timeout(10000);
-})
 
 describe("Creating rules ... \n".bold, function() {
-    it('Shall create switch-on rule', function(done) {
-
-        rules[switchOnCmdName].cid = componentId;
-
-        helpers.rules.createRule(rules[switchOnCmdName], userToken, accountId, deviceId, function(err, id) {
-            if (err) {
-                done(new Error("Cannot create switch-on rule: " + err));
-            } else {
-                rules[switchOnCmdName].id = id;
-                done();
-            }
+    it('Shall create rules', function(done) {
+        var nbRules = 0;
+        components.list.forEach(function(component) {
+            nbRules += component.rules.length;
         })
+
+        if ( nbRules > 0 ) {
+            components.list.forEach(function(component) {
+                component.rules.forEach(function(rule) {
+                    rule.cid = component.id;
+                    rule.conditionComponent = component.name;
+                    helpers.rules.createRule(rule, userToken, accountId, deviceId, function(err, id) {
+                        if (err) {
+                            done(new Error("Cannot create rule " + rule.name +": " + err));
+                        } else {
+                            rule.id = id;
+                            if ( --nbRules == 0 ) {
+                                done();
+                            }
+                        }
+                    })
+                })
+            })
+        }
+        else {
+            done()
+        }
 
     }).timeout(20000);
 
-    it('Shall create switch-off rule', function(done) {
-
-        rules[switchOffCmdName].cid = componentId;
-
-        helpers.rules.createRule(rules[switchOffCmdName], userToken, accountId, deviceId, function(err, id) {
-            if (err) {
-                done(new Error("Cannot create switch-off rule: " + err));
-            } else {
-                rules[switchOffCmdName].id = id;
-                done();
-            }
-        })
-
-    }).timeout(20000);
     
     it('Shall get all rules', function(done) {
         helpers.rules.getRules(userToken, accountId, function(err, response) {
             if (err) {
                 done(new Error("Cannot get rules " + err));
             } else {
-                assert.equal(response[0].name, 'oisp-tests-rule-high-temp', 'rule name is wrong')
+                
+                components.list.forEach(function(component) {
+                    if ( component.hasOwnProperty('rules') ) {
+                        component.rules.forEach(function(rule) {
+                            var found = false;
+                            for(var i=0; i<response.length; i++) {
+                                if ( rule.name == response[i].name ) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if ( !found ) {
+                                done(new Error("rule " + rule.name + " not found")); 
+                            }
+                        })
+                    }
+                })
                 rulelist = response
                 done();
             }
@@ -730,754 +835,162 @@ describe("Creating rules ... \n".bold, function() {
 describe("Sending observations and checking rules ...\n".bold, function() {
 
     it('Shall send observation and check rules', function(done) {
-        assert.notEqual(componentId, null, "Invalid component id")
-        assert.notEqual(rules[switchOnCmdName].id, null, "Invalid switch-on rule id")
-        assert.notEqual(rules[switchOffCmdName].id, null, "Invalid switch-off rule id")
         assert.notEqual(proxyConnector, null, "Invalid websocket proxy connector")
-
-        var index = 0;
-        var nbActuations = 0;
 
         process.stdout.write("    ");
 
-        for (var i = 0; i < temperatureValues.length; i++) {
-            temperatureValues[i].ts = null;
-            if (temperatureValues[i].expectedActuation != null) {
-                nbActuations++;
-            }
-        }
+        var curComponent = null;
+        components.reset();
 
-        var step = function(){
-            index++;
-
-            if (index == temperatureValues.length) {
-                process.stdout.write("\n");
-                done();
-            } else {
-                sendObservationAndCheckRules(index);
+        var step = function(component) {
+            component.dataIndex++;
+            if ( component.dataIndex == component.data.length) {
+                if ( component.next ) {
+                    process.stdout.write("\n\t");
+                    component = component.next;
+                } else {
+                    process.stdout.write("\n");
+                    done();
+                }
             }
+            
+            sendObservationAndCheckRules(component);
         };
 
-	cbManager.set(function(message) {
-            --nbActuations;
-
-            var expectedActuationValue = temperatureValues[index].expectedActuation.toString();
+    	cbManager.set(function(message) {
+            var expectedActuationValue = curComponent.data[curComponent.dataIndex].expectedActuation.toString();
             var componentParam = message.content.params.filter(function(param){
                 return param.name == componentParamName;
             });
 
-            if(componentParam.length == 1)
-            {
+            if(componentParam.length == 1) {
                 var param = componentParam[0];
                 var paramValue = param.value.toString();
 
-                if(paramValue == expectedActuationValue)
-		{
-		    step();
+                if(paramValue == expectedActuationValue) {
+    		      step(curComponent);
                 }
                 else
                 {
                     done(new Error("Param value wrong. Expected: " + expectedActuationValue + " Received: " + paramValue));
                 }
-	    }
+    	    }
             else
             {
                 done(new Error("Did not find component param: " + componentParamName))
             }
         });
-	helpers.connector.wsConnect(proxyConnector, deviceToken, deviceId, cbManager.cb);
 
-        var sendObservationAndCheckRules = function(index) {
+    	helpers.connector.wsConnect(proxyConnector, deviceToken, deviceId, cbManager.cb);
+
+        var sendObservationAndCheckRules = function(component) {
+
+            if ( curComponent != component ) {
+                process.stdout.write(component.type.blue + "\n\t");
+            }
+            curComponent = component;
 
             process.stdout.write(".".green);
 
-            helpers.devices.submitData(temperatureValues[index].value, deviceToken, accountId, deviceId, componentId, function(err, ts) {
-                temperatureValues[index].ts = ts;
-
-                if (index == 0) {
-                    firstObservationTime = temperatureValues[index].ts;
-                }
+            helpers.devices.submitData(component.data[component.dataIndex].value, deviceToken, 
+                                       accountId, deviceId, component.id, function(err, ts) {
+                component.data[component.dataIndex].ts = ts;
 
                 if (err) {
                     done( "Cannot send observation: "+err)
                 }
 
-                if (temperatureValues[index].expectedActuation == null) {
-                    step();
+                if (component.data[component.dataIndex].expectedActuation == null) {
+                    step(component);
                 }
             });
         }
 
-        sendObservationAndCheckRules(index);
+        sendObservationAndCheckRules(components.first);
 
     }).timeout(5*60*1000)
 
     //---------------------------------------------------------------
 
-    it('Shall check received emails', function(done){
-	helpers.mail.waitForNewEmail(imap_username, imap_password, imap_host, imap_port, 7)
-	    .then(() => helpers.mail.getAllEmailMessages(imap_username, imap_password, imap_host, imap_port))
-	    .then( (messages) => {
-		var temperatureValuesCopy =  temperatureValues.map( (elem) => elem);
-		messages.forEach( (message) => {
-		    var lines = message.toString().split("\n");
-		    var i;
-		    lines.forEach((line) => {
-                        var reExecReason = /^- Reason:.*/;
-                        if ( reExecReason.test(line) ) {
-			    var reason = line.split(":")[1].trim();
-			    var index = temperatureValuesCopy.findIndex( (element) => {
-				return (reason == element.expectedEmailReason);
-			    })
-			    temperatureValuesCopy.splice(index, 1);
-			}
-                    })
-		})
-		assert.equal(temperatureValuesCopy.length, 3, "Received emails do not match expected emails sent from rule-engine");
-		done();
-	    }).catch( (err) => {done(err)});
-    }).timeout(30 * 1000);
-
-    it('Shall check observation', function(done) {
-        helpers.data.searchData(firstObservationTime, -1, userToken, accountId, deviceId, componentId, false, {}, function(err, result) {
-            if (err) {
-                done(new Error("Cannot get data: " + err))
-            }
-
-	    var data = {}
-            if (result && result.series && result.series.length == 1){
-		data = result.series[0].points;
-            }
-	    else {
-		done(new Error("Cannot get data."));
-	    }
-            if (data && data.length == temperatureValues.length) {
-		for (var j = 0; j < temperatureValues.length; j++) {
-                    if (temperatureValues[j].ts == data[j].ts && temperatureValues[j].value == data[j].value) {
-			temperatureValues[j].ts = null;
-                    }
-		}
-            }
-
-	    var err = "";
-            for (var i = 0; i < temperatureValues.length; i++) {
-		if (temperatureValues[i].ts != null) {
-                    err += "[" + i + "]=" + temperatureValues[i].value + " ";
+    it('Shall check received emails', function(done) {
+        var expectedEmailReasons = [];
+        components.list.forEach(function(component) {
+            component.data.forEach(function(data) {
+                if ( data.expectedEmailReason ) {
+                    expectedEmailReasons.push(data.expectedEmailReason)
                 }
-            }
-            if (err.length == 0) {
-		done();
-            } else {
-                done(new Error("Got wrong data for " + err))
-            }
-
+            })
         })
-    }).timeout(10000);
 
-});
-
-
-describe("Do time based rule subtests ...".bold,
-	 function() {
-	     var test;
-	     var descriptions = require("./subtests/timebased-rule-tests").descriptions;
-	     it(descriptions.createTbRules,function(done) {
-		 test = require("./subtests/timebased-rule-tests").test(userToken, accountId, deviceId, deviceToken, cbManager);
-		 test.createTbRules(done);
-             }).timeout(10000);
-	     it(descriptions.sendObservations,function(done) {
-		 test.sendObservations(done);
-             }).timeout(120000);
-	     it(descriptions.cleanup,function(done) {
-		 test.cleanup(done);
-	     }).timeout(10000);
-         });
-
-
-describe("Do statistics rule subtests ...".bold,
-	 function() {
-	     var test;
-	     var descriptions = require("./subtests/statistic-rule-tests").descriptions;
-	     it(descriptions.createStatisticsRules,function(done) {
-		 test = require("./subtests/statistic-rule-tests").test(userToken, accountId, deviceId, deviceToken, cbManager);
-		 test.createStatisticsRules(done);
-             }).timeout(10000)
-	     it(descriptions.sendObservations,function(done) {
-		 test.sendObservations(done);
-             }).timeout(50000);
-	     it(descriptions.cleanup,function(done) {
-		 test.cleanup(done);
-	     }).timeout(10000);
-         });
-
-describe("Do data sending subtests ...".bold,
-  function() {
-    var test;
-    var descriptions = require("./subtests/data-sending-tests").descriptions;
-     it(descriptions.sendAggregatedDataPoints,function(done) {
-       test = require("./subtests/data-sending-tests").test(userToken, accountId, deviceId, deviceToken, cbManager);
-       test.sendAggregatedDataPoints(done);
-     }).timeout(10000);
-     it(descriptions.waitForBackendSynchronization,function(done) {
-       test.waitForBackendSynchronization(done);
-     }).timeout(10000);
-     it(descriptions.receiveAggregatedDataPoints,function(done) {
-       test.receiveAggregatedDataPoints(done);
-     }).timeout(10000);
-     it(descriptions.sendAggregatedMultipleDataPoints,function(done) {
-       test.sendAggregatedMultipleDataPoints(done);
-     }).timeout(10000);
-     it(descriptions.waitForBackendSynchronization,function(done) {
-       test.waitForBackendSynchronization(done);
-     }).timeout(10000);
-     it(descriptions.receiveAggregatedMultipleDataPoints,function(done) {
-       test.receiveAggregatedMultipleDataPoints(done);
-     }).timeout(10000);
-     it(descriptions.sendDataPointsWithLoc,function(done) {
-       test.sendDataPointsWithLoc(done);
-     }).timeout(10000);
-     it(descriptions.waitForBackendSynchronization,function(done) {
-       test.waitForBackendSynchronization(done);
-     }).timeout(10000);
-     it(descriptions.receiveDataPointsWithLoc,function(done) {
-       test.receiveDataPointsWithLoc(done);
-     }).timeout(10000);
-     it(descriptions.sendDataPointsWithAttributes,function(done) {
-       test.sendDataPointsWithAttributes(done);
-     }).timeout(10000);
-     it(descriptions.waitForBackendSynchronization,function(done) {
-       test.waitForBackendSynchronization(done);
-     }).timeout(10000);
-     it(descriptions.receiveDataPointsWithAttributes,function(done) {
-       test.receiveDataPointsWithAttributes(done);
-     }).timeout(10000);
-     it(descriptions.receiveDataPointsWithSelectedAttributes,function(done) {
-       test.receiveDataPointsWithSelectedAttributes(done);
-     }).timeout(10000);
-     it(descriptions.receiveDataPointsCount,function(done) {
-       test.receiveDataPointsCount(done);
-     }).timeout(10000);
-     it(descriptions.receiveAggregations,function(done) {
-       test.receiveAggregations(done);
-     }).timeout(10000);
-     it(descriptions.receiveSubset,function(done) {
-       test.receiveSubset(done);
-     }).timeout(10000);
-     it(descriptions.sendMaxAmountOfSamples,function(done) {
-       test.sendMaxAmountOfSamples(done);
-     }).timeout(10000);
-     it(descriptions.receiveMaxAmountOfSamples,function(done) {
-       test.receiveMaxAmountOfSamples(done);
-     }).timeout(10000);
-     it(descriptions.sendPartiallyWrongData,function(done) {
-       test.sendPartiallyWrongData(done);
-     }).timeout(10000);
-     it(descriptions.sendDataAsAdmin,function(done) {
-       test.sendDataAsAdmin(done);
-     }).timeout(10000);
-     it(descriptions.sendDataAsAdminWithWrongAccount,function(done) {
-       test.sendDataAsAdminWithWrongAccount(done);
-     }).timeout(10000);
-     it(descriptions.sendDataAsUser,function(done) {
-       test.sendDataAsUser(done);
-     }).timeout(10000);
-     it(descriptions.waitForBackendSynchronization,function(done) {
-       test.waitForBackendSynchronization(done);
-     }).timeout(10000);
-     it(descriptions.receivePartiallySentData,function(done) {
-       test.receivePartiallySentData(done);
-     }).timeout(10000);
-     it(descriptions.sendDataAsDeviceToWrongDeviceId,function(done) {
-       test.sendDataAsDeviceToWrongDeviceId(done);
-     }).timeout(10000);
-     it(descriptions.receiveDataFromAdmin,function(done) {
-       test.receiveDataFromAdmin(done);
-     }).timeout(10000);
-     it(descriptions.cleanup,function(done) {
-       test.cleanup(done);
-     }).timeout(10000);
-   });
-
-describe("Geting and manage alerts ... \n".bold, function(){
-
-    it('Shall get list of alerts', function(done){
-        helpers.alerts.getListOfAlerts(userToken, accountId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot get list of alerts: " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.length, 7, 'get wrong number of alerts')
-                alertlist = response
-                done();
-            }
-        })
-    })
-        
-    it('Shall add comments to the Alert', function(done){    
-        var comments = {
-            "user": "alertcomment@intel.com",
-            "timestamp": 123233231221,
-            "text": "comment"
+        if ( expectedEmailReasons.length == 0 ) {
+            done()
         }
 
-        helpers.alerts.addCommentsToAlert(userToken, accountId, alertlist[0].alertId, comments, function(err, response) {
-            if (err) {
-                done(new Error("Cannot add comments to the Alert" + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'OK')
-                done();
-            }
-        })
-    })
+    	helpers.mail.waitForNewEmail(imap_username, imap_password, imap_host, imap_port, expectedEmailReasons.length)
+    	    .then(() => helpers.mail.getAllEmailMessages(imap_username, imap_password, imap_host, imap_port))
+    	    .then( (messages) => {
+    		messages.forEach( (message) => {
+    		    var lines = message.toString().split("\n");
+    		    var i;
+    		    lines.forEach((line) => {
+                    var reExecReason = /^- Reason:.*/;
+                    if ( reExecReason.test(line) ) {
+        			    var reason = line.split(":")[1].trim();
+        			    var index = expectedEmailReasons.findIndex( (element) => {
+        				    return (reason == element);
+        			    })
+                        if ( index >= 0 ) {
+                            expectedEmailReasons.splice(index, 1);
+                        } 
+        			}
+                })
+    		})
+    		assert.equal(expectedEmailReasons.length, 0, "Received emails do not match expected emails sent from rule-engine");
+    		done();
+    	    }).catch( (err) => {done(err)});
+        }).timeout(30 * 1000);
 
-    it('Shall get alert infomation', function(done){    
-        helpers.alerts.getAlertDetails(userToken, accountId, alertlist[0].alertId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot get list of alerts: " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.conditions[0].condition, 'temperature-sensor > 25', 'get error alert')
-                done();
-            }
-        })
-    })
+    it('Shall check observations', function(done) {
+        var checkObservations = function(component) {
+            if ( component ) {
+                if ( component.data.length > 0 ) {
 
-    it('Shall update alert status', function(done){     
-        helpers.alerts.updateAlertStatus(userToken, accountId, alertlist[1].alertId, 'Open', function(err, response) {
-            if (err) {
-                done(new Error("Cannot update alert status " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'Open', 'wrong alert status')
-                done();
-            }
-        })
-    })
-    
-    it('Shall clear alert infomation', function(done){
-        helpers.alerts.closeAlert(userToken, accountId, alertlist[2].alertId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot clear alert infomation " + err));
-            } else {
-                done();
-            }
-        })
-    })
+                    helpers.data.searchData(component.data[0].ts, component.data[component.data.length-1].ts, 
+                                            userToken, accountId, deviceId, component.id, false, {}, function(err, result) {
+                        console.log("========err " + err)
+                        console.log("========result " + JSON.stringify(result))
 
-});
+                        if (err) {
+                            done(new Error("Cannot get data: " + err))
+                        }
+                        if (result && result.series && result.series.length == 1) {
+                            err = component.checkData(result.series[0].points);
+                        }
+                	    else {
+                            done(new Error("Cannot get data."));
+                	    }
 
-describe("update rules and create draft rules ... \n".bold, function(){
-
-    var cloneruleId;
-
-    it('Shall clone a rule', function(done){
-        var rulename_clone = rulelist[1].name + ' - cloned';
- 
-        helpers.rules.cloneRule (userToken, accountId, rulelist[1].id, function(err, response) {
-            if (err) {
-                done(new Error("cannot clone a rule " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.name, rulename_clone, 'clone error rule')
-                cloneruleId = response.id
-                done();
-            }
-        })
-    })
-
-    it('Shall update a rule', function(done) {
-                
-        var newrule = {
-            name: "oisp-tests-rule-high-temp-new",
-            synchronizationStatus: "NotSync",
-            conditionComponent: componentName,
-            basicConditionOperator: ">",
-            basicConditionValue: "28",
-            actuationCmd: switchOffCmdName,
-            cid: componentId
-        }
-
-        helpers.rules.updateRule(newrule, userToken, accountId, cloneruleId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot update rules " + err));
-            } else {
-                assert.equal(response.name, newrule.name, 'update rule wrong')
-                done();
-            }
-        })
-
-    }).timeout(20000);
-
-    it('Shall update rule status', function(done){        
-        helpers.rules.updateRuleStatus (userToken, accountId, rulelist[1].id, 'Archived', function(err, response) {
-            if (err) {
-                done(new Error("Cannot update rule status " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'Archived', 'wrong rule status')
-                done();
-            }
-        })
-    })
-
-    it('Shall create a draft rule', function(done){
-        helpers.rules.createDraftRule ('Draftrule', userToken, accountId,function(err, response) {
-            if (err) {
-                done(new Error("cannot create a draft rule " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.name, 'Draftrule', 'wrong draft rule name')
-                done();
-            }
-        })
-    })
-})
-
-describe("Adding user and posting email ...\n".bold, function() {
-    it("Shall add a new user and post email", function(done) {
-        assert.isNotEmpty(imap_username, "no email provided");
-        assert.isNotEmpty(imap_password, "no password provided");
-        helpers.users.addUser(userToken, imap_username, imap_password ,function(err, response) {
-            if (err) {
-                done(new Error("Cannot create new user: " + err));
-            } else {
-		assert.equal(response.email, imap_username, 'add wrong user')
-		assert.equal(response.type, 'user', 'response type wrong')
-                done();
-            }
-        })
-    })
-
-    it("Shall activate user with token", function(done) {
-	helpers.mail.waitForNewEmail(imap_username, imap_password, imap_host, imap_port, 1)
-	    .then(() => helpers.mail.getEmailMessage(imap_username, imap_password, imap_host, imap_port, -1))
-	    .then(function(message) {
-                var regexp = /token=\w*?\r/;
-		var activationline = regexp.exec(message.toString());
-                var rawactivation = activationline[0].split("token=")[1].toString();
-                var activationToken = rawactivation.replace(/\r/, '')
-                activationToken = activationToken.substring(2)
-
-                if ( activationToken === null) {
-		    done(new Error("Wrong email " + message ))
+                        if (err) {
+                            done(new Error(err))
+                        }
+                        else {
+                            checkObservations(component.next)
+                        }
+                    })
                 }
                 else {
-		    assert.isString(activationToken,'activationToken is not string')
-
-		    helpers.users.activateUser(activationToken, function(err, response) {
-                        if (err) {
-			    done(new Error("Cannot activate user: " + err));
-                        } else {
-			    assert.equal(response.status, 'OK', 'cannot activate user')
-
-			    helpers.auth.login(imap_username, imap_password, function(err, token) {
-                                if (err) {
-				    done(new Error("Cannot authenticate receiver: " + err));
-                                } else {
-				    receiverToken = token;
-				    done();
-                                }
-			    })
-                        }
-		    });
+                    checkObservations(component.next)
                 }
-            }).catch(function(err){done(err)});
-    }).timeout( 60 * 1000);
-
-    it('Shall create receiver account', function(done) {
-        assert.notEqual(receiverToken, null, "Invalid user token")
-        helpers.accounts.createAccount('receiver', receiverToken, function(err, response) {
-            if (err) {
-                done(new Error("Cannot create account: " + err));
-            } else {
-                assert.equal(response.name, 'receiver', "accounts name is wrong");
-                receiveraccountId = response.id;
-                done();
             }
-        }) 
-    })
+            else {
+                done()
+            }
+        }
+        checkObservations(components.first)
+       }).timeout(10000);
+
 });
 
-describe("Invite receiver ...\n".bold, function() {
 
-    var inviteId = null;
 
-    it('Shall create invitation', function(done){
-        // a mail will be sent to receiver
-        
-        helpers.invitation.createInvitation(userToken, accountId, imap_username, function(err, response) {
-            if (err) {
-                done(new Error("Cannot create invitation: " + err));
-            } else {
-                assert.equal(response.email, imap_username, 'send invite to wrong name');
-		helpers.mail.waitAndConsumeEmailMessage(imap_username, imap_password, imap_host, imap_port).then(function(message){
-                    done();
-		}). catch(function(err){done(err)});
-            }
-        })
-    }).timeout( 30 * 1000);
 
-    
-    it('Shall get all invitations', function(done){
-
-        helpers.invitation.getAllInvitations(userToken, accountId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot get invitation: " + err));
-            } else {
-                assert.equal(response[0], imap_username, 'send invite to wrong name')
-                done();
-            }
-        })
-    })
-        
-    it('Shall delete invitation and send again', function(done){
-        helpers.invitation.deleteInvitations(userToken, accountId, imap_username, function(err, response) {
-            if (err) {
-                done(new Error("Cannot delete invitation: " + err));
-            } else {
-                helpers.invitation.createInvitation(userToken, accountId, imap_username, function(err, response) {
-                    // when send invitation, the receiver will receive an email said he should login to accept the invitation
-                    if (err) {
-                        done(new Error("Cannot create invitation: " + err));
-                    } else {
-                        assert.equal(response.email, imap_username, 'send invite to wrong name');
-			helpers.mail.waitAndConsumeEmailMessage(imap_username, imap_password, imap_host, imap_port).then(function(message){
-                            done();
-			})
-                    }
-                })
-            }
-        })
-    }).timeout(30 * 1000);
-
-    it('Shall get specific invitations', function(done){
-        var getInvitation = function(cb){
-        helpers.auth.login(imap_username, imap_password, function(err, token) {
-            if (err) {
-                done(new Error("Cannot authenticate: " + err));
-            } else {
-                receiverToken = token;
-                helpers.invitation.getInvitations(receiverToken, receiveraccountId, imap_username, function(err, response) {
-                    if (err) {
-                        cb(err, null);
-                    } else {
-                        if (response != null){
-                          cb(null, response)
-                        } else {
-                            process.stdout.write(".");
-                            setTimeout(function(){
-                                getInvitation(cb);
-                            }, 500);
-                        }
-                    }
-                })
-            }   
-        })
-        };
-       getInvitation(function(err, response){
-           assert.equal(err, null, "get invitation error");
-           inviteId = response[0]._id;
-           done();
-       });
-    }).timeout(2 * 60 * 1000);
-
-    it('Shall accept specific invitations', function(done){
-        helpers.invitation.acceptInvitation(receiverToken, accountId, inviteId, function(err, response) {
-            if (err) {
-                done(new Error('cannot accept invitetion :' + err));
-            } else {
-                assert.equal(response.accountName, accountName, 'accept wrong invitation')
-                done();
-            }
-        })
-    })
-    
-    it('Shall not accept non-existing invitations, or crash', function(done){
-    	inviteId = 0;
-        helpers.invitation.acceptInvitation(receiverToken, accountId, inviteId, function(err, response) {
-            if (err) {
-                done();
-            } else {
-                done(new Error('non-existing invitation accepted' + response));
-            }
-        })
-    })
-
-    it('Shall request activation', function(done) {
-        var username = process.env.USERNAME;
-
-        helpers.users.requestUserActivation(username, function(err, response) {
-            if (err) {
-                done(new Error('cannot request activation:' + err));
-            } else {
-                    assert.equal(response.status, 'OK')
-		    helpers.mail.waitAndConsumeEmailMessage(imap_username, imap_password, imap_host, imap_port).then(function(message){
-			done();
-		    })
-            }
-        })
-    }).timeout( 30 * 1000);
-
-    it('Shall get id of receiver and change privilege', function (done) {
-        helpers.auth.tokenInfo(receiverToken, function (err, response) {
-            if (err) {
-                done(new Error("Cannot get token info: " + err));
-            } else {
-                receiveruserId = response.payload.sub
-                helpers.accounts.changeAccountUser(accountId, userToken, receiveruserId, function (err, response) {
-                    if (err) {
-                        done(new Error("Cannot change another user privilege to your account: " + err));
-                    } else {
-                	assert.equal(response.status, 'OK')
-                        done();
-                    }
-                })
-                
-            }
-        })
-    })
-    
-    it('Shall list all users for account', function (done) {
-        
-        helpers.accounts.getAccountUsers(accountId, userToken, function (err, response) {
-            if (err) {
-                done(new Error("Cannot list users for account: " + err));
-            } else {
-                assert.equal(response.length, 2, 'error account numbers')
-		done();
-            }
-        })
-    })
-})
-
-describe("change password and delete receiver ... \n".bold, function(){
-
-    it('Shall request change receiver password', function(done) {
-	var username = process.env.USERNAME;
-	helpers.users.requestUserPasswordChange(username, function(err, response) {
-            if (err) {
-                done(new Error("Cannot request change password : " + err));
-            } else {
-                assert.equal(response.status, 'OK', 'status error')
-                done();
-            }
-        })
-    })
-
-    it('Shall update receiver password', function(done) {
-	helpers.mail.waitForNewEmail(imap_username, imap_password, imap_host, imap_port, 1)
-	    .then(() => helpers.mail.getEmailMessage(imap_username, imap_password, imap_host, imap_port, -1))
-	    .then(function(message) {
-		var regexp = /token=\w*?\r/;
-		var activationline = regexp.exec(message.toString());
-		var rawactivation = activationline[0].split("token=")[1].toString();
-		var activationToken = rawactivation.replace(/\r/, '')
-		activationToken = activationToken.substring(2)
-
-		if ( activationToken === null) {
-                    done(new Error("Wrong email " + message ))
-		}
-		else {
-                    assert.isString(activationToken,'activationToken is not string')
-                    var password = 'Receiver12345'
-                    helpers.users.updateUserPassword(activationToken, password, function(err, response) {
-			if (err) {
-                            done(new Error("Cannot update receiver password : " + err));
-			} else {
-			    assert.equal(response.status, 'OK', 'status error')
-                            done();
-			}
-                    })
-		}
-            }).catch(function(err){done(err)});
-    }).timeout(2 * 60 * 1000);
-
-    it('Shall change password', function(done) {
-        var username = process.env.USERNAME;
-	var oldPasswd = "Receiver12345";
-        var newPasswd = 'oispnewpasswd2'
-
-        helpers.users.changeUserPassword(userToken, username, oldPasswd, newPasswd, function(err, response) {
-            if (err) {
-                done(new Error("Cannot change password: " + err));
-            } else {
-                assert.equal(response.password, 'oispnewpasswd2', 'new password error')
-                done();
-            }
-        })
-    })
-
-    it('Shall delete draft rule', function(done){
-        helpers.rules.deleteRule (userToken, accountId,   null    , function(err, response){
-            if (err) {
-                done(new Error("cannot delete a draft rule " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'Done')
-                done();
-            } 
-        })
-    })
-
-    it('Shall delete a rule', function(done){
-        helpers.rules.deleteRule (userToken, accountId, rulelist[0].id, function(err, response){
-            if (err) {
-                done(new Error("cannot delete a rule " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'Done')
-                done();
-            } 
-        })
-    })
-
-    it('Shall delete a component', function(done){
-        helpers.devices.deleteDeviceComponent (userToken, accountId, deviceId, componentId, function(err, response){
-            if (err) {
-                done(new Error("cannot delete a component " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'Done')
-                done();
-            } 
-        })
-    })
-
-    it('Shall delete a device', function(done){
-        helpers.devices.deleteDevice (userToken, accountId, deviceId, function(err, response){
-            if (err) {
-                done(new Error("cannot delete a device " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'Done')
-                done();
-            } 
-        })
-    })
-
-    it('Shall delete an account', function(done){
-        helpers.accounts.deleteAccount (userToken, accountId, function(err, response){
-            if (err) {
-                done(new Error("cannot delete an account " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'Done')
-                done();
-            } 
-        })
-    })
-
-    it('Shall delete a user', function(done){
-        helpers.users.deleteUser (userToken, userId, function(err, response){
-            if (err) {
-                done(new Error("cannot delete a user " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'Done')
-                done();
-            } 
-        })
-    })
- 
-})   
