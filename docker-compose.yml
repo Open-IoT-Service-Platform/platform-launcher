@@ -221,6 +221,7 @@ services:
       - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
       - OISP_TSDB_PROPERTIES=${OISP_TSDB_PROPERTIES}
       - OISP_BACKEND_JAEGER_CONFIG
+      - OISP_OBJECT_STORE_MINIO_PROPERTIES
   hdfs-namenode:
     image: singularities/hadoop:2.8
     command: start-hadoop namenode
@@ -319,3 +320,13 @@ services:
       - OISP_REDIS_CONFIG
     volumes:
       - ./data/keys:/app/keys
+  minio:
+    image: minio/minio:RELEASE.2019-02-20T22-44-29Z
+    volumes:
+      - ./data/S3:/data
+    ports:
+      - "9000:9000"
+    environment:
+      - MINIO_ACCESS_KEY=${OISP_MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${OISP_MINIO_SECRET_KEY}
+    command: minio server /data
