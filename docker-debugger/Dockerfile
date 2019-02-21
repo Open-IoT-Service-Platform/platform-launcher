@@ -21,6 +21,9 @@ RUN wget https://github.com/tsenart/vegeta/releases/download/cli%2Fv12.1.0/veget
     tar -xzvf vegeta-12.1.0-linux-amd64.tar.gz && \
     cp vegeta /usr/bin/vegeta
 
+RUN mkdir /home/load-tests/
+ADD load-tests/create_test.py /home/load-tests/create_test.py
+
 WORKDIR /home/platform-launcher
 
 EXPOSE 8089 5557 5558
