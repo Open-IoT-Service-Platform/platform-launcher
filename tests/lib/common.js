@@ -71,6 +71,7 @@ class Component {
         this.dataIndex = 0;
         this.next = null;
         this.prev = null;
+        this.alerts = [];
     }
 
     get name() {
@@ -112,6 +113,26 @@ class Component {
 
         return "Cannot check data";
     }
+
+    alertsNumber() {
+        var nb = 0;
+        this.data.forEach(function(data) {
+            if ( data.expectedActuation != null ) {
+                nb++;
+            }
+        })
+        return nb;
+    }
+
+    checkAlert(value, condition ) {
+        for (var i=0; i<this.data.length; i++) {
+            if ( this.data[i].value == value && this.data[i].expectedEmailReason === condition ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
 
 class Components {
