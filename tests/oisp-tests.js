@@ -26,14 +26,12 @@ var kafka = require('kafka-node');
 var cfenvReader = require('./lib/cfenv/reader');
 var helpers = require("./lib/helpers");
 var colors = require('colors');
-
 var exec = require('child_process').exec;
+var gm = require('gm').subClass({imageMagick: true});
+var { Data, Rule, Component, Components } = require('./lib/common')
 
 var accountName = "oisp-tests";
 var deviceName = "oisp-tests-device";
-
-var componentName = "temperature-sensor";
-var componentType = "temperature.v1.0";
 
 var actuatorName = "powerswitch-actuator";
 var actuatorType = "powerswitch.v1.0";
@@ -50,42 +48,123 @@ var imap_host     = process.env.IMAP_HOST;
 var imap_port     = process.env.IMAP_PORT;
 
 var recipientEmail = imap_username; 
-
 var rules = [];
 
-rules[switchOnCmdName] = {
-    name: "oisp-tests-rule-low-temp",
-    conditionComponent: componentName,
-    basicConditionOperator: "<=",
-    basicConditionValue: "15",
-    actions: [
-                {
-                    type: "actuation",
-                    target: [ switchOnCmdName ]
-                },
-                {
-                    type: "mail",
-                    target: [ emailRecipient ]
-                }
-            ],
-};
 
-rules[switchOffCmdName] = {
-    name: "oisp-tests-rule-high-temp",
-    conditionComponent: componentName,
-    basicConditionOperator: ">",
-    basicConditionValue: "25",
-    actions: [
-                {
-                    type: "actuation",
-                    target: [ switchOffCmdName ]
-                },
-                {
-                    type: "mail",
-                    target: [ emailRecipient ]
-                }
-            ],
-};
+
+//-------------------------------------------------------------------------------------------------------
+// Rules
+//-------------------------------------------------------------------------------------------------------
+var lowTemperatureRule = new Rule("oisp-tests-rule-low-temp","<=", 15);
+    lowTemperatureRule.addAction("actuation", switchOnCmdName);
+    lowTemperatureRule.addAction("mail", emailRecipient);
+
+var highTemperatureRule = new Rule("oisp-tests-rule-high-temp",">", 25);
+    highTemperatureRule.addAction("actuation", switchOffCmdName);
+    highTemperatureRule.addAction("mail", emailRecipient);
+
+//-------------------------------------------------------------------------------------------------------
+// Components
+//-------------------------------------------------------------------------------------------------------
+var components = new Components()
+
+components.add( new Component("temperatures", "Number", "float", "Degress Celsius", "timeSeries", -150, 150, 
+                    [lowTemperatureRule, highTemperatureRule],
+                    temperatureData, temperatureCheckData)
+                );
+
+components.add( new Component("images", "ByteArray", "image/jpeg", "pixel", "binaryDataRenderer", null, null, 
+                    [],
+                    imageData, imageCheckData)
+                );
+
+function temperatureData(componentName) {
+
+    var data = [
+            new Data(-15, 1, componentName + " <= 15"),
+            new Data( -5, 1, componentName + " <= 15"),
+            new Data(  5, 1, componentName + " <= 15"),
+            new Data( 15, 1, componentName + " <= 15"),
+            new Data( 25, null, null),
+            new Data( 30, 0, componentName + " > 25"),
+            new Data( 20, null, null),
+            new Data( 14, 1, componentName + " <= 15"),
+            new Data( 20, null, null),
+            new Data( 28, 0, componentName + " > 25")
+        ];
+
+    return data;
+}
+
+function temperatureCheckData(sentData, receivedData) {
+    if ( sentData.length == receivedData.length) {
+        for (var i = 0; i < sentData.length; i++) {
+            if (sentData[i].ts == receivedData[i].ts && sentData[i].value == receivedData[i].value) {
+                sentData[i].ts = null;
+            }
+        }
+    }
+
+    var err = null;
+    for (var i = 0; i < sentData.length; i++) {
+        if (sentData[i].ts != null) {
+            err += "[" + i + "]=" + sentData[i].value + " ";
+        }
+    }
+    if (err) {
+        err = "Got wrong data for " + err;
+    }
+
+    return err;
+}
+
+
+function imageData(componentName, opaque, cb) {
+    if (!cb) {
+        throw "Callback required";
+    }
+
+    var images = [
+        new gm(100, 200, "red"),
+        new gm(400, 600, "white"),
+        new gm(1280, 720, "blue")
+    ];
+
+    images.forEach(function(image) {
+        image.toBuffer("JPEG", function(err, buffer) {
+            if (!err) {
+                cb(opaque, new Data(buffer, null, null))
+            }
+        })
+    })
+
+    return null;
+}
+
+
+function imageCheckData(sentData, receivedData) {
+    if ( sentData.length == receivedData.length) {
+        for (var i = 0; i < sentData.length; i++) {
+            if (sentData[i].ts == receivedData[i].ts &&
+                sentData[i].value.equals(receivedData[i].value)) {
+                sentData[i].ts = null;
+            }
+        }
+    }
+
+    var err = null;
+    for (var i = 0; i < sentData.length; i++) {
+        if (sentData[i].ts != null) {
+            err += i + " " ;
+        }
+    }
+    if (err) {
+        err = "Got wrong data for items" + err;
+    }
+
+    return err;
+    return null;
+}
 
 //-------------------------------------------------------------------------------------------------------
 // Tests
@@ -98,64 +177,11 @@ var userId;
 var accountId;
 var deviceId;
 var deviceToken;
-var componentId;
 var actuatorId;
 var rulelist;
-var alertlist;               
 var componentParamName; 
 var firstObservationTime;
 
-var temperatureValues = [{
-        value: -15,
-        expectedActuation: 1, // swich on
-        expectedEmailReason: "temperature-sensor <= 15"
-    },
-    {
-        value: -5,
-        expectedActuation: 1, // swich on
-        expectedEmailReason: "temperature-sensor <= 15"
-    },
-    {
-        value: 5,
-        expectedActuation: 1, // swich on
-        expectedEmailReason: "temperature-sensor <= 15"
-    },
-    {
-        value: 15,
-        expectedActuation: 1, // swich on
-        expectedEmailReason: "temperature-sensor <= 15"
-    },
-    {
-        value: 25,
-        expectedActuation: null, // do nothing (no actuation)
-        expectedEmailReason: null,
-    },
-    {
-        value: 30,
-        expectedActuation: 0, // swich off
-        expectedEmailReason: "temperature-sensor > 25"
-    },
-    {
-        value: 20,
-        expectedActuation: null, // do nothing (no actuation)
-        expectedEmailReason: null
-    },
-    {
-        value: 14,
-        expectedActuation: 1, // swich on
-        expectedEmailReason: "temperature-sensor <= 15"
-    },
-    {
-        value: 20,
-        expectedActuation: null, // do nothing (no actuation)
-        expectedEmailReason: null
-    },
-    {
-        value: 28,
-        expectedActuation: 0, // swich off
-        expectedEmailReason: "temperature-sensor > 25"
-    }
-];
 
 process.stdout.write("_____________________________________________________________________\n".bold);
 process.stdout.write("                                                                     \n");
@@ -181,10 +207,8 @@ describe("Waiting for OISP services to be ready ...\n".bold, function() {
         accountId = null;
         deviceId = "00-11-22-33-44-55";
         deviceToken = null;
-        componentId = null;
         actuatorId = null;
         rulelist = null;
-        alertlist = null; 
         componentParamName = "LED";
         firstObservationTime = null;
 
@@ -530,32 +554,136 @@ describe("Creating account and device ...\n".bold, function() {
     })
 })
 
-describe("Creating and getting components ... \n".bold, function() {
+describe("Managing components catalog ... \n".bold, function() {
 
-    it('Shall add device a component', function(done) {
+    it('Shall create new custom Components Types', function(done) {
+        var createCatalog = function(component) {
+            if ( component ) {
+                helpers.cmpcatalog.createCatalog(userToken, accountId, component.catalog, function(err, response) {
+                    if (err) {
+                        done(new Error("Cannot create component: " + err));
+                    } else {
+                        //component.cId = response.id;
+                      //  assert.equal(response.id, component.cId, 'cannot create new component type')
+                        createCatalog(component.next);
+                    }
+                })
+            } else {
+                done()
+            }
+        }
+        createCatalog(components.first);
+    }).timeout(10000);
 
-        helpers.devices.addDeviceComponent(componentName, componentType, deviceToken, accountId, deviceId, function(err, id) {
+    it('Shall list all component types for account', function(done) {
+        helpers.cmpcatalog.getCatalog(userToken, accountId, function(err, response) {
             if (err) {
                 done(new Error("Cannot create component: " + err));
             } else {
-                componentId = id;
+                assert.equal(response.length, components.size + 3, 'get wrong number of components ')
                 done();
             }
         })
     }).timeout(10000);
+
+    it('Shall get component type details', function(done) {
+        var getCatalogDetail = function(component) {
+            if ( component ) {
+                if ( component.catalog.max ) {
+                    helpers.cmpcatalog.getCatalogDetail(userToken, accountId, component.cId, function(err, response) {
+                        if (err) {
+                            done(new Error("Cannot get component type details " + err));
+                        } else {
+                            assert.equal(response.id, component.cId, 'cannot get component '+component.name)
+                            assert.equal(response.max, component.catalog.max)
+                            getCatalogDetail(component.next)
+                        }
+                    })
+                } else {
+                    getCatalogDetail(component.next)
+                }
+            } else {
+                done()
+            }
+        }
+        getCatalogDetail(components.first)
+    }).timeout(10000);
+
+    it('Shall update a component type', function(done) {
+        var updateCatalog = function(component) {
+            if ( component ) {
+                if ( component.catalog.min != null &&
+                     component.catalog.max != null )  {
+                    var newmin = 10;
+                    var newmax = 1000;
+
+                    helpers.cmpcatalog.updateCatalog(userToken, accountId, component.cId, newmin, newmax, function(err, response) {
+                        if (err) {
+                            done(new Error("Cannot get component type details " + err));
+                        } else {
+                            if ( component.upgradeVersion() == false ) {
+                                done(new Error("Cannot upgrade version for component " + component.name))
+                            }
+                            assert.equal(response.id, component.cId, 'cannot update '+component.name+' component to '+component.catalog.version)
+                            assert.equal(response.max, newmax)
+                            updateCatalog(component.next)
+                        }
+                    })
+                } else {
+                    updateCatalog(component.next)
+                }
+            } else {
+                done()
+            }
+        }
+        updateCatalog(components.first)
+    }).timeout(10000);
+})
+
+describe("Creating and getting components ... \n".bold, function() {
+
+    it('Shall add device a component', function(done) {
+        var addDeviceComponent = function(component) {
+            if ( component ) {
+                helpers.devices.addDeviceComponent(component.name, component.type, deviceToken, accountId, deviceId, function(err, id) {
+                    if (err) {
+                        done(new Error("Cannot create component  " +  component + " : " +err));
+                    } else {
+                        if ( id ) {
+                            component.id = id;
+                            addDeviceComponent(component.next);
+                        }
+                        else {
+                            done(new Error("Wrong id for component  " +  component ));
+                        }
+                    }
+                })
+            }
+            else {
+                done();
+            }
+        }
+        addDeviceComponent(components.first);
+
+    }).timeout(10000);
     
     it('Shall not add device a component with the name that a component of the device already has, or crash', function(done) {
-    	
-        helpers.devices.addDeviceComponent(componentName, componentType, deviceToken, accountId, deviceId, function(err, id) {
-            if (err) {
-                done(new Error("Cannot create or try to create component: " + err));
-            } else if (id === undefined) {
-            	// Response with code 409, id should be undefined
-            	done();
-            } else {
-                done(new Error("No error is thrown and the component is added successfully: " + id));
+        var addDeviceComponent = function(component) {
+            if ( component ) {
+                helpers.devices.addDeviceComponent(component.name, component.type, deviceToken, accountId, deviceId, function(err, id) {
+                    if (err) {
+                        addDeviceComponent(component.next);
+                    } else {
+                        done(new Error("No error is thrown and the component is added successfully: " + id));
+                    }
+                })
             }
-        })
+            else {
+                done();
+            }
+        }
+        addDeviceComponent(components.first);
+
     }).timeout(10000);
 
     it('Shall add device an actuator', function(done) {
@@ -631,94 +759,60 @@ describe("Creating and getting components ... \n".bold, function() {
     
 });
 
-describe("Getting components catalog ... \n".bold, function() {
-
-    it('Shall create a new custom Component Type', function(done) {
-        helpers.cmpcatalog.createCatalog(userToken, accountId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot create component: " + err));
-            } else {
-                assert.equal(response.id, 'speed.v1.0', 'cannot create new component type')
-                done();
-            }
-        })
-    }).timeout(10000);
-
-    it('Shall list all component types for account', function(done) {
-        helpers.cmpcatalog.getCatalog(userToken, accountId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot list component: " + err));
-            } else {
-                assert.equal(response.length, 4, 'get wrong number of component types')
-                done();
-            }
-        })
-    }).timeout(10000);
-
-    it('Shall get component type details', function(done) {
-        helpers.cmpcatalog.getCatalogDetail(userToken, accountId, 'speed.v1.0', function(err, response) {
-            if (err) {
-                done(new Error("Cannot get component type details " + err));
-            } else {
-                assert.equal(response.id, 'speed.v1.0', 'cannot get speed component')
-                assert.equal(response.max, 500)
-                done();
-            }
-        })
-    }).timeout(10000);
-
-    it('Shall update a component type', function(done) {
-        var newmin = 10;
-        var newmax = 1000;
-        helpers.cmpcatalog.updateCatalog(userToken, accountId, 'speed.v1.0', newmin, newmax, function(err, response) {
-            if (err) {
-                done(new Error("Cannot get component type details " + err));
-            } else {
-                assert.equal(response.id, 'speed.v1.1', 'cannot update speed component to v1.1')
-                assert.equal(response.max, 1000)
-                done();
-            }
-        })
-    }).timeout(10000);
-})
 
 describe("Creating rules ... \n".bold, function() {
-    it('Shall create switch-on rule', function(done) {
-
-        rules[switchOnCmdName].cid = componentId;
-
-        helpers.rules.createRule(rules[switchOnCmdName], userToken, accountId, deviceId, function(err, id) {
-            if (err) {
-                done(new Error("Cannot create switch-on rule: " + err));
-            } else {
-                rules[switchOnCmdName].id = id;
-                done();
-            }
+    it('Shall create rules', function(done) {
+        var nbRules = 0;
+        components.list.forEach(function(component) {
+            nbRules += component.rules.length;
         })
+
+        if ( nbRules > 0 ) {
+            components.list.forEach(function(component) {
+                component.rules.forEach(function(rule) {
+                    rule.cid = component.id;
+                    rule.conditionComponent = component.name;
+                    helpers.rules.createRule(rule, userToken, accountId, deviceId, function(err, id) {
+                        if (err) {
+                            done(new Error("Cannot create rule " + rule.name +": " + err));
+                        } else {
+                            rule.id = id;
+                            if ( --nbRules == 0 ) {
+                                done();
+                            }
+                        }
+                    })
+                })
+            })
+        }
+        else {
+            done()
+        }
 
     }).timeout(20000);
 
-    it('Shall create switch-off rule', function(done) {
 
-        rules[switchOffCmdName].cid = componentId;
-
-        helpers.rules.createRule(rules[switchOffCmdName], userToken, accountId, deviceId, function(err, id) {
-            if (err) {
-                done(new Error("Cannot create switch-off rule: " + err));
-            } else {
-                rules[switchOffCmdName].id = id;
-                done();
-            }
-        })
-
-    }).timeout(20000);
-    
     it('Shall get all rules', function(done) {
         helpers.rules.getRules(userToken, accountId, function(err, response) {
             if (err) {
                 done(new Error("Cannot get rules " + err));
             } else {
-                assert.equal(response[0].name, 'oisp-tests-rule-high-temp', 'rule name is wrong')
+                components.list.forEach(function(component) {
+                    if ( component.hasOwnProperty('rules') ) {
+                        component.rules.forEach(function(rule) {
+                            var found = false;
+                            for(var i=0; i<response.length; i++) {
+                                if ( rule.name == response[i].name ) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if ( !found ) {
+                                done(new Error("rule " + rule.name + " not found")); 
+                            }
+                        })
+                    }
+                })
                 rulelist = response
                 done();
             }
@@ -730,149 +824,155 @@ describe("Creating rules ... \n".bold, function() {
 describe("Sending observations and checking rules ...\n".bold, function() {
 
     it('Shall send observation and check rules', function(done) {
-        assert.notEqual(componentId, null, "Invalid component id")
-        assert.notEqual(rules[switchOnCmdName].id, null, "Invalid switch-on rule id")
-        assert.notEqual(rules[switchOffCmdName].id, null, "Invalid switch-off rule id")
         assert.notEqual(proxyConnector, null, "Invalid websocket proxy connector")
 
-        var index = 0;
-        var nbActuations = 0;
+        var curComponent = null;
+        components.reset();
 
-        process.stdout.write("    ");
-
-        for (var i = 0; i < temperatureValues.length; i++) {
-            temperatureValues[i].ts = null;
-            if (temperatureValues[i].expectedActuation != null) {
-                nbActuations++;
-            }
-        }
-
-        var step = function(){
-            index++;
-
-            if (index == temperatureValues.length) {
+        var step = function(component) {
+            component.dataIndex++;
+            if ( component.dataIndex == component.data.length) {
                 process.stdout.write("\n");
-                done();
-            } else {
-                sendObservationAndCheckRules(index);
+                component = component.next;
             }
+
+            sendObservationAndCheckRules(component);
         };
 
-	cbManager.set(function(message) {
-            --nbActuations;
-
-            var expectedActuationValue = temperatureValues[index].expectedActuation.toString();
+        cbManager.set(function(message) {
+            var expectedActuationValue = curComponent.data[curComponent.dataIndex].expectedActuation.toString();
             var componentParam = message.content.params.filter(function(param){
                 return param.name == componentParamName;
             });
 
-            if(componentParam.length == 1)
-            {
+            if(componentParam.length == 1) {
                 var param = componentParam[0];
                 var paramValue = param.value.toString();
 
-                if(paramValue == expectedActuationValue)
-		{
-		    step();
+                if(paramValue == expectedActuationValue) {
+                  step(curComponent);
                 }
                 else
                 {
                     done(new Error("Param value wrong. Expected: " + expectedActuationValue + " Received: " + paramValue));
                 }
-	    }
+            }
             else
             {
                 done(new Error("Did not find component param: " + componentParamName))
             }
         });
-	helpers.connector.wsConnect(proxyConnector, deviceToken, deviceId, cbManager.cb);
 
-        var sendObservationAndCheckRules = function(index) {
+        helpers.connector.wsConnect(proxyConnector, deviceToken, deviceId, cbManager.cb);
 
-            process.stdout.write(".".green);
-
-            helpers.devices.submitData(temperatureValues[index].value, deviceToken, accountId, deviceId, componentId, function(err, ts) {
-                temperatureValues[index].ts = ts;
-
-                if (index == 0) {
-                    firstObservationTime = temperatureValues[index].ts;
+        var sendObservationAndCheckRules = function(component) {
+            if ( component ) {
+                if ( curComponent != component ) {
+                    process.stdout.write("\t" + component.type.blue + "\n");
                 }
-
-                if (err) {
-                    done( "Cannot send observation: "+err)
+                curComponent = component;
+                if (component.dataIndex == 0) {
+                    process.stdout.write("\t");
                 }
+                process.stdout.write(".".green);
 
-                if (temperatureValues[index].expectedActuation == null) {
-                    step();
-                }
-            });
+                helpers.devices.submitData(component.data[component.dataIndex].value, deviceToken, 
+                                           accountId, deviceId, component.id, function(err, ts) {
+                    component.data[component.dataIndex].ts = ts;
+
+                    if (err) {
+                        done( "Cannot send observation: "+err)
+                    }
+
+                    if (component.data[component.dataIndex].expectedActuation == null) {
+                        step(component);
+                    }
+                });
+            }
+            else {
+                done();
+            }
         }
 
-        sendObservationAndCheckRules(index);
+        sendObservationAndCheckRules(components.first);
 
     }).timeout(5*60*1000)
 
     //---------------------------------------------------------------
 
-    it('Shall check received emails', function(done){
-	helpers.mail.waitForNewEmail(imap_username, imap_password, imap_host, imap_port, 7)
-	    .then(() => helpers.mail.getAllEmailMessages(imap_username, imap_password, imap_host, imap_port))
-	    .then( (messages) => {
-		var temperatureValuesCopy =  temperatureValues.map( (elem) => elem);
-		messages.forEach( (message) => {
-		    var lines = message.toString().split("\n");
-		    var i;
-		    lines.forEach((line) => {
-                        var reExecReason = /^- Reason:.*/;
-                        if ( reExecReason.test(line) ) {
-			    var reason = line.split(":")[1].trim();
-			    var index = temperatureValuesCopy.findIndex( (element) => {
-				return (reason == element.expectedEmailReason);
-			    })
-			    temperatureValuesCopy.splice(index, 1);
-			}
-                    })
-		})
-		assert.equal(temperatureValuesCopy.length, 3, "Received emails do not match expected emails sent from rule-engine");
-		done();
-	    }).catch( (err) => {done(err)});
-    }).timeout(30 * 1000);
+    it('Shall check received emails', function(done) {
+        var expectedEmailReasons = [];
+        components.list.forEach(function(component) {
+            component.data.forEach(function(data) {
+                if ( data.expectedEmailReason ) {
+                    expectedEmailReasons.push(data.expectedEmailReason)
+                }
+            })
+        })
 
-    it('Shall check observation', function(done) {
-        helpers.data.searchData(firstObservationTime, -1, userToken, accountId, deviceId, componentId, false, {}, function(err, result) {
-            if (err) {
-                done(new Error("Cannot get data: " + err))
-            }
+        if ( expectedEmailReasons.length == 0 ) {
+            done()
+        }
 
-	    var data = {}
-            if (result && result.series && result.series.length == 1){
-		data = result.series[0].points;
-            }
-	    else {
-		done(new Error("Cannot get data."));
-	    }
-            if (data && data.length == temperatureValues.length) {
-		for (var j = 0; j < temperatureValues.length; j++) {
-                    if (temperatureValues[j].ts == data[j].ts && temperatureValues[j].value == data[j].value) {
-			temperatureValues[j].ts = null;
+        helpers.mail.waitForNewEmail(imap_username, imap_password, imap_host, imap_port, expectedEmailReasons.length)
+            .then(() => helpers.mail.getAllEmailMessages(imap_username, imap_password, imap_host, imap_port))
+            .then( (messages) => {
+            messages.forEach( (message) => {
+                var lines = message.toString().split("\n");
+                var i;
+                lines.forEach((line) => {
+                    var reExecReason = /^- Reason:.*/;
+                    if ( reExecReason.test(line) ) {
+                        var reason = line.split(":")[1].trim();
+                        var index = expectedEmailReasons.findIndex( (element) => {
+                            return (reason == element);
+                        })
+                        if ( index >= 0 ) {
+                            expectedEmailReasons.splice(index, 1);
+                        }
                     }
-		}
-            }
+                })
+            })
+            assert.equal(expectedEmailReasons.length, 0, "Received emails do not match expected emails sent from rule-engine");
+            done();
+            }).catch( (err) => {done(err)});
+        }).timeout(30 * 1000);
 
-	    var err = "";
-            for (var i = 0; i < temperatureValues.length; i++) {
-		if (temperatureValues[i].ts != null) {
-                    err += "[" + i + "]=" + temperatureValues[i].value + " ";
+    it('Shall check observations', function(done) {
+        var checkObservations = function(component) {
+            if ( component ) {
+                if ( component.data.length > 0 ) {
+
+                    helpers.data.searchData(component.data[0].ts, component.data[component.data.length-1].ts, 
+                                            userToken, accountId, deviceId, component.id, false, {}, function(err, result) {
+                        if (err) {
+                            done(new Error("Cannot get data: " + err))
+                        }
+                        else if (result && result.series && result.series.length == 1) {
+                            err = component.checkData(result.series[0].points);
+                        }
+                        else {
+                            done(new Error("Cannot get data."));
+                        }
+
+                        if (err) {
+                            done(new Error(err))
+                        }
+                        else {
+                            checkObservations(component.next)
+                        }
+                    })
+                }
+                else {
+                    checkObservations(component.next)
                 }
             }
-            if (err.length == 0) {
-		done();
-            } else {
-                done(new Error("Got wrong data for " + err))
+            else {
+                done()
             }
-
-        })
-    }).timeout(10000);
+        }
+        checkObservations(components.first)
+       }).timeout(10000);
 
 });
 
@@ -1000,69 +1100,141 @@ describe("Do data sending subtests ...".bold,
 
 describe("Geting and manage alerts ... \n".bold, function(){
 
-    it('Shall get list of alerts', function(done){
-        helpers.alerts.getListOfAlerts(userToken, accountId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot get list of alerts: " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.length, 7, 'get wrong number of alerts')
-                alertlist = response
-                done();
+    it('Shall get list of alerts', function(done) {
+        var getListOfAlerts = function(component) {
+            if ( component ) {
+                var alertsNumer = component.alertsNumber();
+                if ( alertsNumer > 0 ) {
+                    helpers.alerts.getListOfAlerts(userToken, accountId, function(err, response) {
+                        if (err) {
+                            done(new Error("Cannot get list of alerts: " + err));
+                        } else {
+                            assert.notEqual(response, null ,'response is null')
+                            assert.equal(response.length, alertsNumer, 'get wrong number of alerts')
+                            component.alerts = response;
+                            getListOfAlerts(component.next)
+                        }
+                    })
+                }
+                else {
+                    getListOfAlerts(component.next)
+                }
             }
-        })
-    })
+            else {
+                done()
+            }
+        }
+        getListOfAlerts(components.first)
+    }).timeout(10000);
         
     it('Shall add comments to the Alert', function(done){    
-        var comments = {
-            "user": "alertcomment@intel.com",
-            "timestamp": 123233231221,
-            "text": "comment"
+        var addCommentsToAlert = function(component) {
+            if ( component ) {
+                if ( component.alerts.length > 0 ) {
+                    var comments = {
+                        "user": "alertcomment@intel.com",
+                        "timestamp": 123233231221,
+                        "text": "comment"
+                    }
+
+                    helpers.alerts.addCommentsToAlert(userToken, accountId,  component.alerts[0].alertId, comments, function(err, response) {
+                        if (err) {
+                            done(new Error("Cannot add comments to the Alert" + err));
+                        } else {
+                            assert.notEqual(response, null ,'response is null')
+                            assert.equal(response.status, 'OK')
+                            done()
+                        }
+                    })
+                }
+                else {
+                    addCommentsToAlert(component.next)
+                }
+            }
+            else {
+                done();
+            }
         }
+        addCommentsToAlert(components.first)
 
-        helpers.alerts.addCommentsToAlert(userToken, accountId, alertlist[0].alertId, comments, function(err, response) {
-            if (err) {
-                done(new Error("Cannot add comments to the Alert" + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'OK')
-                done();
-            }
-        })
     })
 
-    it('Shall get alert infomation', function(done){    
-        helpers.alerts.getAlertDetails(userToken, accountId, alertlist[0].alertId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot get list of alerts: " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.conditions[0].condition, 'temperature-sensor > 25', 'get error alert')
-                done();
+    it('Shall get alert infomation', function(done) {
+        var getAlertDetails = function(component) {
+            if ( component ) {
+                if ( component.alerts.length > 0 ) {
+                    helpers.alerts.getAlertDetails(userToken, accountId, component.alerts[0].alertId, function(err, response) {
+                        if (err) {
+                            done(new Error("Cannot get list of alerts: " + err));
+                        }
+                        else {
+                            assert.notEqual(response, null ,'response is null')
+                            if (!component.checkAlert(parseInt(response.conditions[0].components[0].valuePoints[0].value),
+                                                 response.conditions[0].condition) ) {
+                                done(new Error("get error alert for: " + response.conditions[0].condition));
+                            }
+                            done();
+                        }
+                    })
+                }
+                else {
+                    getAlertDetails(component.next);
+                }
             }
-        })
+            else {
+                done()
+            }
+        }
+        getAlertDetails(components.first);
     })
 
-    it('Shall update alert status', function(done){     
-        helpers.alerts.updateAlertStatus(userToken, accountId, alertlist[1].alertId, 'Open', function(err, response) {
-            if (err) {
-                done(new Error("Cannot update alert status " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'Open', 'wrong alert status')
-                done();
+    it('Shall update alert status', function(done) {
+        var updateAlertStatus = function(component) {
+            if ( component ) {
+                if ( component.alerts.length > 1 ) {
+                    helpers.alerts.updateAlertStatus(userToken, accountId, component.alerts[1].alertId, 'Open', function(err, response) {
+                        if (err) {
+                            done(new Error("Cannot update alert status " + err));
+                        } else {
+                            assert.notEqual(response, null ,'response is null')
+                            assert.equal(response.status, 'Open', 'wrong alert status')
+                            done();
+                        }
+                    })
+                }
+                else {
+                    updateAlertStatus(component.next)
+                }
             }
-        })
+            else {
+                updateAlertStatus(component.next)
+            }
+        }
+        updateAlertStatus(components.first)
     })
     
-    it('Shall clear alert infomation', function(done){
-        helpers.alerts.closeAlert(userToken, accountId, alertlist[2].alertId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot clear alert infomation " + err));
-            } else {
-                done();
+    it('Shall clear alert infomation', function(done) {
+        var closeAlert = function(component) {
+            if ( component ) {
+                if ( component.alerts.length > 2 ) {
+                    helpers.alerts.closeAlert(userToken, accountId, component.alerts[2].alertId, function(err, response) {
+                        if (err) {
+                            done(new Error("Cannot clear alert infomation " + err));
+                        } else {
+                            done();
+                        }
+                    })
+                }
+                else {
+                    closeAlert(component.next)
+                }
             }
-        })
+            else
+            {
+                closeAlert(component.next)
+            }
+        }
+        closeAlert(components.first)
     })
 
 });
@@ -1071,54 +1243,88 @@ describe("update rules and create draft rules ... \n".bold, function(){
 
     var cloneruleId;
 
-    it('Shall clone a rule', function(done){
-        var rulename_clone = rulelist[1].name + ' - cloned';
- 
-        helpers.rules.cloneRule (userToken, accountId, rulelist[1].id, function(err, response) {
-            if (err) {
-                done(new Error("cannot clone a rule " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.name, rulename_clone, 'clone error rule')
-                cloneruleId = response.id
-                done();
+    it('Shall clone a rule', function(done) {
+        var cloneRule = function(component) {
+            if ( component ) {
+                if ( component.rules.length > 0 ) {
+                    var rulename_clone = component.rules[0].name + ' - cloned';
+
+                    helpers.rules.cloneRule (userToken, accountId, component.rules[0].id, function(err, response) {
+                        if (err) {
+                            done(new Error("cannot clone a rule " + err));
+                        } else {
+                            assert.notEqual(response, null ,'response is null')
+                            assert.equal(response.name, rulename_clone, 'clone error rule')
+                            cloneruleId = response.id
+                            done();
+                        }
+                    })
+                }
+                else {
+                    cloneRule(component.next)
+                }
             }
-        })
+            else {
+                done()
+            }
+        }
+        cloneRule(components.first)
     })
 
     it('Shall update a rule', function(done) {
-                
-        var newrule = {
-            name: "oisp-tests-rule-high-temp-new",
-            synchronizationStatus: "NotSync",
-            conditionComponent: componentName,
-            basicConditionOperator: ">",
-            basicConditionValue: "28",
-            actuationCmd: switchOffCmdName,
-            cid: componentId
-        }
+        var updateRule = function(component) {
+            if ( component ) {
+                if ( component.rules.length > 0 ) {
+                    var newrule = new Rule("oisp-tests-rule-high-temp-new",">", 28);
+                    newrule.synchronizationStatus = "NotSync";
+                    newrule.actuationCmd = switchOffCmdName,
+                    newrule.cid = component.id;
+                    newrule.conditionComponent = component.name;
 
-        helpers.rules.updateRule(newrule, userToken, accountId, cloneruleId, function(err, response) {
-            if (err) {
-                done(new Error("Cannot update rules " + err));
-            } else {
-                assert.equal(response.name, newrule.name, 'update rule wrong')
-                done();
+                    helpers.rules.updateRule(newrule, userToken, accountId, cloneruleId, function(err, response) {
+                        if (err) {
+                            done(new Error("Cannot update rules " + err));
+                        } else {
+                            assert.equal(response.name, newrule.name, 'update rule wrong')
+                            done();
+                        }
+                    })
+                }
+                else {
+                    updateRule(component.next);
+                }
             }
-        })
+            else {
+                done()
+            }
+        }
+        updateRule(components.first);
 
     }).timeout(20000);
 
-    it('Shall update rule status', function(done){        
-        helpers.rules.updateRuleStatus (userToken, accountId, rulelist[1].id, 'Archived', function(err, response) {
-            if (err) {
-                done(new Error("Cannot update rule status " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'Archived', 'wrong rule status')
-                done();
+    it('Shall update rule status', function(done){
+        var updateRuleStatus = function(component) {
+            if ( component ) {
+                if ( component.rules.length > 1 ) {
+                    helpers.rules.updateRuleStatus (userToken, accountId, component.rules[1].id, 'Archived', function(err, response) {
+                        if (err) {
+                            done(new Error("Cannot update rule status " + err));
+                        } else {
+                            assert.notEqual(response, null ,'response is null')
+                            assert.equal(response.status, 'Archived', 'wrong rule status')
+                            done();
+                        }
+                    })
+                }
+                else {
+                    updateRuleStatus(component.next)
+                }
             }
-        })
+            else {
+                done()
+            }
+        }
+        updateRuleStatus(components.first)
     })
 
     it('Shall create a draft rule', function(done){
@@ -1433,15 +1639,23 @@ describe("change password and delete receiver ... \n".bold, function(){
     })
 
     it('Shall delete a component', function(done){
-        helpers.devices.deleteDeviceComponent (userToken, accountId, deviceId, componentId, function(err, response){
-            if (err) {
-                done(new Error("cannot delete a component " + err));
-            } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'Done')
-                done();
-            } 
-        })
+        var deleteComponent = function(component) {
+            if ( component ) {
+                helpers.devices.deleteDeviceComponent (userToken, accountId, deviceId, component.id, function(err, response){
+                    if (err) {
+                        done(new Error("cannot delete a component " + err));
+                    } else {
+                        assert.notEqual(response, null ,'response is null')
+                        assert.equal(response.status, 'Done')
+                        deleteComponent(component.next)
+                    }
+                })
+            }
+            else {
+                done()
+            }
+        }
+        deleteComponent(components.first)
     })
 
     it('Shall delete a device', function(done){

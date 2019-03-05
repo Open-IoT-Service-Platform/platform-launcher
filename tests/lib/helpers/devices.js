@@ -194,7 +194,7 @@ function addDeviceComponent(name, type, userToken, accountId, deviceId, cb) {
 
     api.devices.addDeviceComponent(data, function(err, response) {
         if (err) {
-            cb(null);
+            cb(err);
         } else {
             assert.notEqual(response, null, 'response is null')
             cb(null, response.cid);
@@ -217,12 +217,11 @@ function submitData(value, deviceToken, accountId, deviceId, cid, cb) {
             on: ts,
             data: [{
                 componentId: cid,
-                value: value.toString(),
+                value: Buffer.isBuffer(value) ? value : value.toString(),
                 on: ts
             }]
         }
     }
-
     api.devices.submitData(data, function(err, response) {
         if (err) {
             cb(err)
