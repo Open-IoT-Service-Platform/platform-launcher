@@ -47,7 +47,7 @@ function getCatalog(userToken, accountId, cb){
 }
 
 
-function createCatalog(userToken, accountId, cb){
+function createCatalog(userToken, accountId, options, cb){
     if (!cb) {
         throw "Callback required";
     }
@@ -55,18 +55,7 @@ function createCatalog(userToken, accountId, cb){
     var data = {
         userToken: userToken,
         accountId: accountId,
-        body:
-            {
-                "dimension": "speed",
-                "version": "1.0",
-                "type": "sensor",
-                "dataType": "Number",
-                "format": "float",
-                "min": 0,
-                "max": 500,
-                "measureunit": "Degress Celsius",
-                "display": "timeSeries"
-            }
+        body: options
     };
 
     api.cmpcatalog.createCatalog(data, function(err, response) {
