@@ -153,12 +153,12 @@ open-shell:
 ## reset-db: Reset database via admin tool in frontend
 ##
 reset-db:
-	kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) -- node admin resetDB
+	kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) --container dashboard -- node admin resetDB
 
 ## add-test-user: Add a test user via admin tool in frontend
 ##
 add-test-user:
-	for i in $(shell seq 1 10); do kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) -c dashboard -- node admin addUser user$${i}@example.com password admin; done;
+	for i in $(shell seq 1 1); do kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) -c dashboard -- node admin addUser user$${i}@example.com password admin; done;
 
 
 ## prepare-tests: Pull the latest repo in the debugger pod
@@ -178,6 +178,25 @@ test: prepare-tests
 	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger \
 		-- /bin/bash -c "cp setup-environment.example.sh setup-environment.sh && cd tests && make test TESTING_PLATFORM=kubernetes TERM=xterm"
 
+## run-loadtest-datasend: Run a loadtest in DEBUGGER_POD for
+## data send endpoint. This assumes the platform is deployed already.
+## Paramateres (as ENV vars): NR_FRONTEND, NR_BACKEND and NR_CONCURRENT_REQUESTS
+run-loadtest-datasend:
+	echo "Preparing loadtest for POST /api/v1/data/";
+	mkdir -p "loadtest-results/datasend"
+	kubectl -n $(NAMESPACE) scale deployment dashboard --replicas=$(NR_FRONTEND)
+	kubectl -n $(NAMESPACE) scale deployment backend --replicas=$(NR_BACKEND)
+	sleep 5;
+	make wait-until-ready;
+	kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) -c dashboard -- node admin resetDB;
+	make add-test-user;
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -- /usr/bin/python3 /home/load-tests/create_test.py \
+	--suffix b$(NR_BACKEND)_f$(NR_FRONTEND) --concurrency $(NR_CONCURRENT_REQUESTS) && \
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -- /bin/bash runtest_b$(NR_BACKEND)_f$(NR_FRONTEND)_c$(NR_CONCURRENT_REQUESTS).sh && \
+	kubectl -n $(NAMESPACE) cp $(DEBUGGER_POD):out_b$(NR_BACKEND)_f$(NR_FRONTEND)_c$(NR_CONCURRENT_REQUESTS).txt loadtest-results/datasend
+	kubectl -n $(NAMESPACE) cp $(DEBUGGER_POD):perc_b$(NR_BACKEND)_f$(NR_FRONTEND)_c$(NR_CONCURRENT_REQUESTS).txt loadtest-results/datasend
+
+
 ## proxy: Run kubectl proxy and port-forwarding of various pods
 ##
 proxy:
@@ -195,6 +214,9 @@ help:
 ## are ready.
 ##
 wait-until-ready:
+	@printf "\nWaiting for pending ";
+	@while kubectl -n oisp get pods | grep Pending >> /dev/null; \
+		do printf "."; sleep 5; done;
 	@printf "Waiting for backend ";
 	@while kubectl -n oisp get pods -l=app=backend -o \
         jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
