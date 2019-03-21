@@ -49,6 +49,10 @@ REDIS_PORT='6379'
 OPENTSDB_URI='opentsdb'
 OPENTSDB_PORT=4242
 
+export GRAFANA_PORT=3000
+export GRAFANA_ADMIN='grafana'
+export GRAFANA_ADMIN_PASSWORD='intel123'
+
 MQTT_BROKER_URI='mqtt-broker'
 MQTT_BROKER_PORT=8883
 MQTT_BROKER_USERNAME='admin'
@@ -138,6 +142,7 @@ export OISP_FRONTEND_CONFIG=\
 	"mailConfig": "@@OISP_MAIL_CONFIG",
 	"ruleEngineConfig": "@@OISP_RULEENGINE_CONFIG",
 	"gatewayConfig": "@@OISP_GATEWAY_CONFIG",
+    "grafanaConfig": "@@OISP_GRAFANA_CONFIG",
     "jaegerTracing": false
 }'
 
@@ -193,6 +198,16 @@ export OISP_HADOOP_PROPERTIES=\
 export OISP_OPENTSDB_CONFIG=\
 '{
   "port": '$OPENTSDB_PORT'
+}'
+
+# dataSourceHost should be the name of the data source container (e.g opentsdb)
+export OISP_GRAFANA_CONFIG=\
+'{
+  "port": "'$GRAFANA_PORT'",
+  "adminUser": "'$GRAFANA_ADMIN'",
+  "adminPassword": "'$GRAFANA_ADMIN_PASSWORD'",
+  "dataSourceHost": "opentsdb",
+  "dataSourcePort": "'$OPENTSDB_PORT'"
 }'
 
 export OISP_POSTGRES_CONFIG=\
