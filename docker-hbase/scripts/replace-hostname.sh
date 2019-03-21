@@ -23,7 +23,6 @@
 
 declare -a filesToUpdate=(
 	'/opt/hbase/conf/hbase-site.xml'
-	'/opt/hbase/conf/zoo.cfg'
 )
 
 for file in "${filesToUpdate[@]}"; do
@@ -31,8 +30,9 @@ for file in "${filesToUpdate[@]}"; do
 	if [ ! -f "${file}.bak" ]; then
 		cp "${file}" "${file}.back"
 	fi
-
-	sed  "s/hbase-hostname/${HOSTNAME}/g" "${file}.back" > "${file}"
+	cp "${file}.back" "${file}"
+	sed  -i "s/zookeeper-hostname/${ZOOKEEPER}/g" "${file}"
+	sed  -i "s/hdfs-namenode-hostname/${HDFS_NAMENODE}/g" "${file}"
 
 done
 

@@ -15,30 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 
-/opt/replace-hostname.sh
+echo "Stop listener started"
 
-mkdir -p /data/logs
+function clean_up {
+    echo "Stop listener called"
+    /opt/hbase/bin/hbase-daemon.sh stop regionserver
+    exit 0;
+    }
+trap clean_up SIGTERM
 
-service ssh start
+while true; do sleep 10; done
 
-RS_CONF=/opt/hbase/conf/regionservers
 
-if [ ! -f /etc/hosts.bak ]; then
-    cp /etc/hosts /etc/hosts.bak
-else
-    cp /etc/hosts.bak /etc/hosts
-fi
 
-rm $RS_CONF
-for rs in $REGIONSERVERS; do
-    RS_HOSTNAME=$(ssh root@${rs} '(cat /etc/hostname)')
-    RS_HOSTS=$(ssh root@${rs} "(grep ${RS_HOSTNAME} /etc/hosts)")
-    echo $RS_HOSTNAME >> $RS_CONF
-    if ! grep ${RS_HOSTNAME} /etc/hosts; then
-	echo $RS_HOSTS >> /etc/hosts
-    fi
-done
-
-/opt/hbase/bin/start-hbase.sh
-
-exec supervisord -n

@@ -16,20 +16,50 @@
 version: '3.7'
 
 services:
-  hbase:
+  hbase-master:
     image: oisp/hbase:${DOCKER_TAG}
+    entrypoint: bash /opt/wait-for-it.sh hdfs-namenode:8020 -t 300 -- bash /opt/wait-for-it.sh zookeeper:2181 -t 300 -- /opt/entrypoint.sh
     build:
       context: ./docker-hbase/
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
     ports:
-      - 2181:2181
       - 9090:9090
+      - 8081:8080
+      - 9095:9095
+      - 16010:16010
       - 60000:60000
-      - 60020:60020
     volumes:
       - ./data/hbase-logs:/opt/hbase/logs
+    depends_on:
+      - zookeeper
+      - hdfs-namenode
+      - hdfs-datanode
+      - hbase-region
+    environment:
+      - REGIONSERVERS=hbase-region
+      - ZOOKEEPER=${ZOOKEEPER_HBASE}
+      - HDFS_NAMENODE=hdfs-namenode
+  hbase-region:
+    image: oisp/hbase:${DOCKER_TAG}
+    entrypoint: /opt/entrypoint-region.sh
+    build:
+      context: ./docker-hbase/
+      dockerfile: Dockerfile
+      labels:
+        - oisp=true
+        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
+    volumes:
+      - ./data/hbase-logs:/opt/hbase/logs
+    depends_on:
+      - zookeeper
+      - hdfs-namenode
+      - hdfs-datanode
+    environment:
+      - HBASE_MASTER=hbase-master
+      - ZOOKEEPER=${ZOOKEEPER_HBASE}
+      - HDFS_NAMENODE=hdfs-namenode
   postgres:
     image: oisp/postgres:${DOCKER_TAG}
     build:
@@ -55,15 +85,13 @@ services:
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
     ports:
       - 9092:9092
-    environment:
-      - ZK_CONNECT=hbase:2181
     depends_on:
-      - hbase
+      - zookeeper
     environment:
       - ADVERTISED_HOST=${HOST_IP_ADDRESS}
-      - ADVERTISED_PORT=9092
+      - ADVERTISED_PORT=${KAFKA_PORT}
       - AUTO_CREATE_TOPICS=true
-
+      - ZK_CONNECT=${ZOOKEEPER_KAFKA}:${ZOOKEEPER_KAFKA_PORT}
   redis:
     image: redis:3.0
     volumes:
@@ -80,16 +108,16 @@ services:
         - oisp.git_commit=${GIT_COMMIT_GEARPUMP}
     depends_on:
       - nginx
-      - hbase
+      - hbase-master
       - kafka
       - frontend
     working_dir: /app
     environment:
-      - VCAP_SERVICES=${VCAP_SERVICES}
-      - VCAP_APPLICATION=${VCAP_APPLICATION}
-      - KAFKA=${KAFKA}
-      - KAFKA_HEARTBEAT_TOPIC=${KAFKA_HEARTBEAT_TOPIC}
-      - GEARPUMP=${GEARPUMP}
+      - OISP_RULEENGINE_CONFIG=${OISP_RULEENGINE_CONFIG}
+      - OISP_HBASE_CONFIG=${OISP_HBASE_CONFIG}
+      - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
+      - OISP_ZOOKEEPER_CONFIG=${OISP_ZOOKEEPER_CONFIG}
+      - OISP_KAFKA_CONFIG=${OISP_KAFKA_CONFIG}
     ports:
       - 8090:8090
     command: bash wait-for-it.sh kafka:9092 -t 300 -- bash bootstrap.sh
@@ -127,8 +155,10 @@ services:
       - ./data/keys:/app/keys
     working_dir: /app
     environment:
-      - VCAP_SERVICES=${VCAP_SERVICES}
-      - VCAP_APPLICATION=${VCAP_APPLICATION}
+      - OISP_WEBSOCKET_SERVER_CONFIG=${OISP_WEBSOCKET_SERVER_CONFIG}
+      - OISP_POSTGRES_CONFIG=${OISP_POSTGRES_CONFIG}
+      - OISP_KAFKA_CONFIG=${OISP_KAFKA_CONFIG}
+      - OISP_WEBSOCKETUSER_CONFIG=${OISP_WEBSOCKETUSER_CONFIG}
       - TEST=${TEST}
       - NODE_ENV=local
     command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- ./scripts/docker-start.sh
@@ -147,12 +177,24 @@ services:
       - websocket-server
       - backend
       - kafka
-    command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh redis:6379 -t 300  -- ./wait-for-it.sh kafka:9092 -t 300 -- ./scripts/wait-for-heartbeat.sh backend websocket-server -- ./scripts/docker-start.sh
+    command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh redis:6379 -t 300  -- ./wait-for-it.sh kafka:9092 -t 300 -- ./scripts/wait-for-heartbeat.sh backend websocket-server -- ./scripts/docker-start.sh ${RATE_LIMIT}
     volumes:
       - ./data/keys:/app/keys
     environment:
-      - VCAP_SERVICES=${VCAP_SERVICES}
-      - VCAP_APPLICATION=${VCAP_APPLICATION}
+      - OISP_FRONTEND_CONFIG=${OISP_FRONTEND_CONFIG}
+      - OISP_POSTGRES_CONFIG=${OISP_POSTGRES_CONFIG}
+      - OISP_REDIS_CONFIG=${OISP_REDIS_CONFIG}
+      - OISP_KAFKA_CONFIG=${OISP_KAFKA_CONFIG}
+      - OISP_SMTP_CONFIG=${OISP_SMTP_CONFIG}
+      - OISP_DASHBOARDSECURITY_CONFIG=${OISP_DASHBOARDSECURITY_CONFIG}
+      - OISP_GATEWAY_CONFIG=${OISP_GATEWAY_CONFIG}
+      - OISP_BACKENDHOST_CONFIG=${OISP_BACKENDHOST_CONFIG}
+      - OISP_WEBSOCKETUSER_CONFIG=${OISP_WEBSOCKETUSER_CONFIG}
+      - OISP_RULEENGINE_CONFIG=${OISP_RULEENGINE_CONFIG}
+      - OISP_MAIL_CONFIG=${OISP_MAIL_CONFIG}
+      - OISP_HBASE_CONFIG=${OISP_HBASE_CONFIG}
+      - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
+      - OISP_ZOOKEEPER_CONFIG=${OISP_ZOOKEEPER_CONFIG}
       - TEST=${TEST}
       - NODE_ENV=local
   backend:
@@ -165,10 +207,112 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - hbase
+      - hbase-master
       - kafka
-    command: ./wait-for-it.sh hbase:2181 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- make runjar
+    command: ./wait-for-it.sh hbase-master:9090 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- make runjar
     working_dir: /app
     environment:
-      - VCAP_SERVICES=${VCAP_SERVICES}
-      - VCAP_APPLICATION=${VCAP_APPLICATION}
+      - OISP_BACKEND_CONFIG=${OISP_BACKEND_CONFIG}
+      - OISP_KAFKA_CONFIG=${OISP_KAFKA_CONFIG}
+      - OISP_ZOOKEEPER_CONFIG=${OISP_ZOOKEEPER_CONFIG}
+      - OISP_KERBEROS_CONFIG=${OISP_KERBEROS_CONFIG}
+      - OISP_HBASE_CONFIG=${OISP_HBASE_CONFIG}
+      - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
+      - OISP_TSDB_PROPERTIES=${OISP_TSDB_PROPERTIES}
+      - OISP_BACKEND_JAEGER_CONFIG
+  hdfs-namenode:
+    image: singularities/hadoop
+    command: start-hadoop namenode
+    volumes:
+      - ./data/hdfs/name:/opt/hdfs
+    hostname: hdfs-namenode
+    environment:
+      HDFS_USER: root
+    ports:
+      - "8020:8020"
+      - "14000:14000"
+      - "50070:50070"
+      - "50075:50075"
+      - "10020:10020"
+      - "13562:13562"
+      - "19888:19888"
+  hdfs-datanode:
+    image: singularities/hadoop
+    command: start-hadoop datanode hdfs-namenode
+    volumes:
+      - ./data/hdfs/data:/opt/hdfs
+    environment:
+      HDFS_USER: root
+    links:
+      - hdfs-namenode
+  zookeeper:
+    image: zookeeper:3.4.13
+    hostname: zookeeper
+    volumes:
+      - ./data/zookeeper:/data
+      - ./data/zookeeper-logs:/datalog
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888
+  jaeger:
+    image: jaegertracing/all-in-one:1.8
+    ports:
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686
+      - 14268:14268
+      - 9411:9411
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+  opentsdb:
+    image: oisp/opentsdb:${DOCKER_TAG}
+    build:
+      context: ./docker-opentsdb
+      labels:
+        - oisp=true
+        - ois.git_commit=${GIT_COMMIT_OPENTSDB}
+    ports:
+      - 4242:4242
+    depends_on:
+      - hbase-master
+      - zookeeper
+    command: /opt/wait-for-it.sh hbase-master:9090 -t 300 -- /opt/wait-for-it.sh zookeeper:2181 -t 300 -- /opt/tsdb-startup.sh
+    environment:
+      - OISP_ZOOKEEPER_CONFIG=${OISP_ZOOKEEPER_CONFIG}
+      - OISP_OPENTSDB_CONFIG=${OISP_OPENTSDB_CONFIG}
+      - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
+      - OISP_TSDB_PROPERTIES=${OISP_TSDB_PROPERTIES}
+  mqtt-gateway:
+    build:
+      context: ./oisp-mqtt-gw
+      dockerfile: Dockerfile-gateway
+    restart: always
+    depends_on:
+      - mqtt-broker
+    working_dir: /app
+    environment:
+      - NODE_ENV=local
+      - OISP_MQTT_GATEWAY_CONFIG
+      - OISP_REDIS_CONFIG
+    volumes:
+      - ./data/keys:/app/keys
+      - ./oisp-mqtt-gw/ingestion:/app/ingestion
+      - ./oisp-mqtt-gw/lib:/app/lib
+    command: ./wait-for-it.sh broker:8883 -t 300 -- ./wait-for-it.sh redis:6379 -t 300
+  mqtt-broker:
+    build:
+      context: ./oisp-mqtt-gw
+      dockerfile: Dockerfile-broker
+    restart: always
+    ports:
+      - 8883:8883
+    working_dir: /app
+    environment:
+      - OISP_MQTT_BROKER_CONFIG
+      - OISP_REDIS_CONFIG
+    volumes:
+      - ./data/keys:/app/keys

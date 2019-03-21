@@ -196,6 +196,177 @@ var deleteRule = function(userToken, accountId, ruleId){
     });
 };
 
+var submitDataList = function(valueList, deviceToken, accountId, deviceId, cidList){
+    return new Promise((resolve, reject) => {
+	helpers.data.submitDataList(valueList, deviceToken, accountId, deviceId, cidList, function(err, response){
+	    if (err) {
+		reject(err);
+	    } else {
+		resolve(response);
+	    }
+	});
+    });
+}
+
+
+var submitData = function(value, deviceToken, accountId, deviceId, cid){
+    return new Promise((resolve, reject) => {
+	helpers.data.submitData(value, deviceToken, accountId, deviceId, cid, function(err, response){
+	    if (err) {
+		reject(err);
+	    } else {
+		resolve(response);
+	    }
+	});
+    });
+}
+
+
+var searchData = function(from, to, userToken, accountId, deviceId, cid, queryMeasureLocation, targetFilter){
+    return new Promise((resolve, reject) => {
+	helpers.data.searchData(from, to, userToken, accountId, deviceId, cid, queryMeasureLocation, targetFilter, function(err, response){
+	    if (err) {
+		reject(err);
+	    } else {
+		resolve(response);
+	    }
+	});
+    });
+}
+
+
+var searchDataAdvanced = function(from, to, userToken, accountId, deviceId, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly){
+    return new Promise((resolve, reject) => {
+	helpers.data.searchDataAdvanced(from, to, userToken, accountId, deviceId, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly, function(err, response){
+	    if (err) {
+		reject(err);
+	    } else {
+		resolve(response);
+	    }
+	});
+    });
+}
+
+var authGetToken = (username, password) => {
+  return new Promise(function(resolve, reject){
+    helpers.auth.login(username, password, function(err, token) {
+      if (err) {
+        reject(err);
+	    } else {
+        resolve(token);
+      }
+    });
+  });
+};
+
+var invitationCreate = (userToken, accountId, receiverEmail) => {
+  return new Promise(function(resolve, reject){
+    helpers.invitation.createInvitation(userToken, accountId, receiverEmail, function(err, response) {
+      if (err) {
+        reject(err);
+	    } else {
+        resolve(response);
+      }
+    });
+  });
+};
+
+var invitationAccept = (userToken, accountId, inviteId) => {
+  return new Promise(function(resolve, reject){
+    helpers.invitation.acceptInvitation(userToken, accountId, inviteId, function(err, response) {
+      if (err) {
+        reject(err);
+	    } else {
+        resolve(response);
+      }
+    });
+  });
+};
+
+var authTokenInfo = (userToken) => {
+  return new Promise(function(resolve, reject){
+    helpers.auth.tokenInfo(userToken, function(err, response) {
+      if (err) {
+        reject(err);
+	    } else {
+        resolve(response);
+      }
+    });
+  });
+};
+
+var accountCreate = (name, userToken) => {
+  return new Promise(function(resolve, reject){
+    helpers.accounts.createAccount(name, userToken, function(err, response) {
+      if (err) {
+        reject(err);
+	    } else {
+        resolve(response);
+      }
+    });
+  });
+};
+
+var accountDelete = (userToken, accountId) => {
+  return new Promise(function(resolve, reject){
+    helpers.accounts.deleteAccount(userToken, accountId, function(err, response) {
+      if (err) {
+        reject(err);
+	    } else {
+        resolve(response);
+      }
+    });
+  });
+};
+
+var inviteDelete = (userToken, accountId, email) => {
+  return new Promise(function(resolve, reject){
+    helpers.invitation.deleteInvitations(userToken, accountId,email, function(err, response) {
+      if (err) {
+        reject(err);
+	    } else {
+        resolve(response);
+      }
+    });
+  });
+};
+
+var createDevice = (name, deviceId, userToken, accountId) => {
+  return new Promise(function(resolve, reject){
+    helpers.devices.createDevice(name, deviceId, userToken, accountId, function(err, response) {
+      if (err) {
+        reject(err);
+	    } else {
+        resolve(response);
+      }
+    });
+  });
+};
+
+var deleteDevice = (userToken, accountId, deviceId) => {
+  return new Promise(function(resolve, reject){
+    helpers.devices.deleteDevice(userToken, accountId, deviceId, function(err, response) {
+      if (err) {
+        reject(err);
+	    } else {
+        resolve(response);
+      }
+    });
+  });
+};
+
+var activateDevice = (userToken, accountId, deviceId) => {
+  return new Promise(function(resolve, reject){
+    helpers.devices.activateDevice(userToken, accountId, deviceId, function(err, response) {
+      if (err) {
+        reject(err);
+	    } else {
+        resolve(response);
+      }
+    });
+  });
+};
+
 module.exports = {
     checkObservations: checkObservations,
     addComponent: addComponent,
@@ -204,5 +375,19 @@ module.exports = {
     createStatisticRule: createStatisticRule,
     createTbRule: createTbRule,
     deleteComponent: deleteComponent,
-    deleteRule: deleteRule
+    deleteRule: deleteRule,
+    submitDataList: submitDataList,
+    submitData: submitData,
+    searchData: searchData,
+    searchDataAdvanced: searchDataAdvanced,
+    authGetToken: authGetToken,
+    createInvitation: invitationCreate,
+    acceptInvitation: invitationAccept,
+    authTokenInfo: authTokenInfo,
+    createAccount: accountCreate,
+    deleteAccount: accountDelete,
+    deleteInvite: inviteDelete,
+    createDevice: createDevice,
+    deleteDevice: deleteDevice,
+    activateDevice: activateDevice
 };
