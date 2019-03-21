@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Optional ENV variables:
 # * ADVERTISED_HOST: the external ip for the container, e.g. `docker-machine ip \`docker-machine active\``
@@ -9,10 +9,13 @@
 # * NUM_PARTITIONS: configure the default number of log partitions per topic
 
 # Configure advertised host/port if we run in helios
+
+
 if [ ! -z "$HELIOS_PORT_kafka" ]; then
     ADVERTISED_HOST=`echo $HELIOS_PORT_kafka | cut -d':' -f 1 | xargs -n 1 dig +short | tail -n 1`
     ADVERTISED_PORT=`echo $HELIOS_PORT_kafka | cut -d':' -f 2`
 fi
+
 
 # Set the external host and port
 if [ ! -z "$ADVERTISED_HOST" ]; then
@@ -20,7 +23,7 @@ if [ ! -z "$ADVERTISED_HOST" ]; then
     if grep -q "^advertised.host.name" $KAFKA_HOME/config/server.properties; then
         sed -r -i "s/#(advertised.host.name)=(.*)/\1=$ADVERTISED_HOST/g" $KAFKA_HOME/config/server.properties
     else
-        echo "advertised.host.name=$ADVERTISED_HOST" >> $KAFKA_HOME/config/server.properties
+        echo -e "\nadvertised.host.name=$ADVERTISED_HOST" >> $KAFKA_HOME/config/server.properties
     fi
 fi
 if [ ! -z "$ADVERTISED_PORT" ]; then
@@ -46,7 +49,13 @@ if [ ! -z "$ZK_CHROOT" ]; then
     }
 
     # configure kafka
-    sed -r -i "s/(zookeeper.connect)=(.*)/\1=localhost:2181\/$ZK_CHROOT/g" $KAFKA_HOME/config/server.properties
+    sed -r -i "s/(zookeeper.connect)=(.*)/\1=locallhost:2181\/$ZK_CHROOT/g" $KAFKA_HOME/config/server.properties
+fi
+
+# Configure external Zookeeper
+if [ ! -z "$ZK_CONNECT" ]; then
+    echo "Setting external Zookeeper service"
+    sed -r -i "s/(zookeeper.connect)=(.*)/\1=$ZK_CONNECT/g" $KAFKA_HOME/config/server.properties
 fi
 
 # Allow specification of log retention policies
@@ -68,8 +77,14 @@ fi
 # Enable/disable auto creation of topics
 if [ ! -z "$AUTO_CREATE_TOPICS" ]; then
     echo "auto.create.topics.enable: $AUTO_CREATE_TOPICS"
-    echo "auto.create.topics.enable=$AUTO_CREATE_TOPICS" >> $KAFKA_HOME/config/server.properties
+    if grep auto.create.topics.enable $KAFKA_HOME/config/server.properties; then
+	sed -r -i "s/(auto.create.topics.enable)=(.*)/\1=${AUTO_CREATE_TOPICS}/g" $KAFKA_HOME/config/server.properties
+    else
+	echo "auto.create.topics.enable=$AUTO_CREATE_TOPICS" >> $KAFKA_HOME/config/server.properties
+    fi
 fi
 
-# Run Kafka
+# Run kafka-server
 $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties
+
+

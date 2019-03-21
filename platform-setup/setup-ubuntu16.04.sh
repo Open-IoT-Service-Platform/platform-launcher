@@ -23,9 +23,7 @@ sudo curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-c
 sudo chmod +x /usr/local/bin/docker-compose
 
 #other packages needed
-sudo apt-get install make git
-sudo apt install kafkacat
-
+sudo apt-get install -y make git kafkacat imagemagick
 
 sudo usermod -aG docker ${USER}
 

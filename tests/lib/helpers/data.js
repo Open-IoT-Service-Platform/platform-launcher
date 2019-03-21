@@ -50,7 +50,6 @@ function getObservation(ts, userToken, accountId, deviceId, cid, cb) {
 
     api.data.searchData(data, function(err, response) {
         var found = false;
-
         if (err) {
             cb(err);
         } else {
@@ -73,9 +72,27 @@ function getObservation(ts, userToken, accountId, deviceId, cid, cb) {
     });
 }
 
-function searchData(from, userToken, accountId, deviceId, cid, cb) {
+
+function searchData(from, to, userToken, accountId, deviceId, cid, queryMeasureLocation, targetFilter, cb) {
     if (!cb) {
         throw "Callback required";
+    }
+
+    var metrics = [{ "id": cid }];
+
+    if (Array.isArray(cid)) {
+	     metrics = cid.map((element) => ({"id": element}))
+    }
+
+    if (targetFilter == undefined) {
+      targetFilter = {}
+    }
+    if (targetFilter.deviceList == undefined) {
+      targetFilter.deviceList = [deviceId];
+    } else {
+      if (targetFilter.deviceList.indexOf(deviceId) == -1) {
+        targetFilter.deviceList.push(deviceId);
+      }
     }
 
     var data = {
@@ -83,22 +100,21 @@ function searchData(from, userToken, accountId, deviceId, cid, cb) {
         accountId: accountId,
         body: {
             from: from,
-            targetFilter: {
-                deviceList: [deviceId]
-            },
-            metrics: [{
-                id: cid
-            }]
+            targetFilter: targetFilter,
+            metrics: metrics,
+            queryMeasureLocation: queryMeasureLocation
         }
     };
+
+    if (to !== undefined && to > 0) {
+      data.body.to = to;
+    }
 
     api.data.searchData(data, function(err, response) {
         if (err) {
             cb(err)
         } else {
-            if (response.series) {
-                cb(null, response.series[0].points)
-            }
+            cb(null, response)
         }
     });
 }
@@ -111,7 +127,7 @@ function submitData(value, deviceToken, accountId, deviceId, cid, cb) {
     var ts = new Date().getTime();
 
     var data = {
-        deviceToken: deviceToken,
+        userToken: deviceToken,
         deviceId: deviceId,
         body: {
             accountId: accountId,
@@ -128,14 +144,55 @@ function submitData(value, deviceToken, accountId, deviceId, cid, cb) {
         if (err) {
             cb(err)
         } else {
-            if (response.series) {
-                cb(null, response.series[0].points)
+            if (response) {
+                cb(null, response)
             }
         }
     });
 }
 
-function searchDataAdvanced(from, userToken, accountId, deviceId, cid, cb) {
+function submitDataList(valueList, deviceToken, accountId, deviceId, cidList, cb) {
+    if (!cb) {
+        throw "Callback required";
+    }
+    var ts = new Date().getTime();
+
+    var data = {
+        userToken: deviceToken,
+        deviceId: deviceId,
+        body: {
+            accountId: accountId,
+            on: valueList[0].ts,
+            data: []
+        }
+    }
+
+    valueList.forEach(function(element){
+      var toPush = {
+        componentId: cidList[element.component],
+        value: element.value.toString(),
+        on: element.ts
+      }
+      if (element.loc) {
+        toPush.loc = element.loc;
+      }
+      if (element.attributes !== undefined){
+        toPush.attributes = element.attributes;
+      }
+      data.body.data.push(toPush);
+    });
+    api.data.submitData(data, function(err, response) {
+        if (err) {
+            cb(err)
+        } else {
+            if (response) {
+                cb(null, response)
+            }
+        }
+    });
+}
+
+function searchDataAdvanced(from, to, userToken, accountId, deviceId, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly, cb) {
     if (!cb) {
         throw "Callback required";
     }
@@ -146,9 +203,23 @@ function searchDataAdvanced(from, userToken, accountId, deviceId, cid, cb) {
         body: {
             deviceIds: [deviceId],
             from: from,
-            componentIds: [cid]
+            showMeasureLocation: showMeasureLocation,
+            componentIds: cidList
         }
     };
+
+    if (returnedMeasureAttributes !== undefined && returnedMeasureAttributes != []) {
+      data.body.returnedMeasureAttributes = returnedMeasureAttributes;
+    }
+    if (aggregations !== undefined && aggregations != "") {
+      data.body.aggregations = aggregations;
+    }
+    if (countOnly !== undefined) {
+      data.body.countOnly = countOnly;
+    }
+    if (to != undefined) {
+      data.body.to = to;
+    }
 
     api.data.searchDataAdvanced(data, function(err, response) {
         if (err) {
@@ -164,5 +235,6 @@ module.exports={
     getObservation: getObservation,
     searchData: searchData,
     submitData: submitData,
+    submitDataList: submitDataList,
     searchDataAdvanced: searchDataAdvanced
 }

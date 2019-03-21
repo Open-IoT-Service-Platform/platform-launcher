@@ -33,6 +33,14 @@ DOCKER_COMPOSE_ARGS?=
 PULL_IMAGES?=false
 DEBUG?=false
 
+# Variable to remove rate limits for endpoints in frontend
+DISABLE_RATE_LIMITS?=false
+RATE_LIMIT = ''
+ifeq ($(DISABLE_RATE_LIMITS),true)
+RATE_LIMIT = '--disable-rate-limits'
+endif
+export RATE_LIMIT
+
 ifeq  ($(DEBUG),true)
 CONTAINERS:=$(CONTAINERS) debugger
 endif
@@ -88,6 +96,23 @@ endif
 			sudo mv data-backup data; \
 		fi; \
 	fi
+	@if [ -f data/hdfs/name ]; then echo "HDFS folder existing already"; else \
+		echo "Creating HDFS name and data node"; \
+		mkdir -p data/hdfs/name; \
+		mkdir -p data/hdfs/data; \
+	fi;
+	@if [ -f data/zookeeper ]; then echo "Zookeeper folder existing already"; else \
+		echo "Creating Zookeeper data folder"; \
+		mkdir -p data/zookeeper; \
+	mkdir -p data/zookeeper-logs; \
+	fi;
+
+	@if [ -f data/keys/hbase/id_rsa ]; then echo "HBase keys existing already"; else \
+		mkdir -p data/keys/hbase; \
+		ssh-keygen -q -t rsa -P "" -f data/keys/hbase/id_rsa; \
+	fi;
+	@cp data/keys/hbase/* docker-hbase
+	@chmod 755 docker-hbase/id_rsa*
 
 	@if [ -f data/keys/private.pem ]; then echo "RSA keys existing already"; else \
 		mkdir -p data/keys; \
@@ -99,6 +124,12 @@ endif
 		mkdir -p ${SSL_CERT_PATH}; \
 		openssl req  -nodes -new -x509  -keyout ${SSL_CERT_PATH}/server.key -out ${SSL_CERT_PATH}/server.cert -subj "/C=UK/ST=NRW/L=London/O=My Inc/OU=DevOps/CN=www.streammyiot.com/emailAddress=donotreply@www.streammyiot.com"; \
 	fi;
+	@if [ -f data/keys/mqtt/mqtt_gw_secret.key ]; then echo "MQTT/GW key existing already. Skipping creating new key"; else \
+                echo "Creating MQTT/GW secret."; \
+                mkdir -p data/keys/mqtt; \
+                openssl rand -base64  16 > data/keys/mqtt/mqtt_gw_secret.key; \
+        fi;
+
 	@touch $@
 
 ## build: Build OISP images locally.

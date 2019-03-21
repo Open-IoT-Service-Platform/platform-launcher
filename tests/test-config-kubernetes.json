@@ -33,7 +33,8 @@
 		},
 	        "kafka": {
 		        "host": "kafka",
-		        "port": 9092
+		        "port": 9092,
+		        "topic": "heartbeat"
 		}
 	}
 }
