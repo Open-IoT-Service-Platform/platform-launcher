@@ -29,7 +29,7 @@ function replace_config {
 function add_config {
   config_line=$1
   replacement="${config_line} = $2"
-  echo ${replacement} >> ${CONFIG_FILE}
+  echo "${replacement}" >> ${CONFIG_FILE}
 }
 
 echo "Starting $0"
@@ -50,6 +50,7 @@ replace_config "tsd.storage.hbase.zk_quorum" ${ZKCLUSTER} "#"
 replace_config "tsd.network.port" ${PORT} ""
 replace_config "tsd.core.auto_create_metrics" "true" "#"
 add_config "tsd.http.request.enable_chunked" "true"
+add_config "tsd.http.request.cors_domains" "*"
 
 /opt/opentsdb/src/create_table.sh
 echo "Result $?"
