@@ -24,7 +24,8 @@ ENV OPENTSDB_VERSION 2.3.1
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 RUN apt-get update -qq && apt-get upgrade -y
-RUN	apt-get install -y --no-install-recommends wget jq supervisor openjdk-8-jdk-headless dh-autoreconf
+RUN	apt-get install -y --no-install-recommends wget jq supervisor openjdk-8-jdk-headless  \
+		dh-autoreconf gnuplot gnuplot-x11 libgd2-xpm-dev libgd3
 RUN echo https://github.com/OpenTSDB/opentsdb/releases/download/v${OPENTSDB_VERSION}/opentsdb-${OPENTSDB_VERSION}.tar.gz
 RUN	cd /opt && \
 		wget -q  https://github.com/OpenTSDB/opentsdb/releases/download/v${OPENTSDB_VERSION}/opentsdb-${OPENTSDB_VERSION}.tar.gz
