@@ -77,21 +77,21 @@ services:
       - POSTGRES_USER=${POSTGRES_USERNAME}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
   kafka:
-    image: oisp/kafka:${DOCKER_TAG}
-    build:
-      context: ./docker-kafka/
-      labels:
-        - oisp=true
-        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
+    image: bitnami/kafka:1.1.1
     ports:
-      - 9092:9092
+      - 9093:9093
+      - 9092:9093
     depends_on:
       - zookeeper
     environment:
-      - ADVERTISED_HOST=${HOST_IP_ADDRESS}
-      - ADVERTISED_PORT=${KAFKA_PORT}
-      - AUTO_CREATE_TOPICS=true
-      - ZK_CONNECT=${ZOOKEEPER_KAFKA}:${ZOOKEEPER_KAFKA_PORT}
+      - KAFKA_ZOOKEEPER_CONNECT=${ZOOKEEPER_KAFKA}:${ZOOKEEPER_KAFKA_PORT}
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_LISTENERS=LISTENER_BOB://0.0.0.0:9092,LISTENER_FRED://0.0.0.0:9093
+      - KAFKA_ADVERTISED_LISTENERS=LISTENER_BOB://kafka:9092,LISTENER_FRED://localhost:9093
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=LISTENER_BOB:PLAINTEXT,LISTENER_FRED:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=LISTENER_BOB
+    volumes:
+      - ./data/kafka:/bitnami/kafka
   redis:
     image: redis:3.0
     volumes:
