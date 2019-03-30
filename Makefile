@@ -129,7 +129,11 @@ endif
                 mkdir -p data/keys/mqtt; \
                 openssl rand -base64  16 > data/keys/mqtt/mqtt_gw_secret.key; \
         fi;
-
+	@if [ -f data/kafka ]; then echo "Kafka persitence dir existing already. Skipping creating new dir"; else \
+                echo "Creating kafka folder"; \
+                mkdir -p data/kafka; \
+				chmod 777 data/kafka; \
+    fi;
 	@touch $@
 
 ## build: Build OISP images locally.
