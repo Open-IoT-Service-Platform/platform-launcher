@@ -2,28 +2,80 @@
 #
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
-version: 2
-jobs:
-  build:
-    docker:
-      # specify the version you desire here
-      - image: circleci/node:8.0
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
-
+version: 2.1
+executors:
+  my-executor:
+    machine:
+      enabled: true
+      image: ubuntu-1604:201903-01
     working_directory: ~/repo
     environment:
       shell: /bin/bash
       TERM: xterm
-
+      TZ: "Europe/Berlin"
+commands:
+  setup-build-environment:
+    description: "Setup build Environment"
     steps:
-      - checkout
-
       - run:
-          name: Check whether most recent commit is signedoff
+          shell: /bin/bash
+          name: Setup build environment
+          command: |
+            cd platform-setup
+            sudo ./setup-ubuntu16.04.sh
+  setup-branch:
+    description: "Setup branch"
+    steps:
+      - run:
+          shell: /bin/bash
+          name: Setup branch
+          command: |
+            if [ "$CIRCLE_BRANCH" = "develop" ]; then
+              git branch --set-upstream-to=origin/develop develop
+              make update
+            fi
+  build-branch:
+    description: "Build branch"
+    steps:
+      - run:
+          shell: /bin/bash
+          name: Build branch
+          command: |
+            yes| make build
+  e2e-test:
+    description: "E2E test"
+    steps:
+      - run:
+          shell: /bin/bash
+          name: E2e Test
+          command: |
+            yes| make test
+  push-images:
+    description: "Push images"
+    parameters:
+      tag:
+        type: string
+        default: "latest"
+    steps:
+      - run:
+          shell: /bin/bash
+          name: Push images to docker hub
+          command: |
+            docker login  -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+            DOCKER_TAG="latest"
+            if [ "<< parameters.tag >>" = "date" ]; then
+              DOCKER_TAG=`date -I`
+            fi
+            if [ "<< parameters.tag >>" = "tag" ]; then
+              DOCKER_TAG=`git describe --tag` || exit 1
+            fi
+            echo Now trying to push with Tag ${DOCKER_TAG}
+            make push
+  check-signed:
+    description: "Check whether latest commit is signed"
+    steps:
+      - run:
+          name: Check whether most recent commit is signed
           shell: /bin/bash
           command: |
             MESSAGE=`git log -1 --pretty=%B`
@@ -34,10 +86,61 @@ jobs:
               echo "Commit is not signedoff"
               exit 1
             fi
-
-      # run tests!
-      - run:
-          shell: /bin/bash
-          name: Run remote build & e2e tests
-          command: |
-            ssh -o "StrictHostKeyChecking no" root@ci.streammyiot.com /opt/test/testTest.sh test
+jobs:
+  build:
+    executor: my-executor
+    steps:
+      - checkout
+      - check-signed
+      - setup-build-environment
+      - setup-branch
+      - build-branch
+      - e2e-test
+  build-master:
+    executor: my-executor
+    steps:
+      - checkout
+      - setup-build-environment
+      - setup-branch
+      - build-branch
+      - e2e-test
+      - push-images:
+          tag: "tag"
+  build-nightly:
+    executor: my-executor
+    steps:
+      - checkout
+      - setup-build-environment
+      - setup-branch
+      - build-branch
+      - e2e-test
+      - push-images:
+          tag: "date"
+workflows:
+  version: 2.1
+  workflow:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - develop
+      - build-master:
+          filters:
+            branches:
+              only:
+                - master
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - develop
+    jobs:
+      - build-nightly:
+          filters:
+            branches:
+              only:
+                - develop
