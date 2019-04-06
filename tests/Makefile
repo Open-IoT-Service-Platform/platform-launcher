@@ -55,14 +55,12 @@ test: npm-install
 	@until echo new-test | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat; do echo "Kafka not ready. Waiting ..."; sleep 1; done
 	@ (for i in {1..4}; do echo new-test ; done) | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat;
 	@. ../setup-environment.sh && until kafkacat -C -b $(KAFKA_BROKER) -t heartbeat -e -o -4 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
-
 ifeq ($(TESTING_PLATFORM), docker)
 	@$(call msg,"Resetting database ...");
-	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin resetDB
-
+	@. ../setup-environment.sh && docker exec  "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin resetDB
 	@$(call msg,"Adding a user for testing ...");
-	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
-	@. ../setup-environment.sh && docker exec -i "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin addUser $(USERNAME2) $(PASSWORD2) $(ROLE2) > /dev/null
+	@. ../setup-environment.sh && docker exec "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
+	@. ../setup-environment.sh && docker exec "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin addUser $(USERNAME2) $(PASSWORD2) $(ROLE2) > /dev/null
 else
 	@$(call msg,"Resetting database ...");
 	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin resetDB
