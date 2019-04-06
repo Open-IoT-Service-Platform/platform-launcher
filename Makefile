@@ -194,7 +194,7 @@ stop:
 ##
 update: distclean
 	@$(call msg,"Git Update (dev only)");
-	@git pull
+	#@git pull
 	@if [ -f setup-environment.sh ]; then \
 		mv setup-environment.sh config-backup/setup-environment-$$(date +%Y-%m-%d-%H%M%S).sh.bak; \
 	fi;
