@@ -24,11 +24,11 @@ commands:
             cd platform-setup
             sudo ./setup-ubuntu16.04.sh
   setup-branch:
-    description: "Setup branch"
+    description: "Setup subbranches"
     steps:
       - run:
           shell: /bin/bash
-          name: Setup branch
+          name: Setup sub branches
           command: |
             sudo apt install jq
             # First find out Base Branch (if any)
@@ -78,12 +78,20 @@ commands:
             DOCKER_TAG="latest"
             if [ "<< parameters.tag >>" = "date" ]; then
               DOCKER_TAG=`date -I`
+              DOCKER_PUSH_LATEST=true
             fi
             if [ "<< parameters.tag >>" = "tag" ]; then
-              DOCKER_TAG=`git describe --tag` || exit 1
+              DOCKER_TAG=`git describe --tags --exact-match` || exit 1
             fi
-            echo Now trying to push with Tag ${DOCKER_TAG}
-            make push
+            echo Now trying to push with Tag ${DOCKER_TAG} push latest ${DOCKER_PUSH_LATEST}
+            if [ ! -z "$PUSH_DRYRUN" ]; then
+              make push-images
+              if [ ! -z "$DOCKER_PUSH_LATEST" ]; then
+                DOCKER_TAG="latest" make push-images
+              fi
+            else
+              echo Only dry run mode. Not pushing to dockerhub!
+            fi
   check-signed:
     description: "Check whether latest commit is signed"
     steps:
@@ -99,6 +107,14 @@ commands:
               echo "Commit is not signedoff"
               exit 1
             fi
+  check-tagged:
+    description: "Check whether latest commit is tagged"
+    steps:
+      - run:
+          name: Check whether most recent commit is tagged
+          shell: /bin/bash
+          command: |
+            git describe --tags --exact-match || exit 1
 jobs:
   build:
     executor: my-executor
@@ -113,6 +129,7 @@ jobs:
     executor: my-executor
     steps:
       - checkout
+      - check-tagged
       - setup-build-environment
       - setup-branch
       - build-branch
