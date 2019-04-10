@@ -74,24 +74,43 @@ commands:
           shell: /bin/bash
           name: Push images to docker hub
           command: |
+            # login based on preconfigured env variables
             docker login  -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+            #Start with latest tag, replace later by the real-tags
             DOCKER_TAG="latest"
             if [ "<< parameters.tag >>" = "date" ]; then
-              DOCKER_TAG=`date -I`
+              # Should be nightly build
+              TARGET_DOCKER_TAG=nightly-`date -I`
               DOCKER_PUSH_LATEST=true
             fi
             if [ "<< parameters.tag >>" = "tag" ]; then
-              DOCKER_TAG=`git describe --tags --exact-match` || exit 1
+              # Should be master build
+              TARGET_DOCKER_TAG=`git describe --tags --exact-match` || exit 1
             fi
+            # First push latest if applicable and then the real tag
             echo Now trying to push with Tag ${DOCKER_TAG} push latest ${DOCKER_PUSH_LATEST}
-            if [ ! -z "$PUSH_DRYRUN" ]; then
-              make push-images
-              if [ ! -z "$DOCKER_PUSH_LATEST" ]; then
-                DOCKER_TAG="latest" make push-images
+            if [ "$DOCKER_PUSH_LATEST" = "true" ]; then
+              echo Pushing images with latest tag
+              if [ -z "$PUSH_DRYRUN" ]; then
+                make push-images
+              else
+                echo Only dry run mode. Not pushing to dockerhub!
               fi
-            else
-              echo Only dry run mode. Not pushing to dockerhub!
             fi
+            # Now replace all latest tagged images by the real tag
+            echo Now pushing images with tag $DOCKER_TAG
+            images=$(docker images --format "{{.Repository}}:{{.Tag}}"| grep :latest)
+            for image in $images; do
+              newimage=$(echo $image | sed -r "s/:latest/:$TARGET_DOCKER_TAG/g");
+              echo tagging $image to $newimage;
+              docker tag $image $newimage
+              if [ -z "$PUSH_DRYRUN" ]; then
+                docker push ${newimage}
+              else
+                echo Only dry run mode. Not pushing to dockerhub!
+              fi
+            done
+
   check-signed:
     description: "Check whether latest commit is signed"
     steps:
