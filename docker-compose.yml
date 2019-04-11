@@ -221,7 +221,7 @@ services:
       - OISP_TSDB_PROPERTIES=${OISP_TSDB_PROPERTIES}
       - OISP_BACKEND_JAEGER_CONFIG
   hdfs-namenode:
-    image: singularities/hadoop
+    image: singularities/hadoop:2.8
     command: start-hadoop namenode
     volumes:
       - ./data/hdfs/name:/opt/hdfs
