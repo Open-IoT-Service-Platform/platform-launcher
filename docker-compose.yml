@@ -237,7 +237,7 @@ services:
       - "13562:13562"
       - "19888:19888"
   hdfs-datanode:
-    image: singularities/hadoop
+    image: singularities/hadoop:2.8
     command: start-hadoop datanode hdfs-namenode
     volumes:
       - ./data/hdfs/data:/opt/hdfs
@@ -287,6 +287,7 @@ services:
       - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
       - OISP_TSDB_PROPERTIES=${OISP_TSDB_PROPERTIES}
   mqtt-gateway:
+    image: oisp/mqtt-gateway:${DOCKER_TAG}
     build:
       context: ./oisp-mqtt-gw
       dockerfile: Dockerfile-gateway
@@ -304,6 +305,7 @@ services:
       - ./oisp-mqtt-gw/lib:/app/lib
     command: ./wait-for-it.sh broker:8883 -t 300 -- ./wait-for-it.sh redis:6379 -t 300
   mqtt-broker:
+    image: oisp/mqtt-broker:${DOCKER_TAG}
     build:
       context: ./oisp-mqtt-gw
       dockerfile: Dockerfile-broker
