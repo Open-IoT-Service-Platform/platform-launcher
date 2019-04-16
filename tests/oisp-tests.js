@@ -131,7 +131,7 @@ function imageData(componentName, opaque, cb) {
     ];
 
     images.forEach(function(image) {
-        image.toBuffer("JPEG", function(err, buffer) {
+        image.toBuffer("RGB", function(err, buffer) {
             if (!err) {
                 cb(opaque, new Data(buffer, null, null))
             }
