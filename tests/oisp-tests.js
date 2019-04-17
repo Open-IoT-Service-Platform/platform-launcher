@@ -127,11 +127,11 @@ function imageData(componentName, opaque, cb) {
     var images = [
         new gm(100, 200, "red"),
         new gm(400, 600, "white"),
-        new gm(1280, 720, "blue")
+        new gm(500, 720, "blue")
     ];
 
     images.forEach(function(image) {
-        image.toBuffer("JPEG", function(err, buffer) {
+        image.toBuffer("RGB", function(err, buffer) {
             if (!err) {
                 cb(opaque, new Data(buffer, null, null))
             }

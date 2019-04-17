@@ -21,6 +21,6 @@
     "mailparser": "^2.2.0",
     "cbor": "^4.1.5",
     "gm": "^1.23.1",
-    "@open-iot-service-platform/oisp-sdk-js": "https://github.com/Open-IoT-Service-Platform/oisp-sdk-js.git#15e53c93f3a6589682a84c22f1ed4da552c9a084"
+    "@open-iot-service-platform/oisp-sdk-js": "https://github.com/Open-IoT-Service-Platform/oisp-sdk-js.git#9f9d8d78178f313d13453805467e6723b25a986c"
   }
 }
