@@ -164,6 +164,7 @@ services:
     command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- ./scripts/docker-start.sh
   frontend:
     image: oisp/frontend:${DOCKER_TAG}
+    restart: on-failure
     build:
       context: ./oisp-frontend/public-interface
       labels:
