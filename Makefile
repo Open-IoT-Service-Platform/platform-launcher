@@ -172,7 +172,7 @@ start: .init
 	@if [ "${PULL_IMAGES}" = "true" ]; then make pull; fi;
 	@./docker.sh -f docker-compose.yml -f docker-debugger/docker-compose-debugger.yml up -d $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
 
-start-test: export TEST := 1
+start-test: export TEST := "1"
 start-test:
 	@$(call msg,"Starting OISP (test mode: $(TESTING_PLATFORM) )");
 	@make -C tests email-account $(shell pwd)/tests/.env
