@@ -937,7 +937,9 @@ describe("Sending observations and checking rules ...\n".bold, function() {
             done();
             }).catch( (err) => {done(err)});
         }).timeout(30 * 1000);
-
+    it('Wait for backend synchronization', function(done) {
+        setTimeout(done, 2000);
+    }).timeout(5000);
     it('Shall check observations', function(done) {
         var checkObservations = function(component) {
             if ( component ) {
@@ -975,7 +977,6 @@ describe("Sending observations and checking rules ...\n".bold, function() {
        }).timeout(10000);
 
 });
-
 
 describe("Do time based rule subtests ...".bold,
 	 function() {
@@ -1066,9 +1067,6 @@ describe("Do data sending subtests ...".bold,
      it(descriptions.sendMaxAmountOfSamples,function(done) {
        test.sendMaxAmountOfSamples(done);
      }).timeout(10000);
-     it(descriptions.receiveMaxAmountOfSamples,function(done) {
-       test.receiveMaxAmountOfSamples(done);
-     }).timeout(10000);
      it(descriptions.sendPartiallyWrongData,function(done) {
        test.sendPartiallyWrongData(done);
      }).timeout(10000);
@@ -1083,6 +1081,9 @@ describe("Do data sending subtests ...".bold,
      }).timeout(10000);
      it(descriptions.waitForBackendSynchronization,function(done) {
        test.waitForBackendSynchronization(done);
+     }).timeout(10000);
+     it(descriptions.receiveMaxAmountOfSamples,function(done) {
+       test.receiveMaxAmountOfSamples(done);
      }).timeout(10000);
      it(descriptions.receivePartiallySentData,function(done) {
        test.receivePartiallySentData(done);
@@ -1694,4 +1695,4 @@ describe("change password and delete receiver ... \n".bold, function(){
         })
     })
  
-})   
+})
