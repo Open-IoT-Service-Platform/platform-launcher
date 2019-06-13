@@ -9,18 +9,20 @@
   "author": "Intel SSG-DRD",
   "license": "ISC",
   "dependencies": {
-    "chai": "^4.1.2",
-    "mocha": "^4.0.1",
-    "uuid": "^3.1.0",
-    "getmac": "^1.2.1",
-    "colors": "^1.2.1",
-    "cfenv": "^1.0.0",
-    "kafka-node": "^2.4.0",
-    "nodemailer": "^4.6.6",
-    "imap": "^0.8.19",
-    "mailparser": "^2.2.0",
+    "@open-iot-service-platform/oisp-sdk-js": "https://github.com/Open-IoT-Service-Platform/oisp-sdk-js.git#9f9d8d78178f313d13453805467e6723b25a986c",
     "cbor": "^4.1.5",
+    "cfenv": "^1.0.0",
+    "chai": "^4.1.2",
+    "colors": "^1.2.1",
+    "getmac": "^1.2.1",
     "gm": "^1.23.1",
-    "@open-iot-service-platform/oisp-sdk-js": "https://github.com/Open-IoT-Service-Platform/oisp-sdk-js.git#9f9d8d78178f313d13453805467e6723b25a986c"
+    "imap": "^0.8.19",
+    "kafka-node": "^2.4.0",
+    "mailparser": "^2.2.0",
+    "mocha": "^4.0.1",
+    "nodemailer": "^4.6.6",
+    "request-promise": "^4.2.4",
+    "tough-cookie": "^3.0.1",
+    "uuid": "^3.1.0"
   }
 }
