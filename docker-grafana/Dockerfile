@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG GRAFANA_VERSION="latest"
+ARG GRAFANA_VERSION="6.2.2"
 
 FROM grafana/grafana:${GRAFANA_VERSION}
 
