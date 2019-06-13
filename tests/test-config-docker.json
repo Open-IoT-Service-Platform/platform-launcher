@@ -36,5 +36,21 @@
 		        "port": 9092,
 		        "topic": "heartbeat"
 		}
+	},
+	"grafana": {
+		"host": "localhost",
+		"port": 4002,
+		"protocol": "http",
+		"subPath": "/ui/grafana",
+		"strictSSL": "false",
+		"timeout": 30000,
+		"proxy": {
+			"host": false,
+			"port": false
+		},
+		"admin": "grafana",
+		"password": "intel123",
+		"datasourceSuggest": "/api/suggest",
+		"datasourceQuery": "/api/query"
 	}
 }
