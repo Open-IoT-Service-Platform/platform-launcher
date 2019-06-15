@@ -9,7 +9,7 @@
   "author": "Intel SSG-DRD",
   "license": "ISC",
   "dependencies": {
-    "@open-iot-service-platform/oisp-sdk-js": "https://github.com/Open-IoT-Service-Platform/oisp-sdk-js.git#9f9d8d78178f313d13453805467e6723b25a986c",
+    "@open-iot-service-platform/oisp-sdk-js": "https://github.com/Open-IoT-Service-Platform/oisp-sdk-js.git#b9d4556b1b9ab3fb60a3b648c75e8e8cb2e5c412",
     "cbor": "^4.1.5",
     "cfenv": "^1.0.0",
     "chai": "^4.1.2",
