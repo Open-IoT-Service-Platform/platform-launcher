@@ -134,7 +134,7 @@ function submitData(value, deviceToken, accountId, deviceId, cid, cb) {
             on: ts,
             data: [{
                 componentId: cid,
-                value: value.toString(),
+                value: Buffer.isBuffer(value) ? value : value.toString(),
                 on: ts
             }]
         }
@@ -170,7 +170,7 @@ function submitDataList(valueList, deviceToken, accountId, deviceId, cidList, cb
     valueList.forEach(function(element){
       var toPush = {
         componentId: cidList[element.component],
-        value: element.value.toString(),
+        value: (typeof element.value === 'string' || Buffer.isBuffer(element.value)) ? element.value : element.value.toString(),
         on: element.ts
       }
       if (element.loc) {
