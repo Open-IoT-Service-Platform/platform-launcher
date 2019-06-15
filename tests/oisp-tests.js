@@ -78,6 +78,76 @@ components.add( new Component("images", "ByteArray", "image/jpeg", "pixel", "bin
                     imageData, imageCheckData)
                 );
 
+components.add(new Component("metaData", "String", "JSON", "text", "binaryDataRenderer", null, null, 
+                    [],
+                    stringData, stringCheckData)
+                );
+
+components.add(new Component("binaryState", "Boolean", "state", "bool", "timeSeries", null, null, 
+                    [],
+                    boolData, boolCheckData)
+                );
+
+function boolData(componentName) {
+  var data = [
+          new Data("1", null, null),
+          new Data("0", null, null),
+          new Data("1", null, null)
+      ];
+  return data;
+}
+
+function boolCheckData(sentData, receivedData) {
+    if ( sentData.length == receivedData.length) {
+        for (var i = 0; i < sentData.length; i++) {
+            if (sentData[i].ts == receivedData[i].ts && sentData[i].value === receivedData[i].value) {
+                sentData[i].ts = null;
+            }
+        }
+    }
+
+    var err = null;
+    for (var i = 0; i < sentData.length; i++) {
+        if (sentData[i].ts != null) {
+            err += "[" + i + "]=" + sentData[i].value + " ";
+        }
+    }
+    if (err) {
+        err = "Got wrong data for " + err;
+    }
+    return err;
+}
+
+function stringData(componentName) {
+  var data = [
+          new Data('{}', null, null),
+          new Data('{value: "hello world"}', null, null),
+          new Data('{meta: "Camera1", enabled: true, numObjects: 23, calibration: 1.4}', null, null)
+      ];
+  return data;
+}
+
+function stringCheckData(sentData, receivedData) {
+    if ( sentData.length == receivedData.length) {
+        for (var i = 0; i < sentData.length; i++) {
+            if (sentData[i].ts == receivedData[i].ts && sentData[i].value === receivedData[i].value) {
+                sentData[i].ts = null;
+            }
+        }
+    }
+
+    var err = null;
+    for (var i = 0; i < sentData.length; i++) {
+        if (sentData[i].ts != null) {
+            err += "[" + i + "]=" + sentData[i].value + " ";
+        }
+    }
+    if (err) {
+        err = "Got wrong data for " + err;
+    }
+    return err;
+}
+
 function temperatureData(componentName) {
 
     var data = [
@@ -1024,7 +1094,6 @@ describe("Do statistics rule subtests ...".bold,
 		 test.cleanup(done);
 	     }).timeout(10000);
          });
-
 describe("Do data sending subtests ...".bold,
   function() {
     var test;
