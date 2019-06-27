@@ -78,12 +78,12 @@ components.add( new Component("images", "ByteArray", "image/jpeg", "pixel", "bin
                     imageData, imageCheckData)
                 );
 
-components.add(new Component("metaData", "String", "JSON", "text", "binaryDataRenderer", null, null, 
+components.add(new Component("metaData", "String", "JSON", "text", "binaryDataRenderer", null, null,
                     [],
                     stringData, stringCheckData)
                 );
 
-components.add(new Component("binaryState", "Boolean", "state", "bool", "timeSeries", null, null, 
+components.add(new Component("binaryState", "Boolean", "state", "bool", "timeSeries", null, null,
                     [],
                     boolData, boolCheckData)
                 );
@@ -637,6 +637,24 @@ describe("Creating account and device ...\n".bold, function() {
         })
     })
 })
+
+describe("Device Activation Subtests".bold, function() {
+    var test;
+    var descriptions = require("./subtests/device-activation-tests").descriptions;
+    it(descriptions.prepareSetup, function(done) {
+        test = require("./subtests/device-activation-tests").test(userToken, accountId);
+        test.prepareSetup(done);
+    }).timeout(10000);
+    it(descriptions.activateExistingDeviceWithoutToken, function(done) {
+        test.activateExistingDeviceWithoutToken(done);
+    }).timeout(10000);
+    it(descriptions.activateNotExistingDeviceWithoutToken, function(done) {
+        test.activateNotExistingDeviceWithoutToken(done);
+    }).timeout(10000);
+    it(descriptions.cleanup, function(done) {
+        test.cleanup(done);
+    }).timeout(10000);
+});
 
 describe("Managing components catalog ... \n".bold, function() {
 
