@@ -367,7 +367,32 @@ var activateDevice = (userToken, accountId, deviceId) => {
   });
 };
 
+var activateDeviceWithoutToken = (activationCode, deviceId) => {
+    return new Promise(function(resolve, reject){
+        helpers.devices.activateDeviceWithoutToken(activationCode, deviceId, function(err, response) {
+            if (err) {
+                reject(err);
+  	        } else {
+                resolve(response);
+            }
+        });
+    });
+}
+
+var getAccountActivationCode = (accountId, userToken) => {
+    return new Promise(function(resolve, reject){
+        helpers.accounts.getAccountActivationCode(accountId, userToken, function(err, response) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(response);
+            }
+        });
+    });
+}
+
 module.exports = {
+    getAccountActivationCode: getAccountActivationCode,
     checkObservations: checkObservations,
     addComponent: addComponent,
     addActuator: addActuator,
@@ -389,5 +414,6 @@ module.exports = {
     deleteInvite: inviteDelete,
     createDevice: createDevice,
     deleteDevice: deleteDevice,
-    activateDevice: activateDevice
+    activateDevice: activateDevice,
+    activateDeviceWithoutToken: activateDeviceWithoutToken
 };
