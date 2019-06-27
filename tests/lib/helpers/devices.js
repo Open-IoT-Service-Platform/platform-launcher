@@ -39,7 +39,7 @@ function createDevice(name, deviceId, userToken, accountId, cb) {
             name: name,
             deviceId: deviceId,
             gatewayId: "00-11-22-33-44-55",
-            tags: ["tag-a", "tag-b"],   
+            tags: ["tag-a", "tag-b"],
             attributes: {
                 os: "linux"
               }
@@ -168,6 +168,26 @@ function activateDevice(userToken, accountId, deviceId, cb) {
             })
         }
     })
+}
+
+function activateDeviceWithoutToken(activationCode, deviceId, cb) {
+    if (!cb) {
+        throw "Callback required";
+    }
+    var data = {
+        deviceId: deviceId,
+        body: {
+            activationCode: activationCode
+        }
+    };
+    api.devices.registerDevice(data, function(err, response) {
+        if (err) {
+            cb(err);
+        } else {
+            assert.notEqual(response, null, 'response is null')
+            cb(null, response);
+        }
+    });
 }
 
 function createComponentId() {
@@ -380,6 +400,7 @@ module.exports = {
     getDeviceDetails: getDeviceDetails,
     updateDeviceDetails: updateDeviceDetails,
     activateDevice: activateDevice,
+    activateDeviceWithoutToken: activateDeviceWithoutToken,
     addDeviceComponent: addDeviceComponent,
     submitData: submitData,
     deleteDevice: deleteDevice,
