@@ -70,8 +70,13 @@ else
 	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin addUser $(USERNAME2) $(PASSWORD2) $(ROLE2) > /dev/null
 
 endif
+ifndef TEST_PREP_ONLY
 	@$(call msg,"Starting the e2e testing ...");
 	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) USERNAME2=$(USERNAME2) PASSWORD2=$(PASSWORD2) LOG_LEVEL="error" NODE_ENV="local" npm test
+else
+	@$(call msg,"Starting 3rd party test preparation ...");
+	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm run-script prep-only
+endif
 
 ifeq (email-account,$(firstword $(MAKECMDGOALS)))
  	OUTPUT_FILE := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
