@@ -4,7 +4,8 @@
   "description": "E2E test with server",
   "main": "test.js",
   "scripts": {
-    "test": "mocha oisp-tests.js --exit"
+    "test": "mocha oisp-tests.js --exit",
+    "prep-only": "mocha oisp-prep-only.js --exit"
   },
   "author": "Intel SSG-DRD",
   "license": "ISC",
