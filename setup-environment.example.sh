@@ -40,11 +40,12 @@ export KAFKA_PORT='9092'
 export KAFKA_HEARTBEAT_TOPIC='heartbeat'
 GEARPUMP='gearpump:8090'
 BACKEND='backend:8080'
-FRONTEND='frontend:4001'
+export FRONTEND='frontend:4001'
 NGINX='nginx'
 NGINX_PORT='443'
 REDIS='redis'
 REDIS_PORT='6379'
+export WEBSOCKET_SERVER="websocket-server:5000"
 
 OPENTSDB_URI='opentsdb'
 OPENTSDB_PORT=4242
