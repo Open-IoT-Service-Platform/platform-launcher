@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-FROM oisp/hbase:latest
+ARG DOCKER_TAG
+FROM oisp/hbase:${DOCKER_TAG}
 
 # avoid debconf and initrd
 ENV DEBIAN_FRONTEND noninteractive
