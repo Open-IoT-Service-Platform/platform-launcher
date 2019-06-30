@@ -126,8 +126,9 @@ services:
     build:
       context: ./oisp-frontend/public-interface/nginx
       args:
-        - WEBSOCKET_SERVER=websocket-server:5000
-        - DASHBOARD_SERVER=frontend:4001
+        - WEBSOCKET_SERVER=${WEBSOCKET_SERVER}
+        - DASHBOARD_SERVER=${FRONTEND}
+        - DOCKER_TAG=${DOCKER_TAG}
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_FRONTEND}
@@ -277,6 +278,8 @@ services:
     image: oisp/opentsdb:${DOCKER_TAG}
     build:
       context: ./docker-opentsdb
+      args:
+        - DOCKER_TAG=${DOCKER_TAG}
       labels:
         - oisp=true
         - ois.git_commit=${GIT_COMMIT_OPENTSDB}
