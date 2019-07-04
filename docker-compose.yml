@@ -128,6 +128,7 @@ services:
       args:
         - WEBSOCKET_SERVER=${WEBSOCKET_SERVER}
         - DASHBOARD_SERVER=${FRONTEND}
+        - GRAFANA_PROXY_SERVER=${GRAFANA_PROXY_SERVER}
         - DOCKER_TAG=${DOCKER_TAG}
       labels:
         - oisp=true
