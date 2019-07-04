@@ -39,7 +39,7 @@
 	},
 	"grafana": {
 		"host": "localhost",
-		"port": 4002,
+		"port": 80,
 		"protocol": "http",
 		"subPath": "/ui/grafana",
 		"strictSSL": "false",
