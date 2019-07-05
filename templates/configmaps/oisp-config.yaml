@@ -15,7 +15,7 @@ data:
     "mailConfig": "@@OISP_MAIL_CONFIG",
     "ruleEngineConfig": "@@OISP_RULEENGINE_CONFIG",
     "gatewayConfig": "@@OISP_GATEWAY_CONFIG",
-    "jaegerTracing": true
+    "jaegerTracing": {{ .Values.jaeger_tracing }}
     }
   websocket-server: |
     {
@@ -41,7 +41,7 @@ data:
     "logSpans": true,
     "samplerType": "probabilistic",
     "samplerParam": 0.1,
-    "tracing": true
+    "tracing": {{ .Values.jaeger_tracing }}
     }
   kafka: |
     {
@@ -85,8 +85,8 @@ data:
     "hostname": "postgres-ro",
     "writeHostname": "postgres",
     "port": "5432",
-    "username": "oisp",
-    "password": "password"
+    "username": "oisp_user",
+    "password": "supersecret"
     }
   redis: |
     {

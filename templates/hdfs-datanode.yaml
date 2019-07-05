@@ -17,7 +17,7 @@ metadata:
   name: hdfs-datanode
 spec:
   serviceName: hdfs-datanode
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: hdfs-datanode
@@ -31,12 +31,19 @@ spec:
         name: hdfs-namenode
         args: ["start-hadoop", "datanode", "hdfs-namenode"]
         resources:
+          {{ if .Values.less_resources }}
           limits:
-            memory: 1G
-            cpu: 500m
+            cpu: 100m
           requests:
-            memory: 1G
-            cpu: 500m
+            cpu: 100m
+          {{ else }}
+          limits:
+            memory: 500M
+            cpu: 1
+          requests:
+            memory: 500M
+            cpu: 1
+          {{ end }}
         env:
           - name: HDFS_USER
             value: root

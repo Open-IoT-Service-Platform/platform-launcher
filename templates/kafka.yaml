@@ -35,9 +35,14 @@ spec:
       - name: kafka
         image: wurstmeister/kafka
         resources:
+          {{ if .Values.less_resources }}
+          requests:
+            cpu: 100m
+          {{ else }}
           requests:
             memory: 1G
-            cpu: 1
+            cpu: 300m
+          {{ end }}
         env:
         - name: KAFKA_ZOOKEEPER_CONNECT
           value: zookeeper:2181

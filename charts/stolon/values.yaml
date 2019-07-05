@@ -52,14 +52,14 @@ pgReplUsername: "repluser"
 ## default is 40 random chars
 pgReplPassword: "replPassword"
 
-pgSuperuserName: "oisp"
+pgSuperuserName: "oisp_user"
 
 ## set password for the superuser
 ## default is 40 random chars
-pgSuperuserPassword: "password"
+pgSuperuserPassword: "supersecret"
 
 sentinel:
-  replicas: 2
+  replicas: 1
 
   ## Configure resource requests and limits.
   ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
@@ -79,7 +79,7 @@ sentinel:
   tolerations: []
 
 proxy:
-  replicas: 3
+  replicas: 1
   ## Set serviceType to nodePort if needed
   ## proxy is used to route RW requests to the master
   # serviceType: NodePort
@@ -102,7 +102,7 @@ proxy:
   tolerations: []
 
 keeper:
-  replicas: 3
+  replicas: 1
   ## Set serviceType to nodePort if needed
   ## keeper service is used to route RO requests to all nodes
   # serviceType: NodePort
@@ -122,6 +122,9 @@ keeper:
   resources:
     requests:
       cpu: "100m"
+      memory: "512Mi"
+    limits:
+      cpu: "200m"
       memory: "512Mi"
 
   ## Configure nodeSelector, tolerations and affinity.
@@ -146,11 +149,11 @@ persistence:
   accessMode: ReadWriteOnce
 
   ## Persistant Volume Storage Class Name
-  storageClassName: oneandone
+  storageClassName: local-path
 
   ## Persistent Volume Storage Size.
   ##
-  size: 10Gi
+  size: 1Gi
 
 rbac:
   # Specifies whether RBAC resources should be created

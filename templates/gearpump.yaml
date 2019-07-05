@@ -34,12 +34,19 @@ spec:
     spec:
       containers:
       - name: gearpump
-        image: oisp/gearpump:latest
+        image: oisp/rule-engine:{{ .Values.tag }}
         command: ["/bin/bash"]
         resources:
+        resources:
+          {{ if .Values.less_resources }}
           requests:
-            memory: 2G
-            cpu: 2
+            cpu: 100m
+          {{ else }}
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 500m
+          {{ end }}
         args: ["/app/bootstrap.sh"]
         env:
         - name: OISP_RULEENGINE_CONFIG

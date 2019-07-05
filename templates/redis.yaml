@@ -35,12 +35,21 @@ spec:
         imagePullPolicy: IfNotPresent
         name: redis
         resources:
+          {{ if .Values.less_resources }}
+          limits:
+            cpu: 100m
+            memory: 500M
+          requests:
+            cpu: 100m
+            memory: 500M
+          {{ else }}
           limits:
             memory: 2G
             cpu: 500m
           requests:
             memory: 2G
             cpu: 500m
+          {{ end }}
         ports:
         - containerPort: 6379
           protocol: TCP
@@ -61,4 +70,4 @@ spec:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 2Gi

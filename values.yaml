@@ -1,3 +1,4 @@
+# Credentials to pull images from docker registry
 imageCredentials:
     registry: index.docker.io
     username: invalid_username
@@ -19,3 +20,18 @@ numberReplicas:
     frontend: 1
     backend: 1
     debugger: 0
+
+# Hosts used for Ingress configuration
+hosts:
+    frontend: k8s.streammyiot.com
+    websocketserver: ws.streammyiot.com
+
+# Docket image tag
+tag: latest
+
+# Enable jaeger tracing
+jaeger_tracing: false
+
+# Sets resource limits lower to test locally
+# or on smaller cluster when set to true
+less_resources: true

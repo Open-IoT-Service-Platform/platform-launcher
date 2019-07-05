@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
       - name: dbsetup
-        image: oisp/frontend
+        image: oisp/frontend:{{ .Values.tag }}
         env:
         - name: NODE_ENV
           value: local
@@ -70,4 +70,4 @@ spec:
       restartPolicy: Never
       imagePullSecrets:
         - name: dockercred
-  backoffLimit: 4
+  backoffLimit: 10

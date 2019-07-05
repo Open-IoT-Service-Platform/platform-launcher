@@ -40,12 +40,19 @@ spec:
       - name: hbase-region
         image: oisp/hbase
         resources:
+          {{ if .Values.less_resources }}
+          limits:
+            cpu: 100m
+          requests:
+            cpu: 100m
+          {{ else }}
           limits:
             memory: 1G
-            cpu: 500m
+            cpu: 1
           requests:
             memory: 1G
-            cpu: 500m
+            cpu: 1
+          {{ end }}
         env:
         - name: REGIONSERVERS
           value: hbase-region

@@ -9,24 +9,21 @@ spec:
   - port: 5000
   selector:
     app: websocket-server
-  sessionAffinity: ClientIP
+
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: websocket-server
   labels:
     app: websocket-server
 spec:
+  serviceName: "websocket-server"
   replicas: 1
   selector:
     matchLabels:
       app: websocket-server
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-    type: RollingUpdate
+
   template:
     metadata:
       creationTimestamp: null
@@ -35,7 +32,7 @@ spec:
     spec:
       containers:
       - name: websocket-server
-        image: oisp/websocket-server:latest
+        image: oisp/websocket-server:{{ .Values.tag }}
         ports:
         - containerPort: 5000
           protocol: TCP
@@ -46,6 +43,18 @@ spec:
         - "300"
         - --
         - ./scripts/docker-start.sh
+        resources:
+          {{ if .Values.less_resources }}
+          limits:
+            cpu: 100m
+          requests:
+            cpu: 100m
+          {{ else }}
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 500m
+          {{ end }}
         env:
         - name: NODE_ENV
           value: local
@@ -92,16 +101,9 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: dashboard-ws
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.org/proxy-connect-timeout: "3600"
-    nginx.org/proxy-read-timeout: "3600"
-    nginx.org/websocket-services: websocket-server
-  creationTimestamp: null
-  generation: 1
 spec:
   rules:
-  - host: ws.iot.example.com
+  - host: {{ .Values.hosts.websocketserver }}
     http:
       paths:
       - backend:

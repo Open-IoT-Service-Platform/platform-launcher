@@ -45,15 +45,20 @@ spec:
       - name: hbase-master
         image: oisp/hbase
         resources:
-          limits:
-            memory: 1G
-            cpu: 1000m
+          {{ if .Values.less_resources }}
           requests:
+            cpu: 100m
+          {{ else }}
+          limits:
+            cpu: 500m
             memory: 1G
-            cpu: 1000m
+          requests:
+            cpu: 500m
+            memory: 1G
+          {{ end }}
         env:
         - name: REGIONSERVERS
-          value: hbase-region
+          value: hbase-region-0.hbase-region
         - name: ZOOKEEPER
           value: zookeeper
         - name: HDFS_NAMENODE
