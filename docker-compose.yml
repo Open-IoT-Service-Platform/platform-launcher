@@ -98,29 +98,24 @@ services:
       - ./data/redis:/data
     ports:
       - 6379:6379
-  gearpump:
-    image: oisp/gearpump:${DOCKER_TAG}
+  rule-engine:
+    image: oisp/rule-engine:${DOCKER_TAG}
     build:
-      context: ./oisp-gearpump-rule-engine
-      dockerfile: Dockerfile
+      context: ./oisp-beam-rule-engine
       labels:
         - oisp=true
-        - oisp.git_commit=${GIT_COMMIT_GEARPUMP}
-    depends_on:
-      - nginx
-      - hbase-master
-      - kafka
-      - frontend
-    working_dir: /app
+    ports:
+      - 8070:8081
+      - 6121:6121
+      - 6122:6122
+      - 6123:6123
     environment:
       - OISP_RULEENGINE_CONFIG=${OISP_RULEENGINE_CONFIG}
       - OISP_HBASE_CONFIG=${OISP_HBASE_CONFIG}
       - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
       - OISP_ZOOKEEPER_CONFIG=${OISP_ZOOKEEPER_CONFIG}
       - OISP_KAFKA_CONFIG=${OISP_KAFKA_CONFIG}
-    ports:
-      - 8090:8090
-    command: bash wait-for-it.sh kafka:9092 -t 300 -- bash bootstrap.sh
+    command: /app/wait-for-it.sh frontend:4001 -t 300 -- /app/bootstrap.sh
   nginx:
     image: oisp/nginx:${DOCKER_TAG}
     build:
