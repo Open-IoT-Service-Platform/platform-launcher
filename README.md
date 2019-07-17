@@ -11,6 +11,10 @@ This project contains a collection of Kubernetes templates and some helper scrip
  - a persisten volume provisioner
  - Access to oisp Dockerhub repo
 
+## Local installation
+
+In order to run OISP locally, see the setup.md file in this directory.
+
 ## Usage
 
 The templates directory contains templates for all required objects. You will want to edit the configmap and secrets to set up SMTP details and define secure and unique passwords. You will also want to update the secrets with generated public and private keys for encoding the JWTs used for authentication.

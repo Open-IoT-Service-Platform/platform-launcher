@@ -1,5 +1,7 @@
 # OISP Development Setup
 
+For installation on Ubuntu 18.04 LTS, the `setup-ubuntu18.04.sh` script should be used.
+
 ## Prerequisites
 git, make, docker and docker-compose
 
