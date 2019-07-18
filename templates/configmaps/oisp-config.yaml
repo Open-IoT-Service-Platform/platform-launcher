@@ -26,8 +26,9 @@ data:
     }
   backend: |
     {
-    "tsdbName": "hbase",
+    "tsdbName": "openTSDB",
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
+    "tsdbProperties": "%%OISP_TSDB_PROPERTIES",
     "zookeeperConfig": "@@OISP_ZOOKEEPER_CONFIG",
     "kerberosConfig": "@@OISP_KERBEROS_CONFIG",
     "hbaseConfig": "@@OISP_HBASE_CONFIG",
@@ -56,8 +57,7 @@ data:
     }
   zookeeper: |
     {
-    "zkCluster": "zookeeper:2181",
-    "zkNode": "/tmp"
+    "zkCluster": "zookeeper:2181"
     }
   kerberos: |
     {
@@ -77,7 +77,8 @@ data:
     "hbase.security.authentication": "simple",
     "ha.zookeeper.quorum": "zookeeper",
     "hbase.zookeeper.property.clientPort": "2181",
-    "hbase.zookeeper.quorum": "zookeeper"
+    "hbase.zookeeper.quorum": "zookeeper",
+    "hbase.rootdir": "/hbase"
     }
   postgres: |
     {
@@ -141,7 +142,15 @@ data:
     "password": "AgjY7H3eXztyA6AmNjI2rte446gdttgattwRRF61",
     "username": "api_actuator"
     }
-
+  opentsdb-config: |
+    {
+    "port": 4242
+    }
+  opentsdb-properties: |
+    {
+    "uri": "opentsdb",
+    "port": "4242"
+    }
 
 kind: ConfigMap
 metadata:

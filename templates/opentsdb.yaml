@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: opentsdb
+  name: opentsdb
+spec:
+  ports:
+  - port: 4242
+  selector:
+    app: opentsdb
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opentsdb
+  labels:
+    app: opentsdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opentsdb
+  template:
+    metadata:
+      labels:
+        app: opentsdb
+    spec:
+      containers:
+      - name: opentsdb
+        image: oisp/opentsdb:{{ .Values.tag }}
+        ports:
+        - containerPort: 4242
+        args:
+        - /opt/wait-for-it.sh
+        - hbase-master:9090
+        - -t
+        - "300"
+        - --
+        - /opt/wait-for-it.sh
+        - zookeeper:2181
+        - -t
+        - "300"
+        - --
+        - /opt/tsdb-startup.sh
+        env:
+        - name: OISP_ZOOKEEPER_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: zookeeper
+              name: oisp-config
+        - name: OISP_HADOOP_PROPERTIES
+          valueFrom:
+            configMapKeyRef:
+              key: hadoop
+              name: oisp-config
+        - name: OISP_OPENTSDB_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: opentsdb-config
+              name: oisp-config
+        - name: OISP_OPENTSDB_PROPERTIES
+          valueFrom:
+            configMapKeyRef:
+              key: opentsdb-properties
+              name: oisp-config
+        workingDir: /app
+        resources:
+          {{ if .Values.less_resources }}
+          requests:
+            cpu: 100m
+          {{ else }}
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 500m
+          {{ end }}
+      imagePullSecrets:
+      - name: dockercred

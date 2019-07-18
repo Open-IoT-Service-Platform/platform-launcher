@@ -81,6 +81,11 @@ spec:
             configMapKeyRef:
               key: hadoop
               name: oisp-config
+        - name: OISP_TSDB_PROPERTIES
+          valueFrom:
+            configMapKeyRef:
+              key: opentsdb-properties
+              name: oisp-config
         workingDir: /app
         readinessProbe:
           tcpSocket:
