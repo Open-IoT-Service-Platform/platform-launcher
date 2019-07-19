@@ -86,6 +86,11 @@ spec:
             configMapKeyRef:
               key: opentsdb-properties
               name: oisp-config
+        - name: OISP_OBJECT_STORE_MINIO_PROPERTIES
+          valueFrom:
+            configMapKeyRef:
+              key: minio
+              name: oisp-config
         workingDir: /app
         readinessProbe:
           tcpSocket:

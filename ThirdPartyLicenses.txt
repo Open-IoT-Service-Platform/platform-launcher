@@ -4,3 +4,7 @@ values.yaml: Changed cluster name, database usernames and passwords
 templates/keeper-ro-service.yaml: Changed service name
 templates/proxy-service.yaml: Changed service name
 Apache 2.0 License
+
+minio configuration and operator (https://github.com/minio/minio-operator.git)
+The templates are merged in to templates/minio.yaml, and adapted to use values and removed comments
+Apache 2.0 License

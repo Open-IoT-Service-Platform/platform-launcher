@@ -21,6 +21,10 @@ numberReplicas:
     backend: 1
     debugger: 0
 
+minio:
+  accesskey: minio # base 64 encoded "minio" (echo -n 'minio' | base64)
+  secretkey: minio123 # based 64 encoded "minio123" (echo -n 'minio123' | base64)
+
 # Hosts used for Ingress configuration
 hosts:
     frontend: k8s.streammyiot.com

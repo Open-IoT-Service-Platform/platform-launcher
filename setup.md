@@ -38,6 +38,10 @@ but the Rancher volume provisioner can be added easily:
 $ kubectl apply -f https://gist.githubusercontent.com/rberrelleza/58705b20fa69836035cf11bd65d9fc65/raw/bf479a97e2a2da7ba69d909db5facc23cc98942c/local-path-storage.yaml
 $ kubectl get storageclass # check the installation
 ```
+### Install the minio operator
+```bash
+kubectl create -f https://github.com/minio/minio-operator/blob/master/docs/minio-operator.yaml?raw=true
+```
 
 ## OISP
 Get the oisp-k8s repo:

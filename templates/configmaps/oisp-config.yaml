@@ -27,12 +27,14 @@ data:
   backend: |
     {
     "tsdbName": "openTSDB",
+    "objectStoreName": "minio",
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
     "tsdbProperties": "%%OISP_TSDB_PROPERTIES",
     "zookeeperConfig": "@@OISP_ZOOKEEPER_CONFIG",
     "kerberosConfig": "@@OISP_KERBEROS_CONFIG",
     "hbaseConfig": "@@OISP_HBASE_CONFIG",
-    "jaegerConfig": "@@OISP_BACKEND_JAEGER_CONFIG"
+    "jaegerConfig": "@@OISP_BACKEND_JAEGER_CONFIG",
+    "objectStoreProperties": "%%OISP_OBJECT_STORE_MINIO_PROPERTIES"
     }
   backend-jaeger: |
     {
@@ -150,6 +152,14 @@ data:
     {
     "uri": "opentsdb",
     "port": "4242"
+    }
+  minio: |
+    {
+    "endPoint": "minio",
+    "port": "9000",
+    "useSSL": "false",
+    "accessKey": "{{ .Values.minio.accesskey }}",
+    "secretKey": "{{ .Values.minio.secretkey }}"
     }
 
 kind: ConfigMap

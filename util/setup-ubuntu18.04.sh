@@ -59,7 +59,14 @@ sudo snap install helm --classic
 kubectl -n kube-system create serviceaccount tiller
 kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
 helm init --service-account tiller
-echo "\033[1mHelm initiated succesfully\033[0m"
+echo "\033[1mHelm initiated succesfully.\033[0m"
+
+echo ""
+echo "\033[1mInstalling k8s operators"
+echo "------------------------\033[0m"
+kubectl create -f https://github.com/minio/minio-operator/blob/master/docs/minio-operator.yaml?raw=true
+echo "\033[1mOperators installed successfully.\033[0m"
+
 echo ""
 echo "\033[1mInstalling test dependencies"
 echo "----------------------------\033[0m"
