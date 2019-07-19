@@ -8,6 +8,11 @@ metadata:
 spec:
   ports:
   - port: 4001
+    name: "dashboard"
+  - port: 4002
+    name: "4002"
+  - port: 4003
+    name: "4003"
   selector:
     app: dashboard
 ---
@@ -113,6 +118,11 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: mail
+        - name: OISP_GRAFANA_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: grafana
         volumeMounts:
         - mountPath: /app/keys
           name: jwt-keys

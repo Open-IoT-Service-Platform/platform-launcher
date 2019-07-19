@@ -15,7 +15,8 @@ data:
     "mailConfig": "@@OISP_MAIL_CONFIG",
     "ruleEngineConfig": "@@OISP_RULEENGINE_CONFIG",
     "gatewayConfig": "@@OISP_GATEWAY_CONFIG",
-    "jaegerTracing": {{ .Values.jaeger_tracing }}
+    "jaegerTracing": {{ .Values.jaeger_tracing }},
+    "grafanaConfig": "@@OISP_GRAFANA_CONFIG"
     }
   websocket-server: |
     {
@@ -160,6 +161,14 @@ data:
     "useSSL": "false",
     "accessKey": "{{ .Values.minio.accesskey }}",
     "secretKey": "{{ .Values.minio.secretkey }}"
+    }
+  grafana: |
+    {
+    "port": "3000",
+    "adminUser": "{{ .Values.grafana.admin }}",
+    "adminPassword": "{{ .Values.grafana.password }}",
+    "dataSourceHost": "opentsdb",
+    "dataSourcePort": "4242"
     }
 
 kind: ConfigMap
