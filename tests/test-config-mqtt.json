@@ -1,0 +1,57 @@
+{
+	"logger": {
+		"LEVEL": "info",
+		"PATH": "/tmp/",
+		"MAX_SIZE": 134217728
+	},
+	"default_connector": "mqtt",
+	"connector": {
+		"rest": {
+			"host": "localhost",
+			"port": 80,
+			"protocol": "http",
+			"strictSSL": false,
+			"timeout": 30000,
+			"proxy": {
+				"host": false,
+				"port": false
+			}
+		},
+		"ws": {
+			"host": "localhost",
+			"port": 5000,
+			"minRetryTime": 2500,
+			"maxRetryTime": 600000,
+			"testTimeout": 40000,
+			"pingPongIntervalMs": 30000,
+			"enablePingPong": true,
+			"secure": false,
+			"proxy": {
+				"host": false,
+				"port": false
+			}
+		},
+	    "kafka": {
+		        "host": "localhost",
+		        "port": 9092,
+		        "topic": "heartbeat"
+		},
+		"mqtt": {
+            "host": "localhost",
+            "port": 8883,
+            "qos": 1,
+            "retain": false,
+            "secure": true,
+            "strictSSL": true,
+            "retries": 5,
+            "topic": {
+                "metric_topic": "server/metric/{accountid}/{deviceid}",
+                "health": "server/devices/{deviceid}/health",
+                "health_status": "device/{deviceid}/health",
+                "control_command": "device/{gwid}/control",
+                "ingestion_response": "device/{deviceid}/metric/response",
+                "actuation": "device/metric/{deviceid}/actuation"
+            }
+		}
+	}
+}
