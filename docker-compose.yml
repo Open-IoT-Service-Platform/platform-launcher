@@ -300,7 +300,6 @@ services:
       - mqtt-broker
     working_dir: /app
     environment:
-      - NODE_ENV=local
       - OISP_MQTT_GATEWAY_CONFIG
       - OISP_REDIS_CONFIG
     volumes:
