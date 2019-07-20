@@ -41,6 +41,8 @@ export KAFKA_HEARTBEAT_TOPIC='heartbeat'
 GEARPUMP='gearpump:8090'
 BACKEND='backend:8080'
 export FRONTEND='frontend:4001'
+FRONTEND_URL='frontend'
+FRONTEND_PORT='4001'
 export GRAFANA_PROXY_SERVER='frontend:4002'
 NGINX='nginx'
 NGINX_PORT='443'
@@ -293,8 +295,8 @@ export OISP_MQTT_GATEWAY_CONFIG=\
     "mqttBrokerPort": "'${MQTT_BROKER_PORT}'",
     "mqttBrokerUsername": "'${MQTT_BROKER_USERNAME}'",
     "mqttBrokerPassword": "'${MQTT_BROKER_PASSWORD}'",
-    "frontendUri": "'${NGINX}'",
-    "frontendPort": "'${NGINX_PORT}'",
+    "frontendUri": "'${FRONTEND_URL}'",
+    "frontendPort": "'${FRONTEND_PORT}'",
     "frontendSystemUser": "'${FRONTEND_SYSTEMUSER}'",
     "frontendSystemPassword": "'${FRONTEND_SYSTEMPASSWORD}'",
     "redisConf": "@@OISP_REDIS_CONFIG",
