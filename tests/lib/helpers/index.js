@@ -33,5 +33,6 @@ module.exports = {
     rules:      require('./rules'),
     cmpcatalog: require('./cmpcatalog'),
     invitation: require('./invitation'),
-    mail:       require('./mail')
+    mail:       require('./mail'),
+    mqtt:       require('./mqtt')
 };
