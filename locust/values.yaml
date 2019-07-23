@@ -1,8 +1,0 @@
-imageCredentials:
-    registry: index.docker.io
-    username: invalid_username
-    password: invalid_password
-oisp:
-    url: "http://dashboard.oisp:4001"
-locust:
-    numberSlaves: 3
