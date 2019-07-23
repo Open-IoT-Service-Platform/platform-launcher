@@ -9,7 +9,8 @@ sudo apt-get install \
     apt-transport-https \
     ca-certificates \
     curl \
-    software-properties-common
+    software-properties-common \
+    gettext-base
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
@@ -26,5 +27,3 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo apt-get install -y make git kafkacat imagemagick
 
 sudo usermod -aG docker ${USER}
-
-
