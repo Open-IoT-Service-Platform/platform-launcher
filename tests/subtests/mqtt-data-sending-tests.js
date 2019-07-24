@@ -371,7 +371,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager, mqtt
         "sendDataPointsWithAttributes": function(done) {
           var proms = [];
           dataValues3.forEach(function(element) {
-            proms.push(promtests.submitDataList(element, deviceToken, accountId, newDeviceId, componentId));
+            proms.push(promtests.mqttSubmitDataList(mqttConnector, element, deviceToken, accountId, newDeviceId, componentId));
           });
           Promise.all(proms)
             .then(() => {
