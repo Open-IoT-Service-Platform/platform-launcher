@@ -53,6 +53,26 @@ var recipientEmail = imap_username;
 var rules = [];
 
 
+// @description Checks whether variables are set. returns true if one of the
+// variables are set
+// @params skipifset []string array of env variables. If one of them is set, skip the test
+// skipifset variables start with "OISP_TESTS_SKIP" prefix e.g. OISP_TESTS_SKIP_NON_ESSENTIAL
+// @params doifset string if this env variable is set, do the test (and ignore the skip variables)
+// doifset variables have to be prefixed with "OISP_TESTS_DO", e.g. OISP_TEST_DO_MQTT
+var checkTestCondition = function(skipifset, doifset) {
+    if (doifset && process.env[doifset] && doifset.startsWith("OISP_TESTS_DO")) {
+        return false;
+    }
+
+    var found = false;
+    skipifset.forEach(function(envVar) {
+        if (process.env[envVar] && envVar.startsWith("OISP_TESTS_SKIP")) {
+            found = true;
+        }
+    })
+
+    return found;
+}
 
 //-------------------------------------------------------------------------------------------------------
 // Rules
@@ -865,6 +885,11 @@ describe("Creating and getting components ... \n".bold, function() {
 
 
 describe("Creating rules ... \n".bold, function() {
+    before(function(){
+        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_RULES"])) {
+            this.skip();
+        }
+    });
     it('Shall create rules', function(done) {
         var nbRules = 0;
         components.list.forEach(function(component) {
@@ -926,7 +951,11 @@ describe("Creating rules ... \n".bold, function() {
 });
 
 describe("Sending observations and checking rules ...\n".bold, function() {
-
+    before(function(){
+            if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_RULES", "OISP_TESTS_SKIP_DATA_SENDING"])) {
+                this.skip();
+            }
+    });
     it('Shall send observation and check rules', function(done) {
         assert.notEqual(proxyConnector, null, "Invalid websocket proxy connector")
 
@@ -1005,6 +1034,11 @@ describe("Sending observations and checking rules ...\n".bold, function() {
     //---------------------------------------------------------------
 
     it('Shall check received emails', function(done) {
+        before(function(){
+            if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_EMAIL"])) {
+                this.skip();
+            }
+        });
         var expectedEmailReasons = [];
         components.list.forEach(function(component) {
             component.data.forEach(function(data) {
@@ -1082,8 +1116,12 @@ describe("Sending observations and checking rules ...\n".bold, function() {
 
 });
 
-describe("Do time based rule subtests ...".bold,
-	 function() {
+describe("Do time based rule subtests ...".bold, function() {
+    before(function(){
+            if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_RULES"])) {
+                this.skip();
+            }
+    });
 	     var test;
 	     var descriptions = require("./subtests/timebased-rule-tests").descriptions;
 	     it(descriptions.createTbRules,function(done) {
@@ -1096,11 +1134,15 @@ describe("Do time based rule subtests ...".bold,
 	     it(descriptions.cleanup,function(done) {
 		 test.cleanup(done);
 	     }).timeout(10000);
-         });
+    });
 
 
-describe("Do statistics rule subtests ...".bold,
-	 function() {
+describe("Do statistics rule subtests ...".bold, function() {
+    before(function(){
+        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_RULES"])) {
+            this.skip();
+        }
+    });
 	     var test;
 	     var descriptions = require("./subtests/statistic-rule-tests").descriptions;
 	     it(descriptions.createStatisticsRules,function(done) {
@@ -1113,9 +1155,14 @@ describe("Do statistics rule subtests ...".bold,
 	     it(descriptions.cleanup,function(done) {
 		 test.cleanup(done);
 	     }).timeout(10000);
-         });
-describe("Do data sending subtests ...".bold,
-  function() {
+});
+
+describe("Do data sending subtests ...".bold, function() {
+    before(function(){
+        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_DATA_SENDING"])) {
+            this.skip();
+        }
+    });
     var test;
     var descriptions = require("./subtests/data-sending-tests").descriptions;
      it(descriptions.sendAggregatedDataPoints,function(done) {
@@ -1203,6 +1250,11 @@ describe("Do data sending subtests ...".bold,
  });
 
 describe("Grafana subtests...".bold, function() {
+    before(function(){
+        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_GRAFANA"])) {
+            this.skip();
+        }
+    });
     var test;
     var descriptions = require("./subtests/grafana-tests").descriptions;
     it(descriptions.prepareGrafanaTestSetup, function(done) {
@@ -1235,8 +1287,12 @@ describe("Grafana subtests...".bold, function() {
     }).timeout(10000);
 });
 
-   describe("Do MQTT data sending subtests ...".bold,
-     function() {
+   describe("Do MQTT data sending subtests ...".bold, function() {
+       before(function(){
+           if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_MQTT"], "OISP_TESTS_DO_MQTT")) {
+               this.skip();
+           }
+       });
        var test;
        var descriptions = require("./subtests/mqtt-data-sending-tests").descriptions;
        it(descriptions.setup, function(done) {
@@ -1270,7 +1326,11 @@ describe("Grafana subtests...".bold, function() {
     });
 
 describe("Geting and manage alerts ... \n".bold, function(){
-
+    before(function(){
+        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_ALERTS"])) {
+            this.skip();
+        }
+    });
     it('Shall get list of alerts', function(done) {
         var getListOfAlerts = function(component) {
             if ( component ) {
@@ -1411,7 +1471,11 @@ describe("Geting and manage alerts ... \n".bold, function(){
 });
 
 describe("update rules and create draft rules ... \n".bold, function(){
-
+    before(function(){
+        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_RULES"])) {
+            this.skip();
+        }
+    });
     var cloneruleId;
 
     it('Shall clone a rule', function(done) {
@@ -1512,6 +1576,11 @@ describe("update rules and create draft rules ... \n".bold, function(){
 })
 
 describe("Adding user and posting email ...\n".bold, function() {
+    before(function(){
+        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_EMAIL"])) {
+            this.skip();
+        }
+    });
     it("Shall add a new user and post email", function(done) {
         assert.isNotEmpty(imap_username, "no email provided");
         assert.isNotEmpty(imap_password, "no password provided");
@@ -1577,7 +1646,11 @@ describe("Adding user and posting email ...\n".bold, function() {
 });
 
 describe("Invite receiver ...\n".bold, function() {
-
+    before(function(){
+        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_EMAIL"])) {
+            this.skip();
+        }
+    });
     var inviteId = null;
 
     it('Shall create invitation', function(done){
@@ -1729,7 +1802,11 @@ describe("Invite receiver ...\n".bold, function() {
 })
 
 describe("change password and delete receiver ... \n".bold, function(){
-
+    before(function(){
+            if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_MAIL"])) {
+                this.skip();
+            }
+    });
     it('Shall request change receiver password', function(done) {
 	var username = process.env.USERNAME;
 	helpers.users.requestUserPasswordChange(username, function(err, response) {
