@@ -48,7 +48,7 @@ npm-install:
 
 
 test: npm-install
-	@cp test-config-$(TESTING_PLATFORM).json test-config.json
+	@cat test-config-$(TESTING_PLATFORM).json | envsubst > test-config.json
 	@$(call msg,"Waiting for frontend and test Kafka readiness");
 # fill in separator to avoid accidentially dashboard being most recent heartbeat.
 # Then look always for latest heartbeat
