@@ -55,22 +55,21 @@ var rules = [];
 
 // @description Checks whether variables are set. returns true if one of the
 // variables are set
-// @params skipifset []string array of env variables. If one of them is set, skip the test
-// skipifset variables start with "OISP_TESTS_SKIP" prefix e.g. OISP_TESTS_SKIP_NON_ESSENTIAL
-// @params doifset string if this env variable is set, do the test (and ignore the skip variables)
-// doifset variables have to be prefixed with "OISP_TESTS_DO", e.g. OISP_TEST_DO_MQTT
-var checkTestCondition = function(skipifset, doifset) {
-    if (doifset && process.env[doifset] && doifset.startsWith("OISP_TESTS_DO")) {
-        return false;
-    }
-
+// @params skipifset []string array of case names in test-config.json under skip.
+// The last one set to "true" or "false" preceeds, so the order should be from general
+// to specific.
+var checkTestCondition = function(skipifset) {
     var found = false;
-    skipifset.forEach(function(envVar) {
-        if (process.env[envVar] && envVar.startsWith("OISP_TESTS_SKIP")) {
-            found = true;
-        }
+    skipifset.forEach(function(caseName) {
+	if (config.skip[caseName] == "true") {
+	    found = true
+	} else if (config.skip[caseName] == "false") {
+	    found = false
+	} else if (config.skip[caseName] != "") {
+	    console.error("config.skip." + caseName + ' must be "true", "false" or ""')
+	    process.exit(1)
+	}
     })
-
     return found;
 }
 
@@ -886,7 +885,7 @@ describe("Creating and getting components ... \n".bold, function() {
 
 describe("Creating rules ... \n".bold, function() {
     before(function(){
-        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_RULES"])) {
+        if (checkTestCondition(["non_essential", "rules"])) {
             this.skip();
         }
     });
@@ -952,7 +951,7 @@ describe("Creating rules ... \n".bold, function() {
 
 describe("Sending observations and checking rules ...\n".bold, function() {
     before(function(){
-            if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_RULES", "OISP_TESTS_SKIP_DATA_SENDING"])) {
+            if (checkTestCondition(["non_essential", "rules", "data_sending"])) {
                 this.skip();
             }
     });
@@ -1035,7 +1034,7 @@ describe("Sending observations and checking rules ...\n".bold, function() {
 
     it('Shall check received emails', function(done) {
         before(function(){
-            if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_EMAIL"])) {
+            if (checkTestCondition(["non_essential", "email"])) {
                 this.skip();
             }
         });
@@ -1118,7 +1117,7 @@ describe("Sending observations and checking rules ...\n".bold, function() {
 
 describe("Do time based rule subtests ...".bold, function() {
     before(function(){
-            if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_RULES"])) {
+            if (checkTestCondition(["non_essential", "rules"])) {
                 this.skip();
             }
     });
@@ -1139,7 +1138,7 @@ describe("Do time based rule subtests ...".bold, function() {
 
 describe("Do statistics rule subtests ...".bold, function() {
     before(function(){
-        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_RULES"])) {
+        if (checkTestCondition(["non_essential", "rules"])) {
             this.skip();
         }
     });
@@ -1159,7 +1158,7 @@ describe("Do statistics rule subtests ...".bold, function() {
 
 describe("Do data sending subtests ...".bold, function() {
     before(function(){
-        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_DATA_SENDING"])) {
+        if (checkTestCondition(["non_essential", "data_sending"])) {
             this.skip();
         }
     });
@@ -1251,7 +1250,7 @@ describe("Do data sending subtests ...".bold, function() {
 
 describe("Grafana subtests...".bold, function() {
     before(function(){
-        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_GRAFANA"])) {
+        if (checkTestCondition(["non_essential", "grafana"])) {
             this.skip();
         }
     });
@@ -1289,7 +1288,7 @@ describe("Grafana subtests...".bold, function() {
 
    describe("Do MQTT data sending subtests ...".bold, function() {
        before(function(){
-           if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_MQTT"], "OISP_TESTS_DO_MQTT")) {
+           if (checkTestCondition(["non_essential", "mqtt"])) {
                this.skip();
            }
        });
@@ -1327,7 +1326,7 @@ describe("Grafana subtests...".bold, function() {
 
 describe("Geting and manage alerts ... \n".bold, function(){
     before(function(){
-        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_ALERTS"])) {
+        if (checkTestCondition(["non_essential", "alerts"])) {
             this.skip();
         }
     });
@@ -1472,7 +1471,7 @@ describe("Geting and manage alerts ... \n".bold, function(){
 
 describe("update rules and create draft rules ... \n".bold, function(){
     before(function(){
-        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_RULES"])) {
+        if (checkTestCondition(["non_essential", "rules"])) {
             this.skip();
         }
     });
@@ -1577,7 +1576,7 @@ describe("update rules and create draft rules ... \n".bold, function(){
 
 describe("Adding user and posting email ...\n".bold, function() {
     before(function(){
-        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_EMAIL"])) {
+        if (checkTestCondition(["non_essential", "email"])) {
             this.skip();
         }
     });
@@ -1647,7 +1646,7 @@ describe("Adding user and posting email ...\n".bold, function() {
 
 describe("Invite receiver ...\n".bold, function() {
     before(function(){
-        if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_EMAIL"])) {
+        if (checkTestCondition(["non_essential", "email"])) {
             this.skip();
         }
     });
@@ -1803,7 +1802,7 @@ describe("Invite receiver ...\n".bold, function() {
 
 describe("change password and delete receiver ... \n".bold, function(){
     before(function(){
-            if (checkTestCondition(["OISP_TESTS_SKIP_NON_ESSENTIAL", "OISP_TESTS_SKIP_MAIL"])) {
+            if (checkTestCondition(["non_essential", "email"])) {
                 this.skip();
             }
     });
