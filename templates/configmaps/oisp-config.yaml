@@ -116,8 +116,8 @@ data:
     }
   gateway: |
     {
-    "password": "7d501829lhbl1or0bb1784462c97bcad6",
-    "username": "gateway@intel.com"
+    "password": "{{ .Values.systemuser.username }}",
+    "username": "{{ .Values.systemuser.password }}"
     }
   backend-host: |
     {
@@ -169,6 +169,33 @@ data:
     "adminPassword": "{{ .Values.grafana.password }}",
     "dataSourceHost": "opentsdb",
     "dataSourcePort": "4242"
+    }
+
+  mqtt-gateway: |
+    {
+    "mqttBrokerUrl": "localhost",
+    "mqttBrokerPort": "8883",
+    "mqttBrokerUsername": "{{ .Values.mqtt.broker.username }}",
+    "mqttBrokerPassword": "{{ .Values.mqtt.broker.password }}",
+    "frontendUri": "dashboard",
+    "frontendPort": "4001",
+    "frontendSystemUser": "{{ .Values.systemuser.username }}",
+    "frontendSystemPassword": "{{ .Values.systemuser.password }}",
+    "redisConf": "@@OISP_REDIS_CONFIG",
+    "aesKey": "/app/keys/mqtt/mqtt_gw_secret.key"
+    }
+
+  mqtt-broker: |
+    {
+    "redisConf": "@@OISP_REDIS_CONFIG",
+    "jwtPubKey": "/app/keys/public.pem",
+    "mqttBrokerUserName": "{{ .Values.mqtt.broker.username }}",
+    "mqttBrokerPassword": "{{ .Values.mqtt.broker.password }}",
+    "mqttBrokerPort": "8883",
+    "aesKey": "/app/keys/mqtt/mqtt_gw_secret.key",
+    "cafile": "/app/keys/ssl/server.cert",
+    "keyfile": "/app/keys/ssl/server.key",
+    "certfile": "/app/keys/ssl/server.cert"
     }
 
 kind: ConfigMap

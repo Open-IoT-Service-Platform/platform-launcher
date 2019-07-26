@@ -29,10 +29,20 @@ grafana:
   admin: grafana
   password: intel123
 
+mqtt:
+  broker:
+    username: username
+    password: password
+
 # Hosts used for Ingress configuration
 hosts:
     frontend: k8s.streammyiot.com
     websocketserver: ws.streammyiot.com
+    mqttserver: mqtt.streammyiot.com
+
+systemuser:
+  username: gateway@intel.com
+  password: 7d501829lhbl1or0bb1784462c97bcad6
 
 # Docket image tag
 tag: latest
