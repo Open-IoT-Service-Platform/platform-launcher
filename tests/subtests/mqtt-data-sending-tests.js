@@ -272,6 +272,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager, mqtt
       var result = true;
       var reason = "";
       var onlyExistingAttr = onlyExistingAttributes == undefined ? false : onlyExistingAttributes;
+      console.log("Marcel123 " + JSON.stringify(dataValues) + "-------------------------------------------------------- " + JSON.stringify(points));
       if (points.length != dataValues.length) {
         return "Wrong number of returned points";
       }
@@ -433,6 +434,8 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager, mqtt
           promtests.searchDataAdvanced(100000 + BASE_TIMESTAMP, 700000 + BASE_TIMESTAMP, deviceToken, accountId, newDeviceId, componentId, true, undefined, undefined, undefined)
             .then((result) => {
               var mapping = findMapping(foundComponentMap, componentId, result.data[0].components)
+              console.log("Marcel124 " + JSON.stringify(result));
+              console.log("Marcel125 " + JSON.stringify(result.data[0].components.length) + "componentId" + componentId.length);
               if (result.data[0].components.length != componentId.length) {
                 return done("Wrong number of point series!");
               }
@@ -461,7 +464,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager, mqtt
 
         },
         "waitForBackendSynchronization": function(done) {
-            setTimeout(done, 2000);
+            setTimeout(done, 3000);
 
         },
 
