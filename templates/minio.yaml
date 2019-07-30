@@ -36,12 +36,17 @@ spec:
       value: "EC:2"
   ## Configure resource requests and limits for MinIO containers
   resources:
+    {{ if .Values.less_resources }}
+    requests:
+      cpu: 50m
+    {{ else }}
     requests:
       memory: 256Mi
       cpu: 250m
     limits:
       memory: 512Mi
       cpu: 750m
+    {{ end }}
 
   liveness:
     httpGet:

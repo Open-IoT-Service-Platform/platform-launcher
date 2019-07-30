@@ -70,6 +70,10 @@ spec:
         - mountPath: /app/keys
           name: jwt-keys
           readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /v1/api/health
+            port: 4005
       - name: mqtt-broker
         image: oisp/mqtt-broker:{{ .Values.tag }}
         ports:
@@ -97,6 +101,10 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: redis
+        readinessProbe:
+          httpGet:
+            path: /v1/api/health
+            port: 4005
         volumeMounts:
         - mountPath: /app/keys
           name: jwt-keys

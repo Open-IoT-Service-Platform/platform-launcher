@@ -47,7 +47,7 @@ spec:
         resources:
           {{ if .Values.less_resources }}
           requests:
-            cpu: 100m
+            cpu: 50m
           {{ else }}
           limits:
             cpu: 500m

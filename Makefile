@@ -225,6 +225,10 @@ wait-until-ready:
 	@while kubectl -n oisp get pods -l=app=dashboard -o \
         jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
 		do printf "."; sleep 5; done;
+	@printf "\nWaiting for mqtt server";
+	@while kubectl -n oisp get pods -l=app=mqtt-server -o \
+        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
+		do printf "."; sleep 5; done;
 	@echo
 
 #---------------------------------------------------------------------------------------------------

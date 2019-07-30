@@ -138,16 +138,15 @@ spec:
             port: 4001
         resources:
           {{ if .Values.less_resources }}
-          limits:
-            cpu: 100m
           requests:
-            cpu: 100m
+            cpu: 50m
           {{ else }}
           limits:
             cpu: 500m
           requests:
             cpu: 500m
           {{ end }}
+      {{ if .Values.jaeger_tracing }}
       - name: jaeger-agent
         image: jaegertracing/jaeger-agent:1.6.0
         ports:
@@ -162,7 +161,7 @@ spec:
         command:
           - "/go/bin/agent-linux"
           - "--collector.host-port=jaeger-collector:14267"
-
+      {{ end }}
       imagePullSecrets:
         - name: dockercred
       volumes:

@@ -37,7 +37,6 @@ spec:
         image: oisp/rule-engine:{{ .Values.tag }}
         command: ["/bin/bash"]
         resources:
-        resources:
           {{ if .Values.less_resources }}
           requests:
             cpu: 100m

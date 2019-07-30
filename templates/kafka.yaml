@@ -39,7 +39,7 @@ spec:
         resources:
           {{ if .Values.less_resources }}
           requests:
-            cpu: 100m
+            cpu: 50m
           {{ else }}
           requests:
             memory: 1G

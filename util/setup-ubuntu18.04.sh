@@ -1,7 +1,7 @@
 echo "\033[1mInstalling docker"
 echo "-----------------\033[0m"
-sudo apt update
-sudo apt install docker.io -y
+sudo apt -qq update
+sudo apt -qq install docker.io -y
 sudo systemctl start docker
 sudo systemctl enable docker
 echo "\033[1mSuccessfully installed" $(docker --version) "\033[0m"
@@ -22,6 +22,7 @@ if [ ! -d ~/.kube ]; then
       mkdir ~/.kube
 fi
 echo "\033[1mSuccessfully installed kubectl\033[0m"
+export PATH=$PATH:/snap/bin
 kubectl version --short
 echo ""
 
@@ -64,13 +65,15 @@ echo "\033[1mHelm initiated succesfully.\033[0m"
 echo ""
 echo "\033[1mInstalling k8s operators"
 echo "------------------------\033[0m"
-kubectl create -f https://github.com/minio/minio-operator/blob/master/docs/minio-operator.yaml?raw=true
+kubectl create -f https://github.com/minio/minio-operator/blob/master/docs/minio-operator.yaml?raw=true --validate=false
 echo "\033[1mOperators installed successfully.\033[0m"
 
 echo ""
 echo "\033[1mInstalling test dependencies"
 echo "----------------------------\033[0m"
-sudo apt install nodejs npm
-npm install nodemailer
-
+sudo apt -qq install nodejs npm
+sudo npm install -g n
+sudo n 8
+sudo npm install -g nodemailer
+sleep 3
 echo "\033[1mReady to deploy OISP\033[0m"

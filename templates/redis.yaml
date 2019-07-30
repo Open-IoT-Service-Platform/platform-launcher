@@ -36,11 +36,8 @@ spec:
         name: redis
         resources:
           {{ if .Values.less_resources }}
-          limits:
-            cpu: 100m
-            memory: 500M
           requests:
-            cpu: 100m
+            cpu: 50m
             memory: 500M
           {{ else }}
           limits:

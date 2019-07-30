@@ -34,9 +34,14 @@ spec:
       - image: zookeeper:3.4.13
         name: zookeeper
         resources:
+          {{ if .Values.less_resources }}
+          requests:
+            cpu: 50m
+          {{ else }}
           requests:
             memory: 100m
             cpu: 100m
+          {{ end }}
         env:
         - name: ZOO_SERVERS
           value: "server.1=0.0.0.0:2888:3888"
