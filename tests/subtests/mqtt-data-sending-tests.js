@@ -461,7 +461,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager, mqtt
 
         },
         "waitForBackendSynchronization": function(done) {
-            setTimeout(done, 2000);
+            setTimeout(done, 3000);
 
         },
 
