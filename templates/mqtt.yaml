@@ -33,8 +33,8 @@ spec:
       containers:
       - name: mqtt-gateway
         image: oisp/mqtt-gateway:{{ .Values.tag }}
+        command: ["./wait-for-it.sh"]
         args:
-        - ./wait-for-it.sh
         - localhost:8883
         - -t
         - "300"
@@ -43,6 +43,8 @@ spec:
         - redis:6379
         - -t
         - "300"
+        - --
+        - "./start-analytics-gateway.sh"
         resources:
           {{ if .Values.less_resources }}
           limits:

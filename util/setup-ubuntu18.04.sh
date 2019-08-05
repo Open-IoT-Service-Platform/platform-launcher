@@ -65,7 +65,7 @@ echo "\033[1mHelm initiated succesfully.\033[0m"
 echo ""
 echo "\033[1mInstalling k8s operators"
 echo "------------------------\033[0m"
-kubectl create -f https://github.com/minio/minio-operator/blob/master/docs/minio-operator.yaml?raw=true --validate=false
+kubectl create -f https://github.com/minio/minio-operator/blob/master/minio-operator.yaml?raw=true --validate=false
 echo "\033[1mOperators installed successfully.\033[0m"
 
 echo ""
