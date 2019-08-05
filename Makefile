@@ -13,26 +13,15 @@ DEPLOYMENT?=debugger
 DEBUGGER_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep debugger | head -n 1)
 DASHBOARD_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
 SELECTED_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep $(DEPLOYMENT) | head -n 1)
-LOCUST_MASTER_POD=$(shell kubectl -n $(NAMESPACE_LOCUST) get pods -o custom-columns=:metadata.name | grep master | head -n 1)
 HBASE_MASTER_POD=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep hbase-master | head -n 1)
 
 TEST_REPO?=https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 TEST_BRANCH?=develop
 
-test-k8s:
-	@$(call msg, "Testing on local k8s cluster");
-	kafkacat -b kafka:9092 -t heartbeat
-
 # Deployment with kubectl
 # -----------------------------------------------------------------------------
 # Use these functions if you do not have HELM running on your cluster,
 # otherwise, deploying the charts is the recommended method
-
-
-## import-debugger: Launch or update debugger pod in NAMESPACE (default:oisp)
-##
-import-debugger:
-	kubectl apply -n $(NAMESPACE) -f $(TEMPLATES_DIR)/test
 
 ## .docker-cred: Remove this file if you need to update docker credentials
 ##
@@ -48,40 +37,12 @@ import-debugger:
 	kubectl -n $(NAMESPACE) create secret docker-registry dockercred --docker-username=$$DOCKER_USERNAME --docker-password=$$DOCKER_PASSWORD --docker-email=$$DOCKER_EMAIL;
 	@touch $@
 
-
-## import-templates: Launch or update platform on k8s by importing the templates found in TEMPLATES_DIR
-##     The resources will be loaded into NAMESPACE (default: oisp)
-##
-import-templates: .docker-cred
-	@$(call msg, "Importing into namespace:$(NAMESPACE)")
-
-	@kubectl create namespace $(NAMESPACE) || echo Namespace $(NAMESPACE) already exists
-
-	kubectl apply -n $(NAMESPACE) -f $(TEMPLATES_DIR)/configmaps
-	kubectl apply -n $(NAMESPACE) -f $(TEMPLATES_DIR)/secrets
-	kubectl apply -n $(NAMESPACE) -f $(TEMPLATES_DIR)
-
-## export-templates: Export templates in NAMESPACE in running k8s cluster to TEMPLATES_DIR
-##     This does not follow the exact same directory structure as in import-templates
-##
-export-templates:
-	@for n in $$(kubectl get -n $(NAMESPACE) -o=name pvc,configmap,secret,ingress,service,deployment,statefulset,hpa); do \
-	mkdir -p $(TEMPLATES_DIR)/$$(dirname $$n); \
-	kubectl get -n $(NAMESPACE) -o=yaml --export $$n > $(TEMPLATES_DIR)/$$n.yaml; \
-	done
-
 ## clean: Remove all k8s resources by deleting namespace
 ##
 clean:
 	@$(call msg, "Removing workspace $(NAMESPACE)")
 	-kubectl delete namespace $(NAMESPACE)
 	rm -f .docker-cred
-
-
-# Deployment with HELM
-# -----------------------------------------------------------------------------
-# Recommended method
-
 
 check-docker-cred-env:
 	@if [ "$$DOCKERUSER" = "" ]; then \
@@ -125,21 +86,6 @@ undeploy-oisp:
 	helm del $(NAME) --purge
 	kubectl delete namespace $(NAMESPACE)
 
-## deploy-locust: Deploy locust using the HELM chart
-##
-deploy-locust: check-docker-cred-env
-	@cd locust && \
-        helm install . --name $(NAME_LOCUST) --namespace $(NAMESPACE_LOCUST) \
-		--set imageCredentials.username="$$DOCKERUSER" \
-		--set imageCredentials.password="$$DOCKERPASS";
-
-## undeploy-locust: Remove LOCUST deployment by HELM chart
-##
-undeploy-locust:
-	helm del $(NAME_LOCUST) --purge
-	kubectl delete namespace $(NAMESPACE_LOCUST)
-
-
 # Utils
 # ---------------------------------------------------------------------
 
@@ -178,30 +124,10 @@ test: prepare-tests
 	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger \
 		-- /bin/bash -c "cp setup-environment.example.sh setup-environment.sh && cd tests && make test TESTING_PLATFORM=kubernetes TERM=xterm"
 
-## run-loadtest-datasend: Run a loadtest in DEBUGGER_POD for
-## data send endpoint. This assumes the platform is deployed already.
-## Paramateres (as ENV vars): NR_FRONTEND, NR_BACKEND and NR_CONCURRENT_REQUESTS
-run-loadtest-datasend:
-	echo "Preparing loadtest for POST /api/v1/data/";
-	mkdir -p "loadtest-results/datasend"
-	kubectl -n $(NAMESPACE) scale deployment dashboard --replicas=$(NR_FRONTEND)
-	kubectl -n $(NAMESPACE) scale deployment backend --replicas=$(NR_BACKEND)
-	sleep 5;
-	make wait-until-ready;
-	kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) -c dashboard -- node admin resetDB;
-	make add-test-user;
-	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -- /usr/bin/python3 /home/load-tests/create_test.py \
-	--suffix b$(NR_BACKEND)_f$(NR_FRONTEND) --concurrency $(NR_CONCURRENT_REQUESTS) && \
-	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -- /bin/bash runtest_b$(NR_BACKEND)_f$(NR_FRONTEND)_c$(NR_CONCURRENT_REQUESTS).sh && \
-	kubectl -n $(NAMESPACE) cp $(DEBUGGER_POD):out_b$(NR_BACKEND)_f$(NR_FRONTEND)_c$(NR_CONCURRENT_REQUESTS).txt loadtest-results/datasend
-	kubectl -n $(NAMESPACE) cp $(DEBUGGER_POD):perc_b$(NR_BACKEND)_f$(NR_FRONTEND)_c$(NR_CONCURRENT_REQUESTS).txt loadtest-results/datasend
-
-
 ## proxy: Run kubectl proxy and port-forwarding of various pods
 ##
 proxy:
 	-kubectl proxy &
-	-kubectl -n $(NAMESPACE_LOCUST) port-forward $(LOCUST_MASTER_POD) 8089:8089 &
 	-kubectl -n $(NAMESPACE) port-forward $(HBASE_MASTER_POD) 16010:16010
 
 ## help: Show this help message
