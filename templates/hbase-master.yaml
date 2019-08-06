@@ -43,7 +43,7 @@ spec:
     spec:
       containers:
       - name: hbase-master
-        image: oisp/hbase
+        image: oisp/hbase:{{ .Values.tag }}
         resources:
           {{ if .Values.less_resources }}
           requests:

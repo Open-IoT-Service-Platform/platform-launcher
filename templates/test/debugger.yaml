@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - image: oisp/debugger:{{ .Values.tag }}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         name: debugger
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File

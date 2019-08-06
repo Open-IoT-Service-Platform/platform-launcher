@@ -14,8 +14,13 @@ jobs:
           export PATH=$PATH:/snap/bin && bash setup-ubuntu18.04.sh
           npm install nodemailer
     - run:
+        name: Build and deploy images
+        command: |
+          cd util
+          export PATH=$PATH && bash build-and-import-images.sh
+    - run:
         name: Deploy OISP
-        command: export PATH=$PATH:/snap/bin && make deploy-oisp-test
+        command: export PATH=$PATH:/snap/bin && export DOCKERUSER=unused && DOCKERPASS=unused && make deploy-oisp-test
     - run:
         name: Run tests
         command: export PATH=$PATH:/snap/bin && make wait-until-ready && make test

@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
       - name: hbase-region
-        image: oisp/hbase
+        image: oisp/hbase:{{ .Values.tag }}
         resources:
           {{ if .Values.less_resources }}
           limits:

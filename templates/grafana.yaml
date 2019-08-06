@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: grafana
-        image: arkocal/grafana:{{ .Values.tag }}
+        image: oisp/grafana:{{ .Values.tag }}
         ports:
         - containerPort: 3000
         env:
