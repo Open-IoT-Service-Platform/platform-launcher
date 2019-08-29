@@ -111,8 +111,8 @@ endif
 		mkdir -p data/keys/hbase; \
 		ssh-keygen -q -t rsa -P "" -f data/keys/hbase/id_rsa; \
 	fi;
-	@cp data/keys/hbase/* docker-hbase
-	@chmod 755 docker-hbase/id_rsa*
+	@cp data/keys/hbase/* docker/hbase
+	@chmod 755 docker/hbase/id_rsa*
 
 	@if [ -f data/keys/private.pem ]; then echo "RSA keys existing already"; else \
 		mkdir -p data/keys; \
@@ -151,7 +151,7 @@ endif
 ##
 build: .init
 	@$(call msg,"Building OISP containers");
-	@./docker.sh -f docker-compose.yml -f docker-debugger/docker-compose-debugger.yml build $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
+	@./docker.sh -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml build $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
 
 ## pull: Pull OISP containers from dockerhub. Requires docker login.
 ##     You can specify a version using the $DOCKER_TAG argument.
@@ -162,7 +162,7 @@ build: .init
 ##
 pull: .init
 	@$(call msg, "Pulling OISP containers");
-	@./docker.sh -f docker-compose.yml -f docker-debugger/docker-compose-debugger.yml pull $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
+	@./docker.sh -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml pull $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
 
 ## start: Start OISP.
 ##     You can specify a version using the $DOCKER_TAG argument.
@@ -176,7 +176,7 @@ pull: .init
 start: .init
 	@$(call msg,"Starting OISP");
 	@if [ "${PULL_IMAGES}" = "true" ]; then make pull; fi;
-	@./docker.sh -f docker-compose.yml -f docker-debugger/docker-compose-debugger.yml up -d $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
+	@./docker.sh -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml up -d $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
 
 start-test: export TEST := 1
 start-test:
@@ -193,14 +193,13 @@ endif
 ##
 stop:
 	@$(call msg,"Stopping OISP containers");
-	@./docker.sh -f docker-compose.yml -f docker-debugger/docker-compose-debugger.yml stop $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
+	@./docker.sh -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml stop $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
 
 ## update: Update all subrepositories to latest origin/develop
 ##     For competabilty, this will also backup and remove setup-environment.sh
 ##
 update: distclean
 	@$(call msg,"Git Update (dev only)");
-	#@git pull
 	@if [ -f setup-environment.sh ]; then \
 		mv setup-environment.sh config-backup/setup-environment-$$(date +%Y-%m-%d-%H%M%S).sh.bak; \
 	fi;
@@ -224,7 +223,7 @@ docker-clean:
 
 ## test-prep-only: Prepare test for 3rd party apps like oisp-iot-agent but do not start full e2e test
 ## Creates a user with $USERNAME and $PASSWORD, and creates a device with id 00-11-22-33-44-55,
-## dumps the result in oisp-prep-only.conf 
+## dumps the result in oisp-prep-only.conf
 ##
 test-prep-only: export TEST_PREP_ONLY := "1"
 test-prep-only: test
@@ -287,7 +286,7 @@ distclean: clean
 ##
 push-images:
 	@$(call msg,"Pushing docker images to registry");
-	@./docker.sh -f docker-compose.yml -f docker-debugger/docker-compose-debugger.yml push $(CONTAINERS)
+	@./docker.sh -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml push $(CONTAINERS)
 
 ## help: Show this help message
 ##
