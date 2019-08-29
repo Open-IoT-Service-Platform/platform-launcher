@@ -20,7 +20,7 @@ services:
     image: oisp/hbase:${DOCKER_TAG}
     entrypoint: bash /opt/wait-for-it.sh hdfs-namenode:8020 -t 300 -- bash /opt/wait-for-it.sh zookeeper:2181 -t 300 -- /opt/entrypoint.sh
     build:
-      context: ./docker-hbase/
+      context: ./docker/hbase/
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
@@ -45,7 +45,7 @@ services:
     image: oisp/hbase:${DOCKER_TAG}
     entrypoint: /opt/entrypoint-region.sh
     build:
-      context: ./docker-hbase/
+      context: ./docker/hbase/
       dockerfile: Dockerfile
       labels:
         - oisp=true
@@ -64,7 +64,7 @@ services:
     image: oisp/postgres:${DOCKER_TAG}
     build:
       context: .
-      dockerfile: docker-postgres/Dockerfile
+      dockerfile: docker/postgres/Dockerfile
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
@@ -273,7 +273,7 @@ services:
   opentsdb:
     image: oisp/opentsdb:${DOCKER_TAG}
     build:
-      context: ./docker-opentsdb
+      context: ./docker/opentsdb
       args:
         - DOCKER_TAG=${DOCKER_TAG}
       labels:
@@ -334,7 +334,7 @@ services:
   grafana:
     image: oisp/grafana:${DOCKER_TAG}
     build:
-      context: ./docker-grafana
+      context: ./docker/grafana
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
