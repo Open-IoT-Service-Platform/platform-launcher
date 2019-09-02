@@ -1,0 +1,55 @@
+# Credentials to pull images from docker registry
+imageCredentials:
+    registry: index.docker.io
+    username: invalid_username
+    password: invalid_password
+
+smtp:
+    host: smtp.ethereal.email
+    port: 586
+    username: username
+    password: password
+
+imap:
+    host: imap.ethereal.email
+    port: 993
+    username: username
+    password: password
+
+numberReplicas:
+    frontend: 1
+    backend: 1
+    debugger: 0
+
+minio:
+  accesskey: minio
+  secretkey: minio123
+
+grafana:
+  admin: grafana
+  password: intel123
+
+mqtt:
+  broker:
+    username: username
+    password: password
+
+# Hosts used for Ingress configuration
+hosts:
+    frontend: k8s.streammyiot.com
+    websocketserver: ws.streammyiot.com
+    mqttserver: mqtt.streammyiot.com
+
+systemuser:
+  username: gateway@intel.com
+  password: 7d501829lhbl1or0bb1784462c97bcad6
+
+# Docket image tag
+tag: test
+
+# Enable jaeger tracing
+jaeger_tracing: false
+
+# Sets resource limits lower to test locally
+# or on smaller cluster when set to true
+less_resources: true

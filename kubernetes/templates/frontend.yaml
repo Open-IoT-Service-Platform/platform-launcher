@@ -1,0 +1,189 @@
+apiVersion: v1
+
+kind: Service
+metadata:
+  labels:
+    app: dashboard
+  name: dashboard
+spec:
+  ports:
+  - port: 4001
+    name: "dashboard"
+  - port: 4002
+    name: "4002"
+  - port: 4003
+    name: "4003"
+  selector:
+    app: dashboard
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: dashboard
+  name: dashboard
+spec:
+  replicas: {{ .Values.numberReplicas.frontend }}
+  selector:
+    matchLabels:
+      app: dashboard
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: dashboard
+    spec:
+      containers:
+      - name: dashboard
+        image: oisp/frontend:{{ .Values.tag }}
+        ports:
+        - containerPort: 4001
+        args:
+        - ./wait-for-it.sh
+        - postgres:5432
+        - -t
+        - "300"
+        - --
+        - ./wait-for-it.sh
+        - redis:6379
+        - -t
+        - "300"
+        - --
+        - ./wait-for-it.sh
+        - hbase-master:9090
+        - -t
+        - "300"
+        - --
+        - ./scripts/docker-start.sh
+        - "--disable-rate-limits"
+        env:
+        - name: NODE_ENV
+          value: local
+        - name: OISP_FRONTEND_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: frontend
+        - name: OISP_POSTGRES_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: postgres
+        - name: OISP_REDIS_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: redis
+        - name: OISP_KAFKA_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: kafka
+        - name: OISP_SMTP_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: smtp
+        - name: OISP_DASHBOARDSECURITY_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: dashboard-security
+        - name: OISP_GATEWAY_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: gateway
+        - name: OISP_BACKENDHOST_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: backend-host
+        - name: OISP_WEBSOCKETUSER_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: websocket-user
+        - name: OISP_RULEENGINE_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: rule-engine
+        - name: OISP_MAIL_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: mail
+        - name: OISP_GRAFANA_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: grafana
+        volumeMounts:
+        - mountPath: /app/keys
+          name: jwt-keys
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /v1/api/health
+            port: 4001
+          initialDelaySeconds: 200
+        readinessProbe:
+          httpGet:
+            path: /v1/api/health
+            port: 4001
+        resources:
+          {{ if .Values.less_resources }}
+          requests:
+            cpu: 50m
+          {{ else }}
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 500m
+          {{ end }}
+      {{ if .Values.jaeger_tracing }}
+      - name: jaeger-agent
+        image: jaegertracing/jaeger-agent:1.6.0
+        ports:
+        - containerPort: 5775
+          protocol: UDP
+        - containerPort: 5778
+          protocol: TCP
+        - containerPort: 6831
+          protocol: UDP
+        - containerPort: 6832
+          protocol: UDP
+        command:
+          - "/go/bin/agent-linux"
+          - "--collector.host-port=jaeger-collector:14267"
+      {{ end }}
+      imagePullSecrets:
+        - name: dockercred
+      volumes:
+      - name: jwt-keys
+        secret:
+          defaultMode: 420
+          items:
+          - key: jwt.publickey
+            path: public.pem
+          - key: jwt.privatekey
+            path: private.pem
+          secretName: oisp-secrets
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: dashboard-web
+spec:
+  rules:
+  - host: k8s.streammyiot.com
+    http:
+      paths:
+      - backend:
+          serviceName: dashboard
+          servicePort: 4001
