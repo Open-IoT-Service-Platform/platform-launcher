@@ -53,8 +53,9 @@ commands:
       - run:
           shell: /bin/bash
           name: Build branch
+          # DEBUG=true, because on k8s the tests run inside the debug contianer
           command: |
-            yes| make build
+            yes| make build DOCKER_TAG="test" DEBUG=true
   e2e-test:
     description: "E2E test"
     steps:
@@ -62,11 +63,18 @@ commands:
           shell: /bin/bash
           name: E2e Test
           command: |
-            export NVM_DIR="/opt/circleci/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm install v8.16.0
-            nvm alias default v8.16.0
-            yes| make test
+            cd ~/repo/kubernetes/
+            export PATH=$PATH:/snap/bin
+            cd util
+            bash setup-ubuntu18.04.sh
+            bash import-images.sh
+            cd ..
+            npm install nodemailer
+            export DOCKERUSER=unused
+            export DOCKERPASS=unused
+            make deploy-oisp-test
+            make wait-until-ready
+            make test
   push-images:
     description: "Push images"
     parameters:
@@ -80,6 +88,12 @@ commands:
           command: |
             # login based on preconfigured env variables
             docker login  -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+
+            # Tag passed "test" images as "latest"
+            images=$(docker images --format "{{.Repository}}:{{.Tag}}"| grep :test)
+            for image in $images; do
+              newimage=$(echo $image | sed -r "s/:test/:latest/g");
+
             #Start with latest tag, replace later by the real-tags
             DOCKER_TAG="latest"
             if [ "<< parameters.tag >>" = "date" ]; then
