@@ -16,126 +16,13 @@
 version: '3.7'
 
 services:
-  hbase-master:
+  hbase:
     image: oisp/hbase:${DOCKER_TAG}
-    entrypoint: bash /opt/wait-for-it.sh hdfs-namenode:8020 -t 300 -- bash /opt/wait-for-it.sh zookeeper:2181 -t 300 -- /opt/entrypoint.sh
     build:
       context: ./docker/hbase/
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
-    ports:
-      - 9090:9090
-      - 8081:8080
-      - 9095:9095
-      - 16010:16010
-      - 60000:60000
-    volumes:
-      - ./data/hbase-logs:/opt/hbase/logs
-    depends_on:
-      - zookeeper
-      - hdfs-namenode
-      - hdfs-datanode
-      - hbase-region
-    environment:
-      - REGIONSERVERS=hbase-region
-      - ZOOKEEPER=${ZOOKEEPER_HBASE}
-      - HDFS_NAMENODE=hdfs-namenode
-  hbase-region:
-    image: oisp/hbase:${DOCKER_TAG}
-    entrypoint: /opt/entrypoint-region.sh
-    build:
-      context: ./docker/hbase/
-      dockerfile: Dockerfile
-      labels:
-        - oisp=true
-        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
-    volumes:
-      - ./data/hbase-logs:/opt/hbase/logs
-    depends_on:
-      - zookeeper
-      - hdfs-namenode
-      - hdfs-datanode
-    environment:
-      - HBASE_MASTER=hbase-master
-      - ZOOKEEPER=${ZOOKEEPER_HBASE}
-      - HDFS_NAMENODE=hdfs-namenode
-  postgres:
-    image: oisp/postgres:${DOCKER_TAG}
-    build:
-      context: .
-      dockerfile: docker/postgres/Dockerfile
-      labels:
-        - oisp=true
-        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB_REGULAR}
-      - POSTGRES_USER=${POSTGRES_USERNAME}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-  kafka:
-    image: bitnami/kafka:1.1.1
-    ports:
-      - 9093:9093
-      - 9092:9093
-    depends_on:
-      - zookeeper
-    environment:
-      - KAFKA_ZOOKEEPER_CONNECT=${ZOOKEEPER_KAFKA}:${ZOOKEEPER_KAFKA_PORT}
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_LISTENERS=LISTENER_BOB://0.0.0.0:9092,LISTENER_FRED://0.0.0.0:9093
-      - KAFKA_ADVERTISED_LISTENERS=LISTENER_BOB://kafka:9092,LISTENER_FRED://localhost:9093
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=LISTENER_BOB:PLAINTEXT,LISTENER_FRED:PLAINTEXT
-      - KAFKA_INTER_BROKER_LISTENER_NAME=LISTENER_BOB
-    volumes:
-      - ./data/kafka:/bitnami/kafka
-  redis:
-    image: redis:3.0
-    volumes:
-      - ./data/redis:/data
-    ports:
-      - 6379:6379
-  rule-engine:
-    image: oisp/rule-engine:${DOCKER_TAG}
-    build:
-      context: ./oisp-beam-rule-engine
-      labels:
-        - oisp=true
-    ports:
-      - 8070:8081
-      - 6121:6121
-      - 6122:6122
-      - 6123:6123
-    environment:
-      - OISP_RULEENGINE_CONFIG=${OISP_RULEENGINE_CONFIG}
-      - OISP_HBASE_CONFIG=${OISP_HBASE_CONFIG}
-      - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
-      - OISP_ZOOKEEPER_CONFIG=${OISP_ZOOKEEPER_CONFIG}
-      - OISP_KAFKA_CONFIG=${OISP_KAFKA_CONFIG}
-    command: /app/wait-for-it.sh frontend:4001 -t 300 -- /app/bootstrap.sh
-  nginx:
-    image: oisp/nginx:${DOCKER_TAG}
-    build:
-      context: ./oisp-frontend/public-interface/nginx
-      args:
-        - WEBSOCKET_SERVER=${WEBSOCKET_SERVER}
-        - DASHBOARD_SERVER=${FRONTEND}
-        - GRAFANA_PROXY_SERVER=${GRAFANA_PROXY_SERVER}
-        - DOCKER_TAG=${DOCKER_TAG}
-      labels:
-        - oisp=true
-        - oisp.git_commit=${GIT_COMMIT_FRONTEND}
-    ports:
-      - 80:80
-      - 443:443
-    depends_on:
-      - websocket-server
-      - frontend
-    volumes:
-      - ./data/keys/ssl:/etc/ssl
   websocket-server:
     image: oisp/websocket-server:${DOCKER_TAG}
     build:
@@ -143,61 +30,13 @@ services:
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_WEBSOCKET_SERVER}
-    ports:
-      - 5000:5000
-    depends_on:
-      - postgres
-      - kafka
-    volumes:
-      - ./data/keys:/app/keys
-    working_dir: /app
-    environment:
-      - OISP_WEBSOCKET_SERVER_CONFIG=${OISP_WEBSOCKET_SERVER_CONFIG}
-      - OISP_POSTGRES_CONFIG=${OISP_POSTGRES_CONFIG}
-      - OISP_KAFKA_CONFIG=${OISP_KAFKA_CONFIG}
-      - OISP_WEBSOCKETUSER_CONFIG=${OISP_WEBSOCKETUSER_CONFIG}
-      - TEST=${TEST}
-      - NODE_ENV=local
-    command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- ./scripts/docker-start.sh
   frontend:
     image: oisp/frontend:${DOCKER_TAG}
-    restart: on-failure
     build:
       context: ./oisp-frontend/public-interface
       labels:
         - oisp=true
         - ois.git_commit=${GIT_COMMIT_FRONTEND}
-    ports:
-      - 4001:4001
-      - 4002:4002
-      - 4003:4003
-    depends_on:
-      - postgres
-      - redis
-      - websocket-server
-      - backend
-      - kafka
-    command: ./wait-for-it.sh postgres:5432 -t 300 -- ./wait-for-it.sh redis:6379 -t 300  -- ./wait-for-it.sh kafka:9092 -t 300 -- ./scripts/wait-for-heartbeat.sh backend websocket-server -- ./scripts/docker-start.sh ${RATE_LIMIT}
-    volumes:
-      - ./data/keys:/app/keys
-    environment:
-      - OISP_FRONTEND_CONFIG=${OISP_FRONTEND_CONFIG}
-      - OISP_POSTGRES_CONFIG=${OISP_POSTGRES_CONFIG}
-      - OISP_REDIS_CONFIG=${OISP_REDIS_CONFIG}
-      - OISP_KAFKA_CONFIG=${OISP_KAFKA_CONFIG}
-      - OISP_SMTP_CONFIG=${OISP_SMTP_CONFIG}
-      - OISP_DASHBOARDSECURITY_CONFIG=${OISP_DASHBOARDSECURITY_CONFIG}
-      - OISP_GATEWAY_CONFIG=${OISP_GATEWAY_CONFIG}
-      - OISP_BACKENDHOST_CONFIG=${OISP_BACKENDHOST_CONFIG}
-      - OISP_WEBSOCKETUSER_CONFIG=${OISP_WEBSOCKETUSER_CONFIG}
-      - OISP_RULEENGINE_CONFIG=${OISP_RULEENGINE_CONFIG}
-      - OISP_MAIL_CONFIG=${OISP_MAIL_CONFIG}
-      - OISP_HBASE_CONFIG=${OISP_HBASE_CONFIG}
-      - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
-      - OISP_ZOOKEEPER_CONFIG=${OISP_ZOOKEEPER_CONFIG}
-      - OISP_GRAFANA_CONFIG=${OISP_GRAFANA_CONFIG}
-      - TEST=${TEST}
-      - NODE_ENV=local
   backend:
     image: oisp/backend:${DOCKER_TAG}
     build:
@@ -205,71 +44,14 @@ services:
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_BACKEND}
-    ports:
-      - 8080:8080
+  rule-engine:
+    image: oisp/rule-engine:${DOCKER_TAG}
+    build:
+      context: ./oisp-beam-rule-engine
+      labels:
+        - oisp=true
     depends_on:
-      - hbase-master
-      - kafka
-    command: ./wait-for-it.sh hbase-master:9090 -t 300 -- ./wait-for-it.sh kafka:9092 -t 300 -- make runjar
-    working_dir: /app
-    environment:
-      - OISP_BACKEND_CONFIG=${OISP_BACKEND_CONFIG}
-      - OISP_KAFKA_CONFIG=${OISP_KAFKA_CONFIG}
-      - OISP_ZOOKEEPER_CONFIG=${OISP_ZOOKEEPER_CONFIG}
-      - OISP_KERBEROS_CONFIG=${OISP_KERBEROS_CONFIG}
-      - OISP_HBASE_CONFIG=${OISP_HBASE_CONFIG}
-      - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
-      - OISP_TSDB_PROPERTIES=${OISP_TSDB_PROPERTIES}
-      - OISP_BACKEND_JAEGER_CONFIG
-      - OISP_OBJECT_STORE_MINIO_PROPERTIES
-  hdfs-namenode:
-    image: singularities/hadoop:2.8
-    command: start-hadoop namenode
-    volumes:
-      - ./data/hdfs/name:/opt/hdfs
-    hostname: hdfs-namenode
-    environment:
-      HDFS_USER: root
-    ports:
-      - "8020:8020"
-      - "14000:14000"
-      - "50070:50070"
-      - "50075:50075"
-      - "10020:10020"
-      - "13562:13562"
-      - "19888:19888"
-  hdfs-datanode:
-    image: singularities/hadoop:2.8
-    command: start-hadoop datanode hdfs-namenode
-    volumes:
-      - ./data/hdfs/data:/opt/hdfs
-    environment:
-      HDFS_USER: root
-    links:
-      - hdfs-namenode
-  zookeeper:
-    image: zookeeper:3.4.13
-    hostname: zookeeper
-    volumes:
-      - ./data/zookeeper:/data
-      - ./data/zookeeper-logs:/datalog
-    ports:
-      - 2181:2181
-    environment:
-      ZOO_MY_ID: 1
-      ZOO_SERVERS: server.1=0.0.0.0:2888:3888
-  jaeger:
-    image: jaegertracing/all-in-one:1.8
-    ports:
-      - 5775:5775/udp
-      - 6831:6831/udp
-      - 6832:6832/udp
-      - 5778:5778
-      - 16686:16686
-      - 14268:14268
-      - 9411:9411
-    environment:
-      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+      - hbase
   opentsdb:
     image: oisp/opentsdb:${DOCKER_TAG}
     build:
@@ -279,58 +61,16 @@ services:
       labels:
         - oisp=true
         - ois.git_commit=${GIT_COMMIT_OPENTSDB}
-    ports:
-      - 4242:4242
-    depends_on:
-      - hbase-master
-      - zookeeper
-    command: /opt/wait-for-it.sh hbase-master:9090 -t 300 -- /opt/wait-for-it.sh zookeeper:2181 -t 300 -- /opt/tsdb-startup.sh
-    environment:
-      - OISP_ZOOKEEPER_CONFIG=${OISP_ZOOKEEPER_CONFIG}
-      - OISP_OPENTSDB_CONFIG=${OISP_OPENTSDB_CONFIG}
-      - OISP_HADOOP_PROPERTIES=${OISP_HADOOP_PROPERTIES}
-      - OISP_TSDB_PROPERTIES=${OISP_TSDB_PROPERTIES}
   mqtt-gateway:
     image: oisp/mqtt-gateway:${DOCKER_TAG}
     build:
       context: ./oisp-mqtt-gw
       dockerfile: Dockerfile-gateway
-    restart: always
-    depends_on:
-      - mqtt-broker
-    working_dir: /app
-    environment:
-      - OISP_MQTT_GATEWAY_CONFIG
-      - OISP_REDIS_CONFIG
-    volumes:
-      - ./data/keys:/app/keys
-      - ./oisp-mqtt-gw/ingestion:/app/ingestion
-      - ./oisp-mqtt-gw/lib:/app/lib
-    command: ./wait-for-it.sh broker:8883 -t 300 -- ./wait-for-it.sh redis:6379 -t 300
   mqtt-broker:
     image: oisp/mqtt-broker:${DOCKER_TAG}
     build:
       context: ./oisp-mqtt-gw
       dockerfile: Dockerfile-broker
-    restart: always
-    ports:
-      - 8883:8883
-    working_dir: /app
-    environment:
-      - OISP_MQTT_BROKER_CONFIG
-      - OISP_REDIS_CONFIG
-    volumes:
-      - ./data/keys:/app/keys
-  minio:
-    image: minio/minio:RELEASE.2019-02-20T22-44-29Z
-    volumes:
-      - ./data/S3:/data
-    ports:
-      - "9000:9000"
-    environment:
-      - MINIO_ACCESS_KEY=${OISP_MINIO_ACCESS_KEY}
-      - MINIO_SECRET_KEY=${OISP_MINIO_SECRET_KEY}
-    command: minio server /data
   grafana:
     image: oisp/grafana:${DOCKER_TAG}
     build:
@@ -338,12 +78,3 @@ services:
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
-    ports:
-      - 3000:3000
-    environment:
-      - GF_SERVER_DOMAIN=frontend
-      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/ui/grafana
-      - GF_SERVER_HTTP_PORT=${GRAFANA_PORT}
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
-      - DATASOURCE_URL=http://frontend:4003
