@@ -33,6 +33,8 @@ DOCKER_COMPOSE_ARGS?=
 PULL_IMAGES?=false
 DEBUG?=false
 
+DOCKER_TAG=latest
+
 # Variable to remove rate limits for endpoints in frontend
 DISABLE_RATE_LIMITS?=false
 RATE_LIMIT = ''
@@ -151,6 +153,9 @@ endif
 ##
 build: .init
 	@$(call msg,"Building OISP containers");
+	@if [[ $$(printf "opentsdb" | grep "$$(CONTAINERS)") ]]; then \
+		./docker.sh -f docker-compose.yml build $(DOCKER_COMPOSE_ARGS) hbase; \
+	fi
 	@./docker.sh -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml build $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
 
 ## pull: Pull OISP containers from dockerhub. Requires docker login.
@@ -162,38 +167,7 @@ build: .init
 ##
 pull: .init
 	@$(call msg, "Pulling OISP containers");
-	@./docker.sh -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml pull $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
-
-## start: Start OISP.
-##     You can specify a version using the $DOCKER_TAG argument.
-##     If the images are not present, this will try to pull or build them, depending on the
-##     value of $PULL_IMAGES (true/false; defaults to false)
-##     If DEBUG is set to true, debugger will be added to containers
-##     CONTAINERS arg (as whitespace seperated list) specifies which containers should be started,
-##     if it is left blank, all containers except `debugger` will be started.
-##     This command also accepts the argument $DOCKER_COMPOSE_ARGS, which is passed directly to compose.
-##
-start: .init
-	@$(call msg,"Starting OISP");
-	@if [ "${PULL_IMAGES}" = "true" ]; then make pull; fi;
-	@./docker.sh -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml up -d $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
-
-start-test: export TEST := 1
-start-test:
-	@$(call msg,"Starting OISP (test mode: $(TESTING_PLATFORM) )");
-	@make -C tests email-account $(shell pwd)/tests/.env
-ifeq  ($(TESTING_PLATFORM),docker)
-	@source ./tests/.env  && ./docker.sh up -d
-endif
-
-## stop: Stop running OISP containers.
-##     $CONTAINERS arg (as whitespace seperated list) specifies which containers should be stopped,
-##     if it is left blank, all containers except `debugger` will be stopped.
-##     This command also accepts the argument $DOCKER_COMPOSE_ARGS, which is passed directly to compose.
-##
-stop:
-	@$(call msg,"Stopping OISP containers");
-	@./docker.sh -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml stop $(DOCKER_COMPOSE_ARGS) $(CONTAINERS)
+	@docker-compose -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml pull $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
 
 ## update: Update all subrepositories to latest origin/develop
 ##     For competabilty, this will also backup and remove setup-environment.sh
@@ -216,14 +190,14 @@ docker-clean:
 	@read -r -p "Continue? [y/N]: " response; \
 	case $$response in \
 		[Yy]* ) ./docker.sh stop $(docker ps -a -q); \
-			./docker.sh rm -f $(docker ps -a -q); \
-			/bin/bash -c "docker images -q | xargs -n 1 -I {} docker rmi -f {}";;  \
+		./docker.sh rm -f $(docker ps -a -q); \
+		/bin/bash -c "docker images -q | xargs -n 1 -I {} docker rmi -f {}";;  \
 		[Nn]* ) echo "Not removing containers";; \
 	esac \
 
 ## test-prep-only: Prepare test for 3rd party apps like oisp-iot-agent but do not start full e2e test
-## Creates a user with $USERNAME and $PASSWORD, and creates a device with id 00-11-22-33-44-55,
-## dumps the result in oisp-prep-only.conf
+##     Creates a user with $USERNAME and $PASSWORD, and creates a device with id 00-11-22-33-44-55,
+##     dumps the result in oisp-prep-only.conf
 ##
 test-prep-only: export TEST_PREP_ONLY := "1"
 test-prep-only: test
@@ -253,8 +227,9 @@ else
 	)
 endif
 
-## logs: Create a .zip archive containing logs from all containers.
-##     The result will be saved in platform-lancuher-logs_{data}.zip
+## logs: #TODO update to k8s
+## Create a .zip archive containing logs from all containers.
+##  The result will be saved in platform-lancuher-logs_{data}.zip
 ##
 logs:
 	$(eval LOGS_ARCHIVE := platform-launcher-logs_$(shell date +'%Y-%m-%d_%H-%M-%S'))
