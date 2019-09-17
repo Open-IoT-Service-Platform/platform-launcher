@@ -28,7 +28,7 @@ printf "\n"
 
 printf "\033[1mInstalling test dependencies\n"
 printf -- "----------------------------\033[0m\n"
-sudo apt -qq install nodejs npm
+sudo apt -qq install nodejs npm make git
 sudo npm install -g n
 sudo n 8
 sudo npm install -g nodemailer

@@ -30,63 +30,28 @@ USERNAME2 = "oisp2@testing.com"
 PASSWORD2 = "OispTesting2"
 ROLE2 = "admin"
 
-ifeq ($(TESTING_PLATFORM), docker)
-KAFKA_BROKER="localhost:9092"
-else
-KAFKA_BROKER="kafka:9092"
 NAMESPACE=oisp
 DASHBOARD_POD:=$(shell kubectl -n oisp get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
-endif
-
-#----------------------------------------------------------------------------------------------------------------------
-# targets
-#----------------------------------------------------------------------------------------------------------------------
 
 npm-install:
 	@$(call msg,"Installing npm packages ...");
 	@cd $(CURRENT_DIR) && npm install > /dev/null
 
-
 test: npm-install
-	@cat test-config-$(TESTING_PLATFORM).json | envsubst > test-config.json
-	@cp test-config-mqtt-$(TESTING_PLATFORM).json test-config-mqtt.json
-	@$(call msg,"Waiting for frontend and test Kafka readiness");
-# fill in separator to avoid accidentially dashboard being most recent heartbeat.
-# Then look always for latest heartbeat
-	@until echo new-test | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat >/dev/null; do echo "Kafka not ready. Waiting ..."; sleep 1; done
-	@ (for i in {1..4}; do echo new-test ; done) | kafkacat -P -b $(KAFKA_BROKER) -t heartbeat >/dev/null;
-	@. ../setup-environment.sh && until kafkacat -C -b $(KAFKA_BROKER) -t heartbeat -e -o -4 2> /dev/null | grep -m 1 "dashboard"; do sleep 1 ; done
-ifeq ($(TESTING_PLATFORM), docker)
-	@$(call msg,"Resetting database ...");
-	@. ../setup-environment.sh && docker exec  "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin resetDB
-	@$(call msg,"Adding a user for testing ...");
-	@. ../setup-environment.sh && docker exec "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
-	@. ../setup-environment.sh && docker exec "$${COMPOSE_PROJECT_NAME}_frontend_1" node /app/admin addUser $(USERNAME2) $(PASSWORD2) $(ROLE2) > /dev/null
-else
+	@cat test-config-template.json | envsubst > test-config.json
 	@$(call msg,"Resetting database ...");
 	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin resetDB
-
 	@$(call msg,"Adding a user for testing ...");
 	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
 	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin addUser $(USERNAME2) $(PASSWORD2) $(ROLE2) > /dev/null
 
-endif
 ifndef TEST_PREP_ONLY
 	@$(call msg,"Starting the e2e testing ...");
-	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) USERNAME2=$(USERNAME2) PASSWORD2=$(PASSWORD2) LOG_LEVEL="error" NODE_ENV="local" npm test
+	@env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) USERNAME2=$(USERNAME2) PASSWORD2=$(PASSWORD2) LOG_LEVEL="error" NODE_ENV="local" npm test
 else
 	@$(call msg,"Starting 3rd party test preparation ...");
-	@. ../setup-environment.sh && env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm run-script prep-only
+	@env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm run-script prep-only
 endif
-
-ifeq (email-account,$(firstword $(MAKECMDGOALS)))
- 	OUTPUT_FILE := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
- 	$(eval $(OUTPUT_FILE):;@:)
-endif
-
-email-account: npm-install
-	@$(call msg,"Creating ethereal email account");
-	@node ./ethereal.js $(OUTPUT_FILE)
 
 clean:
 	@$(call msg,"Cleaning ...");
@@ -98,7 +63,6 @@ distclean: clean
 #----------------------------------------------------------------------------------------------------------------------
 # helper functions
 #----------------------------------------------------------------------------------------------------------------------
-
 define msg
 	tput setaf 2 && \
 	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo "" && \
