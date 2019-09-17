@@ -21,8 +21,8 @@ commands:
           shell: /bin/bash
           name: Setup build environment
           command: |
-            cd platform-setup
-            sudo ./setup-ubuntu16.04.sh
+            cd util && \
+            bash setup-ubuntu18.04.sh
   setup-branch:
     description: "Setup subbranches"
     steps:
@@ -63,17 +63,11 @@ commands:
           shell: /bin/bash
           name: E2e Test
           command: |
-            cd ~/repo/kubernetes/
             export PATH=$PATH:/snap/bin
-            cd util
-            bash setup-ubuntu18.04.sh
-            bash import-images.sh
-            cd ..
+            make import-images DOCKER_TAG=test DEBUG=true
             npm install nodemailer
-            export DOCKERUSER=unused
-            export DOCKERPASS=unused
+            export NODOCKERLOGIN=true
             make deploy-oisp-test DOCKER_TAG=test
-            make wait-until-ready
             make test
   push-images:
     description: "Push images"

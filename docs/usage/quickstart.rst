@@ -1,13 +1,21 @@
 Getting Started
 ===============
 
-.. warning:: This documentation is work in progress, and subject to change!
+Open IoT Software platform (OISP) is an `open source <https://github.com/Open-IoT-Service-Platform/platform-launcher/>`_ framework for IoT services that runs on Kubernetes. Start by cloning the repo **and checking out the develop branch**. This documentation assumes you are running an Ubuntu system (preferably 18.04 LTS), but other Linux distributions should also work with minor modifications.
 
-Open IoT Software platform (OISP) is an `open source <https://github.com/Open-IoT-Service-Platform/platform-launcher/>`_ framework for IoT services that runs on Kubernetes. Start by cloning the repo **and checking out the develop branch**.
+.. note:: Most of the functionality described in this documentation is packed into the ``Makefile`` in the project root. Run ``make help`` for a list of available commands with descriptions.
 
-Deploying OISP
+Running OISP
 --------------
-OISP can be deployed on any Kubernetes cluster that has helm installed, a volume provisioner and an ingress controller. For development purposes, we recommend a local installation based on `k3s <https://k3s.io/>`_.
+OISP can be deployed on any Kubernetes cluster that has Helm installed, a volume provisioner and an ingress controller. For development purposes, we recommend a local installation based on `k3s <https://k3s.io/>`_, as described in `Creating a lightweight local kubernetes cluster`_.
+
+If you wish to deploy on an external cluster, make sure the following conditions are met:
+
+1. Your host is configured to manage the cluster, meaning the default kubeconfig file is at ``~/.kube/config``.
+2. Helm and kubectl are installed on the client and cluster.
+3. The cluster has an Ingress controller and a volume provisioner configured.
+4. The `minio operator <https://github.com/minio/minio-operator>`_ is installed in the cluster.
+
 
 Creating a lightweight local kubernetes cluster
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -18,47 +26,42 @@ Run the following commands from the repository root to create a local k3s cluste
   cd kubernetes/util
   sh setup-ubuntu-18.04.sh
 
-The cluster is created in two docker containers, one for the master and one for the worker. If you like, you can modify the script to make k3s run locally, but the containerized setup is recommended, to avoid issues like port clashes.
+.. note:: The script should also run on Ubuntu 16.04 LTS, but you might need to ``export PATH=$PATH:/snap/bin`` first. On other Linux distributions, please install the snap packages in the script manually, and run the script afterwards.
 
-The setup script should be fairly easy to adapt on other distributions. If you want to restart the cluster and have a fresh start you can always run the ``restart-cluster.sh``, which creates a new cluster from scratch.
+The cluster is created in two Docker containers, one for the master and one for the worker. If you like, you can modify the script to make k3s run on bare metal instead of Docker, but the containerized setup is recommended, to avoid issues like port clashes.
+
+If you need to recreate the cluster, simply run ``make restart-cluster``.
 
 .. warning:: Both scripts are going to replace your ``~/.kube/kubeconfig`` file!
 
-Preparing your system
-~~~~~~~~~~~~~~~~~~~~~
-If you have used the scripts to set up a local cluster, you are ready to go. Otherwise, follow these steps:
-- Set ``kubectl`` to use the cluster you want to deploy on by default without passing the config file as an argument, by moving your kubeconfig to ``~/.kube/kubeconfig``.
-- Install and configure `helm <https://helm.sh/>`_.
-
-In order to run tests, your are also going to need ``nodejs`` and ``nodemailer`` installed.
-
-Performing the deployment
-~~~~~~~~~~~~~~~~~~~~~~~~~
-If you have access to OISP dockerhub repository, export your user credentials to your shell:
+Deployment
+~~~~~~~~~~
+If you have access to the OISP dockerhub repository, export your user credentials to your shell:
 
 .. code-block:: bash
 
-  export DOCKERUSER={yourusername}
-  read -s DOCKERPASS # enter your password and press enter
+  export DOCKERUSER=[YOURUSERNAME]
+  read -s DOCKERPASS # type your password and press enter
 
-Otherwise, you will have to build the images yourself. Go to the project root and run ``make update && make build``. You can specify a docker tag for the images as well. Run ``make help`` for more details. Afterwards, you have two options to get the images inside the cluster:
+Otherwise, you will have to build the images yourself. Go to the project root and run ``make update && make build``.
+You can specify a docker tag for the images being built. Run ``make help`` for more details. Afterwards, you have two options to get the images inside the cluster:
 
-1. Import the images using the `ìmport-images.sh` script found in ``kubernetes/import-images.sh``. You might need to change the ``DOCKER_TAG`` variable in the script.
+1. Run ``make import-images``, which also takes the ``DOCKER_TAG`` and ``DEBUG`` parameter, of which the later has to be set to ``true`` in order to run tests.
 2. *OR* push the images to another repo, and adapt the ``imageCredentials`` section in ``kubernetes/values.yaml``. You will also need to export your credentials to your shell as described before.
 
-Finally, adapt the ``kubernetes/values.yaml`` to fit your needs, and run ``make deploy-oisp`` from the ``kubernetes`` directory.
+Finally, adapt the ``kubernetes/values.yaml`` to fit your needs and run ``make deploy-oisp``.
 
-.. note:: If you wish to run tests, or have a debugger container inside the cluster with useful tools, run ``make deploy-oisp-test``, which requires you to build with ``make build DEBUG=true`` from the repository root.
+.. note:: If you wish to run tests, or have a debugger container inside the cluster with useful tools, run ``make deploy-oisp-test``, which requires you to also build with ``make build DEBUG=true`` from the repository root.
 
-.. hint:: You can watch the deployment process by running ``watch kubectl -n oisp get pods``, or programmatically wait until the system is up and running by using the command ``make wait-until-ready`` from the ``kubernetes`` directory.
+.. hint:: You can watch the deployment process by running ``watch kubectl -n oisp get pods``, or programmatically wait until the system is up and running by using the command ``make wait-until-ready``.
 
 Running end to end tests
 ~~~~~~~~~~~~~~~~~~~~~~~~
-If you have deployed with ``make deploy-oisp-test``, you can run ``make test`` from the ``kubernetes`` directory to make sure everything is working. The tests should take about 3-4 minutes to complete, *after the system is up and running*. Do not start the tests before ``make wait-until-ready`` terminates.
+If you have deployed with ``make deploy-oisp-test``, you can run ``make test`` to make sure everything is working. The tests should take about 3-4 minutes to complete, *after the system is up and running*.
 
 Using OISP
 ----------
-You need a user account to interact with most of the API functionality. You can create a test user by running ``make add-test-user`` from the ``kubernetes`` directory. The username is ``user1@example.com`` and the password is simply ``password``.
+You need a user account to interact with most of the API functionality. You can create a test user by running ``make add-test-user``. The username is ``user1@example.com`` and the password is simply ``password``.
 
 .. _ExposeLocally:
 
@@ -68,7 +71,7 @@ In a production environment, OISP should be exposed using Kubernetes ingresses. 
 
 .. code-block:: bash
 
-  kubefwd services -n oisp
+  sudo kubefwd services -n oisp --kubeconfig=/home/[YOUR_USERNAME]/.kube/config
 
 Interacting with OISP
 ~~~~~~~~~~~~~~~~~~~~~

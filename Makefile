@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Intel Corporation
+# Copyright (c) 2017-2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,49 +13,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
-#----------------------------------------------------------------------------------------------------------------------
-# targets
-#----------------------------------------------------------------------------------------------------------------------
-
 SHELL:=/bin/bash
 CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+export CURRENT_DIR_BASE:=$(shell basename $(CURRENT_DIR))
 BRANCH:=$(shell git branch| grep \*| cut -d ' ' -f2)
 export TEST = 0
-export HOST_IP_ADDRESS=$(shell ip -4 addr show docker0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
-SSL_CERT_PATH:=data/keys/ssl
 
 COMPOSE_PROJECT_NAME?="oisp"
-DOCKER_REGISTRY=""
 CONTAINERS?=$(shell docker-compose --log-level ERROR config --services)
 DOCKER_COMPOSE_ARGS?=
-PULL_IMAGES?=false
+K3S_NODE=$(shell docker ps --format '{{.Names}}' | grep k3s_node)
+export DOCKER_TAG=latest
+export GIT_COMMIT_PLATFORM_LAUNCHER=$(git rev-parse HEAD)
+export GIT_COMMIT_FRONTEND=$(git -C oisp-frontend rev-parse HEAD)
+export GIT_COMMIT_GEARPUMP=$(git -C oisp-gearpump-rule-engine rev-parse HEAD)
+export GIT_COMMIT_WEBSOCKET_SERVER=$(git -C oisp-websocket-server rev-parse HEAD)
+export GIT_COMMIT_BACKEND=$(git -C oisp-backend rev-parse HEAD)
+
 DEBUG?=false
-
-DOCKER_TAG=latest
-
-# Variable to remove rate limits for endpoints in frontend
-DISABLE_RATE_LIMITS?=false
-RATE_LIMIT = ''
-ifeq ($(DISABLE_RATE_LIMITS),true)
-RATE_LIMIT = '--disable-rate-limits'
-endif
-export RATE_LIMIT
-
 ifeq  ($(DEBUG),true)
 CONTAINERS:=$(CONTAINERS) debugger
 endif
 
-# Can be docker or kubernetes
-export TESTING_PLATFORM?=docker
+NAMESPACE?=oisp
+# Name for HELM deployment
+NAME?=oisp
+
+DEPLOYMENT?=debugger
+DEBUGGER_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep debugger | head -n 1)
+SELECTED_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep $(DEPLOYMENT) | head -n 1)
+DASHBOARD_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
 
 .init:
 	@$(call msg,"Initializing ...");
-	@if [ ! -f ".firstRun" ]; then \
-		make docker-clean && \
-		touch .firstRun;\
-	fi
 	@$(call msg,"Currently on branch ${BRANCH}");
 	@if [ "${BRANCH}" != master ]; then \
 		if [ "${TEST}" != "1" ]; then \
@@ -69,80 +59,148 @@ export TESTING_PLATFORM?=docker
 		git submodule init; \
 		git submodule update; \
 	fi;
-ifeq ($(wildcard ./setup-environment.sh ),)
-	@if [ "${TEST}" != "1" ]; then \
-		tput setaf 1; \
-		while true; do \
-			read -r -p "Use the default config in setup-environment.example.sh file ? [y/N]: " response; \
-			case $$response in \
-			   	[Yy]* ) cp ./setup-environment.example.sh setup-environment.sh; break;; \
-			[Nn]* ) break;; \
-				* ) echo "Please answer yes or no.";; \
-			esac \
-		done ; \
-		tput sgr0; \
-	else \
-		cp ./setup-environment.example.sh setup-environment.sh;	\
-	fi
-endif
-
-	@if [ "${TEST}" == "1" ]; then \
-		if [ -d ./data ] && [ ! -f ./data/.forTest ]; then \
-			sudo rm -rf data-backup; \
-			sudo mv data data-backup; \
-		fi; \
-		mkdir -p ./data && touch ./data/.forTest; \
-	else \
-		if [ -d ./data-backup ]; then \
-			sudo rm -rf data; \
-			sudo mv data-backup data; \
-		fi; \
-	fi
-	@if [ -f data/hdfs/name ]; then echo "HDFS folder existing already"; else \
-		echo "Creating HDFS name and data node"; \
-		mkdir -p data/hdfs/name; \
-		mkdir -p data/hdfs/data; \
+	@if [ -f docker/hbase/id_rsa ]; then echo "HBase keys existing already"; else \
+		ssh-keygen -q -t rsa -P "" -f docker/hbase/id_rsa; \
 	fi;
-	@if [ -f data/zookeeper ]; then echo "Zookeeper folder existing already"; else \
-		echo "Creating Zookeeper data folder"; \
-		mkdir -p data/zookeeper; \
-	mkdir -p data/zookeeper-logs; \
-	fi;
-
-	@if [ -f data/keys/hbase/id_rsa ]; then echo "HBase keys existing already"; else \
-		mkdir -p data/keys/hbase; \
-		ssh-keygen -q -t rsa -P "" -f data/keys/hbase/id_rsa; \
-	fi;
-	@cp data/keys/hbase/* docker/hbase
 	@chmod 755 docker/hbase/id_rsa*
-
-	@if [ -f data/keys/private.pem ]; then echo "RSA keys existing already"; else \
-		mkdir -p data/keys; \
-		openssl genpkey -algorithm RSA -out data/keys/private.pem -pkeyopt rsa_keygen_bits:2048; \
-		openssl rsa -pubout -in data/keys/private.pem -out data/keys/public.pem; \
-	fi;
-	@if [ -f ${SSL_CERT_PATH}/server.key ]; then echo "SSL key existing already. Skipping creating self signed cert."; else \
-		echo "Creating self signed SSL certificate."; \
-		mkdir -p ${SSL_CERT_PATH}; \
-		openssl req  -nodes -new -x509  -keyout ${SSL_CERT_PATH}/server.key -out ${SSL_CERT_PATH}/server.cert -subj "/C=UK/ST=NRW/L=London/O=My Inc/OU=DevOps/CN=www.streammyiot.com/emailAddress=donotreply@www.streammyiot.com"; \
-	fi;
-	@if [ -f data/keys/mqtt/mqtt_gw_secret.key ]; then echo "MQTT/GW key existing already. Skipping creating new key"; else \
-		echo "Creating MQTT/GW secret."; \
-    mkdir -p data/keys/mqtt; \
-    openssl rand -base64  16 > data/keys/mqtt/mqtt_gw_secret.key; \
-  fi;
-	@if [ -f data/kafka ]; then echo "Kafka persitence dir existing already. Skipping creating new dir"; else \
-    echo "Creating kafka folder"; \
-    mkdir -p data/kafka; \
-		chmod 777 data/kafka; \
-  fi;
-
-	@if [ -f data/S3 ]; then echo "S3 directory existing already. Skipping creating new dir"; else \
-                echo "Creating S3 storage dir."; \
-                mkdir -p data/S3; \
-  fi;
-
 	@touch $@
+
+# ===================
+# DEPLOYMENT COMMANDS
+# ===================
+check-docker-cred-env:
+	@if [ "$$NODOCKERLOGIN" = "true" ]; then \
+		echo "Not using a docker registry. Images must be imported"; exit 0; \
+	else \
+		if [ "$$DOCKERUSER" = "" ]; then \
+			echo "DOCKERUSER env var is undefined"; exit 1; \
+		fi; \
+		if [ "$$DOCKERPASS" = "" ]; then \
+			echo "DOCKERPASS env var is undefined"; exit 1; \
+		fi; \
+		docker login -u $$DOCKERUSER -p $$DOCKERPASS; \
+	fi
+
+## deploy-oisp-test: Deploy repository as HELM chart,
+##     create an ethereal address, and make sure there is
+##     a debugger container.
+##     This also takes a $DOCKER_TAG parameter
+##
+deploy-oisp-test: check-docker-cred-env
+	@node ./tests/ethereal.js tests/.env;
+	. tests/.env && \
+	cd kubernetes && \
+	helm install . --name $(NAME) --namespace $(NAMESPACE) \
+		--set imageCredentials.username="$$DOCKERUSER" \
+		--set imageCredentials.password="$$DOCKERPASS" \
+		--set smtp.host="$$SMTP_HOST" \
+		--set smtp.port="$$SMTP_PORT" \
+		--set smtp.username="$$SMTP_USERNAME" \
+		--set smtp.password="$$SMTP_PASSWORD" \
+		--set imap.host="$$IMAP_HOST" \
+		--set imap.port="$$IMAP_PORT" \
+		--set imap.username="$$IMAP_USERNAME" \
+		--set imap.password="$$IMAP_PASSWORD" \
+		--set numberReplicas.debugger=1 \
+		--set tag=$(DOCKER_TAG)
+
+## deploy-oisp: Deploy repository as HELM chart
+##
+deploy-oisp: check-docker-cred-env
+	@cd kubernetes && \
+	helm install . --name $(NAME) --namespace $(NAMESPACE) \
+		--set imageCredentials.username="$$DOCKERUSER" \
+		--set imageCredentials.password="$$DOCKERPASS" \
+		--set set=$(DOCKER_TAG)
+
+
+## undeploy-oisp: Remove OISP deployment by HELM chart
+##
+undeploy-oisp:
+	@cd kubernetes && \
+	helm del $(NAME) --purge && \
+	kubectl delete namespace $(NAMESPACE)
+
+# =====
+# UTILS
+# =====
+
+## reset-db: Reset database via admin tool in frontend
+##
+reset-db:
+	kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) --container dashboard -- node admin resetDB
+
+## add-test-user: Add a test user via admin tool in frontend
+##
+add-test-user:
+	for i in $(shell seq 1 1); do kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) -c dashboard -- node admin addUser user$${i}@example.com password admin; done;
+
+## wait-until-ready: Wait until the platform is up and running
+##     As of now, this is assumed if all dashboard and backend containers
+##     are ready.
+##
+wait-until-ready:
+	@printf "\nWaiting for pending ";
+	@while kubectl -n oisp get pods | grep Pending >> /dev/null; \
+		do printf "."; sleep 5; done;
+	@printf "Waiting for backend ";
+	@while kubectl -n oisp get pods -l=app=backend -o \
+        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
+		do printf "."; sleep 5; done;
+	@printf "\nWaiting for frontend ";
+	@while kubectl -n oisp get pods -l=app=dashboard -o \
+        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
+		do printf "."; sleep 5; done;
+	@printf "\nWaiting for mqtt server";
+	@while kubectl -n oisp get pods -l=app=mqtt-server -o \
+        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
+		do printf "."; sleep 5; done;
+	@echo
+
+## import-images: Import images listed in CONTAINERS into local cluster
+##
+import-images:
+	@$(foreach image,$(CONTAINERS), \
+		printf $(image); \
+		docker save oisp/$(image):$(DOCKER_TAG) -o /tmp/$(image) && printf " is saved" && \
+		docker cp /tmp/$(image) $(K3S_NODE):/tmp/$(image) && printf ", copied" && \
+		docker exec -it $(K3S_NODE) ctr image import /tmp/$(image) >> /dev/null && printf ", imported\n"; \
+	)
+
+## open-shell: Open a shell to a random pod in DEPLOYMENT.
+##     By default thi will try to open a shell to a debugger pod.
+##
+open-shell:
+	@$(call msg, "Opening shell to pod: $(SELECTED_POD)")
+	kubectl -n $(NAMESPACE) exec -it $(SELECTED_POD) /bin/bash
+
+## restart-cluster: Create a new k3s cluster from scratch and
+##     install the dependencies for OISP
+##
+restart-cluster:
+	@./util/restart-cluster.sh
+
+# =======
+# TESTING
+# =======
+## prepare-tests: Push the working directory to the debugger pod.
+##     This has no permanent effect as the pod on which the tests
+##     are prepared is mortal
+##
+prepare-tests: wait-until-ready
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger -- /bin/bash -c "rm -rf *"
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger -- /bin/bash -c "rm -rf .* || true"
+	kubectl -n $(NAMESPACE) cp $(CURRENT_DIR) $(DEBUGGER_POD):/home -c debugger
+
+## test: Run tests
+##
+test: prepare-tests
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger \
+		-- /bin/bash -c "cd /home/$(CURRENT_DIR_BASE)/tests && make test TERM=xterm"
+
+# ==============
+# BUILD COMMANDS
+# ==============
 
 ## build: Build OISP images locally.
 ##     You can specify a version using the $DOCKER_TAG argument.
@@ -153,30 +211,16 @@ endif
 ##
 build: .init
 	@$(call msg,"Building OISP containers");
-	@if [[ $$(printf "opentsdb" | grep "$$(CONTAINERS)") ]]; then \
-		./docker.sh -f docker-compose.yml build $(DOCKER_COMPOSE_ARGS) hbase; \
+	@if [[ $$(printf "$(CONTAINERS)" | grep "opentsdb") ]]; then \
+		docker-compose -f docker-compose.yml build $(DOCKER_COMPOSE_ARGS) hbase; \
 	fi
-	@./docker.sh -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml build $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
-
-## pull: Pull OISP containers from dockerhub. Requires docker login.
-##     You can specify a version using the $DOCKER_TAG argument.
-##     $CONTAINERS arg (as whitespace seperated list) specifies which containers should be pulled,
-##     if it is left blank, all containers will be pulled.
-##     If $DEBUG is set to true, debugger will be added to CONTAINERS
-##     This command also accepts the argument $DOCKER_COMPOSE_ARGS, which is passed directly to compose.
-##
-pull: .init
-	@$(call msg, "Pulling OISP containers");
-	@docker-compose -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml pull $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
+	@docker-compose -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml build --parallel $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
 
 ## update: Update all subrepositories to latest origin/develop
 ##     For competabilty, this will also backup and remove setup-environment.sh
 ##
-update: distclean
+update: clean
 	@$(call msg,"Git Update (dev only)");
-	@if [ -f setup-environment.sh ]; then \
-		mv setup-environment.sh config-backup/setup-environment-$$(date +%Y-%m-%d-%H%M%S).sh.bak; \
-	fi;
 	@git submodule init
 	@git submodule update
 	@git submodule foreach git fetch origin
@@ -189,24 +233,20 @@ docker-clean:
 	@$(call msg,"Removing all docker images and containers ...");
 	@read -r -p "Continue? [y/N]: " response; \
 	case $$response in \
-		[Yy]* ) ./docker.sh stop $(docker ps -a -q); \
-		./docker.sh rm -f $(docker ps -a -q); \
+		[Yy]* ) docker stop $(docker ps -a -q); \
+		docker rm -f $(docker ps -a -q); \
 		/bin/bash -c "docker images -q | xargs -n 1 -I {} docker rmi -f {}";;  \
 		[Nn]* ) echo "Not removing containers";; \
 	esac \
 
+# TODO fix this
 ## test-prep-only: Prepare test for 3rd party apps like oisp-iot-agent but do not start full e2e test
 ##     Creates a user with $USERNAME and $PASSWORD, and creates a device with id 00-11-22-33-44-55,
 ##     dumps the result in oisp-prep-only.conf
 ##
-test-prep-only: export TEST_PREP_ONLY := "1"
-test-prep-only: test
+#test-prep-only: export TEST_PREP_ONLY := "1"
+#test-prep-only: test
 
-## test: Run OISP E2E tests.
-##
-test: export TEST := "1"
-test: .init
-	make start-test && source ./tests/.env && cd tests && make TEST_PREP_ONLY=${TEST_PREP_ONLY} test;
 
 ## remove: Remove all OISP images from local machine.
 ##     $CONTAINERS arg (as whitespace seperated list) specifies which containers should be removed,
@@ -220,23 +260,22 @@ ifeq  ($(CONTAINERS),"")
 	docker rmi -f $(images)
 else
 	@$(foreach container,$(CONTAINERS), \
-		echo $container; \
-		./docker.sh stop $(container); \
-		./docker.sh rm -f -v $(container); \
+		docker rm -f -v $(container); \
 		docker images | grep  "^.*$(container)" | awk '{print $$3}' | xargs -n 1 -I {} docker rmi -f {}; \
 	)
 endif
 
-## logs: #TODO update to k8s
-## Create a .zip archive containing logs from all containers.
-##  The result will be saved in platform-lancuher-logs_{data}.zip
+## logs:
+##     Create a .zip archive containing logs from all containers.
+##     The result will be saved in platform-lancuher-logs_{data}.zip
+##     This can only be used if the cluster is running locally on k3s.
 ##
 logs:
-	$(eval LOGS_ARCHIVE := platform-launcher-logs_$(shell date +'%Y-%m-%d_%H-%M-%S'))
-	@$(call msg,"Making one archive file with all the containers logs within ( ./$(LOGS_ARCHIVE).zip ) ...");
+	$(eval LOGS_ARCHIVE := oisp-logs_$(shell date +'%Y-%m-%d_%H-%M-%S'))
+	@$(call msg,"Making one archive file with all the logs within ( ./$(LOGS_ARCHIVE).zip ) ...");
 	@rm -rf /tmp/$(LOGS_ARCHIVE)* && mkdir -p /tmp/$(LOGS_ARCHIVE)
-	@docker-compose config --services  2> /dev/null | xargs -r  -n 1 sh -c './docker.sh logs "$$@"  >  /tmp/$(LOGS_ARCHIVE)/"$$@".logs ' logs
-	@cd /tmp && zip -q -r ./$(LOGS_ARCHIVE).zip $(LOGS_ARCHIVE)/*.logs
+	@docker cp $(shell docker ps --format "{{.Names}}" | grep k3s_node):/var/log/pods /tmp/$(LOGS_ARCHIVE)
+	@cd /tmp && zip -q -r ./$(LOGS_ARCHIVE).zip $(LOGS_ARCHIVE)/*
 	@mv /tmp/$(LOGS_ARCHIVE).zip .
 
 
@@ -246,14 +285,6 @@ clean:
 	@$(call msg,"Cleaning ...");
 	@rm -f .init
 
-distclean: clean
-	@if [ -f setup-environment.sh ]; then \
-		./docker.sh down; \
-	fi
-	@if [ -f ./data/.forTest ]; then \
-		sudo rm -rf ./data; \
-	fi
-
 ## push images: Push containers to dockerhub.
 ##     This obviously requires docker login,
 ##     $CONTAINERS arg selects which containers (whitespace seperated list) should be pushed,
@@ -261,16 +292,16 @@ distclean: clean
 ##
 push-images:
 	@$(call msg,"Pushing docker images to registry");
-	@./docker.sh -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml push $(CONTAINERS)
+	@docker-compose -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml push $(CONTAINERS)
 
 ## help: Show this help message
 ##
 help:
 	@grep "^##" Makefile | cut -c4-
 
-#----------------------------------------------------------------------------------------------------------------------
+#-----------------
 # helper functions
-#----------------------------------------------------------------------------------------------------------------------
+#-----------------
 
 define msg
 	tput setaf 2 && \

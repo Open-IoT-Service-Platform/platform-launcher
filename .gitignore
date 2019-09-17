@@ -1,10 +1,11 @@
 setup-environment.sh
 .init
 .prepare
-data
 config-backup/
 .firstRun
 tests/.env
 tests/package-lock.json
 tests/test-config.json
 data-backup/
+node_modules/
+oisp-logs_*.zip
