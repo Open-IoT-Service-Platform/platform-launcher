@@ -9,8 +9,6 @@ spec:
   ports:
   - name: "8020"
     port: 8020
-  - name: "22"
-    port: 22
   selector:
     app: hbase-region
 ---
