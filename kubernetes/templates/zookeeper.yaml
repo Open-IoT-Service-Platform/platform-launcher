@@ -6,6 +6,8 @@ spec:
   ports:
   - name: "2181"
     port: 2181
+  - name: "22"
+    port: 22
   selector:
     app: zookeeper
 ---
