@@ -24,6 +24,7 @@ author = 'oisp'
 # The full version, including alpha/beta/rc tags
 release = 'v1.1-beta1'
 
+master_doc = 'index'
 
 # -- General configuration ---------------------------------------------------
 
