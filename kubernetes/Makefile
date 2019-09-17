@@ -4,9 +4,6 @@ NAMESPACE?=oisp
 # Name for HELM deployment
 NAME?=oisp
 
-NAMESPACE_LOCUST?=locust
-NAME_LOCUST?=locust
-
 TEMPLATES_DIR?=templates
 
 DEPLOYMENT?=debugger
@@ -17,6 +14,8 @@ HBASE_MASTER_POD=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:met
 
 TEST_REPO?=https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 TEST_BRANCH?=develop
+
+DOCKER_TAG?=latest
 
 # Deployment with kubectl
 # -----------------------------------------------------------------------------
@@ -55,6 +54,7 @@ check-docker-cred-env:
 ## deploy-oisp-test: Deploy repository as HELM chart,
 ## create an ethereal address, and make sure there is
 ## a debugger container.
+## This also takes a $DOCKER_TAG parameter
 ##
 deploy-oisp-test: check-docker-cred-env
 	node ./util/ethereal.js util/ethereal_creds;
@@ -70,7 +70,8 @@ deploy-oisp-test: check-docker-cred-env
 		--set imap.port="$$IMAP_PORT" \
 		--set imap.username="$$IMAP_USERNAME" \
 		--set imap.password="$$IMAP_PASSWORD" \
-		--set numberReplicas.debugger=1;
+		--set numberReplicas.debugger=1 \
+		--set tag=$(DOCKER_TAG)
 
 ## deploy-oisp: Deploy repository as HELM chart
 ##

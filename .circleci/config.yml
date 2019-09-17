@@ -72,7 +72,7 @@ commands:
             npm install nodemailer
             export DOCKERUSER=unused
             export DOCKERPASS=unused
-            make deploy-oisp-test
+            make deploy-oisp-test DOCKER_TAG=test
             make wait-until-ready
             make test
   push-images:
@@ -93,7 +93,8 @@ commands:
             images=$(docker images --format "{{.Repository}}:{{.Tag}}"| grep :test)
             for image in $images; do
               newimage=$(echo $image | sed -r "s/:test/:latest/g");
-
+              docker tag $image $newimage;
+            done
             #Start with latest tag, replace later by the real-tags
             DOCKER_TAG="latest"
             if [ "<< parameters.tag >>" = "date" ]; then
