@@ -45,7 +45,7 @@ systemuser:
   password: 7d501829lhbl1or0bb1784462c97bcad6
 
 # Docket image tag
-tag: test
+tag: latest
 
 # Enable jaeger tracing
 jaeger_tracing: false
