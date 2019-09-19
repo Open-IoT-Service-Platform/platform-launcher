@@ -259,6 +259,42 @@ var authGetToken = (username, password) => {
   });
 };
 
+var getRefreshToken = (token) => {
+    return new Promise(function(resolve, reject) {
+        helpers.auth.getRefreshToken(token, function(err, response) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(response);
+            }
+        });
+    });
+};
+
+var revokeRefreshToken = (token, refreshToken) => {
+    return new Promise(function(resolve, reject) {
+        helpers.auth.revokeRefreshToken(token, refreshToken, function(err, response) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(response);
+            }
+        });
+    });
+};
+
+var refreshAuthToken = (oldToken, refreshToken) => {
+    return new Promise(function(resolve, reject) {
+        helpers.auth.refreshAuthToken(oldToken, refreshToken, function(err, response) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(response);
+            }
+        });
+    });
+};
+
 var invitationCreate = (userToken, accountId, receiverEmail) => {
   return new Promise(function(resolve, reject){
     helpers.invitation.createInvitation(userToken, accountId, receiverEmail, function(err, response) {
@@ -440,6 +476,9 @@ module.exports = {
     searchData: searchData,
     searchDataAdvanced: searchDataAdvanced,
     authGetToken: authGetToken,
+    getRefreshToken: getRefreshToken,
+    revokeRefreshToken: revokeRefreshToken,
+    refreshAuthToken: refreshAuthToken,
     createInvitation: invitationCreate,
     acceptInvitation: invitationAccept,
     authTokenInfo: authTokenInfo,
