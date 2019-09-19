@@ -87,8 +87,59 @@ function userInfo(token, cb) {
     })
 }
 
+function getRefreshToken(token, cb) {
+    if (!cb) {
+        throw "Callback required";
+    }
+
+    var data = {
+        token: token
+    };
+
+    api.auth.getRefreshToken(data, function(err, response) {
+        cb(err, response);
+    });
+}
+
+function revokeRefreshToken(token, refreshToken, cb) {
+    if (!cb) {
+        throw "Callback required";
+    }
+
+    var data = {
+        token: token,
+        body: {
+            refreshToken: refreshToken
+        }
+    };
+
+    api.auth.revokeRefreshToken(data, function(err, response) {
+        cb(err, response);
+    });
+}
+
+function refreshAuthToken(oldToken, refreshToken, cb) {
+    if (!cb) {
+        throw "Callback required";
+    }
+
+    var data = {
+        token: oldToken,
+        body: {
+            refreshToken: refreshToken
+        }
+    };
+
+    api.auth.refreshAuthToken(data, function(err, response) {
+        cb(err, response);
+    });
+}
+
 module.exports = {
     login: login,
+    getRefreshToken: getRefreshToken,
+    revokeRefreshToken: revokeRefreshToken,
+    refreshAuthToken: refreshAuthToken,
     userInfo: userInfo,
     tokenInfo: tokenInfo
 };
