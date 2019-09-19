@@ -680,6 +680,24 @@ describe("Device Activation Subtests".bold, function() {
     }).timeout(10000);
 });
 
+describe("Refresh Token Subtests".bold, function() {
+    var test;
+    var descriptions = require("./subtests/refresh-token-tests").descriptions;
+    it(descriptions.getRefreshTokensForDeviceAndUser, function(done) {
+        test = require("./subtests/refresh-token-tests").test(userToken, deviceToken);
+        test.getRefreshTokensForDeviceAndUser(done);
+    }).timeout(10000);
+    it(descriptions.refreshTokensForDeviceAndUser, function(done) {
+        test.refreshTokensForDeviceAndUser(done);
+    }).timeout(10000);
+    it(descriptions.revokeRefreshToken, function(done) {
+        test.revokeRefreshToken(done);
+    });
+    it(descriptions.cleanup, function(done) {
+        test.cleanup(done);
+    }).timeout(10000);
+});
+
 describe("Managing components catalog ... \n".bold, function() {
 
     it('Shall create new custom Components Types', function(done) {
@@ -1061,7 +1079,7 @@ describe("Sending observations and checking rules ...\n".bold, function() {
                 var lines = message.toString().split("\n");
                 var i;
                 lines.forEach((line) => {
-                    var reExecReason = /^- Reason:.*/;
+                    var reExecReason = /^- Reason:.;*/
                     if ( reExecReason.test(line) ) {
                         var reason = line.split(":")[1].trim();
                         var index = expectedEmailReasons.findIndex( (element) => {
@@ -1943,5 +1961,4 @@ describe("change password and delete receiver ... \n".bold, function(){
             }
         })
     })
-
 })
