@@ -53,10 +53,10 @@ spec:
             cpu: 50m
           {{ else }}
           limits:
-            memory: 500M
+            memory: 1G
             cpu: 1
           requests:
-            memory: 500M
+            memory: 1G
             cpu: 1
           {{ end }}
         env:
