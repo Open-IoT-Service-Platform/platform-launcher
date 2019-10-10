@@ -53,11 +53,13 @@ spec:
           {{ end }}
         env:
         - name: REGIONSERVERS
-          value: hbase-region
+          value: hbase-region-0.hbase-region
         - name: ZOOKEEPER
           value: zookeeper:2181
         - name: HDFS_NAMENODE
           value: hdfs-namenode
+        - name: HADOOP_USER_NAME
+          value: root
         command: ["/bin/bash", "/opt/entrypoint-region.sh"]
         ports:
         - containerPort: 2181
