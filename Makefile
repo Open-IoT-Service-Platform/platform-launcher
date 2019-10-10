@@ -102,7 +102,8 @@ deploy-oisp-test: check-docker-cred-env
 		--set imap.username="$$IMAP_USERNAME" \
 		--set imap.password="$$IMAP_PASSWORD" \
 		--set numberReplicas.debugger=1 \
-		--set tag=$(DOCKER_TAG)
+		--set tag=$(DOCKER_TAG) \
+		$(HELM_ARGS)
 
 ## deploy-oisp: Deploy repository as HELM chart
 ##
@@ -111,7 +112,18 @@ deploy-oisp: check-docker-cred-env
 	helm install . --name $(NAME) --namespace $(NAMESPACE) \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
-		--set set=$(DOCKER_TAG)
+		--set tag=$(DOCKER_TAG) \
+		$(HELM_ARGS)
+
+## upgrade-oisp: Upgrade already deployed HELM chart
+##
+upgrade-oisp: check-docker-cred-env
+	@cd kubernetes && \
+	helm upgrade . --name $(NAME) --namespace $(NAMESPACE) \
+		--set imageCredentials.username="$$DOCKERUSER" \
+		--set imageCredentials.password="$$DOCKERPASS" \
+		--set tag=$(DOCKER_TAG) \
+		$(HELM_ARGS)
 
 
 ## undeploy-oisp: Remove OISP deployment by HELM chart
