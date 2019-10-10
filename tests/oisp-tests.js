@@ -669,6 +669,9 @@ describe("Device Activation Subtests".bold, function() {
     it(descriptions.activateExistingDeviceWithoutToken, function(done) {
         test.activateExistingDeviceWithoutToken(done);
     }).timeout(10000);
+    it(descriptions.activateAnotherDeviceWithSameIdInAnotherAccount, function(done) {
+        test.activateAnotherDeviceWithSameIdInAnotherAccount(done);
+    }).timeout(10000);
     it(descriptions.activateNotExistingDeviceWithoutToken, function(done) {
         test.activateNotExistingDeviceWithoutToken(done);
     }).timeout(10000);
