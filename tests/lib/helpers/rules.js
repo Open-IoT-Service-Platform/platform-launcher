@@ -74,7 +74,7 @@ function getRuleDetails(userToken, accountId, ruleId, cb) {
     });
 }
 
-function createRule(ruleConfig, userToken, accountId, deviceId, cb) {
+function createRule(ruleConfig, userToken, accountId, deviceId, resetType, cb) {
     if (!cb) {
         throw "Callback required";
     }
@@ -89,7 +89,7 @@ function createRule(ruleConfig, userToken, accountId, deviceId, cb) {
             priority: "Medium",
             type: "Regular",
             status: "Active",
-            resetType: "Automatic",
+            resetType: resetType,
             synchronizationStatus: "NotSync",
 
             actions: ruleConfig.actions,
