@@ -50,7 +50,6 @@ var checkObservations = function(tempValues, cid, cbManager, deviceToken, accoun
             function sendActualObservation(){
                 helpers.devices.submitData(tempValues[index].value, deviceToken, accountId, deviceId, cid, function(err, ts) {
                     tempValues[index].ts = ts;
-
                     if (index === 0) {
                         firstObservationTime = tempValues[index].ts;
                     }
@@ -104,7 +103,6 @@ var checkObservations = function(tempValues, cid, cbManager, deviceToken, accoun
 	};
 	cbManager.set(actuationCallback);
 
-
 	sendObservationAndCheckRules(index);
     });
 };
@@ -147,6 +145,20 @@ var createCommand = (cmdName, componentParamName, onOff, userToken, accountId, d
 	});
     });
 };
+
+var createSimpleRule = (rule, userToken, accountId, deviceId, resetType="Automatic") => {
+    return new Promise(function(resolve, reject){
+	helpers.rules.createRule(rule, userToken, accountId, deviceId, resetType, function(err, id) {
+	    if (err) {
+		reject(err);
+	    } else {
+		rule.id = id;
+		resolve(id);
+	    }
+	});
+    });
+};
+
 var createStatisticRule = (rule, userToken, accountId, deviceId) => {
     return new Promise(function(resolve, reject){
 	helpers.rules.createStatisticRule(rule, userToken, accountId, deviceId, function(err, id) {
@@ -452,6 +464,30 @@ var mqttSubmitDataList = (connector, valueList, deviceToken, accountId, deviceId
     });
 };
 
+var getAlerts = (userToken, accountId, deviceId) => {
+  return new Promise(function(resolve, reject){
+      helpers.alerts.getListOfAlerts(userToken, accountId, function(err, response) {
+          if (err) {
+              reject(new Error("Cannot get list of alerts: " + err));
+          } else {
+              resolve(response);
+          }
+      });
+  })
+};
+
+var updateAlert = (userToken, accountId, alertId, status) => {
+    return new Promise(function(resolve, reject) {
+        helpers.alerts.updateAlertStatus(userToken, accountId, alertId, status, function(err, response) {
+            if (err) {
+                reject(new Error("Cannot update alert status " + err));
+            } else {
+                resolve();
+            }
+        });
+    });
+};
+
 module.exports = {
     getAccountActivationCode: getAccountActivationCode,
     checkObservations: checkObservations,
@@ -459,6 +495,7 @@ module.exports = {
     addActuator: addActuator,
     createCommand: createCommand,
     createStatisticRule: createStatisticRule,
+    createSimpleRule: createSimpleRule,
     createTbRule: createTbRule,
     deleteComponent: deleteComponent,
     deleteRule: deleteRule,
@@ -481,5 +518,7 @@ module.exports = {
     activateDeviceWithoutToken: activateDeviceWithoutToken,
     mqttSetCredential: mqttSetCredential,
     mqttSubmitData: mqttSubmitData,
-    mqttSubmitDataList: mqttSubmitDataList
+    mqttSubmitDataList: mqttSubmitDataList,
+    getAlerts: getAlerts,
+    updateAlert: updateAlert
 };

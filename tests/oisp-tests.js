@@ -932,7 +932,7 @@ describe("Creating rules ... \n".bold, function() {
                 component.rules.forEach(function(rule) {
                     rule.cid = component.id;
                     rule.conditionComponent = component.name;
-                    helpers.rules.createRule(rule, userToken, accountId, deviceId, function(err, id) {
+                    helpers.rules.createRule(rule, userToken, accountId, deviceId, "Automatic", function(err, id) {
                         if (err) {
                             done(new Error("Cannot create rule " + rule.name +": " + err));
                         } else {
@@ -980,7 +980,6 @@ describe("Creating rules ... \n".bold, function() {
 
     }).timeout(20000);
 });
-
 describe("Sending observations and checking rules ...\n".bold, function() {
     before(function(){
             if (checkTestCondition(["non_essential", "rules", "data_sending"])) {
@@ -1136,7 +1135,31 @@ describe("Sending observations and checking rules ...\n".bold, function() {
        }).timeout(BACKEND_TIMEOUT);
 
 });
-
+describe("Do basic rule and alerts subtests ...".bold, function() {
+  before(function(){
+          if (checkTestCondition(["non_essential", "rules"])) {
+              this.skip();
+          }
+  });
+    var test;
+    var descriptions = require("./subtests/rules-and-alerts-tests").descriptions;
+    it(descriptions.createBasicRules,function(done) {
+        test = require("./subtests/rules-and-alerts-tests").test(userToken, accountId, deviceId, deviceToken, cbManager);
+        test.createBasicRules(done);
+    }).timeout(10000);
+    it(descriptions.sendObservations,function(done) {
+        test.sendObservations(done);
+    }).timeout(120000);
+    it(descriptions.deleteRuleAndSendDataAgain,function(done) {
+        test.deleteRuleAndSendDataAgain(done);
+    }).timeout(120000);
+    it(descriptions.createRulesAndCheckAlarmReset,function(done) {
+        test.createRulesAndCheckAlarmReset(done);
+    }).timeout(120000);
+     it(descriptions.cleanup,function(done) {
+     test.cleanup(done);
+ }).timeout(10000);
+});
 describe("Do time based rule subtests ...".bold, function() {
     before(function(){
             if (checkTestCondition(["non_essential", "rules"])) {
