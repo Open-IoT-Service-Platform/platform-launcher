@@ -119,7 +119,7 @@ deploy-oisp: check-docker-cred-env
 ##
 upgrade-oisp: check-docker-cred-env
 	@cd kubernetes && \
-	helm upgrade . --name $(NAME) --namespace $(NAMESPACE) \
+	helm upgrade $(NAME) . --namespace $(NAMESPACE) \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
 		--set tag=$(DOCKER_TAG) \

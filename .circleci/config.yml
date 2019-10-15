@@ -13,6 +13,12 @@ executors:
       shell: /bin/bash
       TERM: xterm
       TZ: "Europe/Berlin"
+  deployer:
+    docker:
+      - image: oisp/deployer
+    environment:
+      shell: /bin/bash
+      TERM: xterm
 commands:
   setup-build-environment:
     description: "Setup build Environment"
@@ -147,6 +153,16 @@ commands:
           shell: /bin/bash
           command: |
             git describe --tags --exact-match || exit 1
+  deploy:
+    description: "Deploy OISP to a production cluster."
+    steps:
+      - run:
+          name: Run deploy script
+          shell: /bin/bash
+          command: |
+            export HELM_ARGS="--set stolon.persistence.storageClassName=\"oneandone\" --set less_resources=\"false\" "
+            cd ~ && sh deploy.sh
+
 jobs:
   build:
     executor: my-executor
@@ -178,6 +194,12 @@ jobs:
       - e2e-test
       - push-images:
           tag: "date"
+  deploy-production:
+    executor: deployer
+    steps:
+      - deploy
+
+
 workflows:
   version: 2.1
   workflow:
@@ -206,3 +228,6 @@ workflows:
             branches:
               only:
                 - develop
+      - deploy-production:
+          requires:
+            - build-nightly
