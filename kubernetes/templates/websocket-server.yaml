@@ -94,16 +94,3 @@ spec:
           - key: jwt.privatekey
             path: private.pem
           secretName: oisp-secrets
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: dashboard-ws
-spec:
-  rules:
-  - host: {{ .Values.hosts.websocketserver }}
-    http:
-      paths:
-      - backend:
-          serviceName: websocket-server
-          servicePort: 5000
