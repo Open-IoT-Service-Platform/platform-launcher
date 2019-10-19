@@ -79,3 +79,14 @@ Interacting with OISP
 You can interact with OISP using the `REST API <https://streammyiot.com/ui/public/api.html>`_, or with our SDKs for `javascript <https://github.com/Open-IoT-Service-Platform/oisp-sdk-js>`_ and `python <https://github.com/Open-IoT-Service-Platform/oisp-sdk-python>`_.
 
 .. warning:: Using the SDKs is the recommended way of interacting with the platform, however, they might not be always up to date with the latest features. Please feel welcome to open issues for any incompatibility problems between the API and the SDKs.
+
+
+Cert-Manager
+------------
+
+OISP is prepared to be used with cert-manager to retrieve and update certificates from letsencrypt.
+To configure the cert-manager:
+
+1. Install cert-manager as described `here <https://docs.cert-manager.io/en/release-0.11/getting-started/install/kubernetes.html>`_ .
+2. Install issuer `kubectl apply -f kubernetes/cert-manager/clusterissuer-prod.yaml`. Note that it is managing certificcates cluster wide and thus does not have a namespace.
+3. Adapt email address in  `kubernetes/certificate_web_prod.yaml`. Install the certificate in namespace oisp: `kubectl apply -f kubernetes/certificate_web_prod.yaml -n oisp`
