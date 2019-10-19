@@ -36,9 +36,9 @@ mqtt:
 
 # Hosts used for Ingress configuration
 hosts:
-    frontend: k8s.streammyiot.com
-    websocketserver: ws.streammyiot.com
-    mqttserver: mqtt.streammyiot.com
+    frontend: latest.streammyiot.com
+    websocketserver: ws.latest.streammyiot.com
+    mqttserver: mqtt.latest.streammyiot.com
 
 systemuser:
   username: gateway@intel.com

@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: dashboard-web-http
+spec:
+  rules:
+  - host: {{ .Values.hosts.frontend }}
+    http:
+      paths:
+      - backend:
+          serviceName: dashboard
+          servicePort: 4001
+  - host: {{ .Values.hosts.websocketserver }}
+    http:
+      paths:
+      - backend:
+          serviceName: websocket-server
+          servicePort: 5000
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: dashboard-web
+spec:
+  backend:
+    serviceName: dashboard
+    servicePort: 4001 
+  tls:
+  - hosts:
+    - latest.streammyiot.com
+    - ws.latest.streammyiot.com
+    secretName: dashboard-web-prod-tls 
+  rules:
+  - host: {{ .Values.hosts.frontend }}
+    http:
+      paths:
+      - path: / 
+        backend:
+          serviceName: dashboard
+          servicePort: 4001
+  - host: {{ .Values.hosts.websocketserver }}
+    http:
+      paths:
+      - path: / 
+        backend:
+          serviceName: websocket-server
+          servicePort: 5000
+
