@@ -174,16 +174,3 @@ spec:
           - key: jwt.privatekey
             path: private.pem
           secretName: oisp-secrets
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: dashboard-web
-spec:
-  rules:
-  - host: k8s.streammyiot.com
-    http:
-      paths:
-      - backend:
-          serviceName: dashboard
-          servicePort: 4001
