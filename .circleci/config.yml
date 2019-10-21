@@ -16,6 +16,9 @@ executors:
   deployer:
     docker:
       - image: oisp/deployer
+        auth:
+          username: $DOCKER_USERNAME
+          password: $DOCKER_PASSWORD
     environment:
       shell: /bin/bash
       TERM: xterm
