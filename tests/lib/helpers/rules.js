@@ -227,7 +227,7 @@ function createTbRule(ruleConfig, userToken, accountId, deviceId, cb) {
             priority: "Medium",
             type: "Regular",
             status: "Active",
-            resetType: "Manual",
+            resetType: "Automatic",
             synchronizationStatus: "NotSync",
 
             actions: ruleConfig.actions,
