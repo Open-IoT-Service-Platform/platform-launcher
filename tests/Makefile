@@ -30,8 +30,8 @@ USERNAME2 = "oisp2@testing.com"
 PASSWORD2 = "OispTesting2"
 ROLE2 = "admin"
 
-NAMESPACE=oisp
-DASHBOARD_POD:=$(shell kubectl -n oisp get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
+NAMESPACE?=oisp
+DASHBOARD_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
 
 npm-install:
 	@$(call msg,"Installing npm packages ...");
