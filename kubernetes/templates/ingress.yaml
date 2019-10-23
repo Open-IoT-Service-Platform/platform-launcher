@@ -10,6 +10,13 @@ spec:
       - backend:
           serviceName: dashboard
           servicePort: 4001
+  - host: {{ .Values.hosts.frontend }}
+    http:
+        paths:
+        - path: /ui/grafana
+          backend:
+            serviceName: dashboard
+            servicePort: 4002
   - host: {{ .Values.hosts.websocketserver }}
     http:
       paths:
@@ -24,25 +31,31 @@ metadata:
 spec:
   backend:
     serviceName: dashboard
-    servicePort: 4001 
+    servicePort: 4001
   tls:
   - hosts:
     - latest.streammyiot.com
     - ws.latest.streammyiot.com
-    secretName: dashboard-web-prod-tls 
+    secretName: dashboard-web-prod-tls
   rules:
   - host: {{ .Values.hosts.frontend }}
     http:
       paths:
-      - path: / 
+      - path: /
         backend:
           serviceName: dashboard
           servicePort: 4001
+  - host: {{ .Values.hosts.frontend }}
+    http:
+        paths:
+        - path: /ui/grafana
+          backend:
+            serviceName: dashboard
+            servicePort: 4002
   - host: {{ .Values.hosts.websocketserver }}
     http:
       paths:
-      - path: / 
+      - path: /
         backend:
           serviceName: websocket-server
           servicePort: 5000
-
