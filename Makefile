@@ -23,7 +23,7 @@ COMPOSE_PROJECT_NAME?="oisp"
 CONTAINERS?=$(shell docker-compose --log-level ERROR config --services)
 DOCKER_COMPOSE_ARGS?=
 K3S_NODE=$(shell docker ps --format '{{.Names}}' | grep k3s_node)
-export DOCKER_TAG=latest
+export DOCKER_TAG?=latest
 export GIT_COMMIT_PLATFORM_LAUNCHER=$(git rev-parse HEAD)
 export GIT_COMMIT_FRONTEND=$(git -C oisp-frontend rev-parse HEAD)
 export GIT_COMMIT_GEARPUMP=$(git -C oisp-gearpump-rule-engine rev-parse HEAD)
@@ -35,9 +35,9 @@ ifeq  ($(DEBUG),true)
 CONTAINERS:=$(CONTAINERS) debugger
 endif
 
-NAMESPACE?=oisp
+export NAMESPACE?=oisp
 # Name for HELM deployment
-NAME?=oisp
+NAME?=$(NAMESPACE)
 
 DEPLOYMENT?=debugger
 DEBUGGER_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep debugger | head -n 1)
@@ -139,7 +139,7 @@ undeploy-oisp:
 
 ## reset-db: Reset database via admin tool in frontend
 ##
-reset-db:
+
 	kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) --container dashboard -- node admin resetDB
 
 ## add-test-user: Add a test user via admin tool in frontend
@@ -153,18 +153,18 @@ add-test-user:
 ##
 wait-until-ready:
 	@printf "\nWaiting for pending ";
-	@while kubectl -n oisp get pods | grep Pending >> /dev/null; \
+	@while kubectl -n $(NAMESPACE) get pods | grep Pending >> /dev/null; \
 		do printf "."; sleep 5; done;
 	@printf "Waiting for backend ";
-	@while kubectl -n oisp get pods -l=app=backend -o \
+	@while kubectl -n $(NAMESPACE) get pods -l=app=backend -o \
         jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
 		do printf "."; sleep 5; done;
 	@printf "\nWaiting for frontend ";
-	@while kubectl -n oisp get pods -l=app=dashboard -o \
+	@while kubectl -n $(NAMESPACE) get pods -l=app=dashboard -o \
         jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
 		do printf "."; sleep 5; done;
 	@printf "\nWaiting for mqtt server";
-	@while kubectl -n oisp get pods -l=app=mqtt-server -o \
+	@while kubectl -n $(NAMESPACE) get pods -l=app=mqtt-server -o \
         jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
 		do printf "."; sleep 5; done;
 	@echo
@@ -208,7 +208,7 @@ prepare-tests: wait-until-ready
 ##
 test: prepare-tests
 	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger \
-		-- /bin/bash -c "cd /home/$(CURRENT_DIR_BASE)/tests && make test TERM=xterm"
+		-- /bin/bash -c "cd /home/$(CURRENT_DIR_BASE)/tests && make test TERM=xterm NAMESPACE=$(NAMESPACE)"
 
 # ==============
 # BUILD COMMANDS
