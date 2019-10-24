@@ -89,8 +89,10 @@ data:
     "hostname": "postgres-ro",
     "writeHostname": "postgres",
     "port": "5432",
-    "username": "oisp_user",
-    "password": "supersecret"
+    "su_username": "{{ .Values.stolon.pgSuperuserName }}",
+    "su_password": "{{ .Values.stolon.pgSuperuserPassword }}",
+    "username": "{{ .Values.postgres.username }}",
+    "password": "{{ .Values.postgres.password }}"
     }
   redis: |
     {
@@ -131,10 +133,10 @@ data:
   rule-engine: |
     {
     "uri": "gearpump:8090",
-    "password": "7d501829lhbl1or0bb1784462c97bcad6",
-    "username": "rule_engine@intel.com",
-    "gearpumpUsername": "admin",
-    "gearpumpPassword": "admin",
+    "password": "{{ .Values.ruleEngine.username }}",
+    "username": "{{ .Values.ruleEngine.password }}",
+    "gearpumpUsername": "{{ .Values.ruleEngine.gearpump.username }}",
+    "gearpumpPassword": "{{ .Values.ruleEngine.gearpump.password }}",
     "frontendUri": "dashboard:4001",
     "hbaseConfig": "@@OISP_HBASE_CONFIG",
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
@@ -142,8 +144,8 @@ data:
     }
   websocket-user: |
     {
-    "password": "AgjY7H3eXztyA6AmNjI2rte446gdttgattwRRF61",
-    "username": "api_actuator"
+    "password": "{{ .Values.websocketServer.password }}",
+    "username": "{{ .Values.websocketServer.username }}"
     }
   opentsdb-config: |
     {
