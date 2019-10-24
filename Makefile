@@ -137,9 +137,10 @@ undeploy-oisp:
 # UTILS
 # =====
 
+
 ## reset-db: Reset database via admin tool in frontend
 ##
-
+reset-db:
 	kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) --container dashboard -- node admin resetDB
 
 ## add-test-user: Add a test user via admin tool in frontend
