@@ -34,6 +34,17 @@ mqtt:
     username: username
     password: password
 
+ruleEngine:
+  username: "rule_engine@intel.com"
+  password: password
+  gearpump:
+    username: admin
+    password: password
+
+websocketServer:
+  username: api_actuator
+  password: password
+
 # Hosts used for Ingress configuration
 hosts:
     frontend: latest.streammyiot.com
@@ -43,6 +54,14 @@ hosts:
 systemuser:
   username: gateway@intel.com
   password: 7d501829lhbl1or0bb1784462c97bcad6
+
+stolon:
+  pgSuperuserName: oisp_user
+  pgSuperuserPassword: supersecret
+
+postgres:
+  username: oisp_user
+  password: supersecret
 
 # Docket image tag
 tag: latest
