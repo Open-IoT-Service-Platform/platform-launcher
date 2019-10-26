@@ -1,16 +1,16 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dbsetup
+  name: dbupdate
   annotations:
-    "helm.sh/hook": post-install
-    "helm.sh/hook-weight": "0"
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "20"
     "helm.sh/hook-delete-policy": "before-hook-creation"
 spec:
   template:
     spec:
       containers:
-      - name: dbsetup
+      - name: dbupdate
         image: oisp/frontend:{{ .Values.tag }}
         env:
         - name: NODE_ENV
@@ -70,7 +70,7 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: mail
-        command: ["./wait-for-it.sh", "postgres:5432", "-t", "300", "--", "node", "admin", "createDB"]
+        command: ["node", "admin", "updateDB"]
       restartPolicy: Never
       imagePullSecrets:
         - name: dockercred
