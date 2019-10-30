@@ -56,7 +56,7 @@ systemuser:
   password: 7d501829lhbl1or0bb1784462c97bcad6
 
 stolon:
-  pgSuperuserName: oisp_user
+  pgSuperuserName: superuser
   pgSuperuserPassword: supersecret
 
 postgres:
