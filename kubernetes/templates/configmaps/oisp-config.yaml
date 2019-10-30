@@ -133,8 +133,8 @@ data:
   rule-engine: |
     {
     "uri": "gearpump:8090",
-    "password": "{{ .Values.ruleEngine.username }}",
-    "username": "{{ .Values.ruleEngine.password }}",
+    "password": "{{ .Values.ruleEngine.password }}",
+    "username": "{{ .Values.ruleEngine.username }}",
     "gearpumpUsername": "{{ .Values.ruleEngine.gearpump.username }}",
     "gearpumpPassword": "{{ .Values.ruleEngine.gearpump.password }}",
     "frontendUri": "dashboard:4001",
