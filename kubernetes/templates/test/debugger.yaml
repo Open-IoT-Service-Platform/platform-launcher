@@ -60,7 +60,7 @@ metadata:
   name: pod-reader
 rules:
  - apiGroups: [""] # "" indicates the core API group
-   resources: ["pods"]
+   resources: ["pods", "configmaps"]
    verbs: ["get", "list", "exec"]
  - apiGroups: [""]
    resources: ["pods/exec"]

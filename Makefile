@@ -88,7 +88,7 @@ check-docker-cred-env:
 ##
 deploy-oisp-test: check-docker-cred-env
 	@node ./tests/ethereal.js tests/.env;
-	. tests/.env && \
+	@. tests/.env && \
 	cd kubernetes && \
 	helm install . --name $(NAME) --namespace $(NAMESPACE) \
 		--set imageCredentials.username="$$DOCKERUSER" \
@@ -101,6 +101,14 @@ deploy-oisp-test: check-docker-cred-env
 		--set imap.port="$$IMAP_PORT" \
 		--set imap.username="$$IMAP_USERNAME" \
 		--set imap.password="$$IMAP_PASSWORD" \
+		--set systemuser.password="$(call randomPass)" \
+		--set grafana.password="$(call randomPass)" \
+		--set mqtt.broker.password="$(call randomPass)" \
+		--set ruleEngine.password="$(call randomPass)" \
+		--set ruleEngine.gearpump.password="$(call randomPass)" \
+		--set websocketServer.password="$(call randomPass)" \
+		--set stolon.pgSuperuserPassword="$(call randomPass)" \
+		--set postgres.password="$(call randomPass)" \
 		--set numberReplicas.debugger=1 \
 		--set tag=$(DOCKER_TAG) \
 		$(HELM_ARGS)
@@ -112,16 +120,33 @@ deploy-oisp: check-docker-cred-env
 	helm install . --name $(NAME) --namespace $(NAMESPACE) \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
+		--set systemuser.password="$(call randomPass)" \
+		--set grafana.password="$(call randomPass)" \
+		--set mqtt.broker.password="$(call randomPass)" \
+		--set ruleEngine.password="$(call randomPass)" \
+		--set ruleEngine.gearpump.password="$(call randomPass)" \
+		--set websocketServer.password="$(call randomPass)" \
+		--set stolon.pgSuperuserPassword="$(call randomPass)" \
+		--set postgres.password="$(call randomPass)" \
 		--set tag=$(DOCKER_TAG) \
 		$(HELM_ARGS)
 
 ## upgrade-oisp: Upgrade already deployed HELM chart
 ##
 upgrade-oisp: check-docker-cred-env
-	@cd kubernetes && \
+	@source util/get_oisp_credentials.sh && \
+	cd kubernetes && \
 	helm upgrade $(NAME) . --namespace $(NAMESPACE) \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
+		--set systemuser.password="$${SYSTEMUSER_PASSWORD}" \
+		--set grafana.password="$${GRAFANA_PASSWORD}" \
+		--set mqtt.broker.password="$${MQTT_BROKER_PASSWORD}" \
+		--set ruleEngine.password="$${RULEENGINE_PASSWORD}" \
+		--set ruleEngine.gearpump.password="$${RULEENGINE_GEARPUMP_PASSWORD}" \
+		--set websocketServer.password="$${WEBSOCKETSERVER_PASSWORD}" \
+		--set stolon.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
+		--set postgres.password="$${POSTGRES_PASSWORD}" \
 		--set tag=$(DOCKER_TAG) \
 		$(HELM_ARGS)
 
@@ -322,4 +347,8 @@ define msg
 	echo -e "\t"$1 && \
 	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo "" && \
 	tput sgr0
+endef
+
+define randomPass
+$$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c$${1:-64})
 endef

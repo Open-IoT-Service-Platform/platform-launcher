@@ -38,7 +38,8 @@ npm-install:
 	@cd $(CURRENT_DIR) && npm install > /dev/null
 
 test: npm-install
-	@cat test-config-template.json | envsubst > test-config.json
+	@export OISP_GRAFANA_PASSWORD=$$(kubectl -n $(NAMESPACE) get -o yaml configmaps oisp-config | shyaml get-value data.grafana | jq -r .adminPassword) && \
+	cat test-config-template.json | envsubst > test-config.json
 	@$(call msg,"Resetting database ...");
 	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin resetDB
 	@$(call msg,"Adding a user for testing ...");
