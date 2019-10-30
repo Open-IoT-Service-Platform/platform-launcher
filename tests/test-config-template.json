@@ -49,7 +49,7 @@
 			"port": false
 		},
 		"admin": "grafana",
-		"password": "intel123",
+		"password": "${OISP_GRAFANA_PASSWORD}",
 		"datasourceSuggest": "/api/suggest",
 		"datasourceQuery": "/api/query"
 	},
