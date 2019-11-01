@@ -1,0 +1,28 @@
+[
+    {
+        "agents": [
+	    {
+		"port": 41234,
+		"host": "127.0.0.1"
+	    }],
+	"name": "tempSensor",
+	"componentName": "temp",
+	"componentType": "temperature.v1.0",
+	"type": "number",
+	"sigma": 0.1,
+	"startValue": 20
+    },
+    {
+        "agents": [
+	    {
+		"port": 41234,
+		"host": "127.0.0.1"
+	    }],
+	"name": "humSensor",
+	"componentName": "humidity",
+	"componentType": "humidity.v1.0",
+	"type": "number",
+	"sigma": 0.5,
+	"startValue": 50
+    }
+]
