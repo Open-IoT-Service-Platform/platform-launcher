@@ -81,6 +81,23 @@ You can interact with OISP using the `REST API <https://streammyiot.com/ui/publi
 .. warning:: Using the SDKs is the recommended way of interacting with the platform, however, they might not be always up to date with the latest features. Please feel welcome to open issues for any incompatibility problems between the API and the SDKs.
 
 
+Deploying IoT-Agent with test sensor
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The folder ``./kubernetes/iot-agent`` contains an example on how to deploy the oisp-iot-agent
+with Kubernetes. Once there is a running OISP instance, you can create a test user and deploy the agent by
+
+1. Run ``make add-test-user`` to create a user in OISP.
+2. Create or pull containers oisp-testsensor and oisp-iot-agent.
+3. Import agent images ``make import-images-agent`` to import the images to k3s.
+4. Login with the user to the OISP service, create an account and take the activation code from the account main page.
+5. Copy the activation code to ``./kubernetes/iot-agent/global-config/activation-code``
+6. Update the urls in ``./kubernetes/iot-agent/global-config/config.json``
+7. Create the global configmap and secrets by ``(cd ./kubernetes/iot-agent/global-config; sh ./create.sh``
+8. Go to the testsensor directory ``cd ./kubernetes/iot-agent/deploy-testsensor``
+9. To create instance ``n`` on node ``node`` apply the script as follows ``sh ./create node n``
+10. Apply the instance with ``kubectl apply -f node-n/all.yaml``
+
+
 Cert-Manager
 ------------
 

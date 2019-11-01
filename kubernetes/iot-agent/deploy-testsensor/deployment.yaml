@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  <NODENAME><ID>-deployment-testsensor
+  namespace: <NAMESPACE>
+  labels:
+    app: oisp-testsensor-sensor
+spec:
+  selector:
+    matchLabels:
+      app: oisp-testsensor-sensor
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: oisp-testsensor-sensor
+    spec:
+      containers:
+      - name: oisp-iot-agent
+        env:
+          - name: OISP_DEVICE_ID
+            value: "<NODENAME><ID>"
+          - name: OISP_DEVICE_ACTIVATION_CODE
+            valueFrom:
+              secretKeyRef:
+                name: global-devices-secret
+                key: activation-code
+        volumeMounts:
+          - name: oisp-devices-config-volume
+            mountPath: /volume/config
+          - name: oisp-devices-data-volume
+            mountPath: /volume/data
+        image: docker.io/oisp/oisp-iot-agent:latest
+        imagePullPolicy: IfNotPresent
+      - name: oisp-testsensor
+        image: docker.io/oisp/oisp-testsensor:latest
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: LOG_LEVEL
+            value: "verbose"
+        volumeMounts:
+          - name: testsensor-config
+            mountPath: /etc/oisp
+        resources:
+          limits:
+      volumes:
+        - name: oisp-devices-config-volume
+          configMap:
+            name: global-devices-config
+            items:
+            - key: config.json
+              path: config.json
+        - name: testsensor-config
+          configMap:
+            name: testsensor-config
+            items:
+            - key: sensorSpecs.json
+              path: sensorSpecs.json
+        - name: oisp-devices-data-volume
+          persistentVolumeClaim:
+            claimName: <NODENAME><ID>-pvc-device-data
+      nodeSelector:
+         kubernetes.io/hostname: <NODENAME>
