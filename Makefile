@@ -21,6 +21,7 @@ export TEST = 0
 
 COMPOSE_PROJECT_NAME?="oisp"
 CONTAINERS?=$(shell docker-compose --log-level ERROR config --services)
+CONTAINERS_AGENT=oisp-testsensor oisp-iot-agent
 DOCKER_COMPOSE_ARGS?=
 K3S_NODE=$(shell docker ps --format '{{.Names}}' | grep k3s_node)
 export DOCKER_TAG?=latest
@@ -199,6 +200,16 @@ wait-until-ready:
 ##
 import-images:
 	@$(foreach image,$(CONTAINERS), \
+		printf $(image); \
+		docker save oisp/$(image):$(DOCKER_TAG) -o /tmp/$(image) && printf " is saved" && \
+		docker cp /tmp/$(image) $(K3S_NODE):/tmp/$(image) && printf ", copied" && \
+		docker exec -it $(K3S_NODE) ctr image import /tmp/$(image) >> /dev/null && printf ", imported\n"; \
+	)
+
+## import-images-agent: Import images to deploy OISP-Agent
+##
+import-images-agent:
+	@$(foreach image,$(CONTAINERS_AGENT), \
 		printf $(image); \
 		docker save oisp/$(image):$(DOCKER_TAG) -o /tmp/$(image) && printf " is saved" && \
 		docker cp /tmp/$(image) $(K3S_NODE):/tmp/$(image) && printf ", copied" && \
