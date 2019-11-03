@@ -40,7 +40,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
 	tbComponent: componentName,
 	tbConditionOperator: ">=",
 	tbConditionValue: "20", //>=20 temp
-	tbTimelimit: 30, //wait 30s 
+	tbTimelimit: 30, //wait 30s
 	actions: [
             {
                 type: "actuation",
@@ -64,9 +64,9 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     };
     var temperatureValues = [
 	{
-            value: 20,
-            expectedActuation: null,
-	    delay: 0
+        value: 20,
+        expectedActuation: null,
+        delay: 0
 	},
 	{
 	    value: 21,
@@ -114,29 +114,29 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
 	    delay: 1000
 	},
 	{
-	    value: 19,
+	    value: 19.1,
 	    expectedActuation: null,
 	    delay: 2000
 	},
 	{
-	    value: 19,
+	    value: 19.2,
 	    expectedActuation: null,
 	    delay: 4000
 	},
 	{
-	    value: 19,
+	    value: 19.3,
 	    expectedActuation: 0,
 	    delay: 10000
 	},
 	{
-	    value: 20,
+	    value: 20.1,
 	    expectedActuation: null,
 	    delay: 1000
 	},
 	{
-            value: 20,
-            expectedActuation: null,
-            delay: 1000
+        value: 20.2,
+        expectedActuation: null,
+        delay: 1000
         }
     ];
 
@@ -196,7 +196,8 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
 		    var prm1 = helpers.alerts.deleteAlert(userToken, accountId, alerts[0].alertId);
 		    var prm2 = helpers.alerts.deleteAlert(userToken, accountId, alerts[1].alertId);
 		    var prm3 = helpers.alerts.deleteAlert(userToken, accountId, alerts[2].alertId);
-		    return Promise.all([prm1, prm2, prm3]);
+            var prm4 = helpers.alerts.deleteAlert(userToken, accountId, alerts[3].alertId);
+		    return Promise.all([prm1, prm2, prm3, prm4]);
 		})
 		.then(() => {done();})
 		.catch((err) => {done(err);});
