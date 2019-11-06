@@ -1,6 +1,7 @@
 FROM alpine
 
-RUN apk add --update make curl git bash ncurses
+RUN apk add --update make curl git bash ncurses jq py-pip
+RUN pip install shyaml
 WORKDIR /home
 
 # Install kubectl
