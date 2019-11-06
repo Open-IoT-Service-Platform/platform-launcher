@@ -7,7 +7,7 @@ helm init --upgrade --wait
 export DOCKERUSER=${DOCKER_USERNAME}
 export DOCKERPASS=${DOCKER_PASSWORD}
 export NODOCKERLOGIN=true
-if [[ $(helm ls -q | grep oisp) ]]; then
+if [[ $(helm ls -q | grep "${NAME}\$") ]]; then
     CMD="upgrade"
     rm kubernetes/templates/jobs/db_setup.yaml
 else
