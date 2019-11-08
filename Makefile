@@ -43,7 +43,7 @@ NAME?=$(NAMESPACE)
 DEPLOYMENT?=debugger
 DEBUGGER_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep debugger | head -n 1)
 SELECTED_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep $(DEPLOYMENT) | head -n 1)
-DASHBOARD_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
+FRONTEND_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep frontend | head -n 1)
 
 .init:
 	@$(call msg,"Initializing ...");
@@ -167,15 +167,15 @@ undeploy-oisp:
 ## reset-db: Reset database via admin tool in frontend
 ##
 reset-db:
-	kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) --container dashboard -- node admin resetDB
+	kubectl -n $(NAMESPACE) exec $(FRONTEND_POD) --container frontend -- node admin resetDB
 
 ## add-test-user: Add a test user via admin tool in frontend
 ##
 add-test-user:
-	for i in $(shell seq 1 1); do kubectl -n $(NAMESPACE) exec $(DASHBOARD_POD) -c dashboard -- node admin addUser user$${i}@example.com password admin; done;
+	for i in $(shell seq 1 1); do kubectl -n $(NAMESPACE) exec $(FRONTEND_POD) -c frontend -- node admin addUser user$${i}@example.com password admin; done;
 
 ## wait-until-ready: Wait until the platform is up and running
-##     As of now, this is assumed if all dashboard and backend containers
+##     As of now, this is assumed if all frontend and backend containers
 ##     are ready.
 ##
 wait-until-ready:
@@ -187,7 +187,7 @@ wait-until-ready:
         jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
 		do printf "."; sleep 5; done;
 	@printf "\nWaiting for frontend ";
-	@while kubectl -n $(NAMESPACE) get pods -l=app=dashboard -o \
+	@while kubectl -n $(NAMESPACE) get pods -l=app=frontend -o \
         jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
 		do printf "."; sleep 5; done;
 	@printf "\nWaiting for mqtt server";

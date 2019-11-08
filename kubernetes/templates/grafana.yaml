@@ -34,7 +34,7 @@ spec:
         - containerPort: 3000
         env:
         - name: GF_SERVER_DOMAIN
-          value: dashboard
+          value: frontend
         - name: GF_SERVER_ROOT_URL
           value: "%(protocol)s://%(domain)s:%(http_port)s/ui/grafana"
         - name: GF_SERVER_HTTP_PORT
@@ -44,7 +44,7 @@ spec:
         - name: GF_SECURITY_ADMIN_PASSWORD
           value: {{ .Values.grafana.password }}
         - name: DATASOURCE_URL
-          value: http://dashboard:4003
+          value: http://frontend:4003
         resources:
           {{ if .Values.less_resources }}
           limits:
