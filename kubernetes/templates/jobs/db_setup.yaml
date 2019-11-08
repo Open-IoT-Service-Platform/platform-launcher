@@ -40,11 +40,11 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: smtp
-        - name: OISP_DASHBOARDSECURITY_CONFIG
+        - name: OISP_FRONTENDSECURITY_CONFIG
           valueFrom:
             configMapKeyRef:
               name: oisp-config
-              key: dashboard-security
+              key: frontend-security
         - name: OISP_GATEWAY_CONFIG
           valueFrom:
             configMapKeyRef:

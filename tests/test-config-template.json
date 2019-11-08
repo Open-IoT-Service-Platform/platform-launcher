@@ -7,7 +7,7 @@
 	"default_connector": "rest+ws",
 	"connector": {
 		"rest": {
-			"host": "dashboard",
+			"host": "frontend",
 			"port": 4001,
 			"protocol": "http",
 			"strictSSL": false,
@@ -38,7 +38,7 @@
 		}
 	},
 	"grafana": {
-		"host": "dashboard",
+		"host": "frontend",
 		"port": 4002,
 		"protocol": "http",
 		"subPath": "/ui/grafana",
