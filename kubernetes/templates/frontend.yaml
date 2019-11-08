@@ -3,30 +3,30 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: dashboard
-  name: dashboard
+    app: frontend
+  name: frontend
 spec:
   ports:
   - port: 4001
-    name: "dashboard"
+    name: "frontend"
   - port: 4002
     name: "4002"
   - port: 4003
     name: "4003"
   selector:
-    app: dashboard
+    app: frontend
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: dashboard
-  name: dashboard
+    app: frontend
+  name: frontend
 spec:
   replicas: {{ .Values.numberReplicas.frontend }}
   selector:
     matchLabels:
-      app: dashboard
+      app: frontend
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -35,10 +35,10 @@ spec:
   template:
     metadata:
       labels:
-        app: dashboard
+        app: frontend
     spec:
       containers:
-      - name: dashboard
+      - name: frontend
         image: oisp/frontend:{{ .Values.tag }}
         ports:
         - containerPort: 4001
@@ -88,11 +88,11 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: smtp
-        - name: OISP_DASHBOARDSECURITY_CONFIG
+        - name: OISP_FRONTENDSECURITY_CONFIG
           valueFrom:
             configMapKeyRef:
               name: oisp-config
-              key: dashboard-security
+              key: frontend-security
         - name: OISP_GATEWAY_CONFIG
           valueFrom:
             configMapKeyRef:

@@ -31,7 +31,7 @@ PASSWORD2 = "OispTesting2"
 ROLE2 = "admin"
 
 NAMESPACE?=oisp
-DASHBOARD_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep dashboard | head -n 1)
+FRONTEND_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep frontend | head -n 1)
 
 npm-install:
 	@$(call msg,"Installing npm packages ...");
@@ -41,10 +41,10 @@ test: npm-install
 	@export OISP_GRAFANA_PASSWORD=$$(kubectl -n $(NAMESPACE) get -o yaml configmaps oisp-config | shyaml get-value data.grafana | jq -r .adminPassword) && \
 	cat test-config-template.json | envsubst > test-config.json
 	@$(call msg,"Resetting database ...");
-	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin resetDB
+	@kubectl exec -i $(FRONTEND_POD) -c frontend --  node /app/admin resetDB
 	@$(call msg,"Adding a user for testing ...");
-	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
-	@kubectl exec -i $(DASHBOARD_POD) -c dashboard --  node /app/admin addUser $(USERNAME2) $(PASSWORD2) $(ROLE2) > /dev/null
+	@kubectl exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
+	@kubectl exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME2) $(PASSWORD2) $(ROLE2) > /dev/null
 
 ifndef TEST_PREP_ONLY
 	@$(call msg,"Starting the e2e testing ...");

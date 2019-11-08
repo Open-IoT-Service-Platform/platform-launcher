@@ -2,14 +2,17 @@ apiVersion: v1
 data:
   postgres.database: oisp
   postgres.username: oisp
-
+  # This dictionary contains frontendSecurityConfig and dashboardSecurityConfig
+  # for backwards competability. The later can be removed with the comment
+  # after the frontend is updated
   frontend: |
     {
     "postgresConfig": "@@OISP_POSTGRES_CONFIG",
     "redisConfig": "@@OISP_REDIS_CONFIG",
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
     "smtpConfig": "@@OISP_SMTP_CONFIG",
-    "dashboardSecurityConfig": "@@OISP_DASHBOARDSECURITY_CONFIG",
+    "frontendSecurityConfig": "@@OISP_FRONTENDSECURITY_CONFIG",
+    "dashboardSecurityConfig": "@@OISP_FRONTENDSECURITY_CONFIG",
     "backendHostConfig": "@@OISP_BACKENDHOST_CONFIG",
     "websocketUserConfig": "@@OISP_WEBSOCKETUSER_CONFIG",
     "mailConfig": "@@OISP_MAIL_CONFIG",
@@ -109,7 +112,7 @@ data:
     "username": "{{ .Values.smtp.username }}",
     "password": "{{ .Values.smtp.password }}"
     }
-  dashboard-security: |
+  frontend-security: |
     {
     "captcha_test_code": "s09ef48213s8fe8fw8rwer5489wr8wd5",
     "interaction_token_permision_key": "password",
@@ -137,7 +140,7 @@ data:
     "username": "{{ .Values.ruleEngine.username }}",
     "gearpumpUsername": "{{ .Values.ruleEngine.gearpump.username }}",
     "gearpumpPassword": "{{ .Values.ruleEngine.gearpump.password }}",
-    "frontendUri": "dashboard:4001",
+    "frontendUri": "frontend:4001",
     "hbaseConfig": "@@OISP_HBASE_CONFIG",
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
     "zookeeperConfig": "@@OISP_ZOOKEEPER_CONFIG"
@@ -179,7 +182,7 @@ data:
     "mqttBrokerPort": "8883",
     "mqttBrokerUsername": "{{ .Values.mqtt.broker.username }}",
     "mqttBrokerPassword": "{{ .Values.mqtt.broker.password }}",
-    "frontendUri": "dashboard",
+    "frontendUri": "frontend",
     "frontendPort": "4001",
     "frontendSystemUser": "{{ .Values.systemuser.username }}",
     "frontendSystemPassword": "{{ .Values.systemuser.password }}",
