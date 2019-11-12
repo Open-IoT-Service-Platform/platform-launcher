@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
@@ -8,7 +8,7 @@ metadata:
   labels:
     app: debugger
   name: debugger
-  selfLink: /apis/extensions/v1beta1/namespaces/cloudfest-1/deployments/debugger
+  selfLink: /apis/extensions/v1/namespaces/cloudfest-1/deployments/debugger
 spec:
   replicas: {{ .Values.numberReplicas.debugger }}
   selector:
@@ -55,7 +55,7 @@ spec:
 
 ---
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: pod-reader
 rules:
@@ -68,7 +68,7 @@ rules:
 ---
 
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: pod-reader-binding
 subjects:
