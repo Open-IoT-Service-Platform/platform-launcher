@@ -34,6 +34,8 @@ mqtt:
     username: username
     password: password
 
+# Gearpump username and password are legacy, they can be removed safely
+# after the rule-engine is updated to ignore them.
 ruleEngine:
   username: "rule_engine@intel.com"
   password: password
