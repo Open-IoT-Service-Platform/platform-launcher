@@ -51,6 +51,7 @@ replace_config "tsd.network.port" ${PORT} ""
 replace_config "tsd.core.auto_create_metrics" "true" "#"
 add_config "tsd.http.request.enable_chunked" "true"
 add_config "tsd.http.request.cors_domains" "*"
+add_config "tsd.storage.flush_interval" "100"
 
 /opt/opentsdb/src/create_table.sh
 echo "Result $?"
