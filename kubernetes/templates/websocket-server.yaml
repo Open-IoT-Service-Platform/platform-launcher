@@ -43,7 +43,7 @@ spec:
           protocol: TCP
         args:
         - ./wait-for-it.sh
-        - postgres:5432
+        - redis:6379
         - -t
         - "300"
         - --
@@ -71,11 +71,11 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: websocket-server
-        - name: OISP_POSTGRES_CONFIG
+        - name: OISP_REDIS_CONFIG
           valueFrom:
             configMapKeyRef:
               name: oisp-config
-              key: postgres
+              key: redis
         - name: OISP_KAFKA_CONFIG
           valueFrom:
             configMapKeyRef:

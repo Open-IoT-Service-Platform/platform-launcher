@@ -18,9 +18,9 @@ data:
     }
   websocket-server: |
     {
-    "postgresConfig": "@@OISP_POSTGRES_CONFIG",
     "websocketUserConfig": "@@OISP_WEBSOCKETUSER_CONFIG",
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
+    "redisConfig": "@@OISP_REDIS_CONFIG",
     "uri": ""
     }
   backend: |
