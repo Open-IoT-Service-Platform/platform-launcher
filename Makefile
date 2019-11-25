@@ -14,6 +14,7 @@
 # limitations under the License.
 
 SHELL:=/bin/bash
+HELM:=${PWD}/util/helm
 CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 export CURRENT_DIR_BASE:=$(shell basename $(CURRENT_DIR))
 BRANCH:=$(shell git branch| grep \*| cut -d ' ' -f2)
@@ -91,7 +92,7 @@ deploy-oisp-test: check-docker-cred-env
 	@node ./tests/ethereal.js tests/.env;
 	@. tests/.env && \
 	cd kubernetes && \
-	helm install . --name $(NAME) --namespace $(NAMESPACE) \
+	${HELM} install . --name $(NAME) --namespace $(NAMESPACE) \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
 		--set smtp.host="$$SMTP_HOST" \
@@ -118,7 +119,7 @@ deploy-oisp-test: check-docker-cred-env
 ##
 deploy-oisp: check-docker-cred-env
 	@cd kubernetes && \
-	helm install . --name $(NAME) --namespace $(NAMESPACE) \
+	${HELM} install . --name $(NAME) --namespace $(NAMESPACE) \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
 		--set systemuser.password="$(call randomPass)" \
@@ -137,7 +138,7 @@ deploy-oisp: check-docker-cred-env
 upgrade-oisp: check-docker-cred-env
 	@source util/get_oisp_credentials.sh && \
 	cd kubernetes && \
-	helm upgrade $(NAME) . --namespace $(NAMESPACE) \
+	${HELM} upgrade $(NAME) . --namespace $(NAMESPACE) \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
 		--set systemuser.password="$${SYSTEMUSER_PASSWORD}" \
@@ -156,7 +157,7 @@ upgrade-oisp: check-docker-cred-env
 ##
 undeploy-oisp:
 	@cd kubernetes && \
-	helm del $(NAME) --purge && \
+	${HELM} del $(NAME) --purge && \
 	kubectl delete namespace $(NAMESPACE)
 
 # =====

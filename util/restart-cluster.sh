@@ -25,11 +25,13 @@ printf "\n"
 
 printf "\033[1mInstalling helm\n"
 printf -- "---------------\033[0m\n"
-sudo snap install helm --classic
+printf -- "Fck snap\n"
+wget https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz
+tar xvf ~/Downloads/helm-v2.16.1-linux-amd64.tar.gz --strip-components=1 linux-amd64/helm
 
 kubectl -n kube-system create serviceaccount tiller
 kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-helm init --service-account tiller --wait
+./helm init --service-account tiller --wait
 printf "\033[1mHelm initiated succesfully.\033[0m\n"
 
 printf "\n"
