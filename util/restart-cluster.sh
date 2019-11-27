@@ -2,7 +2,7 @@ printf "\033[1mStarting k3s\n"
 printf -- "------------\033[0m\n"
 rm -rf ~/k3s
 mkdir ~/k3s
-curl https://raw.githubusercontent.com/rancher/k3s/master/docker-compose.yml > ~/k3s/docker-compose.yml
+curl https://raw.githubusercontent.com/rancher/k3s/8ff4c3c2562a6912975ed56e317541f6e7b17431/docker-compose.yml > ~/k3s/docker-compose.yml
 # Compose down is necessary for subsequent runs to succeed
 cd ~/k3s && sudo docker-compose down -v && sudo docker-compose up -d
 printf "Waiting for k3s to create kubeconfig file\n"
