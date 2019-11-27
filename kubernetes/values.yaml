@@ -239,3 +239,21 @@ jaeger_tracing: false
 # why: Because selection of subcharts in Helm does not work with "false" values (sad, but true)
 less_resources: true
 production: false
+
+flink:
+  resources:
+    jobmanager:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+    taskmanager:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
