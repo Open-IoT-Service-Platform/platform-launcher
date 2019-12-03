@@ -24,11 +24,6 @@ spec:
   selector:
     matchLabels:
       app: hbase-region
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-    type: RollingUpdate
   template:
     metadata:
       labels:
