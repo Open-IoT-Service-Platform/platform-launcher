@@ -90,8 +90,9 @@ check-docker-cred-env:
 deploy-oisp-test: check-docker-cred-env
 	@node ./tests/ethereal.js tests/.env;
 	@. tests/.env && \
+	kubectl create namespace oisp && \
 	cd kubernetes && \
-	helm install . --name $(NAME) --namespace $(NAMESPACE) \
+	helm install $(NAME) . --namespace $(NAMESPACE) \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
 		--set smtp.host="$$SMTP_HOST" \
@@ -118,7 +119,7 @@ deploy-oisp-test: check-docker-cred-env
 ##
 deploy-oisp: check-docker-cred-env
 	@cd kubernetes && \
-	helm install . --name $(NAME) --namespace $(NAMESPACE) \
+	helm install $(NAME) . --namespace $(NAMESPACE) \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
 		--set systemuser.password="$(call randomPass)" \
@@ -156,7 +157,6 @@ upgrade-oisp: check-docker-cred-env
 ##
 undeploy-oisp:
 	@cd kubernetes && \
-	helm del $(NAME) --purge && \
 	kubectl delete namespace $(NAMESPACE)
 
 # =====
