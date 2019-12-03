@@ -23,18 +23,6 @@ printf "\033[1mGot storage classes:\033[0m\n"
 kubectl get storageclass
 printf "\n"
 
-printf "\033[1mInstalling helm\n"
-printf -- "---------------\033[0m\n"
-cd /tmp
-wget https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz
-tar xf helm-v2.16.1-linux-amd64.tar.gz
-sudo cp linux-amd64/helm /usr/bin/helm
-
-kubectl -n kube-system create serviceaccount tiller
-kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-helm init --service-account tiller --wait
-printf "\033[1mHelm initiated succesfully.\033[0m\n"
-
 printf "\n"
 printf "\033[1mInstalling k8s operators\n"
 printf -- "------------------------\033[0m\n"
