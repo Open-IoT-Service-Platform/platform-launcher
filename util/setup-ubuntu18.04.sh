@@ -26,6 +26,16 @@ export PATH=$PATH:/snap/bin
 kubectl version --short
 printf "\n"
 
+CURR_DIR=$(pwd)
+printf "\033[1mInstalling helm\n"
+printf -- "---------------\033[0m\n"
+cd /tmp
+wget https://get.helm.sh/helm-v3.0.0-linux-amd64.tar.gz
+tar xf helm-v3.0.0-linux-amd64.tar.gz
+sudo cp linux-amd64/helm /usr/bin/helm
+printf "\033[1mHelm installed succesfully.\033[0m\n"
+cd $CURR_DIR
+
 printf "\033[1mInstalling test dependencies\n"
 printf -- "----------------------------\033[0m\n"
 sudo pip install shyaml
