@@ -114,8 +114,8 @@ data:
     }
   gateway: |
     {
-    "password": "{{ .Values.systemuser.username }}",
-    "username": "{{ .Values.systemuser.password }}"
+    "username": "{{ .Values.systemuser.username }}",
+    "password": "{{ .Values.systemuser.password }}"
     }
   backend-host: |
     {

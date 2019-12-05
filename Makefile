@@ -90,7 +90,7 @@ check-docker-cred-env:
 deploy-oisp-test: check-docker-cred-env
 	@node ./tests/ethereal.js tests/.env;
 	@. tests/.env && \
-	kubectl create namespace oisp && \
+	kubectl create namespace $(NAMESPACE) && \
 	cd kubernetes && \
 	helm install $(NAME) . --namespace $(NAMESPACE) \
 		--set imageCredentials.username="$$DOCKERUSER" \
