@@ -5,16 +5,16 @@ imageCredentials:
     password: invalid_password
 
 smtp:
-    host: smtp.ethereal.email
-    port: 586
+    host: debugger
+    port: 2525
     username: username
     password: password
 
 imap:
     host: imap.ethereal.email
     port: 993
-    username: username
-    password: password
+    username: imaptest@streammyiot.com
+    password: P@ssword123!
 
 numberReplicas:
     frontend: 1
