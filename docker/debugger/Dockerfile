@@ -13,6 +13,7 @@ RUN npm install --global n
 RUN n 8
 
 RUN pip3 install locustio oisp shyaml
+RUN npm install -g fake-smtp-server
 
 ENV OISP_REMOTE https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 

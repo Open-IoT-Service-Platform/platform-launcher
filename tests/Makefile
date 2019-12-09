@@ -41,10 +41,10 @@ test: npm-install
 	@export OISP_GRAFANA_PASSWORD=$$(kubectl -n $(NAMESPACE) get -o yaml configmaps oisp-config | shyaml get-value data.grafana | jq -r .adminPassword) && \
 	cat test-config-template.json | envsubst > test-config.json
 	@$(call msg,"Resetting database ...");
-	@kubectl exec -i $(FRONTEND_POD) -c frontend --  node /app/admin resetDB
+	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin resetDB
 	@$(call msg,"Adding a user for testing ...");
-	@kubectl exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
-	@kubectl exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME2) $(PASSWORD2) $(ROLE2) > /dev/null
+	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
+	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME2) $(PASSWORD2) $(ROLE2) > /dev/null
 
 ifndef TEST_PREP_ONLY
 	@$(call msg,"Starting the e2e testing ...");
