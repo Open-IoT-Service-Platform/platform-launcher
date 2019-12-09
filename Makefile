@@ -88,37 +88,14 @@ check-docker-cred-env:
 ##     This also takes a $DOCKER_TAG parameter
 ##
 deploy-oisp-test: check-docker-cred-env
-	@node ./tests/ethereal.js tests/.env;
-	@. tests/.env && \
-	kubectl create namespace $(NAMESPACE) && \
-	cd kubernetes && \
-	helm install $(NAME) . --namespace $(NAMESPACE) \
-		--set imageCredentials.username="$$DOCKERUSER" \
-		--set imageCredentials.password="$$DOCKERPASS" \
-		--set smtp.host="$$SMTP_HOST" \
-		--set smtp.port="$$SMTP_PORT" \
-		--set smtp.username="$$SMTP_USERNAME" \
-		--set smtp.password="$$SMTP_PASSWORD" \
-		--set imap.host="$$IMAP_HOST" \
-		--set imap.port="$$IMAP_PORT" \
-		--set imap.username="$$IMAP_USERNAME" \
-		--set imap.password="$$IMAP_PASSWORD" \
-		--set systemuser.password="$(call randomPass)" \
-		--set grafana.password="$(call randomPass)" \
-		--set mqtt.broker.password="$(call randomPass)" \
-		--set ruleEngine.password="$(call randomPass)" \
-		--set ruleEngine.gearpump.password="$(call randomPass)" \
-		--set websocketServer.password="$(call randomPass)" \
-		--set stolon.pgSuperuserPassword="$(call randomPass)" \
-		--set postgres.password="$(call randomPass)" \
-		--set numberReplicas.debugger=1 \
-		--set tag=$(DOCKER_TAG) \
-		$(HELM_ARGS)
+	make deploy-oisp
+	kubectl -n oisp scale deployment debugger --replicas=1
 
 ## deploy-oisp: Deploy repository as HELM chart
 ##
 deploy-oisp: check-docker-cred-env
 	@cd kubernetes && \
+	kubectl create namespace $(NAMESPACE) && \
 	helm install $(NAME) . --namespace $(NAMESPACE) \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
@@ -239,6 +216,8 @@ restart-cluster:
 prepare-tests: wait-until-ready
 	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger -- /bin/bash -c "rm -rf *"
 	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger -- /bin/bash -c "rm -rf .* || true"
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger -- /bin/bash -c "pkill node || true"
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger -- fake-smtp-server -s 2525 > /dev/null 2>&1 &
 	kubectl -n $(NAMESPACE) cp $(CURRENT_DIR) $(DEBUGGER_POD):/home -c debugger
 
 ## test: Run tests
