@@ -89,7 +89,7 @@ check-docker-cred-env:
 ##
 deploy-oisp-test: check-docker-cred-env
 	make deploy-oisp
-	kubectl -n oisp scale deployment debugger --replicas=1
+	kubectl -n $(NAMESPACE) scale deployment debugger --replicas=1
 
 ## deploy-oisp: Deploy repository as HELM chart
 ##
@@ -97,6 +97,7 @@ deploy-oisp: check-docker-cred-env
 	@cd kubernetes && \
 	kubectl create namespace $(NAMESPACE) && \
 	helm install $(NAME) . --namespace $(NAMESPACE) \
+		--timeout 600s \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
 		--set systemuser.password="$(call randomPass)" \
@@ -116,6 +117,7 @@ upgrade-oisp: check-docker-cred-env
 	@source util/get_oisp_credentials.sh && \
 	cd kubernetes && \
 	helm upgrade $(NAME) . --namespace $(NAMESPACE) \
+		--timeout 600s \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
 		--set systemuser.password="$${SYSTEMUSER_PASSWORD}" \
