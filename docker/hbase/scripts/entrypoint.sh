@@ -31,12 +31,7 @@ fi
 
 rm $RS_CONF
 for rs in $REGIONSERVERS; do
-    RS_HOSTNAME=$(ssh root@${rs} '(cat /etc/hostname)')
-    RS_HOSTS=$(ssh root@${rs} "(grep ${RS_HOSTNAME} /etc/hosts)")
-    echo $RS_HOSTNAME >> $RS_CONF
-    if ! grep ${RS_HOSTNAME} /etc/hosts; then
-	echo $RS_HOSTS >> /etc/hosts
-    fi
+    echo $rs >> $RS_CONF
 done
 
 /opt/hbase/bin/start-hbase.sh

@@ -21,6 +21,10 @@ numberReplicas:
     backend: 1
     debugger: 0
 
+hbaseScale:
+  dataNodes: 3
+  regionServers: "hbase-region-0.hbase-region hbase-region-1.hbase-region hbase-region-2.hbase-region"
+  
 minio:
   accesskey: minio
   secretkey: minio123

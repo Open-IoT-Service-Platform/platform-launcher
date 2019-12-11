@@ -2,6 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: hdfs-datanode
+  labels:
+    app: hdfs-datanode
 spec:
   ports:
   - name: "8080"
@@ -17,7 +19,7 @@ metadata:
   name: hdfs-datanode
 spec:
   serviceName: hdfs-datanode
-  replicas: 1
+  replicas: {{ .Values.hbaseScale.dataNodes }}
   selector:
     matchLabels:
       app: hdfs-datanode
@@ -48,10 +50,18 @@ spec:
         volumeMounts:
         - mountPath: /opt/hdfs
           name: hdfs-datanode-data
+        - name: hdfs-site
+          mountPath: /usr/local/hadoop-2.8.3/etc/hadoop
       volumes:
       - name: hdfs-datanode-data
         persistentVolumeClaim:
           claimName: hdfs-datanode-data
+      - name: hdfs-site
+        configMap:
+          name: hdfs-config
+          items:
+          - key: hdfs-site.yaml
+            path: hdfs-site.yaml
   volumeClaimTemplates:
   - metadata:
       name: hdfs-datanode-data
