@@ -58,7 +58,7 @@ spec:
           {{ end }}
         env:
         - name: REGIONSERVERS
-          value: hbase-region-0.hbase-region
+          value: {{ .Values.hbaseScale.regionServers }}
         - name: ZOOKEEPER
           value: zookeeper
         - name: HDFS_NAMENODE
