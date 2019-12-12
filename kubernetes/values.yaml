@@ -20,6 +20,7 @@ numberReplicas:
     frontend: 1
     backend: 1
     debugger: 0
+    minio: 2
 
 hbaseScale:
   dataNodes: 3

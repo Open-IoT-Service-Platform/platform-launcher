@@ -25,7 +25,11 @@ kind: MinIOInstance
 metadata:
   name: minio
 spec:
+  {{ if .Values.less_resources }}
   replicas: 1
+  {{ else }}
+  replicas: {{ .Values.numberReplicas.minio }}
+  {{ end }}
   ## Add metadata to the pods created by the StatefulSet
   metadata:
     labels:
