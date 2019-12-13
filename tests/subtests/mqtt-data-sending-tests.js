@@ -328,20 +328,20 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager, mqtt
             var password = process.env.PASSWORD;
 
             promtests.authGetToken(username, password)
-                .then((userToken) => promtests.createDevice(newDeviceName, newDeviceId, userToken, accountId))
+                .then((grant) => promtests.createDevice(newDeviceName, newDeviceId, grant.token, accountId))
                 .then(() => promtests.activateDevice(userToken, accountId, newDeviceId))
                 .then((token) => {
                     deviceToken = token.deviceToken;
                 })
                 .then(() =>
                     promtests.addComponent(componentNames[0], componentTypes[0],
-                        deviceToken, accountId, newDeviceId))
+                        userToken, accountId, newDeviceId))
                 .then((id) => { componentId[0] = id; })
                 .then(() => promtests.addComponent(componentNames[1], componentTypes[1],
-                    deviceToken, accountId, newDeviceId))
+                    userToken, accountId, newDeviceId))
                 .then((id) => { componentId[1] = id; })
                 .then(() => promtests.addComponent(componentNames[2], componentTypes[2],
-                    deviceToken, accountId, newDeviceId))
+                    userToken, accountId, newDeviceId))
                 .then((id) => { componentId[2] = id; })
                 .then(() => done())
                 .catch((err) => { done(err); });

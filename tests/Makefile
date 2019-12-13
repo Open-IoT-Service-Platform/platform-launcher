@@ -24,11 +24,9 @@ CURRENT_DIR  :=  $(patsubst %/,%,$(dir $(MAKEFILE_DIR)))
 
 USERNAME = "oisp@testing.com"
 PASSWORD = "OispTesting1"
-ROLE = "admin"
 
 USERNAME2 = "oisp2@testing.com"
 PASSWORD2 = "OispTesting2"
-ROLE2 = "admin"
 
 NAMESPACE?=oisp
 FRONTEND_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep frontend | head -n 1)
@@ -41,10 +39,11 @@ test: npm-install
 	@export OISP_GRAFANA_PASSWORD=$$(kubectl -n $(NAMESPACE) get -o yaml configmaps oisp-config | shyaml get-value data.grafana | jq -r .adminPassword) && \
 	cat test-config-template.json | envsubst > test-config.json
 	@$(call msg,"Resetting database ...");
+	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin resetKeycloakUsers
 	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin resetDB
 	@$(call msg,"Adding a user for testing ...");
-	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME) $(PASSWORD) $(ROLE) > /dev/null
-	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME2) $(PASSWORD2) $(ROLE2) > /dev/null
+	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME) $(PASSWORD) > /dev/null
+	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME2) $(PASSWORD2) > /dev/null
 
 ifndef TEST_PREP_ONLY
 	@$(call msg,"Starting the e2e testing ...");

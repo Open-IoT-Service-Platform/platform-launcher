@@ -26,6 +26,13 @@ spec:
           backend:
             serviceName: frontend
             servicePort: 4002
+  - host: {{ .Values.hosts.frontend }}
+    http:
+      paths:
+      - path: /keycloak
+        backend:
+          serviceName: oisp-keycloak-http
+          servicePort: 4080
   - host: {{ .Values.hosts.websocketserver }}
     http:
       paths:
