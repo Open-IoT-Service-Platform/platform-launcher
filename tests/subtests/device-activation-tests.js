@@ -1,10 +1,11 @@
-var test = function(userToken, accountId1) {
+var test = function(token, accountId1) {
     var promtests = require('./promise-wrap');
     var activationCode1;
     var activationCode2;
     var accountId2;
     var deviceId1 = "ACTIVATION-TEST1";
     var deviceId2 = "ACTIVATION-TEST2";
+    var userToken = token;
 
     return {
         "prepareSetup": function(done) {
@@ -28,6 +29,8 @@ var test = function(userToken, accountId1) {
         "activateAnotherDeviceWithSameIdInAnotherAccount": function(done) {
             promtests.createAccount("ExistingDeviceIdTest", userToken)
             .then((res) => { accountId2 = res.id; })
+            .then(() => promtests.authGetToken(process.env.USERNAME, process.env.PASSWORD))
+            .then((grant) => { userToken = grant.token; })
             .then(() => promtests.createDevice("device1", deviceId1, userToken, accountId2))
             .then(() => promtests.getAccountActivationCode(accountId2, userToken))
             .then((res) => { activationCode2 = res.activationCode; })

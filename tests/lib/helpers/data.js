@@ -192,6 +192,48 @@ function submitDataList(valueList, deviceToken, accountId, deviceId, cidList, cb
     });
 }
 
+function submitDataListAsUser(valueList, userToken, accountId, deviceId, cidList, cb) {
+    if (!cb) {
+        throw "Callback required";
+    }
+    var ts = new Date().getTime();
+
+    var data = {
+        userToken: userToken,
+        accountId: accountId,
+        deviceId: deviceId,
+        body: {
+            accountId: accountId,
+            on: valueList[0].ts,
+            data: []
+        }
+    }
+
+    valueList.forEach(function(element){
+      var toPush = {
+        componentId: cidList[element.component],
+        value: (typeof element.value === 'string' || Buffer.isBuffer(element.value)) ? element.value : element.value.toString(),
+        on: element.ts
+      }
+      if (element.loc) {
+        toPush.loc = element.loc;
+      }
+      if (element.attributes !== undefined){
+        toPush.attributes = element.attributes;
+      }
+      data.body.data.push(toPush);
+    });
+    api.data.submitDataAsUser(data, function(err, response) {
+        if (err) {
+            cb(err)
+        } else {
+            if (response) {
+                cb(null, response)
+            }
+        }
+    });
+}
+
 function searchDataAdvanced(from, to, userToken, accountId, deviceId, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly, cb) {
     if (!cb) {
         throw "Callback required";
@@ -236,5 +278,6 @@ module.exports={
     searchData: searchData,
     submitData: submitData,
     submitDataList: submitDataList,
+    submitDataListAsUser: submitDataListAsUser,
     searchDataAdvanced: searchDataAdvanced
 }

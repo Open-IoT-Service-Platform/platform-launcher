@@ -13,6 +13,8 @@ spec:
     name: "4002"
   - port: 4003
     name: "4003"
+  - port: 4004
+    name: "4004"
   selector:
     app: frontend
 ---
@@ -93,6 +95,11 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: frontend-security
+        - name: OISP_KEYCLOAK_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: keycloak
         - name: OISP_GATEWAY_CONFIG
           valueFrom:
             configMapKeyRef:

@@ -25,7 +25,7 @@ numberReplicas:
 hbaseScale:
   dataNodes: 3
   regionServers: "hbase-region-0.hbase-region hbase-region-1.hbase-region hbase-region-2.hbase-region"
-  
+
 minio:
   accesskey: minio
   secretkey: minio123
@@ -66,11 +66,93 @@ stolon:
   pgSuperuserName: superuser
   pgSuperuserPassword: supersecret
 
+# db values must be same with the postgres config, see stolon values
+keycloak:
+  init:
+    resources:
+      requests:
+        cpu: "50m"
+  keycloak:
+    image:
+      repository: jboss/keycloak
+      tag: 8.0.1
+    basepath: keycloak
+    extraArgs: "-Dkeycloak.profile.feature.token_exchange=enabled -Dkeycloak.profile.feature.admin_fine_grained_authz=enabled -Dkeycloak.profile.feature.upload_scripts=enabled -Dkeycloak.import=/opt/jboss/realms/oisp-realm.json"
+    extraEnv: |
+      - name: PROXY_ADDRESS_FORWARDING
+        value: "true"
+      - name: OISP_FRONTEND_DEVICE_ACCOUNT_ENDPOINT
+        value: "http://frontend:4004/keycloak/activationcode/:activationCode/devices/:deviceUID/account"
+      - name: OISP_FRONTEND_USER_ACCOUNT_ENDPOINT
+        value: "http://frontend:4004/keycloak/users/:userId/accounts"
+      - name: OISP_FRONTEND_SECRET
+        valueFrom:
+          configMapKeyRef:
+            name: oisp-config
+            key: keycloak-frontend-secret
+    resources:
+      requests:
+        cpu: "50m"
+    startupScripts:
+      startup.sh: |
+        #!/bin/sh
+        echo "Database address is set to: $DB_ADDR"
+        echo "OISP Frontend User Account Endpoint is set to: $OISP_FRONTEND_USER_ACCOUNT_ENDPOINT"
+        echo "OISP Frontend Device Account Endpoint is set to: $OISP_FRONTEND_DEVICE_ACCOUNT_ENDPOINT"
+        REALM_DIR="/opt/jboss/realms/oisp-realm.json"
+        PRIVATE_KEY=$(cat /keys/private.pem)
+        PRIVATE_KEY=${PRIVATE_KEY//$'\n'/\\\\n}
+        PRIVATE_KEY=${PRIVATE_KEY//\//\\\/}
+        PUBLIC_CERT=$(cat /keys/x509.pem)
+        PUBLIC_CERT=${PUBLIC_CERT//$'\n'/\\\\n}
+        PUBLIC_CERT=${PUBLIC_CERT//\//\\\/}
+        mkdir /opt/jboss/realms
+        cp /realms/oisp-realm.json /opt/jboss/realms/oisp-realm.json
+        sed -i "s/{{ INSERT-PRIVATE-KEY }}/${PRIVATE_KEY}/" ${REALM_DIR}
+        sed -i "s/{{ INSERT-PUBLIC-CERT }}/${PUBLIC_CERT}/" ${REALM_DIR}
+        # OISP_FRONTEND_SECRET is already defined in the environment variables
+        sed -i "s/{{ INSERT-OISP-FRONTEND-SECRET }}/${OISP_FRONTEND_SECRET}/" ${REALM_DIR}
+    extraVolumes: |
+      - name: oisp-realm-secret
+        secret:
+          secretName: oisp-realm-secret
+      - name: jwt-keys
+        secret:
+          secretName: oisp-secrets
+          items:
+          - key: jwt.x509
+            path: x509.pem
+          - key: jwt.privatekey
+            path: private.pem
+          defaultMode: 420
+    extraVolumeMounts: |
+      - name: oisp-realm-secret
+        mountPath: "/realms"
+        readOnly: false
+      - name: jwt-keys
+        mountPath: "/keys"
+        readOnly: true
+    service:
+      httpPort: 4080
+      httpsPort: 4043
+    username: keycloak
+    password: intel123
+    persistence:
+      deployPostgres: false
+      dbVendor: postgres
+      dbName: oisp
+      dbHost: postgres
+      dbPort: "5432"
+      dbUser: superuser
+      dbPassword: supersecret
+  frontend:
+    secret: "supersecret"
+
 postgres:
   username: oisp_user
   password: supersecret
 
-# Docket image tag
+# Docker image tag
 tag: latest
 
 # Enable jaeger tracing

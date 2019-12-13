@@ -24,6 +24,8 @@ CONTAINERS?=$(shell docker-compose --log-level ERROR config --services)
 CONTAINERS_AGENT=oisp-testsensor oisp-iot-agent
 DOCKER_COMPOSE_ARGS?=
 K3S_NODE=$(shell docker ps --format '{{.Names}}' | grep k3s_node)
+KEYCLOAK_HELM_REPO:="https://codecentric.github.io/helm-charts"
+KEYCLOAK_HELM_REPO_NAME:="codecentric"
 export DOCKER_TAG?=latest
 export GIT_COMMIT_PLATFORM_LAUNCHER=$(git rev-parse HEAD)
 export GIT_COMMIT_FRONTEND=$(git -C oisp-frontend rev-parse HEAD)
@@ -96,6 +98,10 @@ deploy-oisp-test: check-docker-cred-env
 deploy-oisp: check-docker-cred-env
 	@cd kubernetes && \
 	kubectl create namespace $(NAMESPACE) && \
+	kubectl -n $(NAMESPACE) create secret generic oisp-realm-secret --from-file=./../keycloak/oisp-realm.json && \
+	POSTGRES_PASSWORD="$(call randomPass)" && \
+	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
+	helm dependency update --namespace $(NAMESPACE) && \
 	helm install $(NAME) . --namespace $(NAMESPACE) \
 		--timeout 600s \
 		--set imageCredentials.username="$$DOCKERUSER" \
@@ -106,8 +112,10 @@ deploy-oisp: check-docker-cred-env
 		--set ruleEngine.password="$(call randomPass)" \
 		--set ruleEngine.gearpump.password="$(call randomPass)" \
 		--set websocketServer.password="$(call randomPass)" \
-		--set stolon.pgSuperuserPassword="$(call randomPass)" \
+		--set stolon.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
+		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_PASSWORD}" \
 		--set postgres.password="$(call randomPass)" \
+		--set keycloak.keycloak.password="$(call randomPass)" \
 		--set tag=$(DOCKER_TAG) \
 		$(HELM_ARGS)
 
@@ -116,6 +124,10 @@ deploy-oisp: check-docker-cred-env
 upgrade-oisp: check-docker-cred-env
 	@source util/get_oisp_credentials.sh && \
 	cd kubernetes && \
+	kubectl -n $(NAMESPACE) delete secret oisp-realm-secret && \
+	kubectl -n $(NAMESPACE) create secret generic oisp-realm-secret --from-file=./../keycloak/oisp-realm.json && \
+	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
+	helm dependency update --namespace $(NAMESPACE) && \
 	helm upgrade $(NAME) . --namespace $(NAMESPACE) \
 		--timeout 600s \
 		--set imageCredentials.username="$$DOCKERUSER" \
@@ -127,7 +139,9 @@ upgrade-oisp: check-docker-cred-env
 		--set ruleEngine.gearpump.password="$${RULEENGINE_GEARPUMP_PASSWORD}" \
 		--set websocketServer.password="$${WEBSOCKETSERVER_PASSWORD}" \
 		--set stolon.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
+		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_SU_PASSWORD}" \
 		--set postgres.password="$${POSTGRES_PASSWORD}" \
+		--set keycloak.keycloak.password="$${KEYCLOAK_PASSWORD}" \
 		--set tag=$(DOCKER_TAG) \
 		$(HELM_ARGS)
 

@@ -19,78 +19,61 @@
 
 "use strict";
 
-var test = function(userToken, deviceToken) {
+var test = function(username, password, userToken, accountId, deviceId) {
 
     var chai = require('chai');
     var assert = chai.assert;
     var promtests = require('./promise-wrap');
 
-    var oldUserRefreshToken;
+    var oldUserToken;
+    var oldDeviceToken;
     var userRefreshToken;
     var newUserToken;
-    var oldDeviceRefreshToken;
     var deviceRefreshToken;
     var newDeviceToken;
 
     return {
     "getRefreshTokensForDeviceAndUser": function(done) {
-        promtests.getRefreshToken(userToken)
+        promtests.authGetToken(username, password)
         .then(response => {
             userRefreshToken = response.refreshToken;
+            oldUserToken = response.token;
             assert.notEqual(userRefreshToken, null, "Cannot get user refresh token.");
-        }).then(() => promtests.getRefreshToken(deviceToken))
+        }).then(() => promtests.activateDevice(oldUserToken, accountId, deviceId))
         .then(response => {
             deviceRefreshToken = response.refreshToken;
+            oldDeviceToken = response.deviceToken;
             assert.notEqual(deviceRefreshToken, null, "Cannot get device refresh token.");
         }).then(() => { done(); })
         .catch((err) => { done(err); });
     },
     "refreshTokensForDeviceAndUser": function(done) {
-        promtests.refreshAuthToken(userToken, userRefreshToken)
+        promtests.refreshAuthToken(oldUserToken, userRefreshToken)
         .then(response => {
-            oldUserRefreshToken = userRefreshToken;
-            userRefreshToken = response.refreshToken;
             newUserToken = response.jwt;
-            assert.notEqual(userRefreshToken, null, "Device refresh token has not refreshed itself.");
             return promtests.authTokenInfo(newUserToken);
         }).then(response => {
-            return promtests.refreshAuthToken(deviceToken, deviceRefreshToken);
+            if (!response) {
+                done('Could not get refreshed user token info: ' + response)
+            }
+            return promtests.refreshAuthToken(oldDeviceToken, deviceRefreshToken);
         }).then(response => {
-            oldDeviceRefreshToken = deviceRefreshToken;
-            deviceRefreshToken = response.refreshToken;
             newDeviceToken = response.jwt;
-            assert.notEqual(deviceRefreshToken, null, "Device refresh token has not refreshed itself.");
-            return promtests.refreshAuthToken(newDeviceToken, oldDeviceRefreshToken)
-                .then(() => {
-                    throw "Old refresh token can still be used."
-                }).catch(err => {
-                    Promise.resolve();
-                });
-        }).then(() => { done(); })
-    },
-    "revokeRefreshToken": function(done) {
-        promtests.revokeRefreshToken(deviceToken, deviceRefreshToken)
-        .then(response => {
-            return promtests.refreshAuthToken(newDeviceToken, deviceRefreshToken)
-                .then(() => {
-                    throw "Revoked refresh token can still be used."
-                }).catch(err => {
-                    Promise.resolve();
-                });
-        }).then(() => { done(); });
-    },
-    "cleanup": function(done) {
-        promtests.revokeRefreshToken(newUserToken, userRefreshToken)
-        .then(() => { done(); });
+            return promtests.authTokenInfo(newDeviceToken);
+        }).then((response) => {
+            if (response) {
+                done();
+            } else {
+                done('Could not get refreshed device token info: ' + response);
+            }
+        });
     }
     };
 };
 
 var descriptions = {
     "getRefreshTokensForDeviceAndUser": "Create a refresh token for given device and user",
-    "refreshTokensForDeviceAndUser": "Use refresh token to get new JWT tokens for device and user",
-    "revokeRefreshToken": "Revoke a refresh token and test if it can be still used",
-    "cleanup": "Cleanup refresh tokens"
+    "refreshTokensForDeviceAndUser": "Use refresh token to get new JWT tokens for device and user"
 };
 
 module.exports = {
