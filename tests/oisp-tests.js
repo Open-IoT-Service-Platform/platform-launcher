@@ -27,6 +27,7 @@ var mqttConnector = oispSdk(mqttConfig).lib.proxies.getProxyConnector('mqtt');
 var kafka = require('kafka-node');
 var cfenvReader = require('./lib/cfenv/reader');
 var helpers = require("./lib/helpers");
+var promtests = require('./subtests/promise-wrap');
 var colors = require('colors');
 var exec = require('child_process').exec;
 var gm = require('gm').subClass({imageMagick: true});
@@ -269,6 +270,7 @@ var receiverToken;
 var receiveruserId;
 var receiveraccountId;
 var userId;
+var userId2;
 var accountId;
 var deviceId;
 var deviceToken;
@@ -277,6 +279,21 @@ var rulelist;
 var componentParamName;
 var firstObservationTime;
 
+var getNewUserTokens = function(done) {
+    var username = process.env.USERNAME;
+    var password = process.env.PASSWORD;
+    var username2 = process.env.USERNAME2;
+    var password2 = process.env.PASSWORD2;
+    return promtests.authGetToken(username, password).then(grant => {
+        userToken = grant.token;
+        return promtests.authGetToken(username2, password2);
+    }).then(grant => {
+        userToken2 = grant.token;
+        done();
+    }).catch(err => {
+        done(err);
+    });
+};
 
 process.stdout.write("_____________________________________________________________________\n".bold);
 process.stdout.write("                                                                     \n");
@@ -387,22 +404,8 @@ describe("get authorization and manage user ...\n".bold, function() {
         assert.isNotEmpty(username, "no username2 provided");
         assert.isNotEmpty(password, "no password2 provided");
 
-        helpers.auth.login(username, password, function(err, token) {
-            if (err) {
-                done(new Error("Cannot authenticate: " + err));
-            } else {
-                userToken = token;
-                helpers.auth.login(username2, password2, function(err, token) {
-                    if (err) {
-                        done(new Error("Cannot authenticate: " + err));
-                    } else {
-                        userToken2 = token;
-                    }
-                    done();
-                });
-            }
-        })
-    })
+        getNewUserTokens(done);
+    });
 
     it('Shall get token info', function (done) {
         helpers.auth.tokenInfo(userToken, function (err, response) {
@@ -414,9 +417,15 @@ describe("get authorization and manage user ...\n".bold, function() {
                     done(new Error("get null user id"));
                 }
                 else {
-                    userId = response.payload.sub
+                    userId = response.payload.sub;
                 }
-                done();
+                helpers.auth.tokenInfo(userToken2, function(err, response) {
+                    if (err) {
+                        return done(err);
+                    }
+                    userId2 = response.payload.sub;
+                    done();
+                });
             }
         })
     })
@@ -464,7 +473,7 @@ describe("Creating account and device ...\n".bold, function() {
             } else {
                 assert.equal(response.name, accountName, "accounts name is wrong");
                 accountId = response.id;
-                done();
+                getNewUserTokens(done);
             }
         })
     })
@@ -683,23 +692,20 @@ describe("Device Activation Subtests".bold, function() {
     }).timeout(10000);
 });
 
+
 describe("Refresh Token Subtests".bold, function() {
     var test;
     var descriptions = require("./subtests/refresh-token-tests").descriptions;
     it(descriptions.getRefreshTokensForDeviceAndUser, function(done) {
-        test = require("./subtests/refresh-token-tests").test(userToken, deviceToken);
+        test = require("./subtests/refresh-token-tests")
+            .test(process.env.USERNAME, process.env.PASSWORD, userToken, accountId, deviceId);
         test.getRefreshTokensForDeviceAndUser(done);
     }).timeout(10000);
     it(descriptions.refreshTokensForDeviceAndUser, function(done) {
         test.refreshTokensForDeviceAndUser(done);
     }).timeout(10000);
-    it(descriptions.revokeRefreshToken, function(done) {
-        test.revokeRefreshToken(done);
-    });
-    it(descriptions.cleanup, function(done) {
-        test.cleanup(done);
-    }).timeout(10000);
 });
+
 
 describe("Managing components catalog ... \n".bold, function() {
 
@@ -792,7 +798,7 @@ describe("Creating and getting components ... \n".bold, function() {
     it('Shall add device a component', function(done) {
         var addDeviceComponent = function(component) {
             if ( component ) {
-                helpers.devices.addDeviceComponent(component.name, component.type, deviceToken, accountId, deviceId, function(err, id) {
+                helpers.devices.addDeviceComponent(component.name, component.type, userToken, accountId, deviceId, function(err, id) {
                     if (err) {
                         done(new Error("Cannot create component  " +  component + " : " +err));
                     } else {
@@ -817,7 +823,7 @@ describe("Creating and getting components ... \n".bold, function() {
     it('Shall not add device a component with the name that a component of the device already has, or crash', function(done) {
         var addDeviceComponent = function(component) {
             if ( component ) {
-                helpers.devices.addDeviceComponent(component.name, component.type, deviceToken, accountId, deviceId, function(err, id) {
+                helpers.devices.addDeviceComponent(component.name, component.type, userToken, accountId, deviceId, function(err, id) {
                     if (err) {
                         addDeviceComponent(component.next);
                     } else {
@@ -835,7 +841,7 @@ describe("Creating and getting components ... \n".bold, function() {
 
     it('Shall add device an actuator', function(done) {
 
-        helpers.devices.addDeviceComponent(actuatorName, actuatorType, deviceToken, accountId, deviceId, function(err, id) {
+        helpers.devices.addDeviceComponent(actuatorName, actuatorType, userToken, accountId, deviceId, function(err, id) {
             if (err) {
                 done(new Error("Cannot create actuator: " + err));
             } else {
@@ -887,13 +893,12 @@ describe("Creating and getting components ... \n".bold, function() {
     })
 
     it('Shall get list of actuations', function(done) {
-
         var parameters = {
             from: 0,
             to: undefined
         }
 
-        helpers.control.pullActuations(parameters, deviceToken, accountId, deviceId, actuatorId, function(err, response) {
+        helpers.control.pullActuations(parameters, userToken, accountId, deviceId, actuatorId, function(err, response) {
             if (err) {
                 done(new Error("get list of actuations: " + err));
             } else {
@@ -1262,6 +1267,7 @@ describe("Do data sending subtests ...".bold, function() {
      }).timeout(10000);
  });
 
+
 describe("Grafana subtests...".bold, function() {
     before(function(){
         if (checkTestCondition(["non_essential", "grafana"])) {
@@ -1300,43 +1306,45 @@ describe("Grafana subtests...".bold, function() {
     }).timeout(10000);
 });
 
-   describe("Do MQTT data sending subtests ...".bold, function() {
-       before(function(){
-           if (checkTestCondition(["non_essential", "mqtt"])) {
-               this.skip();
-           }
-       });
-       var test;
-       var descriptions = require("./subtests/mqtt-data-sending-tests").descriptions;
-       it(descriptions.setup, function(done) {
-         test = require("./subtests/mqtt-data-sending-tests").test(userToken, accountId, deviceId, deviceToken, cbManager, mqttConnector);
-         test.setup(done);
-       }).timeout(10000);
-       it(descriptions.sendSingleDataPoint, function(done) {
-         test.sendSingleDataPoint(done);
-       }).timeout(10000);
-       it(descriptions.sendMultipleDataPoints, function(done) {
-         test.sendMultipleDataPoints(done);
-       }).timeout(10000);
-       it(descriptions.sendDataPointsWithAttributes, function(done) {
-         test.sendDataPointsWithAttributes(done);
-       }).timeout(10000);
-       it(descriptions.waitForBackendSynchronization, function(done) {
-         test.waitForBackendSynchronization(done);
-       }).timeout(10000);
-       it(descriptions.receiveSingleDataPoint, function(done) {
-         test.receiveSingleDataPoint(done);
-       }).timeout(10000);
-       it(descriptions.receiveMultipleDataPoints, function(done) {
-         test.receiveMultipleDataPoints(done);
-       }).timeout(10000);
-       it(descriptions.receiveDataPointsWithAttributes, function(done) {
-         test.receiveDataPointsWithAttributes(done);
-       }).timeout(10000);
-       it(descriptions.cleanup, function(done) {
-         test.cleanup(done);
-       }).timeout(10000);
+
+describe("Do MQTT data sending subtests ...".bold, function() {
+    before(function(){
+        if (checkTestCondition(["non_essential", "mqtt"])) {
+            this.skip();
+        }
     });
+    var test;
+    var descriptions = require("./subtests/mqtt-data-sending-tests").descriptions;
+    it(descriptions.setup, function(done) {
+        test = require("./subtests/mqtt-data-sending-tests").test(userToken, accountId, deviceId, deviceToken, cbManager, mqttConnector);
+        test.setup(done);
+    }).timeout(10000);
+    it(descriptions.sendSingleDataPoint, function(done) {
+        test.sendSingleDataPoint(done);
+    }).timeout(10000);
+    it(descriptions.sendMultipleDataPoints, function(done) {
+        test.sendMultipleDataPoints(done);
+    }).timeout(10000);
+    it(descriptions.sendDataPointsWithAttributes, function(done) {
+        test.sendDataPointsWithAttributes(done);
+    }).timeout(10000);
+    it(descriptions.waitForBackendSynchronization, function(done) {
+        test.waitForBackendSynchronization(done);
+    }).timeout(10000);
+    it(descriptions.receiveSingleDataPoint, function(done) {
+        test.receiveSingleDataPoint(done);
+    }).timeout(10000);
+    it(descriptions.receiveMultipleDataPoints, function(done) {
+        test.receiveMultipleDataPoints(done);
+    }).timeout(10000);
+    it(descriptions.receiveDataPointsWithAttributes, function(done) {
+        test.receiveDataPointsWithAttributes(done);
+    }).timeout(10000);
+    it(descriptions.cleanup, function(done) {
+        test.cleanup(done);
+    }).timeout(10000);
+});
+
 
 describe("Geting and manage alerts ... \n".bold, function(){
     before(function(){
@@ -1594,41 +1602,41 @@ describe("Adding user and posting email ...\n".bold, function() {
             this.skip();
         }
     });
+
     it("Shall add a new user and post email", function(done) {
         assert.isNotEmpty(imap_username, "no email provided");
-	nr_mails = helpers.mail.getAllEmailMessages().length;
+        nr_mails = helpers.mail.getAllEmailMessages().length;
         assert.isNotEmpty(imap_password, "no password provided");
         helpers.users.addUser(userToken, imap_username, imap_password ,function(err, response) {
             if (err) {
                 done(new Error("Cannot create new user: " + err));
             } else {
-		assert.equal(response.email, imap_username, 'add wrong user');
-		assert.equal(response.type, 'user', 'response type wrong');
+                assert.equal(response.email, imap_username, 'add wrong user');
                 done();
             }
-        })
-    })
+        });
+    });
 
     it("Shall activate user with token", function(done) {
-	helpers.mail.waitForNewEmail(nr_mails+1);
-	var message = helpers.mail.getAllEmailMessages(imap_username)[0];
+        helpers.mail.waitForNewEmail(nr_mails+1);
+        var message = helpers.mail.getAllEmailMessages(imap_username)[0];
         var regexp = /token=\w*/;
-	var activationToken = message.match(regexp).toString().split("=")[1];
-	helpers.users.activateUser(activationToken, function(err, response) {
+        var activationToken = message.match(regexp).toString().split("=")[1];
+        helpers.users.activateUser(activationToken, function(err, response) {
             if (err) {
-		done(new Error("Cannot activate user (token " + activationToken + ") : " + err));
+                done(new Error("Cannot activate user (token " + activationToken + ") : " + err));
             } else {
-		assert.equal(response.status, 'OK', 'cannot activate user')
-		helpers.auth.login(imap_username, imap_password, function(err, token) {
+                assert.equal(response.status, 'OK', 'cannot activate user')
+                helpers.auth.login(imap_username, imap_password, function(err, grant) {
                     if (err) {
-			done(new Error("Cannot authenticate receiver: " + err));
+                        done(new Error("Cannot authenticate receiver: " + err));
                     } else {
-			receiverToken = token;
-			done();
+                        receiverToken = grant.token;
+                        done();
                     }
-		})
+                });
             }
-	});
+        });
     }).timeout( 60 * 1000);
 
     it('Shall create receiver account', function(done) {
@@ -1639,10 +1647,17 @@ describe("Adding user and posting email ...\n".bold, function() {
             } else {
                 assert.equal(response.name, 'receiver', "accounts name is wrong");
                 receiveraccountId = response.id;
-                done();
+                helpers.auth.login(imap_username, imap_password, function(err, grant) {
+                    if (err) {
+                        done(new Error("Cannot authenticate receiver: " + err));
+                    } else {
+                        receiverToken = grant.token;
+                        done();
+                    }
+                });
             }
-        })
-    })
+        });
+    });
 });
 
 describe("Invite receiver ...\n".bold, function() {
@@ -1701,11 +1716,11 @@ describe("Invite receiver ...\n".bold, function() {
 
     it('Shall get specific invitations', function(done){
         var getInvitation = function(cb){
-        helpers.auth.login(imap_username, imap_password, function(err, token) {
+        helpers.auth.login(imap_username, imap_password, function(err, grant) {
             if (err) {
                 done(new Error("Cannot authenticate: " + err));
             } else {
-                receiverToken = token;
+                receiverToken = grant.token;
                 helpers.invitation.getInvitations(receiverToken, receiveraccountId, imap_username, function(err, response) {
                     if (err) {
                         cb(err, null);
@@ -1843,7 +1858,7 @@ describe("change password and delete receiver ... \n".bold, function(){
 
     it('Shall change password', function(done) {
         var username = process.env.USERNAME;
-	var oldPasswd = "Receiver12345";
+	    var oldPasswd = "Receiver12345";
         var newPasswd = 'oispnewpasswd2'
 
         helpers.users.changeUserPassword(userToken, username, oldPasswd, newPasswd, function(err, response) {
@@ -1929,10 +1944,20 @@ describe("change password and delete receiver ... \n".bold, function(){
             if (err) {
                 done(new Error("cannot delete a user " + err));
             } else {
-                assert.notEqual(response, null ,'response is null')
-                assert.equal(response.status, 'Done')
-                done();
+                assert.notEqual(response, null ,'response is null');
+                assert.equal(response.status, 'Done');
+                helpers.users.deleteUser(userToken2, userId2, function(err, response) {
+                    if (err) {
+                        return done(err);
+                    }
+                    helpers.users.deleteUser(receiverToken, receiveruserId, function(err, response) {
+                        if (err) {
+                            return done(err);
+                        }
+                        done();
+                    });
+                });
             }
-        })
-    })
+        });
+    });
 })
