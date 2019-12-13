@@ -78,8 +78,12 @@ var test = function(userToken1, userToken2) {
         .then((response) => {accountId1_1 = response.id})
         .then(() => promtests.createAccount("acc1_2", userToken1))
         .then((response) => {accountId1_2 = response.id})
+        .then(() => promtests.authGetToken(process.env.USERNAME, process.env.PASSWORD))
+        .then((grant) => { userToken1 = grant.token; })
         .then(() => promtests.createAccount("acc2", userToken2))
         .then((response) => {accountId2 = response.id})
+        .then(() => promtests.authGetToken(process.env.USERNAME2, process.env.PASSWORD2))
+        .then((grant) => { userToken2 = grant.token; })
         .then(() => promtests.createDevice("device1_1", deviceId1_1, userToken1, accountId1_1))
         .then(() => promtests.createDevice("device1_2", deviceId1_2, userToken1, accountId1_2))
         .then(() => promtests.createDevice("device2", deviceId2, userToken2, accountId2))
@@ -89,13 +93,13 @@ var test = function(userToken1, userToken2) {
         .then((response) => {deviceToken1_2 = response.deviceToken})
         .then(() => promtests.activateDevice(userToken2, accountId2, deviceId2))
         .then((response) => {deviceToken2 = response.deviceToken})
-        .then(() => promtests.addComponent(componentName + '1', componentType, deviceToken1_1, accountId1_1, deviceId1_1))
+        .then(() => promtests.addComponent(componentName + '1', componentType, userToken1, accountId1_1, deviceId1_1))
         .then((id) => {componentId1_1_1 = id})
-        .then(() => promtests.addComponent(componentName + '2', componentType, deviceToken1_1, accountId1_1, deviceId1_1))
+        .then(() => promtests.addComponent(componentName + '2', componentType, userToken1, accountId1_1, deviceId1_1))
         .then((id) => {componentId1_1_2 = id})
-        .then(() => promtests.addComponent(componentName, componentType, deviceToken1_2, accountId1_2, deviceId1_2))
+        .then(() => promtests.addComponent(componentName, componentType, userToken1, accountId1_2, deviceId1_2))
         .then((id) => {componentId1_2 = id})
-        .then(() => promtests.addComponent(componentName, componentType, deviceToken2, accountId2, deviceId2))
+        .then(() => promtests.addComponent(componentName, componentType, userToken2, accountId2, deviceId2))
         .then((id) => {componentId2 = id})
         .then(() => promtests.submitData(componentData1_1_1, deviceToken1_1, accountId1_1, deviceId1_1, componentId1_1_1))
         .then(() => promtests.submitData(componentData1_1_2, deviceToken1_1, accountId1_1, deviceId1_1, componentId1_1_2))
@@ -104,21 +108,15 @@ var test = function(userToken1, userToken2) {
         .then(() => {
             var username = process.env.USERNAME;
             var password = process.env.PASSWORD;
-            assert.isNotEmpty(username, "no username provided");
-            assert.isNotEmpty(password, "no password provided");
-
             return promtests.authGetToken(username, password);
         })
-        .then((token) => { refreshedUserToken1 = token; })
+        .then((grant) => { refreshedUserToken1 = grant.token; })
         .then(() => {
             var username = process.env.USERNAME2;
             var password = process.env.PASSWORD2;
-            assert.isNotEmpty(username, "no username provided");
-            assert.isNotEmpty(password, "no password provided");
-
             return promtests.authGetToken(username, password);
         })
-        .then((token) => { refreshedUserToken2 = token; })
+        .then((grant) => { refreshedUserToken2 = grant.token; })
         .then(() => {
             var cookie1 = new tough.Cookie({
                 key: "jwt",
@@ -217,7 +215,7 @@ var test = function(userToken1, userToken2) {
         grafanaOptions.body = JSON.stringify(datasourceQueryBody);
         request(grafanaOptions).then(res => {
             if (res.statusCode >= 300) {
-                done('Can\'t authenticate to datasource')
+                done('Can\'t authenticate to datasource');
             } else {
                 var metrics = JSON.parse(res.body);
                 var dataBelongsToUser = function(metric) {
@@ -275,8 +273,8 @@ var test = function(userToken1, userToken2) {
         request(grafanaOptions).then(res => {
             var metrics = JSON.parse(res.body);
             if (metrics !== undefined && metrics.length > 0) {
-                done('Expected empty result, but got some data: ' + metrics);
-            } else if (res.statusCode < 300) {
+                done('Expected empty result, but got some data: ' + res.body);
+            } else if (res.statusCode < 400) {
                 done('Expected 400, got: ' + res.statusCode);
             } else {
                 done();
@@ -363,8 +361,8 @@ var test = function(userToken1, userToken2) {
             assert.isNotEmpty(username, "no username provided");
             assert.isNotEmpty(password, "no password provided");
 
-            promtests.authGetToken(username, password).then(token => {
-                userToken1 = token;
+            promtests.authGetToken(username, password).then(grant => {
+                userToken1 = grant.token;
             });
         })
         .then(() => {
@@ -373,8 +371,8 @@ var test = function(userToken1, userToken2) {
             assert.isNotEmpty(username, "no username provided");
             assert.isNotEmpty(password, "no password provided");
 
-            promtests.authGetToken(username, password).then(token => {
-                userToken2 = token;
+            promtests.authGetToken(username, password).then(grant => {
+                userToken2 = grant.token;
             });
         })
 		.then(() => { done(); })

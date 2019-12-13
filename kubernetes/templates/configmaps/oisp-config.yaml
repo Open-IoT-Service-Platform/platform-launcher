@@ -13,7 +13,8 @@ data:
     "ruleEngineConfig": "@@OISP_RULEENGINE_CONFIG",
     "gatewayConfig": "@@OISP_GATEWAY_CONFIG",
     "jaegerTracing": {{ .Values.jaeger_tracing }},
-    "grafanaConfig": "@@OISP_GRAFANA_CONFIG"
+    "grafanaConfig": "@@OISP_GRAFANA_CONFIG",
+    "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG"
     }
   websocket-server: |
     {
@@ -112,6 +113,21 @@ data:
     "private_pem_path": "./keys/private.pem",
     "public_pem_path": "./keys/public.pem"
     }
+  keycloak: |
+    {
+    "listenerPort": "4004",
+    "realm": "OISP",
+    "auth-server-url": "http://oisp-keycloak-http:4080/keycloak",
+    "resource": "oisp-frontend",
+    "secret": "{{ .Values.keycloak.frontend.secret }}",
+    "ssl-required": "external"
+    }
+  keycloak-admin: |
+    {
+    "username": "{{ .Values.keycloak.keycloak.username }}",
+    "password": "{{ .Values.keycloak.keycloak.password }}"
+    }
+  keycloak-frontend-secret: {{ .Values.keycloak.frontend.secret }}
   gateway: |
     {
     "username": "{{ .Values.systemuser.username }}",
@@ -170,7 +186,6 @@ data:
     "dataSourceHost": "opentsdb",
     "dataSourcePort": "4242"
     }
-
   mqtt-gateway: |
     {
     "mqttBrokerUrl": "localhost",
@@ -184,7 +199,6 @@ data:
     "redisConf": "@@OISP_REDIS_CONFIG",
     "aesKey": "/app/keys/mqtt/mqtt_gw_secret.key"
     }
-
   mqtt-broker: |
     {
     "redisConf": "@@OISP_REDIS_CONFIG",

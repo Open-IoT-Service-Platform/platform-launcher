@@ -1,0 +1,3 @@
+# Keycloak Configuration Files
+
+This directory contains configuration files for keycloak to sync with OISP. It currently uses custom jwt keys and script uploading features, which both will be discarded in the future to achieve high compatability. It defines the oisp-frontend as a client and provides necessary policies so these can be used by the oisp-frontend component. To see how these the keys and client secrets is inserted into the config, please refer to [kubernetes/values.yaml](https://github.com/Open-IoT-Service-Platform/platform-launcher/blob/develop/kubernetes/values.yaml). To see how the policies function, look at the [oisp-frontend](https://github.com/Open-IoT-Service-Platform/oisp-frontend) repository.

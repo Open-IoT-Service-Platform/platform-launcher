@@ -125,11 +125,11 @@ describe("get user token and activation code ...\n".bold, function() {
         assert.isNotEmpty(username, "no username provided");
         assert.isNotEmpty(password, "no password provided");
 
-        helpers.auth.login(username, password, function(err, token) {
+        helpers.auth.login(username, password, function(err, grant) {
             if (err) {
                 done(new Error("Cannot authenticate: " + err));
             } else {
-                userToken = token;
+                userToken = grant.token;
                 done();
             }
         })
@@ -173,4 +173,3 @@ describe("get user token and activation code ...\n".bold, function() {
         done();
     })
 })
-

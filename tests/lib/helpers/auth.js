@@ -40,15 +40,17 @@ function login(username, password, cb) {
     };
 
     api.auth.getAuthToken(data, function(err, response) {
-        var userToken = null;
+        var grant = {};
 
         if (!err) {
             assert.isString(response.token, "no access token retrieved");
-            if (response.token) {
-                userToken = response.token;
-            }
+            assert.isString(response.refreshToken, "no refresh token retrieved");
+            assert.isString(response.idToken, "no id token retrieved");
+            grant.token = response.token;
+            grant.refreshToken = response.refreshToken;
+            grant.idToken = response.idToken;
         }
-        cb(err, userToken);
+        cb(err, grant);
     })
 }
 
@@ -87,37 +89,6 @@ function userInfo(token, cb) {
     })
 }
 
-function getRefreshToken(token, cb) {
-    if (!cb) {
-        throw "Callback required";
-    }
-
-    var data = {
-        token: token
-    };
-
-    api.auth.getRefreshToken(data, function(err, response) {
-        cb(err, response);
-    });
-}
-
-function revokeRefreshToken(token, refreshToken, cb) {
-    if (!cb) {
-        throw "Callback required";
-    }
-
-    var data = {
-        token: token,
-        body: {
-            refreshToken: refreshToken
-        }
-    };
-
-    api.auth.revokeRefreshToken(data, function(err, response) {
-        cb(err, response);
-    });
-}
-
 function refreshAuthToken(oldToken, refreshToken, cb) {
     if (!cb) {
         throw "Callback required";
@@ -137,8 +108,6 @@ function refreshAuthToken(oldToken, refreshToken, cb) {
 
 module.exports = {
     login: login,
-    getRefreshToken: getRefreshToken,
-    revokeRefreshToken: revokeRefreshToken,
     refreshAuthToken: refreshAuthToken,
     userInfo: userInfo,
     tokenInfo: tokenInfo

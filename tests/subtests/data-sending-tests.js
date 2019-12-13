@@ -546,23 +546,23 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
   return {
     "sendAggregatedDataPoints": function(done) {
       //To be independent of main tests, own sensors, actuators, and commands have to be created
-      promtests.addComponent(componentNames[0], componentTypes[0], deviceToken, accountId, deviceId)
+      promtests.addComponent(componentNames[0], componentTypes[0], userToken, accountId, deviceId)
         .then((id) => {
           componentId[0] = id;
         })
-        .then((id) => promtests.addComponent(componentNames[1], componentTypes[1], deviceToken, accountId, deviceId))
+        .then((id) => promtests.addComponent(componentNames[1], componentTypes[1], userToken, accountId, deviceId))
         .then((id) => {
           componentId[1] = id;
         })
-        .then((id) => promtests.addComponent(componentNames[2], componentTypes[2], deviceToken, accountId, deviceId))
+        .then((id) => promtests.addComponent(componentNames[2], componentTypes[2], userToken, accountId, deviceId))
         .then((id) => {
           componentId[2] = id;
         })
-        .then((id) => promtests.addComponent(componentNames[3], componentTypes[3], deviceToken, accountId, deviceId))
+        .then((id) => promtests.addComponent(componentNames[3], componentTypes[3], userToken, accountId, deviceId))
         .then((id) => {
           componentId[3] = id;
         })
-        .then((id) => promtests.addComponent(componentNames[4], componentTypes[4], deviceToken, accountId, deviceId))
+        .then((id) => promtests.addComponent(componentNames[4], componentTypes[4], userToken, accountId, deviceId))
         .then((id) => {
           componentId[4] = id;
         })
@@ -924,7 +924,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
       assert.isNotEmpty(username, "no username provided");
       assert.isNotEmpty(password, "no password provided");
       promtests.authGetToken(username, password)
-      .then((userToken) => promtests.submitDataList(dataValues6, userToken, accountId, deviceId, componentId, {}))
+      .then((grant) => promtests.submitDataListAsUser(dataValues6, grant.token, accountId, deviceId, componentId, {}))
       .then(() => {
         done()
       })
@@ -945,14 +945,15 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
       assert.isNotEmpty(password2, "no password provided");
       //First create a user for the account, accept the invitation and try to send data
       promtests.authGetToken(username, password)
-      .then((userToken) => {return promtests.createInvitation(userToken, accountId, username2)})
+      .then((grant) => {return promtests.createInvitation(grant.token, accountId, username2)})
       .then((result) => {inviteId = result._id; return promtests.authGetToken(username2, password2)})
-      .then((userToken) => {admin2Token = userToken; return promtests.acceptInvitation(userToken, accountId, inviteId)})
-      .then(() => promtests.submitDataList(dataValues7,
+      .then((grant) => promtests.acceptInvitation(grant.token, accountId, inviteId))
+      .then(() => promtests.authGetToken(username2, password2))
+      .then((grant) => admin2Token = grant.token)
+      .then(() => promtests.submitDataListAsUser(dataValues7,
         admin2Token, accountId, deviceId, componentId, {}).catch(e => e))
       .then((result) => {
-        var parsedResult = JSON.parse(result);
-        assert.equal(parsedResult.code, 401)
+        assert.equal(result, 'Access denied')
         done()
       })
       .catch((err) => {
@@ -963,16 +964,17 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
       assert.isNotEmpty(username2, "no username provided");
       assert.isNotEmpty(password2, "no password provided");
       promtests.authGetToken(username2, password2)
-      .then((userToken) => {
-        userToken2 = userToken;
-        return promtests.createAccount(accountName2, userToken)
+      .then((grant) => {
+        return promtests.createAccount(accountName2, grant.token)
       })
+      .then(() => promtests.authGetToken(username2, password2))
+      .then((grant) => userToken2 = grant.token)
       .then(() => promtests.authTokenInfo(userToken2))
       .then((tokenInfo) => {
         accountId2 = tokenInfo.payload.accounts[0].id;
         return accountId2;})
       .then((accountId2) =>
-      promtests.submitDataList(dataValues7,
+      promtests.submitDataListAsUser(dataValues7,
         userToken2, accountId2, deviceId, componentId, {}).catch(e => e))
       .then((result) => {
         var parsedResult = JSON.parse(result);
@@ -1009,7 +1011,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
       assert.isNotEmpty(password, "no password provided");
       //First create a user for the account, accept the invitation and try to send data
       promtests.authGetToken(username, password)
-      .then((userToken) => promtests.createDevice(newDeviceName, newDeviceId, userToken, accountId))
+      .then((grant) => promtests.createDevice(newDeviceName, newDeviceId, grant.token, accountId))
       .then(() => promtests.activateDevice(userToken, accountId, newDeviceId))
       .then((result) => {
         return promtests.addComponent(componentName, componentType, userToken, accountId, newDeviceId)
@@ -1027,8 +1029,8 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
       })
     },
     "cleanup": function(done) {
-      promtests.deleteComponent(deviceToken, accountId, deviceId, componentId[0])
-        .then(() => promtests.deleteComponent(deviceToken, accountId, deviceId, componentId[1]))
+      promtests.deleteComponent(userToken, accountId, deviceId, componentId[0])
+        .then(() => promtests.deleteComponent(userToken, accountId, deviceId, componentId[1]))
         .then(() => promtests.deleteComponent(userToken, accountId, newDeviceId, newComponentId))
         .then(() => promtests.deleteDevice(userToken, accountId, newDeviceId))
         .then(() => promtests.deleteAccount(userToken2, accountId2))

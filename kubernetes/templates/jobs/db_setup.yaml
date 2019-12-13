@@ -70,7 +70,12 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: mail
-        command: ["./wait-for-it.sh", "postgres:5432", "-t", "300", "--", "node", "admin", "createDB"]
+        - name: OISP_KEYCLOAK_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: keycloak
+        command: ["./wait-for-it.sh", "postgres:5432", "-t", "300", "--", "./wait-for-it.sh", "oisp-keycloak-http:4080", "-t", "300", "--", "node", "admin", "createDB"]
       restartPolicy: Never
       imagePullSecrets:
         - name: dockercred

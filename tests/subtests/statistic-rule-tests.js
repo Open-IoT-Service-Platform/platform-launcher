@@ -129,9 +129,9 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     return {
 	"createStatisticsRules": function(done) {
 	    //To be independent of main tests, own sensors, actuators, and commands have to be created
-	    promtests.addComponent(componentName, componentType, deviceToken, accountId, deviceId)
+	    promtests.addComponent(componentName, componentType, userToken, accountId, deviceId)
 		.then((id) => {componentId = id; rules[switchOffCmdName].cid = componentId; rules[switchOnCmdName].cid = componentId;})
-		.then(()   => promtests.addActuator(actuatorName, actuatorType, deviceToken, accountId, deviceId))
+		.then(()   => promtests.addActuator(actuatorName, actuatorType, userToken, accountId, deviceId))
 		.then((id) => {actuatorId = id;})
 		.then(()   => promtests.createCommand(switchOffCmdName, componentParamName, 0, userToken, accountId, deviceId, actuatorId))
 		.then(()   => promtests.createCommand(switchOnCmdName, componentParamName, 1, userToken, accountId, deviceId, actuatorId))

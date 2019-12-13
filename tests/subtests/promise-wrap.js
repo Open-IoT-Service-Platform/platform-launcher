@@ -208,6 +208,18 @@ var submitDataList = function(valueList, deviceToken, accountId, deviceId, cidLi
     });
 }
 
+var submitDataListAsUser = function(valueList, userToken, accountId, deviceId, cidList) {
+    return new Promise((resolve, reject) => {
+        helpers.data.submitDataListAsUser(valueList, userToken, accountId, deviceId, cidList, function(err, response) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(response);
+            }
+        });
+    });
+};
+
 
 var submitData = function(value, deviceToken, accountId, deviceId, cid){
     return new Promise((resolve, reject) => {
@@ -249,38 +261,14 @@ var searchDataAdvanced = function(from, to, userToken, accountId, deviceId, cidL
 
 var authGetToken = (username, password) => {
   return new Promise(function(resolve, reject){
-    helpers.auth.login(username, password, function(err, token) {
+    helpers.auth.login(username, password, function(err, tokens) {
       if (err) {
         reject(err);
 	    } else {
-        resolve(token);
+        resolve(tokens);
       }
     });
   });
-};
-
-var getRefreshToken = (token) => {
-    return new Promise(function(resolve, reject) {
-        helpers.auth.getRefreshToken(token, function(err, response) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(response);
-            }
-        });
-    });
-};
-
-var revokeRefreshToken = (token, refreshToken) => {
-    return new Promise(function(resolve, reject) {
-        helpers.auth.revokeRefreshToken(token, refreshToken, function(err, response) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(response);
-            }
-        });
-    });
 };
 
 var refreshAuthToken = (oldToken, refreshToken) => {
@@ -472,12 +460,11 @@ module.exports = {
     deleteComponent: deleteComponent,
     deleteRule: deleteRule,
     submitDataList: submitDataList,
+    submitDataListAsUser: submitDataListAsUser,
     submitData: submitData,
     searchData: searchData,
     searchDataAdvanced: searchDataAdvanced,
     authGetToken: authGetToken,
-    getRefreshToken: getRefreshToken,
-    revokeRefreshToken: revokeRefreshToken,
     refreshAuthToken: refreshAuthToken,
     createInvitation: invitationCreate,
     acceptInvitation: invitationAccept,

@@ -78,6 +78,7 @@ commands:
             export NODOCKERLOGIN=true
             make deploy-oisp-test DOCKER_TAG=test
             make test
+          no_output_timeout: 20m
   push-images:
     description: "Push images"
     parameters:

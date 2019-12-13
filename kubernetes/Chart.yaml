@@ -3,3 +3,7 @@ appVersion: "1.0.4"
 description: OISP Helm Chart
 name: oisp
 version: 0.1.0
+dependencies:
+  - name: keycloak
+    version: 6.0.4
+    repository: https://codecentric.github.io/helm-charts
