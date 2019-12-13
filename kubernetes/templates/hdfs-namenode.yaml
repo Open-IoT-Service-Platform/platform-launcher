@@ -73,10 +73,16 @@ spec:
         volumeMounts:
         - mountPath: /opt/hdfs
           name: hdfs-namenode-data
+        - name: hdfs-site
+          mountPath: /usr/local/hadoop-2.8.3/etc/hadoop/hdfs-site.xml
+          subPath: hdfs-site.xml
       volumes:
       - name: hdfs-namenode-data
         persistentVolumeClaim:
           claimName: hdfs-namenode-data
+      - name: hdfs-site
+        configMap:
+          name: hdfs-config
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
