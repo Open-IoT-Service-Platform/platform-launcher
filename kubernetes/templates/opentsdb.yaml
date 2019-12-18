@@ -32,15 +32,21 @@ spec:
         ports:
         - containerPort: 4242
         args:
+
         - /opt/wait-for-it.sh
-        - hbase-master:9090
+        - {{ .Values.zookeeper.readyCheck }}
         - -t
         - "300"
         - --
         - /opt/wait-for-it.sh
-        - zookeeper:2181
+        - {{ .Values.hbaseScale.masterReady }}
         - -t
         - "300"
+        - --
+        - /opt/wait-for-it.sh
+        - {{ .Values.hbaseScale.regionServersReady }}
+        - -t
+        - "600"
         - --
         - /opt/tsdb-startup.sh
         env:
@@ -68,7 +74,7 @@ spec:
         resources:
           {{ if .Values.less_resources }}
           requests:
-            cpu: 50m
+            cpu: 100m
           {{ else }}
           limits:
             cpu: 500m

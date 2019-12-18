@@ -56,6 +56,11 @@ spec:
         - "300"
         - --
         - ./wait-for-it.sh
+        - {{ .Values.kafka.service}}
+        - -t
+        - "300"
+        - --
+        - ./wait-for-it.sh
         - keycloak-http:4080
         - -t
         - "300"

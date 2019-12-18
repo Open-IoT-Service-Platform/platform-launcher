@@ -42,11 +42,11 @@ spec:
             cpu: 50m
           {{ else }}
           limits:
-            memory: 500M
+            memory: 1G
             cpu: 1
           requests:
             memory: 500M
-            cpu: 1
+            cpu: 500M
           {{ end }}
         env:
           - name: HDFS_USER
