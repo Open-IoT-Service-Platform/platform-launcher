@@ -176,6 +176,10 @@ jobs:
       - setup-build-environment
       - setup-branch
       - build-branch
+  e2e:
+    executor: my-executor
+    steps:
+      - checkout
       - e2e-test
   build-master:
     executor: my-executor
@@ -195,7 +199,9 @@ jobs:
       - setup-build-environment
       - setup-branch
       - build-branch
-      - e2e-test
+  push-docker-images:
+    executor: my-executor
+    steps:
       - push-images:
           tag: "date"
   deploy-production:
@@ -218,6 +224,29 @@ workflows:
             branches:
               only:
                 - master
+      - e2e:
+          name: e2e-test-develop
+          filters:
+            branches:
+              ignore:
+                - master
+          requires:
+            - build
+      - e2e:
+          name: e2e-test-master
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - build-master
+      - push-docker-images:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - e2e-test-master
   nightly:
     triggers:
       - schedule:
@@ -232,6 +261,12 @@ workflows:
             branches:
               only:
                 - develop
-      - deploy-production:
+      - e2e:
           requires:
             - build-nightly
+      - push-docker-images:
+          requires:
+            - e2e
+      - deploy-production:
+          requires:
+            - push-docker-images
