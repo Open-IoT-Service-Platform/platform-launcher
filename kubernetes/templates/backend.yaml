@@ -39,7 +39,12 @@ spec:
         - containerPort: 8080
         args:
         - ./wait-for-it.sh
-        - hbase-master:9090
+        - "opentsdb:4242"
+        - -t
+        - "600"
+        - --
+        - ./wait-for-it.sh
+        - {{ .Values.kafka.service}}
         - -t
         - "300"
         - --

@@ -1,0 +1,11 @@
+apiVersion: zookeeper.pravega.io/v1beta1
+kind: ZookeeperCluster
+metadata:
+  name: {{ .Values.zookeeper.name }}
+  namespace: {{ .Values.zookeeper.namespace }}
+spec:
+  {{ if .Values.less_resources }}
+  replicas: 1
+  {{ else }}
+  replicas: {{ .Values.zookeeper.replicas }}
+  {{ end }}

@@ -41,7 +41,7 @@ spec:
             memory: 2G
             cpu: 500m
           requests:
-            memory: 2G
+            memory: 1G
             cpu: 500m
           {{ end }}
         ports:
