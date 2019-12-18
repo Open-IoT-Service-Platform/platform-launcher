@@ -42,6 +42,11 @@ spec:
         - -t
         - "300"
         - --
+        - ./wait-for-it.sh
+        - {{ .Values.kafka.service}}
+        - "-t"
+        - "300"
+        - "--"
         - ./scripts/docker-start.sh
         resources:
           {{ if .Values.less_resources }}

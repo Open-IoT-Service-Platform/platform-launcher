@@ -38,32 +38,29 @@ spec:
         image: oisp/hbase:{{ .Values.tag }}
         resources:
           {{ if .Values.less_resources }}
-          limits:
-            cpu: 100m
           requests:
-            cpu: 100m
+            cpu: 50m
           {{ else }}
           limits:
             memory: 1G
             cpu: 1
           requests:
-            memory: 1G
-            cpu: 1
+            memory: 500M
+            cpu: 500m
           {{ end }}
         env:
         - name: REGIONSERVERS
           value: hbase-region-0.hbase-region
         - name: ZOOKEEPER
-          value: zookeeper:2181
+          value: {{ .Values.zookeeper.servers }}
         - name: HDFS_NAMENODE
           value: hdfs-namenode
         - name: HADOOP_USER_NAME
           value: root
         command: ["/bin/bash", "/opt/entrypoint-region.sh"]
         ports:
-        - containerPort: 2181
         - containerPort: 9090
-        - containerPort: 60000
-        - containerPort: 60020
+        - containerPort: 16020
+        - containerPort: 16030
       imagePullSecrets:
       - name: dockercred

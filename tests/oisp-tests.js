@@ -476,7 +476,7 @@ describe("Creating account and device ...\n".bold, function() {
                 getNewUserTokens(done);
             }
         })
-    })
+    }).timeout(10000);
 
     it('Shall get account info', function (done) {
         helpers.accounts.getAccountInfo(accountId, userToken, function (err, response) {

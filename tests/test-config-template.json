@@ -32,8 +32,8 @@
 			}
 		},
 	        "kafka": {
-		        "host": "kafka",
-		        "port": 9092,
+		        "host": "kafka-headless.kafka.svc.cluster.local",
+		        "port": 29092,
 		        "topic": "heartbeat"
 		}
 	},
