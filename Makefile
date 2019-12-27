@@ -102,7 +102,7 @@ deploy-oisp: check-docker-cred-env
 	POSTGRES_PASSWORD="$(call randomPass)" && \
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
 	helm dependency update --namespace $(NAMESPACE) && \
-	helm install $(NAME) . --namespace $(NAMESPACE) \
+	time helm install $(NAME) . --namespace $(NAMESPACE) \
 		--timeout 600s \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
@@ -186,6 +186,11 @@ wait-until-ready:
 	@printf "\nWaiting for mqtt server";
 	@while kubectl -n $(NAMESPACE) get pods -l=app=mqtt-server -o \
         jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
+		do printf "."; sleep 5; done;
+	@echo
+	@printf "\nWaiting for keycloak";
+	@while kubectl -n $(NAMESPACE) get pods oisp-keycloak-0 -o \
+        jsonpath="{.status.containerStatuses[*].ready}" | grep false >> /dev/null; \
 		do printf "."; sleep 5; done;
 	@echo
 

@@ -38,9 +38,12 @@ npm-install:
 test: npm-install
 	@export OISP_GRAFANA_PASSWORD=$$(kubectl -n $(NAMESPACE) get -o yaml configmaps oisp-config | shyaml get-value data.grafana | jq -r .adminPassword) && \
 	cat test-config-template.json | envsubst > test-config.json
-	@$(call msg,"Resetting database ...");
-	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin resetKeycloakUsers
-	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin resetDB
+	#@$(call msg,"Resetting database ...");
+	#@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin resetKeycloakUsers
+	#@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin resetDB
+	#@$(call msg,"Resetting rule-engine to proof key-reset issue ...");
+	#@kubectl -n $(NAMESPACE) delete pod $(shell kubectl -n $(NAMESPACE) get pods | grep rule-engine | cut -d " " -f 1)
+	#@sleep 10
 	@$(call msg,"Adding a user for testing ...");
 	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME) $(PASSWORD) > /dev/null
 	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME2) $(PASSWORD2) > /dev/null

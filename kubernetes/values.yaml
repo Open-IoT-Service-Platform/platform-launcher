@@ -20,11 +20,12 @@ numberReplicas:
     frontend: 1
     backend: 1
     debugger: 0
-    minio: 4
+    minio: 1
 
 hbaseScale:
-  dataNodes: 3
-  regionServers: "hbase-region-0.hbase-region hbase-region-1.hbase-region hbase-region-2.hbase-region"
+  dataNodes: 1
+  #regionServers: "hbase-region-0.hbase-region hbase-region-1.hbase-region hbase-region-2.hbase-region"
+  regionServers: "hbase-region-0.hbase-region"
 
 minio:
   accesskey: minio

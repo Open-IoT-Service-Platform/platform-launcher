@@ -1057,7 +1057,7 @@ describe("Sending observations and checking rules ...\n".bold, function() {
 
         sendObservationAndCheckRules(components.first);
 
-    }).timeout(5*60*1000)
+    }).timeout(60*1000)
 
     //---------------------------------------------------------------
 
