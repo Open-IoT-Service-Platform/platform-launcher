@@ -3,7 +3,6 @@ kind: Job
 metadata:
   name: dbsetup
   annotations:
-    "helm.sh/hook": post-install
     "helm.sh/hook-weight": "0"
     "helm.sh/hook-delete-policy": "before-hook-creation"
 spec:
@@ -75,7 +74,7 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: keycloak
-        command: ["./wait-for-it.sh", "postgres:5432", "-t", "300", "--", "./wait-for-it.sh", "oisp-keycloak-http:4080", "-t", "300", "--", "node", "admin", "createDB"]
+        command: ["./wait-for-it.sh", "postgres:5432", "-t", "300", "--", "node", "admin", "createDB"]
       restartPolicy: Never
       imagePullSecrets:
         - name: dockercred

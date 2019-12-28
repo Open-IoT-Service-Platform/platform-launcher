@@ -3,7 +3,6 @@ kind: Job
 metadata:
   name: dbupdate
   annotations:
-    "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "20"
     "helm.sh/hook-delete-policy": "before-hook-creation"
 spec:
@@ -75,7 +74,7 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: keycloak
-        command: ["node", "admin", "updateDB"]
+        command: ["./wait-for-it.sh", "postgres:5432", "-t", "300", "--", "./wait-for-it.sh", "frontend:4001", "-t", "300", "--", "node", "admin", "updateDB"]
       restartPolicy: Never
       imagePullSecrets:
         - name: dockercred
