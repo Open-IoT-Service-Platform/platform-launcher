@@ -19,7 +19,11 @@ metadata:
   name: hdfs-datanode
 spec:
   serviceName: hdfs-datanode
+  {{ if .Values.less_resources }}
+  replicas: 1
+  {{ else }}
   replicas: {{ .Values.hbaseScale.dataNodes }}
+  {{ end }}
   selector:
     matchLabels:
       app: hdfs-datanode
