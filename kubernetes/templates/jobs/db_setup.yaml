@@ -3,7 +3,7 @@ kind: Job
 metadata:
   name: dbsetup
   annotations:
-    #"helm.sh/hook": post-install
+    #s"helm.sh/hook": pre-install
     "helm.sh/hook-weight": "0"
     "helm.sh/hook-delete-policy": "before-hook-creation"
 spec:
