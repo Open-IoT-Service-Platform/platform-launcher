@@ -20,7 +20,11 @@ metadata:
     app: hbase-region
 spec:
   serviceName: hbase-region
+  {{ if .Values.less_resources }}
+  replicas: 1
+  {{ else }}
   replicas: {{ .Values.hbaseScale.dataNodes }}
+  {{ end }}
   selector:
     matchLabels:
       app: hbase-region

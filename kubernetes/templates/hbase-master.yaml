@@ -58,7 +58,11 @@ spec:
           {{ end }}
         env:
         - name: REGIONSERVERS
+          {{ if .Values.less_resources  }}
+          value: {{ .Values.hbaseScale.regionServersTest }}
+          {{ else }}
           value: {{ .Values.hbaseScale.regionServers }}
+          {{ end }}
         - name: ZOOKEEPER
           value: zookeeper
         - name: HDFS_NAMENODE

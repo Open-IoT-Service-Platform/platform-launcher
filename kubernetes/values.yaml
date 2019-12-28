@@ -25,6 +25,7 @@ numberReplicas:
 hbaseScale:
   dataNodes: 3
   regionServers: "hbase-region-0.hbase-region hbase-region-1.hbase-region hbase-region-2.hbase-region"
+  regionServersTest: "hbase-region-0.hbase-region"
 
 minio:
   accesskey: minio
