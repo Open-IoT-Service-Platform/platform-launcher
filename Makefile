@@ -92,7 +92,16 @@ check-docker-cred-env:
 deploy-oisp-test: check-docker-cred-env
 	make deploy-oisp
 	kubectl -n $(NAMESPACE) scale deployment debugger --replicas=1
-
+	# wait for debugger container to become ready (otherwise the next "make" command might failing finding debugger)
+	@printf "Waiting for debugger pod to be created";
+	@while ! kubectl -n $(NAMESPACE) get pods -l=app=debugger 2> /dev/null | grep debugger >> /dev/null; \
+		do printf "."; sleep 5; done;
+	@echo
+	@printf "Waiting for debugger to become ready ";
+	@while kubectl -n $(NAMESPACE) get pods -l=app=debugger -o \
+        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
+		do printf "."; sleep 5; done;
+	@echo
 ## deploy-oisp: Deploy repository as HELM chart
 ##
 deploy-oisp: check-docker-cred-env
@@ -185,6 +194,14 @@ wait-until-ready:
 		do printf "."; sleep 5; done;
 	@printf "\nWaiting for mqtt server";
 	@while kubectl -n $(NAMESPACE) get pods -l=app=mqtt-server -o \
+        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
+		do printf "."; sleep 5; done;
+	@printf "\nWaiting for dbsetup job";
+	@while ! kubectl -n $(NAMESPACE) get job dbsetup -o \
+        jsonpath="{.status.succeeded}" | grep 1 >> /dev/null; \
+		do printf "."; sleep 5; done;
+	@printf "\nWaiting for keycloak";
+	@while kubectl -n $(NAMESPACE) get pod oisp-keycloak-0 -o \
         jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
 		do printf "."; sleep 5; done;
 	@echo

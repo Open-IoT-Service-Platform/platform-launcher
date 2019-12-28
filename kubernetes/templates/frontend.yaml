@@ -56,7 +56,7 @@ spec:
         - "300"
         - --
         - ./wait-for-it.sh
-        - hbase-master:9090
+        - oisp-keycloak-http:4080
         - -t
         - "300"
         - --

@@ -405,7 +405,7 @@ describe("get authorization and manage user ...\n".bold, function() {
         assert.isNotEmpty(password, "no password2 provided");
 
         getNewUserTokens(done);
-    });
+    }).timeout(10000);
 
     it('Shall get token info', function (done) {
         helpers.auth.tokenInfo(userToken, function (err, response) {
@@ -1057,7 +1057,7 @@ describe("Sending observations and checking rules ...\n".bold, function() {
 
         sendObservationAndCheckRules(components.first);
 
-    }).timeout(5*60*1000)
+    }).timeout(60*1000)
 
     //---------------------------------------------------------------
 
