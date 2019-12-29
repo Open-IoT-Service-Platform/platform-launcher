@@ -31,7 +31,7 @@ spec:
       paths:
       - path: /keycloak
         backend:
-          serviceName: oisp-keycloak-http
+          serviceName: keycloak-http
           servicePort: 4080
   - host: {{ .Values.hosts.websocketserver }}
     http:

@@ -117,7 +117,7 @@ data:
     {
     "listenerPort": "4004",
     "realm": "OISP",
-    "auth-server-url": "http://oisp-keycloak-http:4080/keycloak",
+    "auth-server-url": "http://keycloak-http:4080/keycloak",
     "resource": "oisp-frontend",
     "secret": "{{ .Values.keycloak.frontend.secret }}",
     "ssl-required": "external"
