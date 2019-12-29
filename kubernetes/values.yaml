@@ -73,6 +73,8 @@ keycloak:
     resources:
       requests:
         cpu: "50m"
+  fullnameOverride: "keycloak"
+  nameOverride: "keycloak"
   keycloak:
     image:
       repository: jboss/keycloak
