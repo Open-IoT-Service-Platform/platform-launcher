@@ -201,7 +201,7 @@ wait-until-ready:
         jsonpath="{.status.succeeded}" | grep 1 >> /dev/null; \
 		do printf "."; sleep 5; done;
 	@printf "\nWaiting for keycloak";
-	@while kubectl -n $(NAMESPACE) get pod oisp-keycloak-0 -o \
+	@while kubectl -n $(NAMESPACE) get pod keycloak-0 -o \
         jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
 		do printf "."; sleep 5; done;
 	@echo
