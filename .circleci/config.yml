@@ -32,6 +32,10 @@ commands:
           command: |
             cd util && \
             bash setup-ubuntu18.04.sh
+            # create 8GB swap
+            sudo dd if=/dev/zero of=/swapfile bs=1M count=8000
+            sudo mkswap /swapfile
+            sudo swapon /swapfile
   setup-branch:
     description: "Setup subbranches"
     steps:
