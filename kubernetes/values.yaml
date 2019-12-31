@@ -27,7 +27,7 @@ hbaseScale:
   regionServers: "hbase-region-0.hbase-region hbase-region-1.hbase-region hbase-region-2.hbase-region"
   regionServersTest: "hbase-region-0.hbase-region"
   regionServersReady: "hbase-region-0.hbase-region:16020"
-  masterReady: "hbase-master-0:16010"
+  masterReady: "hbase-master-0.hbase-master:16010"
 
 minio:
   accesskey: minio

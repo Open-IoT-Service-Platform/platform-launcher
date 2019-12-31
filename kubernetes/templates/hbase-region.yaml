@@ -57,7 +57,14 @@ spec:
           value: hdfs-namenode
         - name: HADOOP_USER_NAME
           value: root
-        command: ["/bin/bash", "/opt/entrypoint-region.sh"]
+        args:
+        - "/opt/wait-for-it.sh"
+        - {{ .Values.hbaseScale.masterReady }}
+        - "-t"
+        - "300"
+        - "--"
+        - "/bin/bash"
+        - "/opt/entrypoint-region.sh"
         ports:
         - containerPort: 9090
         - containerPort: 16020
