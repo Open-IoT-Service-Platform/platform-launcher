@@ -42,14 +42,12 @@ VOLUME /data
 
 ADD config/hbase-site.xml /opt/hbase/conf/
 
-ADD config/zoo.cfg /opt/hbase/conf/
-
 ADD scripts/replace-hostname.sh /opt/
 
 ADD scripts/entrypoint.sh /opt/
 ADD scripts/entrypoint-region.sh /opt/
+ADD scripts/wait-for-it.sh /opt/
 
-ADD config/supervisor.conf /etc/supervisor/conf.d/
 
 RUN mkdir -p /root/.ssh
 RUN chmod 700 /root/.ssh
@@ -61,8 +59,8 @@ RUN chmod 600 /root/.ssh/authorized_keys
 RUN chmod 600 /root/.ssh/id_rsa
 
 RUN sed -i 's/#   StrictHostKeyChecking ask/   StrictHostKeyChecking no/' /etc/ssh/ssh_config
+RUN sed -i 's/# export HBASE_MANAGES_ZK=true/export HBASE_MANAGES_ZK=false/' /opt/hbase/conf/hbase-env.sh
 
-ADD scripts/wait-for-it.sh /opt/
 # REST API
 EXPOSE 8080
 # REST Web UI at :8085/rest.jsp
@@ -71,9 +69,7 @@ EXPOSE 8085
 EXPOSE 9090
 # Thrift Web UI at :9095/thrift.jsp
 EXPOSE 9095
-# HBase's Embedded zookeeper cluster
-EXPOSE 2181
+
 # HBase Master web UI at :16010/master-status;  ZK at :16010/zk.jsp
 EXPOSE 16010
-
-#ENTRYPOINT ["/opt/entrypoint.sh"]
+EXPOSE 16000

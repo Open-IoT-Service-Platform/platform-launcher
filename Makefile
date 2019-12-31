@@ -186,7 +186,7 @@ wait-until-ready:
 	@printf "\nWaiting for pending ";
 	@while kubectl -n $(NAMESPACE) get pods | grep Pending >> /dev/null; \
 		do printf "."; sleep 5; done;
-	@printf "Waiting for backend ";
+	@printf "\nWaiting for backend ";
 	@while kubectl -n $(NAMESPACE) get pods -l=app=backend -o \
         jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
 		do printf "."; sleep 5; done;
