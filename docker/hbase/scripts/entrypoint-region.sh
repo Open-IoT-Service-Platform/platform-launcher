@@ -20,4 +20,6 @@
 mkdir -p /data/logs
 
 service ssh start
-while [ 1 ]; do sleep 10; done
+
+/opt/hbase/bin/hbase regionserver start
+/opt/hbase/bin/hbase-daemon.sh stop regionserver
