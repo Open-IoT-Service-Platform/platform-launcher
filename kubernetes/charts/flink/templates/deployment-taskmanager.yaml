@@ -31,10 +31,10 @@ spec:
           value: /etc/flink
         resources:
           limits:
-            cpu: {{ .Values.flink.num_slots_per_taskmanager }}
+            cpu: 100m
             memory: {{ .Values.resources.taskmanager.limits.memory }}
           requests:
-            cpu: {{ .Values.flink.num_slots_per_taskmanager }}
+            cpu: 100m
             memory: {{ .Values.resources.taskmanager.requests.memory }}
         volumeMounts:
         - name: {{ template "fullname" . }}-flink-config

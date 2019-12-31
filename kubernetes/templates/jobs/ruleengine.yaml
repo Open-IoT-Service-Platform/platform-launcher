@@ -29,7 +29,6 @@ spec:
           requests:
             cpu: 500m
           {{ end }}
-        rule-engine: Add a flink cluster inside OISP and run rule-engine inside.:kubernetes/templates/jobs/ruleengine.yaml
         env:
         - name: OISP_RULEENGINE_CONFIG
           valueFrom:

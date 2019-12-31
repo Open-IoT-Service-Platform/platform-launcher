@@ -1,0 +1,6 @@
+dependencies:
+- name: flink
+  repository: ""
+  version: 1.4.0
+digest: sha256:3f0d4b71d79f98a5623719801743197ea72f353b6958fdbafd3dd18b22d89b31
+generated: "2019-12-17T11:32:48.242775545+01:00"
