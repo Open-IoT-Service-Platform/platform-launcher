@@ -35,7 +35,7 @@ minio:
 
 kafka:
   maxPayloadSize: 20000000
-  service: kafka-headless.kafka.svc.cluster.local:29092
+  service: kafka-all-broker.kafka.svc.cluster.local:29092
   namespace: kafka
 
 zookeeper:
