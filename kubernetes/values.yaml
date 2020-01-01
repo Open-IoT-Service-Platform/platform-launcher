@@ -165,6 +165,11 @@ keycloak:
   frontend:
     secret: "supersecret"
 
+jwt:
+  public: "No key set"
+  private: "No key set"
+  x509: "No cert set"
+
 postgres:
   username: oisp_user
   password: supersecret
