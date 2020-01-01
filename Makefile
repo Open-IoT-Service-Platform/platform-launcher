@@ -102,9 +102,19 @@ deploy-oisp-test: check-docker-cred-env
         jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
 		do printf "."; sleep 5; done;
 	@echo
+
+generate_keys:
+	@openssl genpkey -algorithm RSA -out private.pem -pkeyopt rsa_keygen_bits:2048 && \
+	openssl rsa -pubout -in private.pem -out public.pem && \
+	openssl req -new -x509 -key private.pem -out x509.pem -batch -days 3650;
+
 ## deploy-oisp: Deploy repository as HELM chart
 ##
-deploy-oisp: check-docker-cred-env
+deploy-oisp: check-docker-cred-env generate_keys
+# First generate ssh keys
+	$(eval PUBLICKEY:=$(shell cat public.pem | base64 | tr -d "\n"))
+	$(eval PRIVATEKEY:=$(shell cat private.pem | base64 | tr -d "\n"))
+	$(eval X509CERT:=$(shell cat x509.pem | base64 | tr -d "\n"))
 	@cd kubernetes && \
 	kubectl create namespace $(NAMESPACE) && \
 	kubectl -n $(NAMESPACE) create secret generic oisp-realm-secret --from-file=./../keycloak/oisp-realm.json && \
@@ -125,6 +135,10 @@ deploy-oisp: check-docker-cred-env
 		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_PASSWORD}" \
 		--set postgres.password="$(call randomPass)" \
 		--set keycloak.keycloak.password="$(call randomPass)" \
+		--set keycloak.frontend.secret="$(call randomPass)" \
+		--set jwt.public="$(PUBLICKEY)" \
+		--set jwt.private="$(PRIVATEKEY)" \
+		--set jwt.x509="$(X509CERT)" \
 		--set tag=$(DOCKER_TAG) \
 		$(HELM_ARGS)
 
@@ -151,6 +165,10 @@ upgrade-oisp: check-docker-cred-env
 		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_SU_PASSWORD}" \
 		--set postgres.password="$${POSTGRES_PASSWORD}" \
 		--set keycloak.keycloak.password="$${KEYCLOAK_PASSWORD}" \
+		--set keycloak.frontend.secret="$${KEYCLOAK_FRONTEND_SECRET}" \
+		--set jwt.public="$${JWT_PUBLIC}" \
+		--set jwt.private="$${JWT_PRIVATE}" \
+		--set jwt.x509="$${JWT_X509}" \
 		--set tag=$(DOCKER_TAG) \
 		$(HELM_ARGS)
 

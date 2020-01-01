@@ -9,3 +9,4 @@ tests/test-config.json
 data-backup/
 node_modules/
 oisp-logs_*.zip
+*.pem
