@@ -482,7 +482,7 @@
     "surrogateAuthRequired" : false,
     "enabled" : true,
     "clientAuthenticatorType" : "client-secret",
-    "secret" : "supersecret",
+    "secret" : "{{ INSERT-OISP-FRONTEND-SECRET }}",
     "defaultRoles" : [ "user" ],
     "redirectUris" : [ "/ui/dashboard" ],
     "webOrigins" : [ ],
