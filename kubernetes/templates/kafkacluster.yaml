@@ -6,7 +6,7 @@ metadata:
   name: kafka
   namespace: {{ .Values.kafka.namespace }}
 spec:
-  headlessServiceEnabled: true
+  headlessServiceEnabled: false
   zkAddresses:
     - {{ .Values.zookeeper.servers }}
   oneBrokerPerNode: false
@@ -14,8 +14,8 @@ spec:
   readOnlyConfig: |
     auto.create.topics.enable=true
     offsets.topic.replication.factor=1
-    #replica.fetch.max.bytes={{ int64 .Values.maxPayloadSize }}
-    #message.max.bytes={{ int64 .Values.maxPayloadSize }}
+    replica.fetch.max.bytes={{ .Values.kafka.maxPayloadSize | int }}
+    message.max.bytes={{ .Values.kafka.maxPayloadSize | int }}
   brokerConfigGroups:
     default:
       storageConfigs:
