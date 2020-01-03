@@ -7,8 +7,6 @@ metadata:
 spec:
   clusterIP: None
   ports:
-  - name: "8080"
-    port: 8080
   - name: "9090"
     port: 9090
   - name: "9095"
