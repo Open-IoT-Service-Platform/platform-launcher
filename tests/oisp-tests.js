@@ -53,6 +53,8 @@ var imap_port     = process.env.IMAP_PORT;
 var recipientEmail = imap_username;
 var rules = [];
 
+var BACKEND_DELAY = 5000;
+var BACKEND_TIMEOUT = 10000;
 // Use this to keep track of received mails and wait for new ones
 // instead of deleting old mails
 var nr_mails = helpers.mail.getAllEmailMessages().length;
@@ -1065,7 +1067,7 @@ describe("Sending observations and checking rules ...\n".bold, function() {
         before(function() {
             if (checkTestCondition(["non_essential", "email"])) {
                 this.skip();
-            }n
+            }
         });
         var expectedEmailReasons = [];
         components.list.forEach(function(component) {
@@ -1094,8 +1096,8 @@ describe("Sending observations and checking rules ...\n".bold, function() {
     }).timeout(5000);
 
     it('Wait for backend synchronization', function(done) {
-        setTimeout(done, 2000);
-    }).timeout(5000);
+        setTimeout(done, BACKEND_DELAY);
+    }).timeout(BACKEND_TIMEOUT);
     it('Shall check observations', function(done) {
         var checkObservations = function(component) {
             if ( component ) {
@@ -1130,7 +1132,7 @@ describe("Sending observations and checking rules ...\n".bold, function() {
             }
         }
         checkObservations(components.first)
-       }).timeout(10000);
+       }).timeout(BACKEND_TIMEOUT);
 
 });
 
@@ -1188,8 +1190,8 @@ describe("Do data sending subtests ...".bold, function() {
        test.sendAggregatedDataPoints(done);
      }).timeout(10000);
      it(descriptions.waitForBackendSynchronization,function(done) {
-       test.waitForBackendSynchronization(done);
-     }).timeout(10000);
+       test.waitForBackendSynchronization(BACKEND_DELAY, done);
+     }).timeout(BACKEND_TIMEOUT);
      it(descriptions.receiveAggregatedDataPoints,function(done) {
        test.receiveAggregatedDataPoints(done);
      }).timeout(10000);
@@ -1197,8 +1199,8 @@ describe("Do data sending subtests ...".bold, function() {
        test.sendAggregatedMultipleDataPoints(done);
      }).timeout(10000);
      it(descriptions.waitForBackendSynchronization,function(done) {
-       test.waitForBackendSynchronization(done);
-     }).timeout(10000);
+       test.waitForBackendSynchronization(BACKEND_DELAY, done);
+     }).timeout(BACKEND_TIMEOUT);
      it(descriptions.receiveAggregatedMultipleDataPoints,function(done) {
        test.receiveAggregatedMultipleDataPoints(done);
      }).timeout(10000);
@@ -1206,8 +1208,8 @@ describe("Do data sending subtests ...".bold, function() {
        test.sendDataPointsWithLoc(done);
      }).timeout(10000);
      it(descriptions.waitForBackendSynchronization,function(done) {
-       test.waitForBackendSynchronization(done);
-     }).timeout(10000);
+       test.waitForBackendSynchronization(BACKEND_DELAY, done);
+     }).timeout(BACKEND_TIMEOUT);
      it(descriptions.receiveDataPointsWithLoc,function(done) {
        test.receiveDataPointsWithLoc(done);
      }).timeout(10000);
@@ -1215,8 +1217,8 @@ describe("Do data sending subtests ...".bold, function() {
        test.sendDataPointsWithAttributes(done);
      }).timeout(10000);
      it(descriptions.waitForBackendSynchronization,function(done) {
-       test.waitForBackendSynchronization(done);
-     }).timeout(10000);
+       test.waitForBackendSynchronization(BACKEND_DELAY, done);
+     }).timeout(BACKEND_TIMEOUT);
      it(descriptions.receiveDataPointsWithAttributes,function(done) {
        test.receiveDataPointsWithAttributes(done);
      }).timeout(10000);
@@ -1248,8 +1250,8 @@ describe("Do data sending subtests ...".bold, function() {
        test.sendDataAsUser(done);
      }).timeout(10000);
      it(descriptions.waitForBackendSynchronization,function(done) {
-       test.waitForBackendSynchronization(done);
-     }).timeout(10000);
+       test.waitForBackendSynchronization(BACKEND_DELAY, done);
+     }).timeout(BACKEND_TIMEOUT);
      it(descriptions.receiveMaxAmountOfSamples,function(done) {
        test.receiveMaxAmountOfSamples(done);
      }).timeout(10000);
@@ -1329,8 +1331,8 @@ describe("Do MQTT data sending subtests ...".bold, function() {
         test.sendDataPointsWithAttributes(done);
     }).timeout(10000);
     it(descriptions.waitForBackendSynchronization, function(done) {
-        test.waitForBackendSynchronization(done);
-    }).timeout(10000);
+        test.waitForBackendSynchronization(BACKEND_DELAY, done);
+    }).timeout(BACKEND_TIMEOUT);
     it(descriptions.receiveSingleDataPoint, function(done) {
         test.receiveSingleDataPoint(done);
     }).timeout(10000);
