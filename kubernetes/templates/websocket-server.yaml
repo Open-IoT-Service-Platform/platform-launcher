@@ -5,6 +5,7 @@ metadata:
     app: websocket-server
   name: websocket-server
 spec:
+  clusterIP: None
   ports:
   - port: 5000
   selector:
@@ -88,7 +89,6 @@ spec:
         workingDir: /app
       imagePullSecrets:
       - name: dockercred
-      hostname: websocket-server
       volumes:
       - name: jwt-keys
         secret:

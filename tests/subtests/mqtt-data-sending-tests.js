@@ -460,8 +460,8 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager, mqtt
             });
 
         },
-        "waitForBackendSynchronization": function(done) {
-            setTimeout(done, 3000);
+        "waitForBackendSynchronization": function(delay, done) {
+            setTimeout(done, delay);
 
         },
 

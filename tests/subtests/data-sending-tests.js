@@ -863,8 +863,8 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
           done(err);
         });
     },
-    "waitForBackendSynchronization": function(done) {
-      setTimeout(done, 2000);
+    "waitForBackendSynchronization": function(delay, done) {
+      setTimeout(done, delay);
 
     },
     "sendPartiallyWrongData": function(done) {
