@@ -57,7 +57,7 @@ spec:
             cpu: 500m
           requests:
             memory: 500M
-            cpu: 500M
+            cpu: 500m
           {{ end }}
         env:
           - name: HDFS_USER
