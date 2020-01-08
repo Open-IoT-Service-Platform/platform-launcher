@@ -1250,8 +1250,10 @@ describe("Do data sending subtests ...".bold, function() {
        test.sendDataAsUser(done);
      }).timeout(10000);
      it(descriptions.waitForBackendSynchronization,function(done) {
-       test.waitForBackendSynchronization(BACKEND_DELAY, done);
-     }).timeout(BACKEND_TIMEOUT);
+       // Due to low profile of test environment and the fact that Kafka/Backend is processing all the 1000s of samples
+       // separately, we need to give the backend more time to settle
+       test.waitForBackendSynchronization(BACKEND_DELAY * 2, done);
+     }).timeout(BACKEND_TIMEOUT * 2);
      it(descriptions.receiveMaxAmountOfSamples,function(done) {
        test.receiveMaxAmountOfSamples(done);
      }).timeout(10000);
