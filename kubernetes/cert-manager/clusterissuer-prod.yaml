@@ -17,4 +17,4 @@ spec:
     solvers:
     - http01:
         ingress:
-          name: dashboard-web-http
+          class: nginx
