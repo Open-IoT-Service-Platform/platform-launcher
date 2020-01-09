@@ -8,8 +8,8 @@ spec:
   duration: 2160h # 90d
   renewBefore: 360h # 15d
   dnsNames:
-  - latest.streammyiot.com
-  - ws.latest.streammyiot.com
+  - latest.oisp.info
+  - ws.latest.oisp.info
   issuerRef:
     name: letsencrypt-prod
     # We can reference ClusterIssuers by changing the kind here.
