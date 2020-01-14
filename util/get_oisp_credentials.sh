@@ -7,7 +7,7 @@ export WEBSOCKETSERVER_PASSWORD=$(kubectl -n ${NAMESPACE} get -o yaml configmaps
 export POSTGRES_SU_PASSWORD=$(kubectl -n ${NAMESPACE} get -o yaml configmaps oisp-config | shyaml get-value data.postgres | jq -r .su_password)
 export POSTGRES_PASSWORD=$(kubectl -n ${NAMESPACE} get -o yaml configmaps oisp-config | shyaml get-value data.postgres | jq -r .password)
 export KEYCLOAK_PASSWORD=$(kubectl -n ${NAMESPACE} get -o yaml configmaps oisp-config | shyaml get-value data.keycloak-admin | jq -r .password)
-export KEYCLOAK_FRONTEND_SECRET=$(kubectl -n ${NAMESPACE} get -o yaml configmaps oisp-config | shyaml get-value data.keycloak.frontend.secret | jq -r .password)
+export KEYCLOAK_FRONTEND_SECRET=$(kubectl -n ${NAMESPACE} get -o yaml configmaps oisp-config | shyaml get-value data.keycloak | jq -r .secret)
 # tr "." "_" because jq cannot handle keys with "."
 export JWT_PRIVATE=$(kubectl -n ${NAMESPACE} -o json get secret oisp-secrets | tr "." "_" | jq -r .data.jwt_privatekey)
 export JWT_PUBLIC=$(kubectl -n ${NAMESPACE} -o json get secret oisp-secrets | tr "." "_" | jq -r .data.jwt_publickey)
