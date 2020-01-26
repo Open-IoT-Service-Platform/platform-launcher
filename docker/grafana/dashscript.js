@@ -77,7 +77,7 @@ for (var i = 0; i < rows; i++) {
         {
             title: 'Metrics of Account: ' + name,
             type: 'graph',
-            datasource: 'OpenTSDB',
+            datasource: 'KairosDB',
             span: 12,
             fill: 1,
             linewidth: 2,

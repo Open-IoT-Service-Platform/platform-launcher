@@ -22,13 +22,6 @@ numberReplicas:
     debugger: 0
     minio: 4
 
-hbaseScale:
-  dataNodes: 3
-  regionServers: "hbase-region-0.hbase-region hbase-region-1.hbase-region hbase-region-2.hbase-region"
-  regionServersTest: "hbase-region-0.hbase-region"
-  regionServersReady: "hbase-region-0.hbase-region:16020"
-  masterReady: "hbase-master-0.hbase-master:16010"
-
 minio:
   accesskey: minio
   secretkey: minio123
@@ -44,6 +37,20 @@ zookeeper:
   name: zookeeper
   servers: "zookeeper-client.zookeeper.svc.cluster.local"
   readyCheck: "zookeeper-client.zookeeper.svc.cluster.local:2181"
+
+backend:
+  defaultTsdbBackend: "kairosDB"
+  objectStoreName: "minio"
+  tsdbUri: "kairosdb"
+  tsdbPort: 8080
+
+cassandra:
+  host: cassandra-oisp-nodes.cassandra.svc.cluster.local
+  port: 9042
+  replication: "{'class': 'SimpleStrategy','replication_factor' : 2}"
+  nodes: 3
+  disk: 10Gi
+  memory: 1Gi
 
 grafana:
   admin: grafana

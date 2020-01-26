@@ -19,9 +19,9 @@ FROM grafana/grafana:${GRAFANA_VERSION}
 
 USER grafana
 
-ARG GF_INSTALL_PLUGINS=""
+ARG GF_INSTALL_PLUGINS="grafana-kairosdb-datasource"
 
-ADD ./opentsdb.yaml /etc/grafana/provisioning/datasources/
+ADD ./kairosdb.yaml /etc/grafana/provisioning/datasources/
 ADD ./dashscript.js /usr/share/grafana/public/dashboards/
 
 RUN if [ ! -z "${GF_INSTALL_PLUGINS}" ]; then \
