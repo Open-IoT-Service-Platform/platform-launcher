@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kairosdb
+  name: kairosdb
+spec:
+  ports:
+  - port: 8080
+  selector:
+    app: kairosdb
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kairosdb
+  labels:
+    app: kairosdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kairosdb
+  template:
+    metadata:
+      labels:
+        app: kairosdb
+    spec:
+      containers:
+      - name: kairosdb
+        image: oisp/kairosdb:{{ .Values.tag }}
+        ports:
+        - containerPort: 8080
+        args:
+        - /opt/wait-for-it.sh
+        - {{ .Values.cassandra.host }}:{{ .Values.cassandra.port}}
+        - -t
+        - "300"
+        - --
+        - /opt/kairosdb-startup.sh
+        env:
+        - name: OISP_KAIROSDB_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: kairosdb-properties
+              name: oisp-config
+        - name: OISP_TSDB_PROPERTIES
+          valueFrom:
+            configMapKeyRef:
+              key: kairosdb-properties
+              name: oisp-config
+        workingDir: /app
+        resources:
+          {{ if .Values.less_resources }}
+          requests:
+            cpu: 100m
+          {{ else }}
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 500m
+          {{ end }}
+      imagePullSecrets:
+      - name: dockercred

@@ -32,6 +32,12 @@ kubectl create ns kafka
 helm install kafka-operator --namespace=kafka banzaicloud-stable/kafka-operator
 kubectl create ns zookeeper
 helm install zookeeper-operator --namespace=zookeeper banzaicloud-stable/zookeeper-operator
+# Cassandra operator does not have helm chart yet
+kubectl create ns cassandra
+kubectl -n cassandra apply -f https://raw.githubusercontent.com/instaclustr/cassandra-operator/v3.1.1/deploy/crds.yaml
+kubectl -n cassandra apply -f https://raw.githubusercontent.com/instaclustr/cassandra-operator/v3.1.1/deploy/bundle.yaml
+kubectl -n cassandra delete cm cassandra-operator-default-config && \
+
 printf -- "\033[1mOperators installed successfully.\033[0m\n"
 
 printf "\033[1mReady to deploy OISP\033[0m\n"
