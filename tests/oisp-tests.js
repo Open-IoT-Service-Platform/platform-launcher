@@ -655,7 +655,7 @@ describe("Creating account and device ...\n".bold, function() {
                 done();
             }
         })
-    })
+    }).timeout(5000);
 
     it('Shall get detail of one device', function(done) {
 
