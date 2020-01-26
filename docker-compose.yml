@@ -16,13 +16,6 @@
 version: '3.7'
 
 services:
-  hbase:
-    image: oisp/hbase:${DOCKER_TAG}
-    build:
-      context: ./docker/hbase/
-      labels:
-        - oisp=true
-        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
   websocket-server:
     image: oisp/websocket-server:${DOCKER_TAG}
     build:
@@ -50,12 +43,10 @@ services:
       context: ./oisp-beam-rule-engine
       labels:
         - oisp=true
-    depends_on:
-      - hbase
-  opentsdb:
-    image: oisp/opentsdb:${DOCKER_TAG}
+  kairosdb:
+    image: oisp/kairosdb:${DOCKER_TAG}
     build:
-      context: ./docker/opentsdb
+      context: ./docker/kairosdb
       args:
         - DOCKER_TAG=${DOCKER_TAG}
       labels:
