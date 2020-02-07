@@ -558,7 +558,7 @@
         "jsonType.label" : "String"
       }
     } ],
-    "defaultClientScopes" : [ "web-origins", "roles", "accounts", "type", "email" ],
+    "defaultClientScopes" : [ "web-origins", "roles", "accounts", "type", "email", "mqtt-broker" ],
     "optionalClientScopes" : [ "offline_access", "microprofile-jwt" ],
     "authorizationSettings" : {
       "allowRemoteResourceManagement" : true,
@@ -1076,7 +1076,8 @@
         "claim.name" : "clientAddress",
         "jsonType.label" : "String"
       }
-    } ],
+    }
+   ],
     "defaultClientScopes" : [ "web-origins", "role_list", "profile", "roles", "email" ],
     "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ],
     "authorizationSettings" : {
@@ -1228,6 +1229,60 @@
       } ],
       "decisionStrategy" : "UNANIMOUS"
     }
+  },
+  {
+    "id": "56707dab-c91b-4c6e-99b8-718b29d7506d",
+    "clientId": "mqtt-broker",
+    "name": "mqtt-broker",
+    "surrogateAuthRequired": false,
+    "enabled": true,
+    "clientAuthenticatorType": "client-secret",
+    "secret": "{{ INSERT-MQTT-BROKER-SECRET }}",
+    "redirectUris": [],
+    "webOrigins": [],
+    "notBefore": 0,
+    "bearerOnly": true,
+    "consentRequired": false,
+    "standardFlowEnabled": true,
+    "implicitFlowEnabled": false,
+    "directAccessGrantsEnabled": true,
+    "serviceAccountsEnabled": false,
+    "publicClient": false,
+    "frontchannelLogout": false,
+    "protocol": "openid-connect",
+    "attributes": {
+      "saml.assertion.signature": "false",
+      "saml.multivalued.roles": "false",
+      "saml.force.post.binding": "false",
+      "saml.encrypt": "false",
+      "saml.server.signature": "false",
+      "saml.server.signature.keyinfo.ext": "false",
+      "exclude.session.state.from.auth.response": "false",
+      "saml_force_name_id_format": "false",
+      "saml.client.signature": "false",
+      "tls.client.certificate.bound.access.tokens": "false",
+      "saml.authnstatement": "false",
+      "display.on.consent.screen": "false",
+      "saml.onetimeuse.condition": "false"
+    },
+    "authenticationFlowBindingOverrides": {},
+    "fullScopeAllowed": true,
+    "nodeReRegistrationTimeout": -1,
+    "defaultClientScopes": [
+      "web-origins",
+      "role_list",
+      "profile",
+      "roles",
+      "accounts",
+      "type",
+      "email"
+    ],
+    "optionalClientScopes": [
+      "address",
+      "phone",
+      "offline_access",
+      "microprofile-jwt"
+    ]
   }, {
     "id" : "2c0c5093-9b2a-4a67-83dc-98daf6cd3a62",
     "clientId" : "security-admin-console",
@@ -1285,7 +1340,30 @@
     "defaultClientScopes" : [ "web-origins", "role_list", "profile", "roles", "email" ],
     "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ]
   } ],
-  "clientScopes" : [ {
+  "clientScopes" : [
+    {
+      "id": "5ed16465-f532-4fd1-a697-b9f66d6160ac",
+      "name": "mqtt-broker",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "id": "1ba18a0a-d3bf-4cf3-847a-d7416c4afe09",
+          "name": "mqtt-broker",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "mqtt-broker",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }, {
     "id" : "59b9e667-75be-43d4-8d7c-6189d27d67aa",
     "name" : "accounts",
     "description" : "accounts that user has access to",

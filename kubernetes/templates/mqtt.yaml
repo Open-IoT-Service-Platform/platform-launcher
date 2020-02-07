@@ -66,6 +66,16 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: redis
+        - name: OISP_KAFKA_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: kafka
+        - name: OISP_POSTGRES_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: postgres
         volumeMounts:
         - mountPath: /app/keys
           name: jwt-keys
@@ -101,6 +111,11 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: redis
+        - name: OISP_KEYCLOAK_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: keycloak
         readinessProbe:
           httpGet:
             path: /v1/api/health
