@@ -185,6 +185,7 @@ data:
     "port": "3000",
     "adminUser": "{{ .Values.grafana.admin }}",
     "adminPassword": "{{ .Values.grafana.password }}",
+    "dataSource": "kairosdb",
     "dataSourceHost": "kairosdb",
     "dataSourcePort": "8080"
     }

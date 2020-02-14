@@ -30,6 +30,7 @@ var test = function(userToken1, userToken2) {
     var componentName = "temperature-sensor-srt";
     var componentType = "temperature.v1.0";
     var promtests = require('./promise-wrap');
+    var apiDataSourcePath = '/api/datasources/proxy';
     var refreshedUserToken1;
     var refreshedUserToken2;
     var accountId1_1;
@@ -185,7 +186,6 @@ var test = function(userToken1, userToken2) {
         }).catch(err => { done(err); });
     },
     "queryUserAccountsData": function(done) {
-        var apiDataSourcePath = '/api/datasources/proxy';
         assert.notEqual(refreshedUserToken1, null, "UserToken 1 not defined");
         assert.notEqual(datasourceId, null, "Datasource Id not defined");
         assert.notEqual(accountId1_1, null, "AccountId 1.1 not defined");
@@ -194,15 +194,13 @@ var test = function(userToken1, userToken2) {
         assert.notEqual(componentId1_2, null, "ComponentId 1.2 not defined");
 
         var datasourceQueryBody = {
-            start: startTime.getTime(),
-            queries: [
+            start_absolute: startTime.getTime(),
+            metrics: [
                 {
-                    metric: accountId1_1 + '.' + componentId1_1_1,
-                    aggregator: 'sum',
+                    name: accountId1_1 + '.' + componentId1_1_1
                 },
                 {
-                    metric: accountId1_2 + '.' + componentId1_2,
-                    aggregator: 'sum',
+                    name: accountId1_2 + '.' + componentId1_2,
                 }
             ]
         };
@@ -217,22 +215,22 @@ var test = function(userToken1, userToken2) {
             if (res.statusCode >= 300) {
                 done('Can\'t authenticate to datasource');
             } else {
-                var metrics = JSON.parse(res.body);
+                var metrics = JSON.parse(res.body).queries[0].results;
                 var dataBelongsToUser = function(metric) {
-                    if (metric.metric === accountId1_1 + '.' + componentId1_1_1) {
-                        return Object.values(metric.dps).every(value => {
-                            return value < componentData1_1_1 + 1E-10 &&
-                                value > componentData1_1_1 - 1E-10;
+                    if (metric.name === accountId1_1 + '.' + componentId1_1_1) {
+                        return metric.values.every(timestampValuePair => {
+                            return timestampValuePair[1] < componentData1_1_1 + 1E-10 &&
+                                timestampValuePair[1] > componentData1_1_1 - 1E-10;
                         });
-                    } else if (metric.metric === accountId1_2 + '.' + componentId1_2) {
-                        return Object.values(metric.dps).every(value => {
-                            return value < componentData1_2 + 1E-10 &&
-                                value > componentData1_2 - 1E-10;
+                    } else if (metric.name === accountId1_2 + '.' + componentId1_2) {
+                        return metric.values.every(timestampValuePair => {
+                            return timestampValuePair[1] < componentData1_2 + 1E-10 &&
+                                timestampValuePair[1] > componentData1_2 - 1E-10;
                         });
                     } else {
                         return false;
                     }
-                }
+                };
                 if (!metrics.every(dataBelongsToUser)) {
                     done('Got unauthorized metric in grafana');
                 } else {
@@ -242,7 +240,6 @@ var test = function(userToken1, userToken2) {
         });
     },
     "tryToGetUnbelongedData": function(done) {
-        var apiDataSourcePath = '/api/datasources/proxy';
         assert.notEqual(refreshedUserToken1, null, "UserToken 1 not defined");
         assert.notEqual(datasourceId, null, "Datasource Name not defined");
         assert.notEqual(accountId1_1, null, "AccountId 1.1 not defined");
@@ -251,15 +248,13 @@ var test = function(userToken1, userToken2) {
         assert.notEqual(componentId2, null, "ComponentId 2 not defined");
 
         var datasourceQueryBody = {
-            start: startTime.getTime(),
-            queries: [
+            start_absolute: startTime.getTime(),
+            metrics: [
                 {
-                    aggregator: 'sum',
-                    metric: accountId1_1 + '.' + componentId1_1_1,
+                    name: accountId1_1 + '.' + componentId1_1_1,
                 },
                 {
-                    aggregator: 'sum',
-                    metric: accountId2 + '.' + componentId2,
+                    name: accountId2 + '.' + componentId2,
                 }
             ]
         };
@@ -271,8 +266,7 @@ var test = function(userToken1, userToken2) {
         grafanaOptions.method = 'POST';
         grafanaOptions.body = JSON.stringify(datasourceQueryBody);
         request(grafanaOptions).then(res => {
-            var metrics = JSON.parse(res.body);
-            if (metrics !== undefined && metrics.length > 0) {
+            if (res.body !== '' && JSON.parse(res.body).queries.length > 0) {
                 done('Expected empty result, but got some data: ' + res.body);
             } else if (res.statusCode < 400) {
                 done('Expected 400, got: ' + res.statusCode);
@@ -282,30 +276,22 @@ var test = function(userToken1, userToken2) {
         });
     },
     "getSuggestions": function(done) {
-        var apiDataSourcePath = '/api/datasources/proxy';
         assert.notEqual(refreshedUserToken1, null, "UserToken 1 not defined");
         assert.notEqual(datasourceId, null, "Datasource Name not defined");
         assert.notEqual(accountId1_1, null, "AccountId 1.1 not defined");
         assert.notEqual(componentId1_1_1, null, "ComponentId 1.1.1 not defined");
         assert.notEqual(componentId1_1_2, null, "ComponentId 1.1.2 not defined");
 
-        var datasourceSuggestBody = {
-            type: 'metrics',
-            q: accountId1_1,
-            max: 10
-        };
-
         grafanaOptions.jar = cookiejar1;
         grafanaOptions.url = grafanaUrl + apiDataSourcePath + '/' +
-            datasourceId + config.grafana.datasourceSuggest;
+            datasourceId + config.grafana.datasourceSuggest + '?prefix=' + accountId1_1;
         grafanaOptions.headers = { 'Content-Type': 'application/json', 'charset': 'utf-8' };
-        grafanaOptions.method = 'POST';
-        grafanaOptions.body = JSON.stringify(datasourceSuggestBody);
+        grafanaOptions.method = 'GET';
         request(grafanaOptions).then(res => {
             if (res.statusCode !== 200) {
                 done('Can\'t authenticate to datasource')
             } else {
-                var suggestions = JSON.parse(res.body);
+                var suggestions = JSON.parse(res.body).results;
                 suggestions.forEach(suggestion => {
                     if (suggestion !== accountId1_1 + '.' + componentId1_1_1
                         && suggestion !== accountId1_1 + '.' + componentId1_1_2) {
@@ -317,30 +303,22 @@ var test = function(userToken1, userToken2) {
         });
     },
     "tryToGetUnbelongedSuggestions": function(done) {
-        var apiDataSourcePath = '/api/datasources/proxy';
         assert.notEqual(refreshedUserToken2, null, "UserToken 2 not defined");
         assert.notEqual(datasourceId, null, "Datasource Name not defined");
         assert.notEqual(accountId1_1, null, "AccountId 1.1 not defined");
         assert.notEqual(componentId1_1_1, null, "ComponentId 1.1.1 not defined");
         assert.notEqual(componentId1_1_2, null, "ComponentId 1.1.2 not defined");
 
-        var datasourceSuggestBody = {
-            type: 'metrics',
-            q: accountId1_1,
-            max: 10
-        };
-
         grafanaOptions.jar = cookiejar2;
         grafanaOptions.url = grafanaUrl + apiDataSourcePath + '/' +
-            datasourceId + config.grafana.datasourceSuggest;
+            datasourceId + config.grafana.datasourceSuggest + '?prefix=' + accountId1_1;
         grafanaOptions.headers = { 'Content-Type': 'application/json', 'charset': 'utf-8' };
-        grafanaOptions.method = 'POST';
-        grafanaOptions.body = JSON.stringify(datasourceSuggestBody);
+        grafanaOptions.method = 'GET';
         request(grafanaOptions).then(res => {
             if (res.statusCode !== 200) {
                 done('Can\'t authenticate to datasource')
             } else {
-                var suggestions = JSON.parse(res.body);
+                var suggestions = JSON.parse(res.body).results;
                 if (suggestions !== undefined && suggestions.length > 0) {
                     done('Got unbelonged suggestions: ' + suggestions);
                 } else {
