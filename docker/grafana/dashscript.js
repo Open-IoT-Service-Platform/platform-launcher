@@ -30,6 +30,10 @@ dashboard = {
     rows : [],
 };
 
+var KAIROSDB = "KairosDB";
+var OPENTSDB = "OpenTSDB";
+var DATASOURCE = KAIROSDB
+
 // Set default time
 // time can be overridden in the url using from/to parameters, but this is
 // handled automatically in grafana core during dashboard initialization
@@ -56,15 +60,45 @@ if (!_.isUndefined(ARGS.metrics)) {
     metrics = ARGS.metrics.split(",");
 }
 
-
-for (var i = 0; i < metrics.length; i++) {
-    queries.push({
+function createOpentsdbQuery(metric, index) {
+    return {
         "aggregator": "sum",
         "downsampleAggregator": "avg",
         "downsampleFillPolicy": "none",
-        "metric": metrics[i],
-        "refId": String.fromCharCode(asciiA + i)
-    });
+        "metric": metric,
+        "refId": String.fromCharCode(asciiA + index)
+    };
+}
+
+function createKairosdbQuery(metric, index) {
+    return {
+        "query": {
+            "metricName": metric,
+            "tags": {
+                "type": []
+            },
+            "groupBy": {
+                "tags": [],
+                "value": [],
+                "time": []
+            },
+            "aggregators": []
+        },
+        "refId": String.fromCharCode(asciiA + index)
+    };
+}
+
+
+for (var i = 0; i < metrics.length; i++) {
+    switch (DATASOURCE) {
+        case KAIROSDB:
+            queries.push(createKairosdbQuery(metrics[i], i));
+            break;
+        case OPENTSDB:
+        default:
+            queries.push(createOpentsdbQuery(metrics[i], i));
+            break;
+    }
 }
 
 dashboard.title = name;
@@ -77,7 +111,7 @@ for (var i = 0; i < rows; i++) {
         {
             title: 'Metrics of Account: ' + name,
             type: 'graph',
-            datasource: 'KairosDB',
+            datasource: DATASOURCE,
             span: 12,
             fill: 1,
             linewidth: 2,

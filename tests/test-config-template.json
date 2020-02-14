@@ -50,8 +50,8 @@
 		},
 		"admin": "grafana",
 		"password": "${OISP_GRAFANA_PASSWORD}",
-		"datasourceSuggest": "/api/suggest",
-		"datasourceQuery": "/api/query"
+		"datasourceSuggest": "/api/v1/metricnames",
+		"datasourceQuery": "/api/v1/datapoints/query"
 	},
 	"skip":
 	{
