@@ -7,7 +7,7 @@ datasources:
   # <string, required> name of the datasource. Required
 - name: KairosDB
   # <string, required> datasource type. Required
-  type: kairosdb
+  type: grafana-kairosdb-datasource
   # <string, required> access mode. proxy or direct (Server or Browser in the UI). Required
   access: proxy
   # <int> org id. will default to orgId 1 if not specified
@@ -33,8 +33,6 @@ datasources:
   # <map> fields that will be converted to json and stored in jsonData
   jsonData:
     keepCookies: ["jwt"]
-    tsdbVersion: 3
-    tsdbResolution: 1
   # <string> json object of data that will be encrypted.
   #secureJsonData:
   # <bool> allow users to edit datasources from the UI.
