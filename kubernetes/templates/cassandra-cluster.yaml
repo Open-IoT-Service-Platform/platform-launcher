@@ -1,5 +1,7 @@
 apiVersion: cassandraoperator.instaclustr.com/v1alpha1
 kind: CassandraDataCenter
+datacenter: {{ .Values.cassandra.datacenter }}
+cluster: {{ .Values.cassandra.cluster }}
 metadata:
   name: oisp
   namespace: cassandra
