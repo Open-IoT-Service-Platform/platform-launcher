@@ -47,13 +47,17 @@ data:
     {
     "uri": "{{ .Values.kafka.service }}",
     "partitions": 1,
-    "replication": 1,
+    "metricsPartitions": {{ .Values.kafka.metricsPartitions }},
+    "replication": {{ .Values.kafka.replicationFactor}},
     "timeoutMs": 10000,
     "topicsObservations": "metrics",
     "topicsRuleEngine": "rules-update",
     "topicsHeartbeatName": "heartbeat",
     "topicsHeartbeatInterval": 5000,
-    "maxPayloadSize": {{ .Values.kafka.maxPayloadSize | int }}
+    "maxPayloadSize": {{ .Values.kafka.maxPayloadSize | int }},
+    "retries": {{ .Values.kafka.retries }},
+    "requestTimeout": {{ .Values.kafka.requestTimeout }},
+    "maxRetryTime": {{ .Values.kafka.maxRetryTime }}
     }
   zookeeper: |
     {
