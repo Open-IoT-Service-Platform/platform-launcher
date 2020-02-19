@@ -27,16 +27,47 @@ minio:
   secretkey: minio123
 
 kafka:
-  maxPayloadSize: 20000000
-  service: kafka-all-broker.kafka.svc.cluster.local:29092
-  namespace: kafka
+  fullnameOverride: oisp-kafka
+  service: oisp-kafka-headless:9092
+  fullBrokerList: "oisp-kafka-headless:9092"
+  replicas: 3
+  metricsPartitions: 2
+  replicationFactor: 2
+  requestTimeout: 20000
+  maxRetryTime: 2000
+  retries: 5
+  configurationOverrides:
+    auto.create.topics.enable: true
+    offsets.topic.replication.factor: 3
+    replica.fetch.max.bytes: "20000000"
+    message.max.bytes: "20000000"
+    default.replication.factor: 2
+  zookeeper:
+    replicaCount: 3
+
+kafkatest:
+  fullnameOverride: oisp-kafka
+  service: oisp-kafka-headless:9092
+  fullBrokerList: "oisp-kafka-headless:9092"
+  replicas: 1
+  metricsPartitions: 1
+  replicationFactor: 1
+  requestTimeout: 2000
+  maxRetryTime: 2000
+  retries: 1
+  configurationOverrides:
+    auto.create.topics.enable: true
+    offsets.topic.replication.factor: 1
+    replica.fetch.max.bytes: "20000000"
+    message.max.bytes: "20000000"
+  zookeeper:
+    replicaCount: 1
 
 zookeeper:
-  replicas: 3
   namespace: zookeeper
   name: zookeeper
-  servers: "zookeeper-client.zookeeper.svc.cluster.local"
-  readyCheck: "zookeeper-client.zookeeper.svc.cluster.local:2181"
+  servers: "oisp-zookeeper-headless"
+  readyCheck: "oisp-zookeeper-headless:2181"
 
 backend:
   defaultTsdbBackend: "kairosDB"
@@ -191,4 +222,7 @@ jaeger_tracing: false
 
 # Sets resource limits lower to test locally
 # or on smaller cluster when set to true
+# Note: make sure that less_resources and production always containe inverted Values
+# why: Because selection of subcharts in Helm does not work with "false" values (sad, but true)
 less_resources: true
+production: false
