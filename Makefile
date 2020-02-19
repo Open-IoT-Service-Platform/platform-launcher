@@ -178,7 +178,6 @@ upgrade-oisp: check-docker-cred-env
 undeploy-oisp:
 	@cd kubernetes && \
 	( helm uninstall $(NAME) --namespace $(NAMESPACE) || echo helm uninstall failed)  && \
-	kubectl -n zookeeper delete pvc $$(kubectl -n zookeeper get pvc | grep data-zookeeper-0 | cut -f 1 -d " ") && \
 	kubectl delete namespace $(NAMESPACE)
 
 # =====

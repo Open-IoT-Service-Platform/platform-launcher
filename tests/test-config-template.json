@@ -32,8 +32,8 @@
 			}
 		},
 	        "kafka": {
-		        "host": "kafka-all-broker.kafka.svc.cluster.local",
-		        "port": 29092,
+		        "host": "oisp-kafka-headless",
+		        "port": 9092,
 		        "topic": "heartbeat"
 		}
 	},
