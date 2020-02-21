@@ -32,7 +32,11 @@ spec:
     spec:
       containers:
       - name: mqtt-gateway
+        {{ if .Values.use_local_registry }}
+        image: registry.local:5000/oisp/mqtt-gateway:{{ .Values.tag }}
+        {{ else }}
         image: oisp/mqtt-gateway:{{ .Values.tag }}
+        {{ end }}
         command: ["./wait-for-it.sh"]
         args:
         - localhost:8883
@@ -85,7 +89,11 @@ spec:
             path: /v1/api/health
             port: 4005
       - name: mqtt-broker
+        {{ if .Values.use_local_registry }}
+        image: registry.local:5000/oisp/mqtt-broker:{{ .Values.tag }}
+        {{ else }}
         image: oisp/mqtt-broker:{{ .Values.tag }}
+        {{ end }}
         ports:
         - containerPort: 8883
         resources:
