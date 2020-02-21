@@ -41,7 +41,11 @@ spec:
     spec:
       containers:
       - name: frontend
+        {{ if .Values.use_local_registry }}
+        image: registry.local:5000/oisp/frontend:{{ .Values.tag }}
+        {{ else }}
         image: oisp/frontend:{{ .Values.tag }}
+        {{ end }}
         ports:
         - containerPort: 4001
         args:

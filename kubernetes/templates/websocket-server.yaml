@@ -33,7 +33,11 @@ spec:
     spec:
       containers:
       - name: websocket-server
+        {{ if .Values.use_local_registry }}
+        image: registry.local:5000/oisp/websocket-server:{{ .Values.tag }}
+        {{ else }}
         image: oisp/websocket-server:{{ .Values.tag }}
+        {{ end }}
         ports:
         - containerPort: 5000
           protocol: TCP
