@@ -39,9 +39,13 @@ spec:
         app: debugger
     spec:
       containers:
-      - image: oisp/debugger:{{ .Values.tag }}
+      - name: debugger
+        {{ if .Values.use_local_registry }}
+        image: registry.local:5000/oisp/debugger:{{ .Values.tag }}
+        {{ else }}
+        image: oisp/debugger:{{ .Values.tag }}
+        {{ end }}
         imagePullPolicy: IfNotPresent
-        name: debugger
         ports:
         - containerPort: 2525
         terminationMessagePath: /dev/termination-log

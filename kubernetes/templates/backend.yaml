@@ -34,7 +34,11 @@ spec:
     spec:
       containers:
       - name: backend
+        {{ if .Values.use_local_registry }}
+        image: registry.local:5000/oisp/backend:{{ .Values.tag }}
+        {{ else }}
         image: oisp/backend:{{ .Values.tag }}
+        {{ end }}
         ports:
         - containerPort: 8080
         args:

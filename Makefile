@@ -248,6 +248,13 @@ import-images-agent:
 		docker exec -it $(K3S_NODE) ctr image import /tmp/$(image) >> /dev/null && printf ", imported\n"; \
 	)
 
+import-images-to-local-registry:
+	@$(foreach image,$(CONTAINERS), \
+                printf $(image); \
+                docker tag oisp/$(image):$(DOCKER_TAG) registry.local:5000/oisp/$(image):$(DOCKER_TAG) && \
+                docker push registry.local:5000/oisp/$(image):$(DOCKER_TAG) && printf " done\n"; \
+        )
+
 ## open-shell: Open a shell to a random pod in DEPLOYMENT.
 ##     By default thi will try to open a shell to a debugger pod.
 ##
