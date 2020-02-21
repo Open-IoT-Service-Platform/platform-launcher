@@ -34,7 +34,11 @@ spec:
     spec:
       containers:
       - name: rule-engine
+        {{ if .Values.use_local_registry }}
+        image: registry.local:5000/oisp/rule-engine:{{ .Values.tag }}
+        {{ else }}
         image: oisp/rule-engine:{{ .Values.tag }}
+        {{ end }}
         command: ["/bin/bash"]
         resources:
           {{ if .Values.less_resources }}

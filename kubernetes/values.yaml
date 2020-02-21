@@ -92,9 +92,7 @@ backend:
   tsdbPort: 8080
 
 cassandra:
-  datacenter: "dc"
   cluster: "oisp"
-  host: cassandra-oisp-dc-nodes.cassandra.svc.cluster.local #note: datacenter and cluster have influence on how the name is built
   port: 9042
   replication: "{'class': 'SimpleStrategy','replication_factor' : 2}"
   nodes: 3
@@ -243,6 +241,7 @@ postgres:
 
 # Docker image tag
 tag: latest
+use_local_registry: true
 
 # Enable jaeger tracing
 jaeger_tracing: false

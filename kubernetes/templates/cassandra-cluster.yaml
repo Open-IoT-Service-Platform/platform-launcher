@@ -1,7 +1,8 @@
 apiVersion: cassandraoperator.instaclustr.com/v1alpha1
 kind: CassandraDataCenter
-datacenter: {{ .Values.cassandra.datacenter }}
+datacenter: {{ .Release.Namespace }}
 cluster: {{ .Values.cassandra.cluster }}
+host: cassandra-oisp-{{ .Release.Namespace }}-nodes.svc.cluster.local #note: datacenter and cluster have influence on how the name is built
 metadata:
   name: oisp
   namespace: cassandra
