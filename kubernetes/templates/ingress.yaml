@@ -4,7 +4,7 @@ metadata:
   name: frontend-web
   annotations:
      kubernetes.io/ingress.class: "nginx"
-     cert-manager.io/cluster-issuer: "letsencrypt-pod"
+     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   backend:
     serviceName: frontend
