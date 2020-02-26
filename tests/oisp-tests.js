@@ -55,6 +55,7 @@ var rules = [];
 
 var BACKEND_DELAY = 5000;
 var BACKEND_TIMEOUT = 10000;
+var TIMEOUT_FACTOR = 2;
 // Use this to keep track of received mails and wait for new ones
 // instead of deleting old mails
 var nr_mails = helpers.mail.getAllEmailMessages().length;
@@ -1239,7 +1240,7 @@ describe("Do data sending subtests ...".bold, function() {
      }).timeout(10000);
      it(descriptions.sendPartiallyWrongData,function(done) {
        test.sendPartiallyWrongData(done);
-     }).timeout(10000);
+     }).timeout(BACKEND_TIMEOUT *  TIMEOUT_FACTOR);
      it(descriptions.sendDataAsAdmin,function(done) {
        test.sendDataAsAdmin(done);
      }).timeout(10000);
