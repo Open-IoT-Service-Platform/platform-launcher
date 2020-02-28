@@ -115,9 +115,12 @@ deploy-oisp: check-docker-cred-env generate_keys
 	$(eval PUBLICKEY:=$(shell cat public.pem | base64 | tr -d "\n"))
 	$(eval PRIVATEKEY:=$(shell cat private.pem | base64 | tr -d "\n"))
 	$(eval X509CERT:=$(shell cat x509.pem | base64 | tr -d "\n"))
-	@cd kubernetes && \
+	@cd keycloak/oisp-js-policies && \
+	mvn package && \
+	cd ./../../kubernetes && \
 	kubectl create namespace $(NAMESPACE) && \
 	kubectl -n $(NAMESPACE) create secret generic oisp-realm-secret --from-file=./../keycloak/oisp-realm.json && \
+	kubectl -n $(NAMESPACE) create configmap oisp-js-policies --from-file=./../keycloak/oisp-js-policies/target/oisp-js-policies.jar && \
 	POSTGRES_PASSWORD="$(call randomPass)" && \
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
 	helm dependency update --namespace $(NAMESPACE) && \
@@ -146,9 +149,13 @@ deploy-oisp: check-docker-cred-env generate_keys
 ##
 upgrade-oisp: check-docker-cred-env
 	@source util/get_oisp_credentials.sh && \
-	cd kubernetes && \
+	cd keycloak/oisp-js-policies && \
+	mvn package && \
+	cd ./../../kubernetes && \
 	kubectl -n $(NAMESPACE) delete secret oisp-realm-secret && \
 	kubectl -n $(NAMESPACE) create secret generic oisp-realm-secret --from-file=./../keycloak/oisp-realm.json && \
+	kubectl -n $(NAMESPACE) delete configmap oisp-js-policies && \
+	kubectl -n $(NAMESPACE) create configmap oisp-js-policies --from-file=./../keycloak/oisp-js-policies/target/oisp-js-policies.jar && \
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
 	helm dependency update --namespace $(NAMESPACE) && \
 	helm upgrade $(NAME) . --namespace $(NAMESPACE) \

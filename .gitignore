@@ -10,3 +10,4 @@ data-backup/
 node_modules/
 oisp-logs_*.zip
 *.pem
+keycloak/oisp-js-policies/target

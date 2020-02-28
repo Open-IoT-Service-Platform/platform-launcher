@@ -36,6 +36,14 @@ sudo cp linux-amd64/helm /usr/bin/helm
 printf "\033[1mHelm installed succesfully.\033[0m\n"
 cd $CURR_DIR
 
+printf "\033[1mInstalling maven and java\n"
+printf -- "-----------------\033[0m\n"
+sudo apt install maven default-jdk default-jre
+printf "\033[1mSuccessfully installed %s\033[0m\n" "$(mvn -version)"
+printf "\n"
+printf "\033[1mSuccessfully installed %s\033[0m\n" "$(java -version)"
+printf "\n"
+
 printf "\033[1mInstalling test dependencies\n"
 printf -- "----------------------------\033[0m\n"
 sudo pip install shyaml

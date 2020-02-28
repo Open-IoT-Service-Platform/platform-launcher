@@ -163,6 +163,9 @@ keycloak:
         PUBLIC_CERT=$(cat /keys/x509.pem)
         PUBLIC_CERT=${PUBLIC_CERT//$'\n'/\\\\n}
         PUBLIC_CERT=${PUBLIC_CERT//\//\\\/}
+        rm -rf /opt/jboss/keycloak/standalone/deployments
+        mkdir /opt/jboss/keycloak/standalone/deployments
+        cp /modules/oisp-js-policies.jar /opt/jboss/keycloak/standalone/deployments/oisp-js-policies.jar
         mkdir /opt/jboss/realms
         cp /realms/oisp-realm.json /opt/jboss/realms/oisp-realm.json
         sed -i "s/{{ INSERT-PRIVATE-KEY }}/${PRIVATE_KEY}/" ${REALM_DIR}
@@ -182,6 +185,12 @@ keycloak:
           - key: jwt.privatekey
             path: private.pem
           defaultMode: 420
+      - name: oisp-js-policies
+        configMap:
+          name: oisp-js-policies
+          items:
+          - key: oisp-js-policies.jar
+            path: oisp-js-policies.jar
     extraVolumeMounts: |
       - name: oisp-realm-secret
         mountPath: "/realms"
@@ -189,6 +198,9 @@ keycloak:
       - name: jwt-keys
         mountPath: "/keys"
         readOnly: true
+      - name: oisp-js-policies
+        mountPath: "/modules"
+        readOnly: false
     service:
       httpPort: 4080
       httpsPort: 4043
