@@ -719,30 +719,24 @@
       }, {
         "id" : "4f54a7b5-9e3f-4ea5-b5fe-e4c6e53eca81",
         "name" : "Grant Access To All Policy",
-        "type" : "js",
+        "type" : "script-grant-all-policy.js",
         "logic" : "POSITIVE",
         "decisionStrategy" : "UNANIMOUS",
-        "config" : {
-          "code" : "$evaluation.grant();"
-        }
+        "config" : { }
       }, {
         "id" : "2003e57b-a247-4c5f-82f9-1cba3c0c658a",
         "name" : "Admin For Accessed Account Policy",
-        "type" : "js",
+        "type" : "script-admin-account-policy.js",
         "logic" : "POSITIVE",
         "decisionStrategy" : "UNANIMOUS",
-        "config" : {
-          "code" : "var context = $evaluation.getContext();\nvar identity = context.getIdentity();\nvar accessToken = identity.getAccessToken();\nvar otherClaims = accessToken.getOtherClaims();\nvar accounts = otherClaims.get('accounts');\nvar permission = $evaluation.getPermission();\nvar path = permission.getClaims().get('accessed-endpoint').toArray()[0];\nvar accountIdRegExp = new RegExp(\"/api/accounts/(.[^/]*)\");\nvar accountId = accountIdRegExp.exec(path);\nvar grantAccess = false;\nif (accountId) {\n    accountId = accountId[1];\n    accounts.forEach(function(account) {\n        if (account.id === accountId && account.role === \"admin\") {\n            grantAccess = true;\n        }\n    });\n}\nif (grantAccess) {\n    $evaluation.grant();\n} else {\n    $evaluation.deny();\n}"
-        }
+        "config" : { }
       }, {
         "id" : "131953b7-23de-44fd-af2e-dd8a9b3b0e18",
         "name" : "Has Access To Account Policy",
-        "type" : "js",
+        "type" : "script-access-account-policy.js",
         "logic" : "POSITIVE",
         "decisionStrategy" : "UNANIMOUS",
-        "config" : {
-          "code" : "var context = $evaluation.getContext();\nvar identity = context.getIdentity();\nvar accessToken = identity.getAccessToken();\nvar otherClaims = accessToken.getOtherClaims();\nvar accounts = otherClaims.get('accounts');\nvar permission = $evaluation.getPermission();\nvar path = permission.getClaims().get('accessed-endpoint').toArray()[0];\nvar accountIdRegExp = new RegExp(\"/api/accounts/(.[^/]*)\");\nvar accountId = accountIdRegExp.exec(path);\nvar grantAccess = false;\nif (accountId) {\n    accountId = accountId[1];\n    accounts.forEach(function(account) {\n        if (account.id === accountId) {\n            grantAccess = true;\n        }\n    });\n}\nif (grantAccess) {\n    $evaluation.grant();\n} else {\n    $evaluation.deny();\n}"
-        }
+        "config" : { }
       }, {
         "id" : "1b928e0d-767f-4b33-bc44-12e7e95688b0",
         "name" : "User Role Policy",
@@ -755,39 +749,31 @@
       }, {
         "id" : "72ea638c-82f0-4d06-afda-fbffc6bfb0e1",
         "name" : "Token Type is User",
-        "type" : "js",
+        "type" : "script-user-token-policy.js",
         "logic" : "POSITIVE",
         "decisionStrategy" : "UNANIMOUS",
-        "config" : {
-          "code" : "var USER = \"user\";\nvar context = $evaluation.getContext();\nvar identity = context.getIdentity();\nvar attributes = identity.getAttributes();\nvar type = attributes.getValue('type').asString(0);\nif (type === USER) {\n    $evaluation.grant();\n} else {\n    $evaluation.deny();\n}"
-        }
+        "config" : { }
       }, {
         "id" : "8fa3b7a1-dc06-4fa5-a2e2-b4ec94c83682",
         "name" : "Token Type is Device",
-        "type" : "js",
+        "type" : "script-device-token-policy.js",
         "logic" : "POSITIVE",
         "decisionStrategy" : "UNANIMOUS",
-        "config" : {
-          "code" : "var DEVICE = \"device\";\nvar context = $evaluation.getContext();\nvar identity = context.getIdentity();\nvar attributes = identity.getAttributes();\nvar type = attributes.getValue('type').asString(0);\nif (type === DEVICE) {\n    $evaluation.grant();\n} else {\n    $evaluation.deny();\n}"
-        }
+        "config" : { }
       }, {
         "id" : "f7914330-3009-4e42-a8c6-4a9c76188c31",
         "name" : "Token Type Match Resource Endpoint And Access To Account Policy",
-        "type" : "js",
+        "type" : "script-token-match-access-account-policy.js",
         "logic" : "POSITIVE",
         "decisionStrategy" : "UNANIMOUS",
-        "config" : {
-          "code" : "var USER = \"user\";\nvar DEVICE = \"device\";\nvar context = $evaluation.getContext();\nvar identity = context.getIdentity();\nvar attributes = identity.getAttributes();\nvar type = attributes.getValue('type').asString(0);\nvar accessToken = identity.getAccessToken();\nvar otherClaims = accessToken.getOtherClaims();\nvar accounts = otherClaims.get('accounts');\nvar permission = $evaluation.getPermission();\nvar path = permission.getClaims().get('accessed-endpoint').toArray()[0];\nvar accountIdRegExp = new RegExp(\"/api/accounts/(.[^/]*)\");\nvar accountId = accountIdRegExp.exec(path);\nif (accountId && type === USER) {\n    var grantAccess = false;\n    accountId = accountId[1];\n    accounts.forEach(function(account) {\n        if (account.id === accountId) {\n            grantAccess = true;\n        }\n    });\n    if (grantAccess) {\n        $evaluation.grant();\n    } else {\n        $evaluation.deny();\n    }\n} else if(!accountId && type === DEVICE) {\n    $evaluation.grant();\n} else {\n    $evaluation.deny();\n}"
-        }
+        "config" : { }
       }, {
         "id" : "cbcfc1e5-3df6-4d42-8d98-a8e4536275c9",
         "name" : "Token Type Match Resource Endpoint And Admin For Accessed Account Policy",
-        "type" : "js",
+        "type" : "script-token-match-admin-account-policy.js",
         "logic" : "POSITIVE",
         "decisionStrategy" : "UNANIMOUS",
-        "config" : {
-          "code" : "var USER = \"user\";\nvar DEVICE = \"device\";\nvar context = $evaluation.getContext();\nvar identity = context.getIdentity();\nvar attributes = identity.getAttributes();\nvar type = attributes.getValue('type').asString(0);\nvar accessToken = identity.getAccessToken();\nvar otherClaims = accessToken.getOtherClaims();\nvar accounts = otherClaims.get('accounts');\nvar permission = $evaluation.getPermission();\nvar path = permission.getClaims().get('accessed-endpoint').toArray()[0];\nvar accountIdRegExp = new RegExp(\"/api/accounts/(.[^/]*)\");\nvar accountId = accountIdRegExp.exec(path);\nif (accountId && type === USER) {\n    var grantAccess = false;\n    accountId = accountId[1];\n    accounts.forEach(function(account) {\n        if (account.id === accountId && account.role === \"admin\") {\n            grantAccess = true;\n        }\n    });\n    if (grantAccess) {\n        $evaluation.grant();\n    } else {\n        $evaluation.deny();\n    }\n} else if(!accountId && type === DEVICE) {\n    $evaluation.grant();\n} else {\n    $evaluation.deny();\n}"
-        }
+        "config" : { }
       }, {
         "id" : "737f035b-dd29-4339-ad5b-75e1db04fb15",
         "name" : "Public Permission",
@@ -1109,12 +1095,10 @@
       "policies" : [ {
         "id" : "a8579d60-1201-4c87-8e39-487fae7324f2",
         "name" : "User Token Type Policy",
-        "type" : "js",
+        "type" : "script-user-token-policy.js",
         "logic" : "POSITIVE",
         "decisionStrategy" : "UNANIMOUS",
-        "config" : {
-          "code" : "var USER = \"user\";\nvar context = $evaluation.getContext();\nvar identity = context.getIdentity();\nvar attributes = identity.getAttributes();\nvar type = attributes.getValue('type').asString(0);\nif (type === USER) {\n    $evaluation.grant();\n} else {\n    $evaluation.deny();\n}"
-        }
+        "config" : { }
       }, {
         "id" : "d169a807-20a1-4947-9200-2dfc74d85cc4",
         "name" : "oisp-frontend Client Policy",
@@ -1374,9 +1358,9 @@
     },
     "protocolMappers" : [ {
       "id" : "24e06173-456c-4404-9f57-529d065dafc9",
-      "name" : "get accounts that user has access",
+      "name" : "accounts mapper",
       "protocol" : "openid-connect",
-      "protocolMapper" : "oidc-script-based-protocol-mapper",
+      "protocolMapper" : "script-accounts-mapper.js",
       "consentRequired" : false,
       "config" : {
         "multivalued" : "false",
@@ -1384,8 +1368,7 @@
         "id.token.claim" : "true",
         "access.token.claim" : "true",
         "claim.name" : "accounts",
-        "jsonType.label" : "JSON",
-        "script" : "/**\n * Available variables: \n * user - the current user\n * realm - the current realm\n * token - the current token\n * userSession - the current userSession\n * keycloakSession - the current keycloakSession\n */\n\n// nashorn http client taken from: https://gist.github.com/billybong/a462152889b6616deb02\nvar LEGACY_UID = \"legacy_app_uid\";\nvar USER = \"user\";\nvar DEVICE = \"device\";\nvar DEVICE_ENDPOINT_ENV = \"OISP_FRONTEND_DEVICE_ACCOUNT_ENDPOINT\";\nvar USER_ENDPOINT_ENV = \"OISP_FRONTEND_USER_ACCOUNT_ENDPOINT\";\nvar SECRET = java.lang.System.getenv(\"OISP_FRONTEND_SECRET\");\nvar placeholder = \"placeholder@placeholder.org\";\nvar placeholderActivationCode = 'placeholder';\n\nfunction read(inputStream){\n    var inReader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream));\n    var inputLine;\n    var response = new java.lang.StringBuffer();\n\n    while ((inputLine = inReader.readLine()) !== null) {\n           response.append(inputLine);\n    }\n    inReader.close();\n    return response.toString();\n}\n\nfunction asResponse(con){\n    var d = read(con.inputStream);\n\n    return {data : d, statusCode : con.responseCode};\n}\n\nfunction httpGet(theUrl){\n    var con = new java.net.URL(theUrl).openConnection();\n    con.requestMethod = \"GET\";\n    con.setRequestProperty(\"Authorization\", \"Basic \" + SECRET);\n\n    return asResponse(con);\n}\n\nvar accessType = keycloakSession.getContext().getRequestHeaders()\n    .getRequestHeader(\"X-Access-Type\");\nif (accessType.length > 0) {\n    accessType = accessType[0];\n}\n\nvar path;\nif (accessType && accessType === DEVICE) {\n    path = java.lang.System.getenv(DEVICE_ENDPOINT_ENV);\n    var activationCode = keycloakSession.getContext().getRequestHeaders()\n        .getRequestHeader(\"X-Activation-Code\");\n    if (activationCode.length > 0) {\n        activationCode = activationCode[0];\n    } else if (user.username === placeholder) {\n        activationCode = placeholderActivationCode;\n    } else {\n        activationCode = \"invalid\";\n    }\n    path = path.replace(\":activationCode\", activationCode);\n    var deviceUID = keycloakSession.getContext().getRequestHeaders()\n        .getRequestHeader(\"X-DeviceUID\")[0];\n    path = path.replace(\":deviceUID\", deviceUID);\n} else {\n    path = java.lang.System.getenv(USER_ENDPOINT_ENV);\n    var userId = user.id;\n    var legacyUID = user.getFirstAttribute(LEGACY_UID);\n    if (legacyUID) {\n        userId = legacyUID;\n    }\n   path = path.replace(\":userId\", userId);\n}\n\nvar res = httpGet(path);\nexports = res.data;"
+        "jsonType.label" : "JSON"
       }
     } ]
   }, {
@@ -1821,17 +1804,16 @@
     },
     "protocolMappers" : [ {
       "id" : "0fcbb880-7b3e-4878-ba29-710db602cd71",
-      "name" : "get access type of user",
+      "name" : "type mapper",
       "protocol" : "openid-connect",
-      "protocolMapper" : "oidc-script-based-protocol-mapper",
+      "protocolMapper" : "script-type-mapper.js",
       "consentRequired" : false,
       "config" : {
         "userinfo.token.claim" : "true",
         "id.token.claim" : "true",
         "access.token.claim" : "true",
         "claim.name" : "type",
-        "jsonType.label" : "String",
-        "script" : "/**\n * Available variables: \n * user - the current user\n * realm - the current realm\n * token - the current token\n * userSession - the current userSession\n * keycloakSession - the current keycloakSession\n */\n\nvar DEVICE = \"device\";\nvar USER = \"user\";\nvar LEGACY_UID = \"legacy_app_uid\";\nvar placeholder = \"placeholder@placeholder.org\";\n\n// Set expire date depending on role\nvar DEFAULT_EXPIRE = 5256000; // 10 years in minutes\nvar USER_EXPIRE = 1440; // 24 hours in minutes\n\nvar currentTimeInSeconds = new Date().getTime() / 1000;\nvar expire = keycloakSession.getContext().getRequestHeaders()\n    .getRequestHeader(\"X-Token-Expire\");\nif (expire.length > 0) {\n    expire = parseInt(expire[0]);\n    token.expiration(currentTimeInSeconds + expire);\n} else {\n    var ArrayList = Java.type(\"java.util.ArrayList\");\n    var roles = new ArrayList();\n    var client = keycloakSession.getContext().getClient();\n    var forEach = Array.prototype.forEach;\n    forEach.call(user.getClientRoleMappings(client).toArray(), function(roleModel) {\n      roles.add(roleModel.getName());\n    });\n    if (roles.contains('user')) {\n        token.expiration(currentTimeInSeconds + USER_EXPIRE * 60);\n    } else {\n        token.expiration(currentTimeInSeconds + DEFAULT_EXPIRE * 60)\n    }\n}\n\n// Set type and subject id\nvar accessType = keycloakSession.getContext().getRequestHeaders()\n    .getRequestHeader(\"X-Access-Type\");\nif (accessType.length > 0) {\n    accessType = accessType[0];\n}\nif (accessType && accessType === DEVICE) {\n    var deviceId = keycloakSession.getContext().getRequestHeaders()\n        .getRequestHeader(\"X-DeviceID\")[0];\n    token.setSubject(deviceId);\n    exports = DEVICE;\n} else {\n    // legacy uid comes from imported existing users\n    var legacyUID = user.getFirstAttribute(LEGACY_UID);\n    if (legacyUID) {\n        token.setSubject(legacyUID);\n    } else {\n        token.setSubject(user.id);\n    }\n    if (user.username === placeholder) {\n        exports = \"invalid\";\n    } else {\n        exports = USER;   \n    }\n}\n"
+        "jsonType.label" : "String"
       }
     } ]
   }, {
@@ -1866,7 +1848,7 @@
   },
   "smtpServer" : { },
   "eventsEnabled" : false,
-  "eventsListeners" : [ "jboss-logging" ],
+  "eventsListeners" : [ "jboss-logging", "oisp-event-listener" ],
   "enabledEventTypes" : [ ],
   "adminEventsEnabled" : false,
   "adminEventsDetailsEnabled" : false,

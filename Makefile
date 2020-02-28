@@ -111,13 +111,12 @@ generate_keys:
 ## deploy-oisp: Deploy repository as HELM chart
 ##
 deploy-oisp: check-docker-cred-env generate_keys
-# First generate ssh keys
+	# First generate ssh keys
 	$(eval PUBLICKEY:=$(shell cat public.pem | base64 | tr -d "\n"))
 	$(eval PRIVATEKEY:=$(shell cat private.pem | base64 | tr -d "\n"))
 	$(eval X509CERT:=$(shell cat x509.pem | base64 | tr -d "\n"))
-	@cd kubernetes && \
+	cd kubernetes && \
 	kubectl create namespace $(NAMESPACE) && \
-	kubectl -n $(NAMESPACE) create secret generic oisp-realm-secret --from-file=./../keycloak/oisp-realm.json && \
 	POSTGRES_PASSWORD="$(call randomPass)" && \
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
 	helm dependency update --namespace $(NAMESPACE) && \
@@ -141,6 +140,7 @@ deploy-oisp: check-docker-cred-env generate_keys
 		--set jwt.private="$(PRIVATEKEY)" \
 		--set jwt.x509="$(X509CERT)" \
 		--set tag=$(DOCKER_TAG) \
+		--set keycloak.keycloak.image.tag=$(DOCKER_TAG) \
 		$(HELM_ARGS)
 
 ## upgrade-oisp: Upgrade already deployed HELM chart
@@ -148,8 +148,6 @@ deploy-oisp: check-docker-cred-env generate_keys
 upgrade-oisp: check-docker-cred-env
 	@source util/get_oisp_credentials.sh && \
 	cd kubernetes && \
-	kubectl -n $(NAMESPACE) delete secret oisp-realm-secret && \
-	kubectl -n $(NAMESPACE) create secret generic oisp-realm-secret --from-file=./../keycloak/oisp-realm.json && \
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
 	helm dependency update --namespace $(NAMESPACE) && \
 	helm upgrade $(NAME) . --namespace $(NAMESPACE) \
@@ -172,6 +170,7 @@ upgrade-oisp: check-docker-cred-env
 		--set jwt.private="$${JWT_PRIVATE}" \
 		--set jwt.x509="$${JWT_X509}" \
 		--set tag=$(DOCKER_TAG) \
+		--set keycloak.keycloak.image.tag=$(DOCKER_TAG) \
 		$(HELM_ARGS)
 
 
@@ -221,7 +220,7 @@ wait-until-ready:
 		do printf "."; sleep 5; done;
 	@printf "\nWaiting for dbsetup job";
 	@while ! kubectl -n $(NAMESPACE) get job dbsetup -o \
-        jsonpath="{.status.succeeded}" | grep 1 >> /dev/null; \
+		jsonpath="{.status.succeeded}" | grep 1 >> /dev/null; \
 		do printf "."; sleep 5; done;
 	@printf "\nWaiting for keycloak";
 	@while kubectl -n $(NAMESPACE) get pod keycloak-0 -o \
@@ -267,7 +266,8 @@ open-shell:
 ##     install the dependencies for OISP
 ##
 restart-cluster:
-	@./util/restart-cluster.sh
+	@cd util && \
+	./restart-cluster.sh
 
 # =======
 # TESTING
