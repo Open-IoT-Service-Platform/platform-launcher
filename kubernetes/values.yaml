@@ -52,9 +52,9 @@ kafkatest:
   replicas: 1
   metricsPartitions: 1
   replicationFactor: 1
-  requestTimeout: 2000
-  maxRetryTime: 2000
-  retries: 1
+  requestTimeout: 20000
+  maxRetryTime: 5000
+  retries: 10
   configurationOverrides:
     auto.create.topics.enable: true
     offsets.topic.replication.factor: 1
