@@ -29,7 +29,7 @@ services:
       context: ./oisp-frontend/public-interface
       labels:
         - oisp=true
-        - ois.git_commit=${GIT_COMMIT_FRONTEND}
+        - oisp.git_commit=${GIT_COMMIT_FRONTEND}
   backend:
     image: oisp/backend:${DOCKER_TAG}
     build:
@@ -51,7 +51,7 @@ services:
         - DOCKER_TAG=${DOCKER_TAG}
       labels:
         - oisp=true
-        - ois.git_commit=${GIT_COMMIT_OPENTSDB}
+        - oisp.git_commit=${GIT_COMMIT_OPENTSDB}
   mqtt-gateway:
     image: oisp/mqtt-gateway:${DOCKER_TAG}
     build:
@@ -66,6 +66,13 @@ services:
     image: oisp/grafana:${DOCKER_TAG}
     build:
       context: ./docker/grafana
+      labels:
+        - oisp=true
+        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
+  keycloak:
+    image: oisp/keycloak:${DOCKER_TAG}
+    build:
+      context: ./docker/keycloak
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
