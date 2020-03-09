@@ -91,6 +91,9 @@ backend:
   tsdbUri: "kairosdb"
   tsdbPort: 8080
 
+# This used to have a host field, which had to be removed from values.yaml
+# If you change cluster, you also have to update the wait-for-it in kairos-db.yaml
+# and in oisp-config.yaml
 cassandra:
   cluster: "oisp"
   port: 9042
@@ -241,7 +244,7 @@ postgres:
 
 # Docker image tag
 tag: latest
-use_local_registry: true
+use_local_registry: false
 
 # Enable jaeger tracing
 jaeger_tracing: false
