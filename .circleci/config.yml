@@ -51,7 +51,8 @@ commands:
 # export DOCKERUSER=$DOCKERUSER passes the local variable to remote connection.
           command: >-
             export TEST_ID=${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM} &&
-            ssh arkocal@82.165.71.183
+            touch .can_delete_if_success &&
+            (ssh arkocal@82.165.71.183
             "cd /tmp/${TEST_ID}/${CIRCLE_PROJECT_REPONAME} &&
             export NAMESPACE=${TEST_ID} &&
             export NODOCKERLOGIN=true &&
@@ -60,8 +61,13 @@ commands:
             make import-images-to-local-registry DOCKER_TAG=test_${TEST_ID} DEBUG=true &&
             (make undeploy-oisp || true) &&
             make deploy-oisp-test DOCKER_TAG=test_${TEST_ID} HELM_ARGS=\"--set use_local_registry=true\" &&
-            make test &&
-            make undeploy-oisp"
+            make test" || rm .can_delete_if_success) &&
+            ssh arkocal@82.165.71.183
+            "cd /tmp/${TEST_ID}/${CIRCLE_PROJECT_REPONAME} &&
+            export KUBECONFIG=\$(k3d get-kubeconfig) &&
+            export NAMESPACE=${TEST_ID} &&
+            make undeploy-oisp" &&
+            rm .can_delete_if_success
 jobs:
   test-job:
     executor: vm-executor

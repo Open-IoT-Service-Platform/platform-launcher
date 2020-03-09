@@ -37,7 +37,7 @@ spec:
         - containerPort: 8080
         args:
         - /opt/wait-for-it.sh
-        - {{ .Values.cassandra.host }}:{{ .Values.cassandra.port}}
+        - "cassandra-{{ .Values.cassandra.cluster}}-{{ .Release.Namespace }}-nodes.cassandra.svc.cluster.local:{{ .Values.cassandra.port}}"
         - -t
         - "300"
         - --

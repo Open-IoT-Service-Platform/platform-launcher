@@ -4,7 +4,7 @@ datacenter: {{ .Release.Namespace }}
 cluster: {{ .Values.cassandra.cluster }}
 host: cassandra-oisp-{{ .Release.Namespace }}-nodes.svc.cluster.local #note: datacenter and cluster have influence on how the name is built
 metadata:
-  name: oisp
+  name: {{ .Release.Namespace }}
   namespace: cassandra
 spec:
   serviceAccountName: cassandra
