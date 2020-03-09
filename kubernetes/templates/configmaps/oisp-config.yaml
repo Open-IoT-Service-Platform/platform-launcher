@@ -178,7 +178,7 @@ data:
     {
     "uri": {{ .Values.backend.tsdbUri | quote }},
     "port": {{ .Values.backend.tsdbPort | quote }},
-    "cassandraHost": "cassandra-{{ .Values.cassandra.cluster}}-{{ .Release.Namespace }}-nodes.svc.cluster.local"
+    "cassandraHost": "cassandra-{{ .Values.cassandra.cluster}}-{{ .Release.Namespace }}-nodes.cassandra.svc.cluster.local", 
     "cassandraPort": {{ .Values.cassandra.port | quote}},
     "cassandraReplication": {{ .Values.cassandra.replication | quote}}
     }
