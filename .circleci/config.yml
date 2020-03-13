@@ -35,16 +35,25 @@ commands:
             git clone ${CIRCLE_REPOSITORY_URL} -b ${CIRCLE_BRANCH} &&
             cd /tmp/${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM}/${CIRCLE_PROJECT_REPONAME}/ &&
             git submodule init &&
-            git submodule update &&
+            git submodule update &&            
             make update TERM=xterm"
+      - run:
+          shell: /bin/bash
+          name: Wait for queue
+          command: >-
+            ssh arkocal@82.165.71.183 "echo \"Waiting for other tests to complete\" &&
+            echo \"Delete /tmp/ci_test.lock manually if you are sure no other tests are running.\" &&
+            while [[ -f /tmp/ci_test.lock ]]; do sleep 5; echo -n \".\"; done &&
+            touch /tmp/ci_test.lock;"
       - run:
           shell: /bin/bash
           name: Build
           command: >-
             export TEST_ID=${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM} &&
             ssh arkocal@82.165.71.183
-            "cd /tmp/${TEST_ID}/${CIRCLE_PROJECT_REPONAME} &&
-            yes | make build DOCKER_TAG=test_${TEST_ID} DEBUG=true TERM=xterm"
+            "(cd /tmp/${TEST_ID}/${CIRCLE_PROJECT_REPONAME} &&
+            yes | make build DOCKER_TAG=test_${TEST_ID} DEBUG=true TERM=xterm) ||
+            (rm /tmp/ci_test.lock && exit 1)"
       - run:
           shell: /bin/bash
           name: Test
@@ -52,18 +61,19 @@ commands:
           command: >-
             export TEST_ID=${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM} &&
             touch .can_delete_if_success &&
-            (ssh arkocal@82.165.71.183
+            ssh arkocal@82.165.71.183
             "cd /tmp/${TEST_ID}/${CIRCLE_PROJECT_REPONAME} &&
-            export NAMESPACE=${TEST_ID} &&
+            (export NAMESPACE=${TEST_ID} &&
             export NODOCKERLOGIN=true &&
             export KUBECONFIG=\$(k3d get-kubeconfig) &&
             sh util/deploy_operators.sh &&
             make import-images-to-local-registry DOCKER_TAG=test_${TEST_ID} DEBUG=true &&
             (make undeploy-oisp || true) &&
             make deploy-oisp-test DOCKER_TAG=test_${TEST_ID} HELM_ARGS=\"--set use_local_registry=true\" &&
-            make test" || rm .can_delete_if_success) &&
+            make test) || rm .can_delete_if_success" &&
             ssh arkocal@82.165.71.183
-            "cd /tmp/${TEST_ID}/${CIRCLE_PROJECT_REPONAME} &&
+            "(rm /tmp/ci_test.lock || true) &&
+            cd /tmp/${TEST_ID}/${CIRCLE_PROJECT_REPONAME} &&
             export KUBECONFIG=\$(k3d get-kubeconfig) &&
             export NAMESPACE=${TEST_ID} &&
             make undeploy-oisp" &&
