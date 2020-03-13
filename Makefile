@@ -181,7 +181,7 @@ undeploy-oisp:
 	@cd kubernetes && \
 	( helm uninstall $(NAME) --namespace $(NAMESPACE) || echo helm uninstall failed)  && \
 	(kubectl delete namespace $(NAMESPACE) || echo "namespace not (or already) deleted") && \
-	kubectl -n cassandra delete cassandradatacenter $(NAMESPACE)
+	(kubectl -n cassandra delete cassandradatacenter $(NAMESPACE) || echo "cassandra dc not (or already) deleted")
 
 # =====
 # UTILS
