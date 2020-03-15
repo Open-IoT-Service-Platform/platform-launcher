@@ -7,9 +7,9 @@ metadata:
 spec:
   ports:
   - port: 8883
+  clusterIP: None
   selector:
     app: mqtt-server
-
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -23,7 +23,6 @@ spec:
   selector:
     matchLabels:
       app: mqtt-server
-
   template:
     metadata:
       creationTimestamp: null
@@ -126,7 +125,6 @@ spec:
           readOnly: true
       imagePullSecrets:
       - name: dockercred
-      hostname: mqtt-server
       volumes:
       - name: jwt-keys
         secret:
