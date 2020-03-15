@@ -36,6 +36,10 @@ kafka:
   requestTimeout: 20000
   maxRetryTime: 2000
   retries: 5
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1024Mi
   configurationOverrides:
     auto.create.topics.enable: true
     offsets.topic.replication.factor: 3
@@ -44,6 +48,10 @@ kafka:
     default.replication.factor: 2
   zookeeper:
     replicaCount: 3
+    resources:
+      requests:
+        cpu: 200m
+        memory: 100M
 
 kafkatest:
   fullnameOverride: oisp-kafka
@@ -55,6 +63,10 @@ kafkatest:
   requestTimeout: 20000
   maxRetryTime: 5000
   retries: 10
+  resources:
+    requests:
+      cpu: 300m
+      memory: 500M
   configurationOverrides:
     auto.create.topics.enable: true
     offsets.topic.replication.factor: 1
@@ -62,6 +74,10 @@ kafkatest:
     message.max.bytes: "20000000"
   zookeeper:
     replicaCount: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 50M
 
 zookeeper:
   namespace: zookeeper
