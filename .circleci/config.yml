@@ -1,8 +1,10 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
 version: 2.1
-
 executors:
-  vm-executor:
+  my-executor:
     machine:
       enabled: true
       image: ubuntu-1604:201903-01
@@ -11,14 +13,21 @@ executors:
       shell: /bin/bash
       TERM: xterm
       TZ: "Europe/Berlin"
-
-workflows:
-  test-workflow:
-    jobs:
-      - test-job
+  deployer:
+    docker:
+      - image: oisp/deployer
+        auth:
+          username: $DOCKER_USERNAME
+          password: $DOCKER_PASSWORD
+    environment:
+      shell: /bin/bash
+      TERM: xterm
 
 commands:
-  say-hello-to-ssh:
+####################################
+# NEW CI OVER SSH STARTS HERE      #
+####################################
+  e2e-over-ssh:
     description: "Say hello with ssh"
     steps:
       - add_ssh_keys:
@@ -35,7 +44,7 @@ commands:
             git clone ${CIRCLE_REPOSITORY_URL} -b ${CIRCLE_BRANCH} &&
             cd /tmp/${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM}/${CIRCLE_PROJECT_REPONAME}/ &&
             git submodule init &&
-            git submodule update &&            
+            git submodule update &&
             make update TERM=xterm"
       - run:
           shell: /bin/bash
@@ -78,8 +87,219 @@ commands:
             export NAMESPACE=${TEST_ID} &&
             make undeploy-oisp" &&
             rm .can_delete_if_success
-jobs:
-  test-job:
-    executor: vm-executor
+
+################################################################################
+# NEW CI OVER SSH ENDS HERE                                                    #
+# TODO: refactoring, once the migration is done, each step should be a cmd     #
+################################################################################
+  setup-build-environment:
+    description: "Setup build Environment"
     steps:
-      - say-hello-to-ssh
+      - run:
+          shell: /bin/bash
+          name: Setup build environment
+          command: |
+            cd util && \
+            bash setup-ubuntu18.04.sh
+            # create 8GB swap
+            sudo dd if=/dev/zero of=/swapfile bs=1M count=8000
+            sudo mkswap /swapfile
+            sudo swapon /swapfile
+  setup-branch:
+    description: "Setup subbranches"
+    steps:
+      - run:
+          shell: /bin/bash
+          name: Setup sub branches
+          command: |
+            sudo apt install jq
+            # First find out Base Branch (if any)
+            if [ ! -z "${CIRCLE_PULL_REQUEST}" ]; then
+              PR=${CIRCLE_PR_NUMBER}
+              PR_REPO=${CIRCLE_PR_REPONAME}
+              PROJECT_USERNAME=${CIRCLE_PROJECT_USERNAME}
+              url="https://api.github.com/repos/${PROJECT_USERNAME}/${PR_REPO}/pulls/${PR}"
+              BASE_BRANCH=$(curl "$url" | jq '.base.ref' | tr -d '"')
+              echo Detected Pull Request with Base Branch ${BASE_BRANCH}
+            fi
+            git submodule init
+            git submodule update
+            if [ "$CIRCLE_BRANCH" = "develop" ] || [ "${BASE_BRANCH}" = "develop" ]; then
+              #If on develop or a PR towards develop assume that all submodules are updated
+              echo Detected that PR is related to develop. Will update all subrepos.
+              make update
+            fi
+  build-branch:
+    description: "Build branch"
+    steps:
+      - run:
+          shell: /bin/bash
+          name: Build branch
+          # DEBUG=true, because on k8s the tests run inside the debug contianer
+          command: |
+            yes| make build DOCKER_TAG="test" DEBUG=true
+  e2e-test:
+    description: "E2E test"
+    steps:
+      - run:
+          shell: /bin/bash
+          name: E2e Test
+          command: |
+            export PATH=$PATH:/snap/bin
+            make import-images DOCKER_TAG=test DEBUG=true
+            npm install nodemailer
+            export NODOCKERLOGIN=true
+            make deploy-oisp-test DOCKER_TAG=test
+            make test
+          no_output_timeout: 20m
+  push-images:
+    description: "Push images"
+    parameters:
+      tag:
+        type: string
+        default: "latest"
+    steps:
+      - run:
+          shell: /bin/bash
+          name: Push images to docker hub
+          command: |
+            # login based on preconfigured env variables
+            docker login  -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+
+            # Tag passed "test" images as "latest"
+            images=$(docker images --format "{{.Repository}}:{{.Tag}}"| grep :test)
+            for image in $images; do
+              newimage=$(echo $image | sed -r "s/:test/:latest/g");
+              docker tag $image $newimage;
+            done
+            #Start with latest tag, replace later by the real-tags
+            DOCKER_TAG="latest"
+            if [ "<< parameters.tag >>" = "date" ]; then
+              # Should be nightly build
+              TARGET_DOCKER_TAG=nightly-`date -I`
+              DOCKER_PUSH_LATEST=true
+            fi
+            if [ "<< parameters.tag >>" = "tag" ]; then
+              # Should be master build
+              TARGET_DOCKER_TAG=`git describe --tags --exact-match` || exit 1
+            fi
+            # First push latest if applicable and then the real tag
+            echo Now trying to push with Tag ${DOCKER_TAG} push latest ${DOCKER_PUSH_LATEST}
+            if [ "$DOCKER_PUSH_LATEST" = "true" ]; then
+              echo Pushing images with latest tag
+              if [ -z "$PUSH_DRYRUN" ]; then
+                make push-images
+              else
+                echo Only dry run mode. Not pushing to dockerhub!
+              fi
+            fi
+            # Now replace all latest tagged images by the real tag
+            echo Now pushing images with tag $DOCKER_TAG
+            images=$(docker images --format "{{.Repository}}:{{.Tag}}"| grep :latest)
+            for image in $images; do
+              newimage=$(echo $image | sed -r "s/:latest/:$TARGET_DOCKER_TAG/g");
+              echo tagging $image to $newimage;
+              docker tag $image $newimage
+              if [ -z "$PUSH_DRYRUN" ]; then
+                docker push ${newimage}
+              else
+                echo Only dry run mode. Not pushing to dockerhub!
+              fi
+            done
+
+  check-signed:
+    description: "Check whether latest commit is signed"
+    steps:
+      - run:
+          name: Check whether most recent commit is signed
+          shell: /bin/bash
+          command: |
+            MESSAGE=`git log -1 --pretty=%B`
+            echo "Checking whether signed"
+            if [[ "${MESSAGE}" == *Signed-off-by:*@* ]]; then
+              echo "Commit is signedoff"
+            else
+              echo "Commit is not signedoff"
+              exit 1
+            fi
+  check-tagged:
+    description: "Check whether latest commit is tagged"
+    steps:
+      - run:
+          name: Check whether most recent commit is tagged
+          shell: /bin/bash
+          command: |
+            git describe --tags --exact-match || exit 1
+  deploy:
+    description: "Deploy OISP to a production cluster."
+    steps:
+      - run:
+          name: Run deploy script
+          shell: /bin/bash
+          command: |
+            export HELM_ARGS="--set stolon.persistence.storageClassName=\"oneandone\" --set less_resources=\"false\" "
+            cd ~ && sh deploy.sh
+
+jobs:
+  build:
+    executor: my-executor
+    steps:
+      - e2e-over-ssh
+  build-master:
+    executor: my-executor
+    steps:
+      - checkout
+      - check-tagged
+      - setup-build-environment
+      - setup-branch
+      - build-branch
+      - e2e-test
+      - push-images:
+          tag: "tag"
+  build-nightly:
+    executor: my-executor
+    steps:
+      - checkout
+      - setup-build-environment
+      - setup-branch
+      - build-branch
+      - e2e-test
+      - push-images:
+          tag: "date"
+  deploy-production:
+    executor: deployer
+    steps:
+      - deploy
+
+
+workflows:
+  version: 2.1
+  workflow:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore:
+                - master
+      - build-master:
+          filters:
+            branches:
+              only:
+                - master
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - develop
+    jobs:
+      - build-nightly:
+          filters:
+            branches:
+              only:
+                - develop
+      - deploy-production:
+          requires:
+            - build-nightly
