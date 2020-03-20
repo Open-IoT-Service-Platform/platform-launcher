@@ -245,6 +245,15 @@ jobs:
     executor: my-executor
     steps:
       - e2e-over-ssh
+  build-pr:
+    executor: my-executor
+    steps:
+      - checkout
+      - check-signed
+      - setup-build-environment
+      - setup-branch
+      - build-branch
+      - e2e-test
   build-master:
     executor: my-executor
     steps:
@@ -276,11 +285,17 @@ workflows:
   version: 2.1
   workflow:
     jobs:
-      - build:
+      - build-pr:
           filters:
             branches:
               ignore:
+                - develop
                 - master
+      - build:
+          filters:
+            branches:
+              only:
+                - develop
       - build-master:
           filters:
             branches:
