@@ -1,0 +1,66 @@
+<!-- templates/devices.ejs -->
+
+<!DOCTYPE html>
+<html>
+<style>
+#devices {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#devices td, #devices th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#devices tr:nth-child(even){background-color: #f2f2f2;}
+
+#devices tr:hover {background-color: #ddd;}
+
+#devices th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: middle;
+  background-color: #003F58;
+  color: white;
+}
+</style>
+<body>
+	<div id="container">
+		<h1>
+			Hello, <b><%= email %></b>.
+		</h1>
+		<table id="devices" class="table table-striped">
+			<thead>
+				<tr>
+					<th>Unique ID</th>
+					<th>ID</th>
+                    <th>Name</th>
+                    <th>Gateway ID</th>
+                    <th>Status</th>
+					<th>Account Name</th>
+				</tr>
+			</thead>
+			<tbody>
+                <% devices.forEach(function(device) { %>
+                    <tr>
+    					<td><%= device.uid %></td>
+    					<td><%= device.deviceId %></td>
+    					<td><%= device.name %></td>
+                        <td><%= device.gatewayId %></td>
+                        <td><%= device.status %></td>
+                        <td><%= device.accountName %></td>
+    				</tr>
+                <% }); %>
+			</tbody>
+		</table>
+        <div>
+            <a href="<%= homepageLink %>">go to homepage</a>
+        </div>
+        <div>
+            <a href="<%= logoutLink %>">logout</a>
+        </div>
+	</div>
+</body>
+</html>
