@@ -196,7 +196,7 @@ reset-db:
 ## add-test-user: Add a test user via admin tool in frontend
 ##
 add-test-user:
-	for i in $(shell seq 1 1); do kubectl -n $(NAMESPACE) exec $(FRONTEND_POD) -c frontend -- node admin addUser user$${i}@example.com password admin; done;
+	for i in $(shell seq 1 1); do kubectl -n $(NAMESPACE) exec $(FRONTEND_POD) -c frontend -- node admin addUser user$${i}@example.com password; done;
 
 ## wait-until-ready: Wait until the platform is up and running
 ##     As of now, this is assumed if all frontend and backend containers
