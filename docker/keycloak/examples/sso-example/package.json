@@ -1,0 +1,19 @@
+{
+  "name": "oisp-example-sso-client",
+  "version": "1.0.0",
+  "date": "2020-03-14T10:38:38.773Z",
+  "description": "OISP Example SSO Client For Keycloak",
+  "main": "app.js",
+  "engines": {
+    "node": "10.19.0"
+  },
+  "author": "Intel Corporation",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@open-iot-service-platform/oisp-sdk-js": "https://github.com/Open-IoT-Service-Platform/oisp-sdk-js.git#471318eb6dafb26608093b2d360884dfd5ee81ed",
+    "ejs": "^3.0.1",
+    "express": "^4.12.4",
+    "express-session": "^1.17.0",
+    "keycloak-connect": "^8.0.1"
+  }
+}
