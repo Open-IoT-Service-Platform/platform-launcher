@@ -293,11 +293,13 @@ workflows:
               ignore:
                 - develop
                 - master
+                - ci-feature
       - build:
           filters:
             branches:
               only:
                 - develop
+                - ci-feature
       - build-master:
           filters:
             branches:
