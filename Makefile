@@ -335,8 +335,10 @@ docker-clean:
 ##     Creates a user with $USERNAME and $PASSWORD, and creates a device with id 00-11-22-33-44-55,
 ##     dumps the result in oisp-prep-only.conf
 ##
-#test-prep-only: export TEST_PREP_ONLY := "1"
-#test-prep-only: test
+test-prep-only: prepare-tests
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger \
+		-- /bin/bash -c "cd /home/$(CURRENT_DIR_BASE)/tests && make test-prepare-only TERM=xterm NAMESPACE=$(NAMESPACE)"
+	kubectl cp $(NAMESPACE)/$(DEBUGGER_POD):/home/$(CURRENT_DIR_BASE)/tests/oisp-prep-only.conf tests/oisp-prep-only.conf
 
 
 ## remove: Remove all OISP images from local machine.

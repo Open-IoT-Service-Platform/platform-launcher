@@ -23,6 +23,7 @@ var config = require("./test-config.json");
 var kafka = require('kafka-node');
 var helpers = require("./lib/helpers");
 var colors = require('colors');
+var promtests = require('./subtests/promise-wrap');
 
 
 var accountName = "oisp-tests";
@@ -30,7 +31,20 @@ var accountName = "oisp-tests";
 var userToken;
 var accountId;
 var deviceId;
+var activationCode;
+var userId;
+var username = process.env.USERNAME;
+var password = process.env.PASSWORD;
 
+var getNewUserTokens = function(done) {
+
+    return promtests.authGetToken(username, password).then(grant => {
+        userToken = grant.token;
+        done();
+    }).catch(err => {
+        done(err);
+    });
+};
 //-------------------------------------------------------------------------------------------------------
 // Tests
 //-------------------------------------------------------------------------------------------------------
@@ -112,29 +126,75 @@ describe("Waiting for OISP services to be ready ...\n".bold, function() {
     }).timeout(2 * 60 * 1000);
 })
 
-describe("get user token and activation code ...\n".bold, function() {
+describe("get authorization and manage user ...\n".bold, function() {
 
-    var activationCode;
-    var accountId;
-    var userToken;
-    var username = process.env.USERNAME;
-    var password = process.env.PASSWORD;
+    it('Shall authenticate', function(done) {
+        var username = process.env.USERNAME;
+        var password = process.env.PASSWORD;
 
-    it('Shall get userToken', function(done) {
+        var username2 = process.env.USERNAME2;
+        var password2 = process.env.PASSWORD2;
 
         assert.isNotEmpty(username, "no username provided");
         assert.isNotEmpty(password, "no password provided");
+        assert.isNotEmpty(username, "no username2 provided");
+        assert.isNotEmpty(password, "no password2 provided");
 
-        helpers.auth.login(username, password, function(err, grant) {
+        getNewUserTokens(done);
+    }).timeout(10000);
+
+    it('Shall get token info', function (done) {
+        helpers.auth.tokenInfo(userToken, function (err, response) {
             if (err) {
-                done(new Error("Cannot authenticate: " + err));
+                done(new Error("Cannot get token info: " + err));
             } else {
-                userToken = grant.token;
+                assert.equal(response.header.typ, 'JWT', 'response type error' );
+                if (response.payload.sub == null){
+                    done(new Error("get null user id"));
+                }
+                else {
+                    userId = response.payload.sub;
+                }
+
+                    done();
+            }
+        })
+    })
+
+    it('Shall get user information', function(done) {
+        helpers.users.getUserInfo(userToken, userId, function(err, response) {
+            if (err) {
+                done(new Error("Cannot get user information : " + err));
+            } else {
+                assert.isString(response.id)
                 done();
             }
         })
     })
 
+    it('Shall update user information', function(done) {
+        var newuserInfo = {
+            attributes:{
+                "phone":"12366666666",
+                "another_attribute":"another_value",
+                "new":"next_string_value"
+            }
+        }
+
+        helpers.users.updateUserInfo(userToken, userId, newuserInfo, function(err, response) {
+            if (err) {
+                done(new Error("Cannot update user information : " + err));
+            } else {
+                assert.equal(response.status, 'OK', 'status error')
+                done();
+            }
+        })
+    })
+})
+
+describe("Creating account and device ...\n".bold, function() {
+
+    var accountInfo;
 
     it('Shall create account', function(done) {
         assert.notEqual(userToken, null, "Invalid user token")
@@ -144,14 +204,43 @@ describe("get user token and activation code ...\n".bold, function() {
             } else {
                 assert.equal(response.name, accountName, "accounts name is wrong");
                 accountId = response.id;
+                getNewUserTokens(done);
+            }
+        })
+    }).timeout(10000);
+
+    it('Shall get account info', function (done) {
+        helpers.accounts.getAccountInfo(accountId, userToken, function (err, response) {
+            if (err) {
+                done(new Error("Cannot get account info: " + err));
+            } else {
+                accountInfo = response;
                 done();
             }
         })
     })
 
-    it('Shall get account activation code', function(done) {
+    it('Shall update an account', function (done) {
 
-        helpers.accounts.getAccountActivationCode(accountId, userToken, function(err, response) {
+        accountInfo.attributes = {
+            "phone":"123456789",
+            "another_attribute":"another_value",
+            "new":"next_string_value"
+        }
+
+        helpers.accounts.updateAccount(accountId, userToken, accountInfo, function (err, response) {
+            if (err) {
+                done(new Error("Cannot update account: " + err));
+            } else {
+                assert.deepEqual(response.attributes, accountInfo.attributes, 'new attributes not being updated');
+                done();
+            }
+        })
+    })
+
+    it('Shall get account activation code', function (done) {
+
+        helpers.accounts.getAccountActivationCode(accountId, userToken, function (err, response) {
             if (err) {
                 done(new Error("Cannot get account activation code: " + err));
             } else {
@@ -160,6 +249,7 @@ describe("get user token and activation code ...\n".bold, function() {
             }
         })
     })
+
     it('Shall create prep config', function(done) {
 
         var prepConf = {

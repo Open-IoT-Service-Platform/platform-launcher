@@ -35,20 +35,24 @@ npm-install:
 	@$(call msg,"Installing npm packages ...");
 	@cd $(CURRENT_DIR) && npm install > /dev/null
 
+test-prepare-only:
+	@export OISP_GRAFANA_PASSWORD=$$(kubectl -n $(NAMESPACE) get -o yaml configmaps oisp-config | shyaml get-value data.grafana | jq -r .adminPassword) && \
+	cat test-config-template.json | envsubst > test-config.json
+	@$(call msg,"Adding a user for testing ...");
+	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME) $(PASSWORD) > /dev/null
+	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME2) $(PASSWORD2) > /dev/null
+	@$(call msg,"Starting 3rd party test preparation ...");
+	@env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm run-script prep-only
+
 test: npm-install
 	@export OISP_GRAFANA_PASSWORD=$$(kubectl -n $(NAMESPACE) get -o yaml configmaps oisp-config | shyaml get-value data.grafana | jq -r .adminPassword) && \
 	cat test-config-template.json | envsubst > test-config.json
 	@$(call msg,"Adding a user for testing ...");
 	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME) $(PASSWORD) > /dev/null
 	@kubectl -n $(NAMESPACE) exec -i $(FRONTEND_POD) -c frontend --  node /app/admin addUser $(USERNAME2) $(PASSWORD2) > /dev/null
-
-ifndef TEST_PREP_ONLY
-	@$(call msg,"Starting the e2e testing ...");
+	@$(call msg,"Starting the e2e testing ... $$TEST_PREP_ONLY");
 	@env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) USERNAME2=$(USERNAME2) PASSWORD2=$(PASSWORD2) LOG_LEVEL="error" NODE_ENV="local" npm test
-else
-	@$(call msg,"Starting 3rd party test preparation ...");
-	@env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm run-script prep-only
-endif
+
 
 clean:
 	@$(call msg,"Cleaning ...");
