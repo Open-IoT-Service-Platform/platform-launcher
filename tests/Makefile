@@ -35,7 +35,7 @@ npm-install:
 	@$(call msg,"Installing npm packages ...");
 	@cd $(CURRENT_DIR) && npm install > /dev/null
 
-test-prepare-only:
+test-prepare-only: npm-install
 	@export OISP_GRAFANA_PASSWORD=$$(kubectl -n $(NAMESPACE) get -o yaml configmaps oisp-config | shyaml get-value data.grafana | jq -r .adminPassword) && \
 	cat test-config-template.json | envsubst > test-config.json
 	@$(call msg,"Adding a user for testing ...");
