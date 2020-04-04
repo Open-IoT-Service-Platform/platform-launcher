@@ -61,6 +61,7 @@
 		"email": "${OISP_TESTS_SKIP_EMAIL}",
 		"grafana": "${OISP_TESTS_SKIP_GRAFANA}",
 		"mqtt": "${OISP_TESTS_SKIP_MQTT}",
-		"alerts": "${OISP_TESTS_SKIP_ALERTS}"
+		"alerts": "${OISP_TESTS_SKIP_ALERTS}",
+		"scale": "${OISP_TESTS_SKIP_SCALE}"
 	}
 }

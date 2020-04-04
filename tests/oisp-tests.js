@@ -1350,6 +1350,41 @@ describe("Do MQTT data sending subtests ...".bold, function() {
     }).timeout(10000);
 });
 
+describe("Do scale device subtests ...".bold, function() {
+    before(function(){
+        if (checkTestCondition(["non_essential", "scale"])) {
+            this.skip();
+        }
+    });
+    var test;
+    var descriptions = require("./subtests/scale-devices-tests").descriptions;
+    it(descriptions.setup, function(done) {
+        test = require("./subtests/scale-devices-tests").test(userToken, accountId, deviceId, deviceToken, cbManager, mqttConnector);
+        test.setup(done);
+    }).timeout(100000);
+    it(descriptions.sendDataToAllDevices, function(done) {
+        test.sendDataToAllDevices(done);
+    }).timeout(100000);
+    it(descriptions.sendDataToSingleDevice, function(done) {
+        test.sendDataToSingleDevice(done);
+    }).timeout(200000);
+    it(descriptions.waitForBackendSynchronization,function(done) {
+      test.waitForBackendSynchronization(BACKEND_DELAY, done);
+    }).timeout(BACKEND_TIMEOUT);
+    it(descriptions.countAllData, function(done) {
+        test.countAllData(done);
+    }).timeout(100000);
+    it(descriptions.countPartialData, function(done) {
+        test.countPartialData(done);
+    }).timeout(100000);
+    it(descriptions.countSingleDeviceData, function(done) {
+        test.countSingleDeviceData(done);
+    }).timeout(100000);
+    it(descriptions.cleanup, function(done) {
+        test.cleanup(done);
+    }).timeout(100000);
+});
+
 
 describe("Geting and manage alerts ... \n".bold, function(){
     before(function(){
