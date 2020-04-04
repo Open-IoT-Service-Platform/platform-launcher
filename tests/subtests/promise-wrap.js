@@ -247,16 +247,19 @@ var searchData = function(from, to, userToken, accountId, deviceId, cid, queryMe
 }
 
 
-var searchDataAdvanced = function(from, to, userToken, accountId, deviceId, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly){
-    return new Promise((resolve, reject) => {
-	helpers.data.searchDataAdvanced(from, to, userToken, accountId, deviceId, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly, function(err, response){
-	    if (err) {
-		reject(err);
-	    } else {
-		resolve(response);
-	    }
-	});
-    });
+var searchDataAdvanced = function(from, to, userToken, accountId, deviceIds, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly){
+  return new Promise((resolve, reject) => {
+    if (!Array.isArray(deviceIds)){
+      deviceIds = [deviceIds];
+    }
+	  helpers.data.searchDataAdvanced(from, to, userToken, accountId, deviceIds, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly, function(err, response){
+	     if (err) {
+         reject(err);
+	     } else {
+		     resolve(response);
+	     }
+	  });
+  });
 }
 
 var authGetToken = (username, password) => {
