@@ -285,9 +285,10 @@ prepare-tests: wait-until-ready
 
 ## test: Run tests
 ##
+test: OISP_TESTS_SKIP_SCALE ?= "true"
 test: prepare-tests
 	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger \
-		-- /bin/bash -c "cd /home/$(CURRENT_DIR_BASE)/tests && make test TERM=xterm NAMESPACE=$(NAMESPACE)"
+		-- /bin/bash -c "cd /home/$(CURRENT_DIR_BASE)/tests && make test TERM=xterm NAMESPACE=$(NAMESPACE) OISP_TESTS_SKIP_SCALE=$(OISP_TESTS_SKIP_SCALE)"
 
 # ==============
 # BUILD COMMANDS

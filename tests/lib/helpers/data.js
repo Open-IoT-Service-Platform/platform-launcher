@@ -234,7 +234,7 @@ function submitDataListAsUser(valueList, userToken, accountId, deviceId, cidList
     });
 }
 
-function searchDataAdvanced(from, to, userToken, accountId, deviceId, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly, cb) {
+function searchDataAdvanced(from, to, userToken, accountId, deviceIds, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly, cb) {
     if (!cb) {
         throw "Callback required";
     }
@@ -243,7 +243,7 @@ function searchDataAdvanced(from, to, userToken, accountId, deviceId, cidList, s
         userToken: userToken,
         accountId: accountId,
         body: {
-            deviceIds: [deviceId],
+            deviceIds: deviceIds,
             from: from,
             showMeasureLocation: showMeasureLocation,
             componentIds: cidList
