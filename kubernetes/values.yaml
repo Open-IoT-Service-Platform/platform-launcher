@@ -26,6 +26,10 @@ minio:
   accesskey: minio
   secretkey: minio123
 
+certmanager:
+  secret: selfsigned-cert-tls
+  issuer: letsencrypt-self
+
 kafka:
   fullnameOverride: oisp-kafka
   service: oisp-kafka-headless:9092
@@ -112,6 +116,11 @@ mqtt:
   broker:
     username: username
     password: password
+  certs:
+    cafile: "server.cert"
+    keyfile: "server.key"
+    certfile: "server.cert"
+    rootpath: "/app/ssl"
 
 # Gearpump username and password are legacy, they can be removed safely
 # after the rule-engine is updated to ignore them.

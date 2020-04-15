@@ -178,7 +178,7 @@ data:
     {
     "uri": {{ .Values.backend.tsdbUri | quote }},
     "port": {{ .Values.backend.tsdbPort | quote }},
-    "cassandraHost": "cassandra-{{ .Values.cassandra.cluster}}-{{ .Release.Namespace }}-nodes.cassandra.svc.cluster.local", 
+    "cassandraHost": "cassandra-{{ .Values.cassandra.cluster}}-{{ .Release.Namespace }}-nodes.cassandra.svc.cluster.local",
     "cassandraPort": {{ .Values.cassandra.port | quote}},
     "cassandraReplication": {{ .Values.cassandra.replication | quote}}
     }
@@ -222,9 +222,9 @@ data:
     "mqttBrokerPassword": "{{ .Values.mqtt.broker.password }}",
     "mqttBrokerPort": "8883",
     "aesKey": "/app/keys/mqtt/mqtt_gw_secret.key",
-    "cafile": "/app/keys/ssl/server.cert",
-    "keyfile": "/app/keys/ssl/server.key",
-    "certfile": "/app/keys/ssl/server.cert"
+    "cafile": "{{ .Values.mqtt.certs.rootpath }}/{{ .Values.mqtt.certs.cafile }}",
+    "keyfile": "{{ .Values.mqtt.certs.rootpath }}/{{ .Values.mqtt.certs.keyfile }}",
+    "certfile": "{{ .Values.mqtt.certs.rootpath }}/{{ .Values.mqtt.certs.certfile }}"
     }
 
 kind: ConfigMap
