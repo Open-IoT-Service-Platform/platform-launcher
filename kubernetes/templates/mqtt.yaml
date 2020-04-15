@@ -131,6 +131,9 @@ spec:
         - mountPath: /app/keys
           name: jwt-keys
           readOnly: true
+        - mountPath: {{ .Values.mqtt.certs.rootpath }}
+          name: cert
+          readOnly: true
       imagePullSecrets:
       - name: dockercred
       volumes:
@@ -144,11 +147,16 @@ spec:
             path: private.pem
           - key: mqtt.key
             path: mqtt/mqtt_gw_secret.key
-          - key: ssl.cert
-            path: ssl/server.cert
-          - key: ssl.key
-            path: ssl/server.key
           secretName: oisp-secrets
+      - name: cert
+        secret:
+          defaultMode: 420
+          items:
+          - key: ca.crt
+            path: {{ .Values.mqtt.certs.cafile }}
+          - key: tls.key
+            path: {{ .Values.mqtt.certs.keyfile }}
+          secretName: {{ .Values.certmanager.secret }}
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
