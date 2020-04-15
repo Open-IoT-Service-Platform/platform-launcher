@@ -60,10 +60,17 @@ spec:
         - name: IMAP_PORT
           value: "{{ .Values.imap.port }}"
         resources:
+          {{ if .Values.less_resources }}
           requests:
-            cpu: "250m"
+            cpu: "50m"
           limits:
             cpu: "250m"
+          {{ else }}
+          requests:
+            cpu: "100m"
+          limits:
+            cpu: "1000m"
+          {{ end }}
       imagePullSecrets:
         - name: dockercred
       dnsPolicy: ClusterFirst
