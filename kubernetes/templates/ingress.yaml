@@ -4,7 +4,7 @@ metadata:
   name: frontend-web
   annotations:
      kubernetes.io/ingress.class: "nginx"
-     cert-manager.io/cluster-issuer: "letsencrypt-prod"
+     cert-manager.io/cluster-issuer: {{ .Values.certmanager.issuer }}
 spec:
   backend:
     serviceName: frontend
@@ -13,7 +13,7 @@ spec:
   - hosts:
     - {{ .Values.hosts.frontend }}
     - {{ .Values.hosts.websocketserver }}
-    secretName: frontend-web-prod-tls
+    secretName: {{ .Values.certmanager.secret }}
   rules:
   - host: {{ .Values.hosts.frontend }}
     http:
