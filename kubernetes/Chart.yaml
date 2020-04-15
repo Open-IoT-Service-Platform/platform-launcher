@@ -10,3 +10,9 @@ dependencies:
 - name: kafka
   version: 0.20.8
   repository: "@incubator"
+  condition: production
+- name: kafka
+  alias: kafkatest
+  version: 0.20.8
+  repository: "@incubator"
+  condition: less_resources
