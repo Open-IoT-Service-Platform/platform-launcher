@@ -54,9 +54,9 @@ spec:
             cpu: 50m
           {{ else }}
           limits:
-            cpu: 500m
+            cpu: 1000m
           requests:
-            cpu: 500m
+            cpu: 250m
           {{ end }}
         env:
         - name: OISP_MQTT_GATEWAY_CONFIG
@@ -98,14 +98,14 @@ spec:
         resources:
           {{ if .Values.less_resources }}
           limits:
-            cpu: 50m
+            cpu: 100m
           requests:
-            cpu: 50m
+            cpu: 100m
           {{ else }}
           limits:
-            cpu: 500m
+            cpu: 1000m
           requests:
-            cpu: 500m
+            cpu: 250m
           {{ end }}
         env:
         - name: OISP_MQTT_BROKER_CONFIG
@@ -152,7 +152,7 @@ spec:
         secret:
           defaultMode: 420
           items:
-          - key: ca.crt
+          - key: tls.crt
             path: {{ .Values.mqtt.certs.cafile }}
           - key: tls.key
             path: {{ .Values.mqtt.certs.keyfile }}
