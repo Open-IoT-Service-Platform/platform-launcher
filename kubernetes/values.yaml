@@ -57,6 +57,8 @@ kafka:
       requests:
         cpu: 200m
         memory: 100M
+  envOverrides:
+    JMX_PORT: 9999
 
 kafkatest:
   fullnameOverride: oisp-kafka
@@ -84,6 +86,8 @@ kafkatest:
       requests:
         cpu: 50m
         memory: 50M
+  envOverrides:
+    JMX_PORT: 9999
 
 zookeeper:
   namespace: zookeeper
