@@ -42,6 +42,12 @@ spec:
         - "300"
         - --
         - /opt/kairosdb-startup.sh
+        livenessProbe:
+          httpGet:
+            path: /api/v1/health/check
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 3
         env:
         - name: OISP_KAIROSDB_CONFIG
           valueFrom:
