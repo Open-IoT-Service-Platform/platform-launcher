@@ -1,7 +1,7 @@
 printf "\n"
 printf "\033[1mInstalling k8s operators\n"
 printf -- "------------------------\033[0m\n"
-kubectl create -f https://github.com/minio/minio-operator/blob/master/minio-operator.yaml?raw=true --validate=false
+kubectl create -f https://github.com/minio/minio-operator/blob/1.0.7/minio-operator.yaml?raw=true --validate=false
 #helm repo add banzaicloud-stable https://kubernetes-charts.banzaicloud.com/
 #kubectl create ns kafka
 #helm install kafka-operator --namespace=kafka banzaicloud-stable/kafka-operator
