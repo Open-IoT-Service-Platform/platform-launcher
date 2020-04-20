@@ -13,15 +13,11 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: rule-engine
-        image: arkocal/rule-engine-deployer
-#        This should be restored after CI, temporarily disabled (and obviously the previous line
-#        should be deleted
-#        {{ if .Values.use_local_registry }}
-#        image: registry.local:5000/oisp/rule-engine-deployer:{{ .Values.tag }}
-#        {{ else }}
-#        This should be restored after CI, temporarily disabled
-#        image: oisp/rule-engine-deployer:{{ .Values.tag }}
-#        {{ end }}
+        {{ if .Values.use_local_registry }}
+        image: registry.local:5000/oisp/rule-engine:{{ .Values.tag }}
+        {{ else }}
+        image: oisp/rule-engine:{{ .Values.tag }}
+        {{ end }}
         resources:
           {{ if .Values.less_resources }}
           requests:
