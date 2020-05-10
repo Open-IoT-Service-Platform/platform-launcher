@@ -164,7 +164,7 @@ metadata:
   name: mqtt
 spec:
   rules:
-  - host: {{ .Values.hosts.mqttserver }}
+  - host: {{ .Values.ingress.hosts.mqttserver }}
     http:
       paths:
       - backend:

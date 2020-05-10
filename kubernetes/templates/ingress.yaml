@@ -11,32 +11,32 @@ spec:
     servicePort: 4001
   tls:
   - hosts:
-    - {{ .Values.hosts.frontend }}
-    - {{ .Values.hosts.websocketserver }}
+    - {{ .Values.ingress.hosts.frontend }}
+    - {{ .Values.ingress.hosts.websocketserver }}
     secretName: {{ .Values.certmanager.secret }}
   rules:
-  - host: {{ .Values.hosts.frontend }}
+  - host: {{ .Values.ingress.hosts.frontend }}
     http:
       paths:
       - path: /
         backend:
           serviceName: frontend
           servicePort: 4001
-  - host: {{ .Values.hosts.frontend }}
+  - host: {{ .Values.ingress.hosts.frontend }}
     http:
         paths:
         - path: /ui/grafana
           backend:
             serviceName: frontend
             servicePort: 4002
-  - host: {{ .Values.hosts.frontend }}
+  - host: {{ .Values.ingress.hosts.frontend }}
     http:
       paths:
       - path: /keycloak
         backend:
           serviceName: keycloak-http
           servicePort: 4080
-  - host: {{ .Values.hosts.websocketserver }}
+  - host: {{ .Values.ingress.hosts.websocketserver }}
     http:
       paths:
       - path: /

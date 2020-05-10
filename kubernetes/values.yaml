@@ -140,10 +140,15 @@ websocketServer:
   password: password
 
 # Hosts used for Ingress configuration
-hosts:
-    frontend: latest.oisp.info
-    websocketserver: ws.latest.oisp.info
-    mqttserver: mqtt.latest.oisp.info
+# ingressType: default or ingress-nginx
+# will be inactive for non-production mode
+ingress:
+  hosts:
+    frontend: platform.industry-fusion.com
+    websocketserver: ws.platform.industry-fusion.com
+    mqttserver: mqtt.platform.industry-fusion.com
+  type: ingress-nginx
+  namespace: ingress-nginx
 
 systemuser:
   username: gateway@intel.com
