@@ -5,6 +5,7 @@ metadata:
   labels:
     app: rule-engine
 spec:
+  backoffLimit: 10
   template:
     metadata:
       labels:
