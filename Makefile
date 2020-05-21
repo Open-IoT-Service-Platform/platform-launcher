@@ -226,6 +226,14 @@ wait-until-ready:
 	@while kubectl -n $(NAMESPACE) get pod keycloak-0 -o \
         jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
 		do printf "."; sleep 5; done;
+	@printf "\nWaiting for kairosdb ";
+	@while kubectl -n $(NAMESPACE) get pods -l=app=kairosdb -o \
+        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
+		do printf "."; sleep 5; done;
+	@printf "\nWaiting for rule engine ";
+	@while kubectl -n $(NAMESPACE) get pods -l=app=rule-engine -o \
+        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
+		do printf "."; sleep 5; done;
 	@echo
 
 ## import-images: Import images listed in CONTAINERS into local cluster
