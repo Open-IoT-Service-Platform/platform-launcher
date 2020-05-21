@@ -248,7 +248,19 @@ var submitData = function(value, deviceToken, accountId, deviceId, cid){
 
 var searchData = function(from, to, userToken, accountId, deviceId, cid, queryMeasureLocation, targetFilter){
     return new Promise((resolve, reject) => {
-	helpers.data.searchData(from, to, userToken, accountId, deviceId, cid, queryMeasureLocation, targetFilter, function(err, response){
+	    helpers.data.searchData(from, to, userToken, accountId, deviceId, cid, queryMeasureLocation, targetFilter, function(err, response){
+	    if (err) {
+		reject(err);
+	    } else {
+		resolve(response);
+	    }
+	});
+    });
+}
+
+var searchDataMaxItems = function(from, to, userToken, accountId, deviceId, cids, queryMeasureLocation, targetFilter, maxItems, order, aggregators){
+    return new Promise((resolve, reject) => {
+	helpers.data.searchDataMaxItems(from, to, userToken, accountId, deviceId, cids, queryMeasureLocation, targetFilter, maxItems, order, aggregators, function(err, response){
 	    if (err) {
 		reject(err);
 	    } else {
@@ -503,6 +515,7 @@ module.exports = {
     submitDataListAsUser: submitDataListAsUser,
     submitData: submitData,
     searchData: searchData,
+    searchDataMaxItems: searchDataMaxItems,
     searchDataAdvanced: searchDataAdvanced,
     authGetToken: authGetToken,
     refreshAuthToken: refreshAuthToken,

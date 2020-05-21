@@ -917,7 +917,7 @@ describe("Creating and getting components ... \n".bold, function() {
 
 describe("Creating rules ... \n".bold, function() {
     before(function(){
-        if (checkTestCondition(["non_essential", "rules"])) {
+        if (checkTestCondition(["non_essential"])) {
             this.skip();
         }
     });
@@ -982,7 +982,7 @@ describe("Creating rules ... \n".bold, function() {
 });
 describe("Sending observations and checking rules ...\n".bold, function() {
     before(function(){
-            if (checkTestCondition(["non_essential", "rules", "data_sending"])) {
+            if (checkTestCondition(["non_essential", "data_sending"])) {
                 this.skip();
             }
     });
@@ -1273,6 +1273,12 @@ describe("Do data sending subtests ...".bold, function() {
      it(descriptions.sendDataAsUser,function(done) {
        test.sendDataAsUser(done);
      }).timeout(10000);
+     it(descriptions.send8000SamplesForAutoDownsampleTest,function(done) {
+       test.send8000SamplesForAutoDownsampleTest(done);
+     }).timeout(100000);
+     /*it(descriptions.send8000SamplesForMultiAggregationTest,function(done) {
+       test.send8000SamplesForMultiAggregationTest(done);
+     }).timeout(100000);*/
      it(descriptions.waitForBackendSynchronization,function(done) {
        // Due to low profile of test environment and the fact that Kafka/Backend is processing all the 1000s of samples
        // separately, we need to give the backend more time to settle
@@ -1289,6 +1295,42 @@ describe("Do data sending subtests ...".bold, function() {
      }).timeout(10000);
      it(descriptions.receiveDataFromAdmin,function(done) {
        test.receiveDataFromAdmin(done);
+     }).timeout(10000);
+     it(descriptions.receiveRawData,function(done) {
+       test.receiveRawData(done);
+     }).timeout(10000);
+     it(descriptions.receiveMaxItems,function(done) {
+       test.receiveMaxItems(done);
+     }).timeout(10000);
+     it(descriptions.receiveAutoAggregatedAvgData,function(done) {
+       test.receiveAutoAggregatedAvgData(done);
+     }).timeout(10000);
+     it(descriptions.receiveAutoAggregatedMaxData,function(done) {
+       test.receiveAutoAggregatedMaxData(done);
+     }).timeout(10000);
+     it(descriptions.receiveAutoAggregatedMinData,function(done) {
+       test.receiveAutoAggregatedMinData(done);
+     }).timeout(10000);
+     it(descriptions.receiveAutoAggregatedSumData,function(done) {
+       test.receiveAutoAggregatedSumData(done);
+     }).timeout(10000);
+     it(descriptions.receiveAggregatedAvgData,function(done) {
+       test.receiveAggregatedAvgData(done);
+     }).timeout(10000);
+     it(descriptions.receiveAggregatedAvgDataMS,function(done) {
+       test.receiveAggregatedAvgDataMS(done);
+     }).timeout(10000);
+     it(descriptions.receiveAggregatedAvgDataMinutes,function(done) {
+       test.receiveAggregatedAvgDataMinutes(done);
+     }).timeout(10000);
+     it(descriptions.receiveRawDataDesc,function(done) {
+       test.receiveRawDataDesc(done);
+     }).timeout(10000);
+     it(descriptions.receiveRawDataLatest,function(done) {
+       test.receiveRawDataLatest(done);
+     }).timeout(10000);
+     it(descriptions.receiveAggregatedDataFromMultipleComponents,function(done) {
+       test.receiveAggregatedDataFromMultipleComponents(done);
      }).timeout(10000);
      it(descriptions.cleanup,function(done) {
        test.cleanup(done);

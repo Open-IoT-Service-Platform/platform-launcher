@@ -47,7 +47,6 @@ function getObservation(ts, userToken, accountId, deviceId, cid, cb) {
             }]
         }
     }
-
     api.data.searchData(data, function(err, response) {
         var found = false;
         if (err) {
@@ -72,51 +71,64 @@ function getObservation(ts, userToken, accountId, deviceId, cid, cb) {
     });
 }
 
-
 function searchData(from, to, userToken, accountId, deviceId, cid, queryMeasureLocation, targetFilter, cb) {
-    if (!cb) {
-        throw "Callback required";
-    }
+  searchDataMaxItems(from, to, userToken, accountId, deviceId, cid, queryMeasureLocation, targetFilter, null, null, null, cb)
+}
 
-    var metrics = [{ "id": cid }];
+function searchDataMaxItems(from, to, userToken, accountId, deviceId, cids, queryMeasureLocation, targetFilter, maxItems, orders, aggregators, cb) {
+  if (!cb) {
+      throw "Callback required";
+  }
+  if (!Array.isArray(cids)) {
+    cids = [cids];
+  }
 
-    if (Array.isArray(cid)) {
-	     metrics = cid.map((element) => ({"id": element}))
-    }
+  var  metrics = cids.map((element) => {
+   var metric = {"id": element};
+   if (orders && orders[element] != undefined && orders[element] != null) {
+     metric.order = orders[element];
+   }
+   if (aggregators && aggregators[element] != undefined  && aggregators[element] != null) {
+     metric.aggregator = aggregators[element];
+   }
+   return metric;
+  });
 
-    if (targetFilter == undefined) {
-      targetFilter = {}
+  if (targetFilter == undefined) {
+    targetFilter = {}
+  }
+  if (targetFilter.deviceList == undefined) {
+    targetFilter.deviceList = [deviceId];
+  } else {
+    if (targetFilter.deviceList.indexOf(deviceId) == -1) {
+      targetFilter.deviceList.push(deviceId);
     }
-    if (targetFilter.deviceList == undefined) {
-      targetFilter.deviceList = [deviceId];
-    } else {
-      if (targetFilter.deviceList.indexOf(deviceId) == -1) {
-        targetFilter.deviceList.push(deviceId);
+  }
+
+  var data = {
+      userToken: userToken,
+      accountId: accountId,
+      body: {
+          from: from,
+          targetFilter: targetFilter,
+          metrics: metrics,
+          queryMeasureLocation: queryMeasureLocation
       }
-    }
+  };
 
-    var data = {
-        userToken: userToken,
-        accountId: accountId,
-        body: {
-            from: from,
-            targetFilter: targetFilter,
-            metrics: metrics,
-            queryMeasureLocation: queryMeasureLocation
-        }
-    };
-
-    if (to !== undefined && to > 0) {
-      data.body.to = to;
-    }
-
-    api.data.searchData(data, function(err, response) {
-        if (err) {
-            cb(err)
-        } else {
-            cb(null, response)
-        }
-    });
+  if (maxItems != null) {
+    data.body.maxItems = maxItems
+  }
+  if (to !== undefined && to > 0) {
+    data.body.to = to;
+  }
+  api.data.searchData(data, function(err, response) {
+      if (err) {
+          cb(err)
+      } else {
+          cb(null, response)
+      }
+  });
 }
 
 
@@ -276,6 +288,7 @@ function searchDataAdvanced(from, to, userToken, accountId, deviceIds, cidList, 
 module.exports={
     getObservation: getObservation,
     searchData: searchData,
+    searchDataMaxItems: searchDataMaxItems,
     submitData: submitData,
     submitDataList: submitDataList,
     submitDataListAsUser: submitDataListAsUser,
