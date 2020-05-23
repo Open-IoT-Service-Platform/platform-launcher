@@ -232,7 +232,7 @@ wait-until-ready:
 		do printf "."; sleep 5; done;
 	@printf "\nWaiting for rule engine ";
 	@while kubectl -n $(NAMESPACE) get pods -l=app=rule-engine -o \
-        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
+        jsonpath="{.items[*].status.phase}" | if ! grep -q Succeeded; then true; else false; fi \
 		do printf "."; sleep 5; done;
 	@echo
 
