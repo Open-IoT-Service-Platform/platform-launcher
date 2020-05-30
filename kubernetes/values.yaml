@@ -109,7 +109,7 @@ cassandra:
   port: 9042
   replication: "{'class': 'SimpleStrategy','replication_factor' : 2}"
   nodes: 3
-  disk: 10Gi
+  disk: 100Gi
   memory: 1Gi
 
 grafana:
