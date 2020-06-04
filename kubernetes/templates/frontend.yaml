@@ -52,22 +52,26 @@ spec:
         - ./wait-for-it.sh
         - postgres:5432
         - -t
-        - "300"
+        - "300000"
+        - -s
         - --
         - ./wait-for-it.sh
         - redis:6379
         - -t
-        - "300"
+        - "300000"
+        - -s
         - --
         - ./wait-for-it.sh
         - {{ .Values.kafka.service}}
         - -t
-        - "300"
+        - "300000"
+        - -s
         - --
         - ./wait-for-it.sh
         - keycloak-http:4080
         - -t
-        - "300"
+        - "300000"
+        - -s
         - --
         - ./scripts/docker-start.sh
         - "--disable-rate-limits"

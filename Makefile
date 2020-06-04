@@ -201,40 +201,16 @@ add-test-user:
 ## wait-until-ready: Wait until the platform is up and running
 ##     As of now, this is assumed if all frontend and backend containers
 ##     are ready.
-##
+##     In case of timeout, the application will be redeployed ONLY if TEST is set
 wait-until-ready:
-	@printf "\nWaiting for pending ";
-	@while kubectl -n $(NAMESPACE) get pods | grep Pending >> /dev/null; \
-		do printf "."; sleep 5; done;
-	@printf "\nWaiting for backend ";
-	@while kubectl -n $(NAMESPACE) get pods -l=app=backend -o \
-        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
-		do printf "."; sleep 5; done;
-	@printf "\nWaiting for frontend ";
-	@while kubectl -n $(NAMESPACE) get pods -l=app=frontend -o \
-        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
-		do printf "."; sleep 5; done;
-	@printf "\nWaiting for mqtt server";
-	@while kubectl -n $(NAMESPACE) get pods -l=app=mqtt-server -o \
-        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
-		do printf "."; sleep 5; done;
-	@printf "\nWaiting for dbsetup job";
-	@while ! kubectl -n $(NAMESPACE) get job dbsetup -o \
-		jsonpath="{.status.succeeded}" | grep 1 >> /dev/null; \
-		do printf "."; sleep 5; done;
-	@printf "\nWaiting for keycloak";
-	@while kubectl -n $(NAMESPACE) get pod keycloak-0 -o \
-        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
-		do printf "."; sleep 5; done;
-	@printf "\nWaiting for kairosdb ";
-	@while kubectl -n $(NAMESPACE) get pods -l=app=kairosdb -o \
-        jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; \
-		do printf "."; sleep 5; done;
-	@printf "\nWaiting for rule engine ";
-	@while kubectl -n $(NAMESPACE) get pods -l=app=rule-engine -o \
-        jsonpath="{.items[*].status.phase}" | if ! grep -q Succeeded; then true; else false; fi \
-		do printf "."; sleep 5; done;
-	@echo
+	@printf "\nWaiting for readiness of platform"; \
+	while ! $(SHELL) ./wait-until-ready.sh $(NAMESPACE); \
+		do \
+			if [ ! -z "${TEST}" ]; then \
+				make undeploy-oisp; \
+				make DOCKER_TAG=test deploy-oisp-test; \
+			fi \
+		done
 
 ## import-images: Import images listed in CONTAINERS into local cluster
 ##
