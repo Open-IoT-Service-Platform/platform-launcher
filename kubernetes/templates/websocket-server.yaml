@@ -45,12 +45,12 @@ spec:
         - ./wait-for-it.sh
         - redis:6379
         - -t
-        - "300"
+        - "300000"
         - --
         - ./wait-for-it.sh
         - {{ .Values.kafka.service}}
         - "-t"
-        - "300"
+        - "300000"
         - "--"
         - ./scripts/docker-start.sh
         resources:
