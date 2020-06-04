@@ -45,12 +45,14 @@ spec:
         - ./wait-for-it.sh
         - "kairosdb:8080"
         - -t
-        - "600"
+        - "600000"
+        - -s
         - --
         - ./wait-for-it.sh
         - {{ .Values.kafka.service}}
         - -t
-        - "300"
+        - "300000"
+        - -s
         - --
         - make
         - runjar

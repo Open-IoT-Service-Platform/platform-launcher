@@ -39,7 +39,7 @@ spec:
         - /opt/wait-for-it.sh
         - "cassandra-{{ .Values.cassandra.cluster}}-{{ .Release.Namespace }}-nodes.cassandra.svc.cluster.local:{{ .Values.cassandra.port}}"
         - -t
-        - "300"
+        - "300000"
         - --
         - /opt/kairosdb-startup.sh
         livenessProbe:
