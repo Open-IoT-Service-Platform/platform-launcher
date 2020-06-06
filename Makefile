@@ -203,14 +203,19 @@ add-test-user:
 ##     are ready.
 ##     In case of timeout, the application will be redeployed ONLY if TEST is set
 wait-until-ready:
-	@printf "\nWaiting for readiness of platform"; \
+	@{ printf "\nWaiting for readiness of platform"; \
+	DOCKER_TAG=$(DOCKER_TAG); \
+	if [ "$${DOCKER_TAG}" = "latest" ]; then \
+	  export DOCKER_TAG=test; \
+	fi; \
 	while ! $(SHELL) ./wait-until-ready.sh $(NAMESPACE); \
 		do \
 			if [ ! -z "${TEST}" ]; then \
+				printf "\nTimeout! Redeploying with docker tag $${DOCKER_TAG}\n"; \
 				make undeploy-oisp; \
-				make DOCKER_TAG=test deploy-oisp-test; \
+				make DOCKER_TAG=$${DOCKER_TAG} deploy-oisp-test; \
 			fi \
-		done
+		done }
 
 ## import-images: Import images listed in CONTAINERS into local cluster
 ##
