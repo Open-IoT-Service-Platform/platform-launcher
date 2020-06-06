@@ -81,7 +81,7 @@ commands:
             make deploy-oisp-test DOCKER_TAG=test_${TEST_ID} HELM_ARGS=\"--set use_local_registry=true
             --set keycloak.keycloak.image.repository=registry.local:5000/oisp/keycloak
             --set keycloak.keycloak.image.tag=test_${TEST_ID}\" &&
-            make test) || rm .can_delete_if_success" &&
+            make DOCKER_TAG=test_${TEST_ID} test) || rm .can_delete_if_success" &&
             ssh arkocal@82.165.71.183
             "(rm /tmp/ci_test.lock || true) &&
             cd /tmp/${TEST_ID}/${CIRCLE_PROJECT_REPONAME} &&
