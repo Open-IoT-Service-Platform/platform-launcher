@@ -21,6 +21,7 @@ export TEST = 0
 
 COMPOSE_PROJECT_NAME?="oisp"
 CONTAINERS?=$(shell docker-compose --log-level ERROR config --services)
+EXT_CONTAINERS=cassandra;gcr.io/cassandra-operator/cassandra-3.11.5:latest sidecar;gcr.io/cassandra-operator/cassandra-sidecar:latest kafka;confluentinc/cp-kafka:5.0.1
 CONTAINERS_AGENT=oisp-testsensor oisp-iot-agent
 DOCKER_COMPOSE_ARGS?=
 K3S_NODE=$(shell docker ps --format '{{.Names}}' | grep k3s_node)
@@ -225,6 +226,14 @@ import-images:
 		docker save oisp/$(image):$(DOCKER_TAG) -o /tmp/$(image) && printf " is saved" && \
 		docker cp /tmp/$(image) $(K3S_NODE):/tmp/$(image) && printf ", copied" && \
 		docker exec -it $(K3S_NODE) ctr image import /tmp/$(image) >> /dev/null && printf ", imported\n"; \
+	)
+	@$(foreach image,$(EXT_CONTAINERS), \
+		arr=( $(subst ;, ,$(image)) ); \
+		printf $${arr[1]};  \
+		docker pull $${arr[1]} > /dev/null && printf ", pulled" && \
+		docker save $${arr[1]} -o /tmp/$${arr[0]} > /dev/null && printf ", saved" && \
+		docker cp /tmp/$${arr[0]} $(K3S_NODE):/tmp/$${arr[0]} && printf ", copied" && \
+		docker exec -it $(K3S_NODE) ctr image import /tmp/$${arr[0]} > /dev/null && printf ", imported\n"; \
 	)
 
 ## import-images-agent: Import images to deploy OISP-Agent
