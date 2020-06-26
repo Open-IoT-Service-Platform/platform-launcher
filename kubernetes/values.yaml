@@ -144,7 +144,10 @@ hosts:
     frontend: latest.oisp.info
     websocketserver: ws.latest.oisp.info
     mqttserver: mqtt.latest.oisp.info
-
+    rocks:
+      frontend: latest.oisp.rocks
+      websocketserver: ws.latest.oisp.rocks
+      mqttserver: mqtt.latest.oisp.rocks
 systemuser:
   username: gateway@intel.com
   password: 7d501829lhbl1or0bb1784462c97bcad6

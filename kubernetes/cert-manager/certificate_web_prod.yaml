@@ -10,6 +10,8 @@ spec:
   dnsNames:
   - latest.oisp.info
   - ws.latest.oisp.info
+  - latest.oisp.rocks
+  - ws.latest.oisp.rocks
   issuerRef:
     name: letsencrypt-prod
     # We can reference ClusterIssuers by changing the kind here.
