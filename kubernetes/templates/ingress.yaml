@@ -43,3 +43,27 @@ spec:
         backend:
           serviceName: websocket-server
           servicePort: 5000
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: tsdb-web
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: {{ .Values.certmanager.issuer }}
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  tls:
+  - hosts:
+    - {{ .Values.hosts.frontend }}
+    secretName: {{ .Values.certmanager.secret }}
+  rules:
+  - host: {{ .Values.hosts.frontend }}
+    http:
+      paths:
+      - path: /tsdb(/|$)(.*)
+        backend:
+          serviceName: frontend
+          servicePort: 4003

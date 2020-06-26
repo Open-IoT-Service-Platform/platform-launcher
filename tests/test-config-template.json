@@ -42,7 +42,7 @@
 		"port": 4002,
 		"protocol": "http",
 		"subPath": "/ui/grafana",
-		"strictSSL": "false",
+		"strictSSL": false,
 		"timeout": 30000,
 		"proxy": {
 			"host": false,
@@ -53,6 +53,15 @@
 		"datasourceSuggest": "/api/v1/metricnames",
 		"datasourceQuery": "/api/v1/datapoints/query"
 	},
+	"tsdbproxy": {
+		"host": "frontend",
+		"port": 4003,
+		"protocol": "http",
+		"strictSSL": false,
+		"suggest": "/api/v1/metricnames",
+		"query": "/api/v1/datapoints/query",
+		"timeout": 30000
+	},
 	"skip":
 	{
 		"non_essential": "${OISP_TESTS_SKIP_NON_ESSENTIAL}",
@@ -60,6 +69,7 @@
 		"data_sending": "${OISP_TESTS_SKIP_DATA_SENDING}",
 		"email": "${OISP_TESTS_SKIP_EMAIL}",
 		"grafana": "${OISP_TESTS_SKIP_GRAFANA}",
+		"tsdbproxy": "${OISP_TESTS_SKIP_TSDBPROXY}",
 		"mqtt": "${OISP_TESTS_SKIP_MQTT}",
 		"alerts": "${OISP_TESTS_SKIP_ALERTS}",
 		"scale": "${OISP_TESTS_SKIP_SCALE}"
