@@ -43,3 +43,49 @@ spec:
         backend:
           serviceName: websocket-server
           servicePort: 5000
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: frontend-web-rocks
+  annotations:
+     kubernetes.io/ingress.class: "nginx"
+     cert-manager.io/cluster-issuer: {{ .Values.certmanager.issuer }}
+spec:
+  backend:
+    serviceName: frontend
+    servicePort: 4001
+  tls:
+  - hosts:
+    - {{ .Values.hosts.rocks.frontend }}
+    - {{ .Values.hosts.rocks.websocketserver }}
+    secretName: {{ .Values.certmanager.secret }}
+  rules:
+  - host: {{ .Values.hosts.rocks.frontend }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: frontend
+          servicePort: 4001
+  - host: {{ .Values.hosts.rocks.frontend }}
+    http:
+        paths:
+        - path: /ui/grafana
+          backend:
+            serviceName: frontend
+            servicePort: 4002
+  - host: {{ .Values.hosts.rocks.frontend }}
+    http:
+      paths:
+      - path: /keycloak
+        backend:
+          serviceName: keycloak-http
+          servicePort: 4080
+  - host: {{ .Values.hosts.rocks.websocketserver }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: websocket-server
+          servicePort: 5000
