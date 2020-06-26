@@ -980,6 +980,7 @@ describe("Creating rules ... \n".bold, function() {
 
     }).timeout(20000);
 });
+
 describe("Sending observations and checking rules ...\n".bold, function() {
     before(function(){
             if (checkTestCondition(["non_essential", "data_sending"])) {
@@ -1376,6 +1377,28 @@ describe("Grafana subtests...".bold, function() {
     }).timeout(10000);
 });
 
+describe("TSDB Proxy subtests...".bold, function() {
+    before(function(){
+        if (checkTestCondition(["non_essential", "tsdbproxy"])) {
+            this.skip();
+        }
+    });
+    var test;
+    var descriptions = require("./subtests/tsdb-proxy-tests").descriptions;
+    it(descriptions.prepareTestSetup, function(done) {
+        test = require("./subtests/tsdb-proxy-tests").test(userToken);
+        test.prepareTestSetup(done);
+    }).timeout(10000);
+    it(descriptions.testSuggestion, function(done) {
+        test.testSuggestion(done);
+    }).timeout(10000);
+    it(descriptions.testQuery, function(done) {
+        test.testQuery(done);
+    }).timeout(10000);
+    it(descriptions.cleanup, function(done) {
+        test.cleanup(done);
+    }).timeout(10000);
+});
 
 describe("Do MQTT data sending subtests ...".bold, function() {
     before(function(){
