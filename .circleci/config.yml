@@ -197,7 +197,7 @@ commands:
             fi
             # Now replace all latest tagged images by the real tag
             echo Now pushing images with tag $DOCKER_TAG
-            images=$(docker images --format "{{.Repository}}:{{.Tag}}"| grep :latest)
+            images=$(docker images --format "{{.Repository}}:{{.Tag}}"| grep :latest | grep oisp)
             for image in $images; do
               newimage=$(echo $image | sed -r "s/:latest/:$TARGET_DOCKER_TAG/g");
               echo tagging $image to $newimage;
