@@ -48,6 +48,8 @@ DEBUGGER_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metada
 SELECTED_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep $(DEPLOYMENT) | head -n 1)
 FRONTEND_POD:=$(shell kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep frontend | head -n 1)
 
+BACKUP_EXCLUDE:=sh.helm stolon default-token oisp-stolon-token
+
 .init:
 	@$(call msg,"Initializing ...");
 	@$(call msg,"Currently on branch ${BRANCH}");
@@ -113,6 +115,7 @@ generate_keys:
 ##
 deploy-oisp: check-docker-cred-env generate_keys
 	# First generate ssh keys
+	@$(call msg,"Starting first deploy");
 	$(eval PUBLICKEY:=$(shell cat public.pem | base64 | tr -d "\n"))
 	$(eval PRIVATEKEY:=$(shell cat private.pem | base64 | tr -d "\n"))
 	$(eval X509CERT:=$(shell cat x509.pem | base64 | tr -d "\n"))
@@ -146,7 +149,8 @@ deploy-oisp: check-docker-cred-env generate_keys
 
 ## upgrade-oisp: Upgrade already deployed HELM chart
 ##
-upgrade-oisp: check-docker-cred-env
+upgrade-oisp: check-docker-cred-env backup
+	@$(call msg,"Starting upgrade");
 	@source util/get_oisp_credentials.sh && \
 	cd kubernetes && \
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
@@ -357,6 +361,38 @@ else
 	)
 endif
 
+
+## test-backup: Test backup
+##     Assumes test-prep-only executed before
+##     then make backup, redeploying OISP and restore backup. Check the users, devices, etc.
+##     NOTE: NAMESPACE and DOCKERTAG need to be set
+##
+test-backup: prepare-tests test-prep-only
+	@$(call msg,"Testing backup and restore ...");
+	$(eval ACCOUNTID := $(shell jq ".accountId" tests/oisp-prep-only.conf))
+	$(eval ACTIVATIONCODE := $(shell jq ".activationCode" tests/oisp-prep-only.conf))
+	$(eval USERNAME := $(shell jq ".username" tests/oisp-prep-only.conf))
+	$(eval PASSWORD := $(shell jq ".password" tests/oisp-prep-only.conf))
+	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger \
+		-- /bin/bash -c "cd /home/$(CURRENT_DIR_BASE)/tests && \
+		make test-backup-before TERM=xterm NAMESPACE=$(NAMESPACE) \
+		ACCOUNTID=$(ACCOUNTID) ACTIVATIONCODE=$(ACTIVATIONCODE) USERNAME=$(USERNAME) PASSWORD=$(PASSWORD)"
+	$(MAKE) backup
+	$(MAKE) undeploy-oisp
+	$(MAKE) NAMESPACE=$(NAMESPACE) DEBUG=$(DEBUG) DOCKER_TAG=$(DOCKER_TAG) deploy-oisp-test
+	$(MAKE) restore
+	FRONTEND=$$(kubectl -n $(NAMESPACE) get pods | grep frontend| cut -d " " -f 1) && \
+	kubectl -n $(NAMESPACE) delete pod keycloak-0 $${FRONTEND}
+	DEBUGGER_POD=$$(kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep debugger | head -n 1) && \
+	$(MAKE) NAMESPACE=$(NAMESPACE) DEBUGGER_POD=$${DEBUGGER_POD} prepare-tests && \
+	kubectl -n $(NAMESPACE) exec $${DEBUGGER_POD} -c debugger \
+		-- /bin/bash -c "cd /home/$(CURRENT_DIR_BASE)/tests && \
+		make test-backup-after TERM=xterm NAMESPACE=$(NAMESPACE) \
+		ACCOUNTID=$(ACCOUNTID) ACTIVATIONCODE=$(ACTIVATIONCODE) USERNAME=$(USERNAME) PASSWORD=$(PASSWORD)"
+
+
+
+
 ## logs:
 ##     Create a .zip archive containing logs from all containers.
 ##     The result will be saved in platform-lancuher-logs_{data}.zip
@@ -386,10 +422,44 @@ push-images:
 	@$(call msg,"Pushing docker images to registry");
 	@docker-compose -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml push $(CONTAINERS)
 
+## backup: backup database, configmaps and secrets.
+##     This requires either default K8s config or KUBECONFIG set
+##     A tar file is created containing the files
+##
+backup:
+	@$(call msg,"Creating backup");
+	@mkdir -p backups
+	@$(eval TMPDIR := backup_$(NAMESPACE)_$(shell date +'%Y-%m-%d_%H-%M-%S'))
+	@if [ -d "/tmp/$(TMPDIR)" ]; then echo "Backup file already exists. Not overwriting. Bye"; exit 1; fi
+	@mkdir -p /tmp/$(TMPDIR)
+	@scripts/db_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) >/dev/null 2>&1
+	@scripts/cm_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) "$(BACKUP_EXCLUDE)" >/dev/null 2>&1
+	@tar cvzf backups/$(TMPDIR).tgz -C /tmp $(TMPDIR)
+	@rm -rf /tmp/$(TMPDIR)
+
+
+## restore: restore database, configmaps and secrets.
+##     This requires either default K8s config or KUBECONFIG set
+##     Parameters: BACKUPFILE var must be set or the most recent timestamp is selected
+##
+restore:
+ifndef BACKUPFILE
+		@echo Look for most recent backup file
+		@$(eval BACKUPFILE := $(shell ls backups/backup_*|sort -V| tail -n 1))
+endif
+	@echo using backup file $(BACKUPFILE)
+	$(eval BASEDIR := $(shell basedir=$(BACKUPFILE); basedir="$${basedir##*/}"; basedir="$${basedir%.*}"; echo $${basedir} ))
+	tar xvzf $(BACKUPFILE) -C /tmp
+	@scripts/cm_check.sh /tmp/$(BASEDIR) $(NAMESPACE)
+	@scripts/db_restore.sh /tmp/$(BASEDIR) $(NAMESPACE)
+	@scripts/cm_restore.sh /tmp/$(BASEDIR) $(NAMESPACE)
+	@rm -rf /tmp/$(BASEDIR)
 ## help: Show this help message
 ##
 help:
 	@grep "^##" Makefile | cut -c4-
+
+
 
 #-----------------
 # helper functions

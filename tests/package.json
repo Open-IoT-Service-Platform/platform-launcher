@@ -5,7 +5,9 @@
   "main": "test.js",
   "scripts": {
     "test": "mocha oisp-tests.js --exit",
-    "prep-only": "mocha oisp-prep-only.js --exit"
+    "prep-only": "mocha oisp-prep-only.js --exit",
+    "test-backup-before": "mocha test-backup-before.js --exit",
+    "test-backup-after": "mocha test-backup-after.js --exit"
   },
   "author": "Intel SSG-DRD",
   "license": "ISC",

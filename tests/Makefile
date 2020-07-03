@@ -22,8 +22,8 @@ SHELL:=/bin/bash
 MAKEFILE_DIR := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR  :=  $(patsubst %/,%,$(dir $(MAKEFILE_DIR)))
 
-USERNAME = "oisp@testing.com"
-PASSWORD = "OispTesting1"
+USERNAME?="oisp@testing.com"
+PASSWORD?="OispTesting1"
 
 USERNAME2 = "oisp2@testing.com"
 PASSWORD2 = "OispTesting2"
@@ -53,6 +53,17 @@ test: npm-install
 	@$(call msg,"Starting the e2e testing ... $$TEST_PREP_ONLY");
 	@env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) USERNAME2=$(USERNAME2) PASSWORD2=$(PASSWORD2) LOG_LEVEL="error" NODE_ENV="local" npm test
 
+test-backup-before: npm-install
+	@export OISP_GRAFANA_PASSWORD=$$(kubectl -n $(NAMESPACE) get -o yaml configmaps oisp-config | shyaml get-value data.grafana | jq -r .adminPassword) && \
+	cat test-config-template.json | envsubst > test-config.json
+	@$(call msg,"Starting backup test before ...");
+	@env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm run-script test-backup-before
+
+test-backup-after: npm-install
+	@export OISP_GRAFANA_PASSWORD=$$(kubectl -n $(NAMESPACE) get -o yaml configmaps oisp-config | shyaml get-value data.grafana | jq -r .adminPassword) && \
+	cat test-config-template.json | envsubst > test-config.json
+	@$(call msg,"Starting backup test before ...");
+	@env http_proxy="" https_proxy="" USERNAME=$(USERNAME) PASSWORD=$(PASSWORD) LOG_LEVEL="error" NODE_ENV="local" npm run-script test-backup-after
 
 clean:
 	@$(call msg,"Cleaning ...");
