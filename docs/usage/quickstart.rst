@@ -42,6 +42,7 @@ If you have access to the OISP dockerhub repository, export your user credential
 
   export DOCKERUSER=[YOURUSERNAME]
   read -s DOCKERPASS # type your password and press enter
+  export DOCKERPASS
 
 Otherwise, you will have to build the images yourself. Go to the project root and run ``make update && make build``.
 You can specify a docker tag for the images being built. Run ``make help`` for more details. Afterwards, you have two options to get the images inside the cluster:
