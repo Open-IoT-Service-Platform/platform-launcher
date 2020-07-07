@@ -1,6 +1,6 @@
 FROM alpine
 
-RUN apk add --update make curl git bash ncurses jq py-pip
+RUN apk add --update make curl git bash ncurses jq py-pip openssl
 RUN pip install shyaml
 WORKDIR /home
 
@@ -10,10 +10,7 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s 
     mv ./kubectl /usr/local/bin/kubectl
 
 # Install helm
-RUN curl -o helm-v2.14.3-linux-amd64.tar.gz https://get.helm.sh/helm-v2.14.3-linux-amd64.tar.gz  && \
-    tar -xzvf helm-v2.14.3-linux-amd64.tar.gz && \
-    mv linux-amd64/* /usr/bin/ && \
-    chmod +x /usr/bin/helm
+RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
 RUN addgroup -S deployer && adduser -S deployer -G deployer -h /home/deployer/
 USER deployer

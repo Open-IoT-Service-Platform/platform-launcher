@@ -8,6 +8,9 @@ metadata:
 spec:
   ports:
   - port: 2525
+    name: "2525"
+  - port: 80
+    name: "80"
   selector:
     app: debugger
 ---

@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-RUN apt-get update && apt-get -y install nano make git kafkacat python python-pip python3-pip python3-dev python3-setuptools ipython3 python-setuptools build-essential nodejs dnsutils virtualenv snapd npm wget apt-transport-https curl apache2-utils imagemagick gettext-base jq
+RUN apt-get update && apt-get -y install nano make git kafkacat python python-pip python3-pip python3-dev python3-setuptools ipython3 python-setuptools build-essential nodejs dnsutils virtualenv snapd npm wget apt-transport-https curl apache2-utils imagemagick gettext-base jq nginx
 
 # install kubectl
 RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
@@ -27,6 +27,6 @@ ADD load-tests/create_test.py /home/load-tests/create_test.py
 
 WORKDIR /home/platform-launcher
 
-EXPOSE 8089 5557 5558
+EXPOSE 8089 5557 5558 80
 
 CMD ["tail", "-f", "/dev/null"]

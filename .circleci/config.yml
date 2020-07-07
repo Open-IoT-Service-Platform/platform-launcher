@@ -1,5 +1,4 @@
 # Javascript Node CircleCI 2.0 configuration file
-#
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
 version: 2.1
@@ -149,9 +148,14 @@ commands:
           command: |
             export PATH=$PATH:/snap/bin
             make import-images DOCKER_TAG=test DEBUG=true
+            docker create -it --name re-tmp oisp/rule-engine:test /bin/sh
+            docker cp re-tmp:/rule-engine-bundled-0.1.jar .
             npm install nodemailer
             export NODOCKERLOGIN=true
             make deploy-oisp-test DOCKER_TAG=test
+            export DEBUGGER_POD=$(kubectl -n oisp get pods -o custom-columns=:metadata.name | grep debugger | head -n 1) &&
+            kubectl -n oisp cp rule-engine-bundled-0.1.jar ${DEBUGGER_POD}:/var/www/html &&
+            kubectl -n oisp exec ${DEBUGGER_POD} -- service nginx start
             make test
           no_output_timeout: 20m
   push-images:

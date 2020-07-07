@@ -13,3 +13,7 @@
 [submodule "oisp-beam-rule-engine"]
 	path = oisp-beam-rule-engine
 	url = https://github.com/Open-IoT-Service-Platform/oisp-beam-rule-engine.git
+[submodule "oisp-services"]
+	path = oisp-services
+	url = https://github.com/Open-IoT-Service-Platform/oisp-services.git
+	branch = develop

@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: services-operator
+spec:
+  selector:
+    matchLabels:
+      app: services-operator
+  template:
+    metadata:
+      labels:
+        app: services-operator
+    spec:
+      serviceAccountName: beamservices-operator
+      containers:
+      - image: arkocal/services-operator:{{ .Values.tag }}
+        name: services-operator
+        env:
+        - name: OISP_FRONTEND_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: frontend
+        - name: OISP_POSTGRES_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: postgres
+        - name: OISP_REDIS_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: redis
+        - name: OISP_KAFKA_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: kafka
+        - name: OISP_SMTP_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: smtp
+        - name: OISP_FRONTENDSECURITY_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: frontend-security
+        - name: OISP_KEYCLOAK_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: keycloak
+        - name: OISP_GATEWAY_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: gateway
+        - name: OISP_BACKENDHOST_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: backend-host
+        - name: OISP_WEBSOCKETUSER_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: websocket-user
+        - name: OISP_RULEENGINE_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: rule-engine
+        - name: OISP_MAIL_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: mail
+        - name: OISP_GRAFANA_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: grafana
+        - name: OISP_ZOOKEEPER_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: zookeeper
+              name: oisp-config
+        resources:
+          requests:
+            cpu: 50m
+          limits:
+            cpu: 50m
+      imagePullSecrets:
+        - name: dockercred
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: beamservices-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: beamservices-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: beamservices-operator
+    namespace: oisp # {{.Release.Namespace}}
