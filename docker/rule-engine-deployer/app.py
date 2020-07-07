@@ -50,7 +50,6 @@ CONFIG = {"application_name": "rule_engine_dashboard",
           "kafka_rule_engine_topic": conf["kafkaConfig"]["topicsRuleEngine"],
           "kafka_heartbeat_topic": conf["kafkaConfig"]["topicsHeartbeatName"],
           "kafka_heartbeat_interval": conf["kafkaConfig"]["topicsHeartbeatInterval"],
-          "hadoop_security_authentication": conf["hbaseConfig"]["hadoopProperties"]["hadoop.security.authentication"],
           "hbase_table_prefix": "local",
           "token": token,
           "zookeeper_hbase_quorum": conf["zookeeperConfig"]["zkCluster"].split(":")[0]

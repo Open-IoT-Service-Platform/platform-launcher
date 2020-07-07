@@ -160,7 +160,6 @@ data:
     "gearpumpUsername": "{{ .Values.ruleEngine.gearpump.username }}",
     "gearpumpPassword": "{{ .Values.ruleEngine.gearpump.password }}",
     "frontendUri": "frontend:4001",
-    "hbaseConfig": "@@OISP_HBASE_CONFIG",
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
     "zookeeperConfig": "@@OISP_ZOOKEEPER_CONFIG"
     }

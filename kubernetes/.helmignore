@@ -1,3 +1,4 @@
 locust/
 #*
 iot-agent/
+crds/.gitignore

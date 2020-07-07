@@ -1,0 +1,35 @@
+apiVersion: oisp.org/v1
+kind: BeamService
+metadata:
+  name: rule-engine
+spec:
+  entryClass: "org.oisp.RuleEngineBuild"
+  tokens:
+  - user: "rule_engine@intel.com" #{{ .Values.ruleEngine.username }}
+    password: "oU9f0QSlNUQTSkMGTB3EcYmq1Sl72cC6-pbIaICDQRT1wMRANfqLkz0Ql78xJHwl" #{{ .Values.ruleEngine.password }}
+  args:
+    runner: FlinkRunner
+    streaming: "true"
+    JSONConfig:
+      format: |
+        {{`{{
+        "application_name": "rule_engine_dashboard",
+        "dashboard_strict_ssl": false,
+        "dashboard_url": "http://{config[ruleEngineConfig][frontendUri]}",
+        "kafka_servers": "{config[kafkaConfig][uri]}",
+        "kafka_zookeeper_quorum": "{config[zookeeperConfig][zkCluster]}" ,
+        "kafka_observations_topic": "{config[kafkaConfig][topicsObservations]}",
+        "kafka_rule_engine_topic": "{config[kafkaConfig][topicsRuleEngine]}",
+        "kafka_heartbeat_topic": "{config[kafkaConfig][topicsHeartbeatName]}",
+        "kafka_heartbeat_interval": "{config[kafkaConfig][topicsHeartbeatInterval]}",
+        "zookeeper_hbase_quorum": "not used",
+        "token": "{tokens[rule_engine@intel.com]}"
+        }}`}}
+      encode: base64
+  package:
+#    url: "http://debugger/rule-engine-bundled-0.1.jar"
+    url: "ftp://82.165.114.145/files/rule-engine-bundled-0.1.jar"
+    username: "ftp"
+    password: "intel123"
+    # url: "ftp:
+#  url: "https://github.com/Open-IoT-Service-Platform/oisp-beam-rule-engine/releases/download/ci-rolling/rule-engine-bundled-0.1.jar"
