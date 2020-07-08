@@ -123,7 +123,7 @@ describe("Waiting for OISP services to be ready ...\n".bold, function() {
             }
         });
 
-    }).timeout(2 * 60 * 1000);
+    }).timeout(1000 * 60 * 1000);
 })
 
 describe("get authorization and manage user ...\n".bold, function() {
