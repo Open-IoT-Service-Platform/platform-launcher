@@ -64,7 +64,7 @@ function check_beamservice {
   local name=$1
   local namespace=$2
   local counts_max=$3
-  local counts_actual=0  
+  local counts_actual=0
   printf "\nWaiting for $name"
   until (kubectl -n oisp get bs rule-engine -o yaml | grep "state: RUNNING");
     do printf "."
@@ -97,7 +97,7 @@ check_deployment kairosdb ${NAMESPACE} mqtt-server 60
 check_deployment websocket-server ${NAMESPACE} mqtt-server 60
 check_job dbsetup ${NAMESPACE} 60
 check_sts keycloak ${NAMESPACE} 60
-check_beamservice rule-engine ${NAMESPACE} 60
+check_beamservice rule-engine ${NAMESPACE} 120
 
 printf "\ndone\n"
 exit 0;
