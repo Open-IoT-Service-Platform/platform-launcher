@@ -13,7 +13,7 @@ spec:
     spec:
       serviceAccountName: beamservices-operator
       containers:
-      - image: arkocal/services-operator:{{ .Values.tag }}
+      - image: oisp/services-operator:{{ .Values.tag }}
         name: services-operator
         env:
         - name: OISP_FRONTEND_CONFIG

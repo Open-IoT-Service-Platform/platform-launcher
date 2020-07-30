@@ -134,6 +134,9 @@ ruleEngine:
   gearpump:
     username: admin
     password: password
+  url: "ftp://82.165.114.145/files/new.jar"
+  ftpUsername: "ftp"
+  ftpPassword: password
 
 websocketServer:
   username: api_actuator

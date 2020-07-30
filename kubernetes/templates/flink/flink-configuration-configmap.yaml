@@ -13,6 +13,9 @@ data:
     taskmanager.rpc.port: 6122
     jobmanager.heap.size: 1024m
     taskmanager.memory.process.size: 1024m
+    restart-strategy: fixed-delay
+    restart-strategy.fixed-delay.attempts: 30
+    restart-strategy.fixed-delay.delay: 10 s
   log4j.properties: |+
     log4j.rootLogger=INFO, file
     log4j.logger.akka=INFO

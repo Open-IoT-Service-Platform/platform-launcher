@@ -85,6 +85,9 @@ check-docker-cred-env:
 			echo "DOCKERPASS env var is undefined"; exit 1; \
 		fi; \
 		docker login -u $$DOCKERUSER -p $$DOCKERPASS; \
+		if [ "$$FTPPASS" = "" ]; then \
+			echo "FTPPASS env var is undefined"; exit 1; \
+		fi; \
 	fi
 
 ## deploy-oisp-test: Deploy repository as HELM chart,
@@ -133,6 +136,8 @@ deploy-oisp: check-docker-cred-env generate_keys
 		--set grafana.password="$(call randomPass)" \
 		--set mqtt.broker.password="$(call randomPass)" \
 		--set ruleEngine.password="$(call randomPass)" \
+		--set ruleEngine.password="$(call randomPass)" \
+		--set ruleEngine.ftpPassword="$${FTPPASS}" \
 		--set ruleEngine.gearpump.password="$(call randomPass)" \
 		--set websocketServer.password="$(call randomPass)" \
 		--set stolon.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
