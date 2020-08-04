@@ -16,3 +16,4 @@ sed -i "s/{{ INSERT-PUBLIC-CERT }}/${PUBLIC_CERT}/" ${REALM_DIR}
 # SECRET variables are already defined in the environment variables
 sed -i "s/{{ INSERT-OISP-FRONTEND-SECRET }}/${OISP_FRONTEND_SECRET}/" ${REALM_DIR}
 sed -i "s/{{ INSERT-MQTT-BROKER-SECRET }}/${OISP_MQTT_BROKER_SECRET}/" ${REALM_DIR}
+sed -i "s/{{ INSERT-WEBSOCKET-SERVER-SECRET }}/${OISP_WEBSOCKET_SERVER_SECRET}/" ${REALM_DIR}

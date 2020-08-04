@@ -191,6 +191,11 @@ keycloak:
           configMapKeyRef:
             name: oisp-config
             key: keycloak-mqtt-broker-secret
+      - name: OISP_WEBSOCKET_SERVER_SECRET
+        valueFrom:
+          configMapKeyRef:
+            name: oisp-config
+            key: keycloak-websocket-server-secret
     resources:
       requests:
         cpu: "50m"
@@ -228,6 +233,9 @@ keycloak:
       dbPassword: supersecret
   frontend:
     secret: "supersecret"
+  websocketServer:
+    secret: "supersecret"
+    id: "websocket-server"
   mqttBroker:
     secret: "supersecret"
     id: "mqtt-broker"
