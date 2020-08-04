@@ -146,6 +146,7 @@ deploy-oisp: check-docker-cred-env generate_keys
 		--set keycloak.keycloak.password="$(call randomPass)" \
 		--set keycloak.frontend.secret="$(call randomPass)" \
 		--set keycloak.mqttBroker.secret="$(call randomPass)" \
+		--set keycloak.websocketServer.secret="$(call randomPass)" \
 		--set jwt.public="$(PUBLICKEY)" \
 		--set jwt.private="$(PRIVATEKEY)" \
 		--set jwt.x509="$(X509CERT)" \
@@ -177,6 +178,7 @@ upgrade-oisp: check-docker-cred-env backup
 		--set keycloak.keycloak.password="$${KEYCLOAK_PASSWORD}" \
 		--set keycloak.frontend.secret="$${KEYCLOAK_FRONTEND_SECRET}" \
 		--set keycloak.mqttBroker.secret="$${KEYCLOAK_MQTT_BROKER_SECRET}" \
+		--set keycloak.websocketServer.secret="$${KEYCLOAK_WEBSOCKET_SERVER_SECRET}" \
 		--set jwt.public="$${JWT_PUBLIC}" \
 		--set jwt.private="$${JWT_PRIVATE}" \
 		--set jwt.x509="$${JWT_X509}" \

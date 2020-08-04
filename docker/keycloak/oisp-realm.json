@@ -558,7 +558,7 @@
         "jsonType.label" : "String"
       }
     } ],
-    "defaultClientScopes" : [ "web-origins", "roles", "accounts", "type", "email", "mqtt-broker" ],
+    "defaultClientScopes" : [ "web-origins", "roles", "accounts", "type", "email", "mqtt-broker", "websocket-server" ],
     "optionalClientScopes" : [ "offline_access", "microprofile-jwt" ],
     "authorizationSettings" : {
       "allowRemoteResourceManagement" : true,
@@ -1267,7 +1267,61 @@
       "offline_access",
       "microprofile-jwt"
     ]
-  }, {
+  },
+  {
+    "id": "6bd6e77d-2229-4445-8db2-a76b3f720a91",
+    "clientId": "websocket-server",
+    "surrogateAuthRequired": false,
+    "enabled": true,
+    "clientAuthenticatorType": "client-secret",
+    "secret": "{{ INSERT-WEBSOCKET-SERVER-SECRET }}",
+    "redirectUris": [],
+    "webOrigins": [],
+    "notBefore": 0,
+    "bearerOnly": true,
+    "consentRequired": false,
+    "standardFlowEnabled": true,
+    "implicitFlowEnabled": false,
+    "directAccessGrantsEnabled": true,
+    "serviceAccountsEnabled": false,
+    "publicClient": false,
+    "frontchannelLogout": false,
+    "protocol": "openid-connect",
+    "attributes": {
+      "saml.assertion.signature": "false",
+      "saml.multivalued.roles": "false",
+      "saml.force.post.binding": "false",
+      "saml.encrypt": "false",
+      "saml.server.signature": "false",
+      "saml.server.signature.keyinfo.ext": "false",
+      "exclude.session.state.from.auth.response": "false",
+      "saml_force_name_id_format": "false",
+      "saml.client.signature": "false",
+      "tls.client.certificate.bound.access.tokens": "false",
+      "saml.authnstatement": "false",
+      "display.on.consent.screen": "false",
+      "saml.onetimeuse.condition": "false"
+    },
+    "authenticationFlowBindingOverrides": {},
+    "fullScopeAllowed": true,
+    "nodeReRegistrationTimeout": -1,
+    "defaultClientScopes": [
+      "web-origins",
+      "role_list",
+      "profile",
+      "roles",
+      "accounts",
+      "type",
+      "email"
+    ],
+    "optionalClientScopes": [
+      "address",
+      "phone",
+      "offline_access",
+      "microprofile-jwt"
+    ]
+  },
+  {
     "id" : "2c0c5093-9b2a-4a67-83dc-98daf6cd3a62",
     "clientId" : "security-admin-console",
     "name" : "${client_security-admin-console}",
@@ -1326,6 +1380,50 @@
   } ],
   "clientScopes" : [
     {
+      "id": "aff3473b-2ffd-4e3c-8696-4e3f5aa9cdde",
+      "name": "oisp-frontend",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      },
+      "protocolMappers": [
+        {
+          "id": "7b66be24-fe26-4be9-9116-0eccc31c4f34",
+          "name": "oisp-frontend",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "oisp-frontend",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }, {
+      "id": "17dfd606-56df-45d5-97a5-25609328d56a",
+      "name": "websocket-server",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      },
+      "protocolMappers": [
+        {
+          "id": "0b19081c-6d9c-4340-a840-395ea6d54d59",
+          "name": "websocket-server",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "websocket-server",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }, {
       "id": "5ed16465-f532-4fd1-a697-b9f66d6160ac",
       "name": "mqtt-broker",
       "protocol": "openid-connect",

@@ -52,6 +52,11 @@ spec:
         - "-t"
         - "300000"
         - "--"
+        - ./wait-for-it.sh
+        - keycloak-http:4080
+        - -t
+        - "300000"
+        - --
         - ./scripts/docker-start.sh
         resources:
           {{ if .Values.less_resources }}
@@ -86,6 +91,11 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: websocket-user
+        - name: OISP_KEYCLOAK_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: keycloak
         volumeMounts:
         - mountPath: /app/keys
           name: jwt-keys
