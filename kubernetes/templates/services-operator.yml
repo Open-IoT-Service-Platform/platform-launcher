@@ -13,7 +13,12 @@ spec:
     spec:
       serviceAccountName: beamservices-operator
       containers:
+      {{ if .Values.use_local_registry }}
+      - image: registry.local:5000/oisp/services-operator:{{ .Values.tag }}
+      {{ else }}
       - image: oisp/services-operator:{{ .Values.tag }}
+      {{ end }}
+
         name: services-operator
         env:
         - name: OISP_FRONTEND_CONFIG
@@ -86,6 +91,8 @@ spec:
             configMapKeyRef:
               key: zookeeper
               name: oisp-config
+        - name: OISP_NAMESPACE
+          value: {{.Release.Namespace}}
         resources:
           requests:
             cpu: 50m
@@ -110,4 +117,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: beamservices-operator
-    namespace: oisp # {{.Release.Namespace}}
+    namespace: {{.Release.Namespace}}

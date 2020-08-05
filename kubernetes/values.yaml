@@ -134,7 +134,7 @@ ruleEngine:
   gearpump:
     username: admin
     password: password
-  url: "ftp://82.165.114.145/files/new.jar"
+  url: "ftp://82.165.114.145/files/rule-engine-bundled-0.1.jar"
   ftpUsername: "ftp"
   ftpPassword: password
 
