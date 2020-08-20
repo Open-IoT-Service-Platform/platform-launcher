@@ -82,3 +82,9 @@ services:
       context: oisp-services/services-operator
       labels:
         - oisp=true
+  services-server:
+    image: arkocal/services-server:${DOCKER_TAG}
+    build:
+      context: ./oisp-services
+      labels:
+        - oisp=true
