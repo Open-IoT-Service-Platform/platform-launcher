@@ -62,8 +62,7 @@ BACKUP_EXCLUDE:=sh.helm stolon default-token oisp-stolon-token
 			esac \
 		fi; \
 	else \
-		git submodule init; \
-		git submodule update; \
+		git submodule update --init --recursive; \
 	fi;
 	@if [ -f docker/hbase/id_rsa ]; then echo "HBase keys existing already"; else \
 		ssh-keygen -q -t rsa -P "" -f docker/hbase/id_rsa; \
@@ -325,10 +324,14 @@ build: .init
 ##
 update: clean
 	@$(call msg,"Git Update (dev only)");
-	@git submodule init
-	@git submodule update
-	@git submodule foreach git fetch origin
-	@git submodule foreach git checkout origin/develop
+# Normally, the following should be enough, but it can crash in merge conflicts
+# Everything is run twice to allow submodules of submodules, if the .gitmodules
+# file is different at HEAD than latest develop.
+#	@git submodule update --init --recursive --remote --merge
+	@$(call msg,"Git Update (dev only)");
+	@git submodule update --init
+	@git submodule foreach --recursive "git fetch origin && git checkout origin/develop && git submodule update --init"
+	@git submodule foreach --recursive "git fetch origin && git checkout origin/develop"
 
 ## docker-clean: Remove all docker images and containers.
 ##     This also includes non-oisp containers.
