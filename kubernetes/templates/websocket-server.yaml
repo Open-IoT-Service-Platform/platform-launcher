@@ -96,10 +96,6 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: keycloak
-        volumeMounts:
-        - mountPath: /app/keys
-          name: jwt-keys
-          readOnly: true
         workingDir: /app
       imagePullSecrets:
       - name: dockercred
