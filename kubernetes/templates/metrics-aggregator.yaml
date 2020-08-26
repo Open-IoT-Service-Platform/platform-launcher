@@ -1,0 +1,13 @@
+apiVersion: oisp.org/v1
+kind: BeamService
+metadata:
+  name: metrics-aggregator
+spec:
+  entryClass: "org.oisp.services.MetricsAggregator"
+  args:
+    runner: FlinkRunner
+    streaming: "true"
+    metricsTopic: {{ .Values.metricsTopic | quote }}
+    bootstrapServers: {{ .Values.kafka.service}}
+  package:
+    url: {{ .Values.metricsAggregator.url }}
