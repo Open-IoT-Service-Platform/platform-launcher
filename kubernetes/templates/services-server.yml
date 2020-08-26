@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: services-server
+  labels:
+    app: services-server
+spec:
+  ports:
+  - name: "80"
+    port: 80
+  selector:
+    app: services-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: services-server
+  name: services-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: services-server
+  template:
+    metadata:
+      labels:
+        app: services-server
+    spec:
+      containers:
+      {{ if .Values.use_local_registry }}
+      - image: registry.local:5000/arkocal/services-server:{{ .Values.tag }}
+      {{ else }}
+      - image: oisp/services-server:{{ .Values.tag }}
+      {{ end }}
+        name: services-server
+        resources:
+          requests:
+            cpu: 50m
+            memory: 300M
+        ports:
+        - containerPort: 80
+          protocol: TCP
