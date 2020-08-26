@@ -36,6 +36,7 @@ kafka:
   fullBrokerList: "oisp-kafka-headless:9092"
   replicas: 3
   metricsPartitions: 2
+  metricsTopic: "metrics"
   replicationFactor: 2
   requestTimeout: 20000
   maxRetryTime: 2000
@@ -66,6 +67,7 @@ kafkatest:
   fullBrokerList: "oisp-kafka-headless:9092"
   replicas: 1
   metricsPartitions: 1
+  metricsTopic: "metrics"
   replicationFactor: 1
   requestTimeout: 20000
   maxRetryTime: 5000
@@ -138,6 +140,9 @@ ruleEngine:
   url: "http://services-server/rule-engine-bundled-0.1.jar"
   ftpUsername: "ftp"
   ftpPassword: password
+
+metricsAggregator:
+  url: "http://services-server/metrics-aggregator-bundled-0.1.jar"
 
 websocketServer:
   username: api_actuator
@@ -276,6 +281,7 @@ flink:
         memory: 128Mi
 
     taskmanager:
+      replicas: 2
       limits:
         cpu: 100m
         memory: 128Mi
