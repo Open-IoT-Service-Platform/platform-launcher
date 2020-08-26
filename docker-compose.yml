@@ -83,7 +83,7 @@ services:
       labels:
         - oisp=true
   services-server:
-    image: arkocal/services-server:${DOCKER_TAG}
+    image: oisp/services-server:${DOCKER_TAG}
     build:
       context: ./oisp-services
       labels:
