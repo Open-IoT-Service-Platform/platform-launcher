@@ -222,14 +222,12 @@ wait-until-ready:
 	if [ "$${DOCKER_TAG}" = "latest" ]; then \
 	  export DOCKER_TAG=test; \
 	fi; \
-	while ! $(SHELL) ./wait-until-ready.sh $(NAMESPACE); \
-		do \
-			if [ ! -z "${TEST}" ]; then \
-				printf "\nTimeout! Redeploying with docker tag $${DOCKER_TAG}\n"; \
-				make undeploy-oisp; \
-				make DOCKER_TAG=$${DOCKER_TAG} deploy-oisp-test; \
-			fi \
-		done }
+	$(SHELL) ./wait-until-ready.sh $(NAMESPACE); \
+	retval=$$?; \
+	if [ $${retval} -eq 2 ]; then \
+		printf "\nTimeout while waiting for platform\n"; \
+		exit 2; \
+	fi }
 
 ## import-images: Import images listed in CONTAINERS into local cluster
 ##
