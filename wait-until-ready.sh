@@ -97,7 +97,7 @@ check_deployment kairosdb ${NAMESPACE} mqtt-server 60
 check_deployment websocket-server ${NAMESPACE} mqtt-server 60
 check_job dbsetup ${NAMESPACE} 60
 check_sts keycloak ${NAMESPACE} 60
-check_beamservice rule-engine ${NAMESPACE} 120
+check_beamservice rule-engine ${NAMESPACE} 240
 
 printf "\ndone\n"
 exit 0;
