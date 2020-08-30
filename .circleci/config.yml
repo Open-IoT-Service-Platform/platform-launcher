@@ -155,7 +155,7 @@ commands:
             export NODOCKERLOGIN=true
             retval=2;
             until [ ${retval} -eq 0 ]; do
-              make undeploy-oisp-test
+              make undeploy-oisp
               make deploy-oisp-test DOCKER_TAG=test HELM_ARGS="--set ruleEngine.url=http://debugger/rule-engine-bundled-0.1.jar"
               export DEBUGGER_POD=$(kubectl -n oisp get pods -o custom-columns=:metadata.name | grep debugger | head -n 1) &&
               kubectl -n oisp cp rule-engine-bundled-0.1.jar ${DEBUGGER_POD}:/var/www/html &&
