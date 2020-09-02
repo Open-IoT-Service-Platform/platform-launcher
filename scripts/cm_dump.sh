@@ -76,8 +76,8 @@ list_images()
 {
   local TYPE=$1
   # dump deployment and StatefulSet
-  local NAMES=($(kubectl -n oisp get ${TYPE} -o jsonpath={...spec.template.spec.containers[*].name}))
-  local IMAGES=($(kubectl -n oisp get ${TYPE} -o jsonpath={...spec.template.spec.containers[*].image}))
+  local NAMES=($(kubectl -n ${NAMESPACE} get ${TYPE} -o jsonpath={...spec.template.spec.containers[*].name}))
+  local IMAGES=($(kubectl -n ${NAMESPACE} get ${TYPE} -o jsonpath={...spec.template.spec.containers[*].image}))
 
   RETURNVAL=()
   for index in "${!NAMES[@]}";

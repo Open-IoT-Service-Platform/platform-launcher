@@ -19,7 +19,6 @@
 cmdname=$(basename $0)
 #DEBUG=true # uncomment to switch on debug
 DUMPFILE=database.sql
-CONTAINER=oisp-stolon-keeper-0
 
 usage()
 {
@@ -44,10 +43,11 @@ fi
 
 TMPDIR=$1
 NAMESPACE=$2
-DBNAME=$(kubectl -n oisp get cm/oisp-config -o jsonpath='{..postgres}'| jq ".dbname")
-USERNAME=$(kubectl -n oisp get cm/oisp-config -o jsonpath='{..postgres}'| jq ".su_username")
-PASSWORD=$(kubectl -n oisp get cm/oisp-config -o jsonpath='{..postgres}'| jq ".su_password")
-HOSTNAME=$(kubectl -n oisp get cm/oisp-config -o jsonpath='{..postgres}'| jq ".hostname")
+CONTAINER=${NAMESPACE}-stolon-keeper-0
+DBNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".dbname")
+USERNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".su_username")
+PASSWORD=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".su_password")
+HOSTNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".hostname")
 
 if [ "${DEBUG}" = "true" ]; then
   echo parameters:
