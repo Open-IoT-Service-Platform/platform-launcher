@@ -1,6 +1,6 @@
 FROM alpine
 
-RUN apk add --update make curl git bash ncurses jq py-pip openssl
+RUN apk add --update make curl git bash ncurses jq py-pip openssl docker-compose
 RUN pip install shyaml
 WORKDIR /home
 
