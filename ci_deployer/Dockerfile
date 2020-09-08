@@ -15,5 +15,6 @@ RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 |
 RUN addgroup -S deployer && adduser -S deployer -G deployer -h /home/deployer/
 USER deployer
 WORKDIR /home/deployer
+RUN helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com
 ADD kubeconfig /home/deployer/.kube/config
 ADD deploy.sh /home/deployer/deploy.sh

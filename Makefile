@@ -84,9 +84,12 @@ check-docker-cred-env:
 			echo "DOCKERPASS env var is undefined"; exit 1; \
 		fi; \
 		docker login -u $$DOCKERUSER -p $$DOCKERPASS; \
-		if [ "$$FTPPASS" = "" ]; then \
-			echo "FTPPASS env var is undefined"; exit 1; \
-		fi; \
+	fi
+# ftp pass checking is disabled, as service jars are hosted in services-server now
+# re-enable this if an ftp server is used instead.
+#		if [ "$$FTPPASS" = "" ]; then \
+#			echo "FTPPASS env var is undefined"; exit 1; \
+#		fi; \
 	fi
 
 ## deploy-oisp-test: Deploy repository as HELM chart,
