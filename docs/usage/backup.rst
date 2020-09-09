@@ -1,3 +1,5 @@
+.. _Backup:
+
 Backup and Restore
 ==================
 
