@@ -12,6 +12,7 @@ Welcome to Open IoT Service Platform's documentation!
 
    usage/quickstart
    usage/services
+   usage/upgrade
    usage/backup
    development/developers_guide
 
