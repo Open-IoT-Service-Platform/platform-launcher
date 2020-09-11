@@ -264,7 +264,13 @@ commands:
           name: Run deploy script
           shell: /bin/bash
           command: |
-            export HELM_ARGS="--set stolon.persistence.storageClassName=\"oneandone\" --set less_resources=\"false\" "
+            export HELM_ARGS="--force \
+              --atomic \
+              --set less_resources=\"false\" --set production=\"true\" \
+              --set certmanager.secret=\"frontend-web-prod-tls\" \
+              --set certmanager.issuer=\"letsencrypt-prod\" \
+              --set numberReplicas.frontend=2 \
+              --set numberReplicas.backend=3"
             cd ~ && sh deploy.sh
 
 jobs:
