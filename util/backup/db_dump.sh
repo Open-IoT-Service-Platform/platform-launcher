@@ -73,4 +73,6 @@ if [ -f "${TMPDIR}/${DUMPFILE}" ]; then
 fi
 
 echo Dump database
-kubectl -n ${NAMESPACE} exec ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; pg_dump -U ${USERNAME} ${DBNAME} -h ${HOSTNAME} -F c -b " > ${TMPDIR}/${DUMPFILE}
+kubectl -n ${NAMESPACE} exec ${CONTAINER} -- /bin/bash -c "mkdir -p /backup; export PGPASSWORD=${PASSWORD}; pg_dump -U ${USERNAME} ${DBNAME} -h ${HOSTNAME} -F c -b  > /backup/${DUMPFILE}"
+kubectl -n ${NAMESPACE} cp ${CONTAINER}:/backup/${DUMPFILE} ${TMPDIR}/${DUMPFILE}
+kubectl -n ${NAMESPACE} exec ${CONTAINER} -- /bin/bash -c "rm -rf /backup"

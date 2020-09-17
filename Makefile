@@ -34,6 +34,7 @@ export GIT_COMMIT_GEARPUMP=$(git -C oisp-gearpump-rule-engine rev-parse HEAD)
 export GIT_COMMIT_WEBSOCKET_SERVER=$(git -C oisp-websocket-server rev-parse HEAD)
 export GIT_COMMIT_BACKEND=$(git -C oisp-backend rev-parse HEAD)
 
+NOBACKUP?=false
 DEBUG?=false
 ifeq  ($(DEBUG),true)
 CONTAINERS:=$(CONTAINERS) debugger
@@ -441,16 +442,17 @@ push-images:
 ##     A tar file is created containing the files
 ##
 backup:
+ifeq ($(NOBACKUP),false)
 	@$(call msg,"Creating backup");
 	@mkdir -p backups
 	@$(eval TMPDIR := backup_$(NAMESPACE)_$(shell date +'%Y-%m-%d_%H-%M-%S'))
 	@if [ -d "/tmp/$(TMPDIR)" ]; then echo "Backup file already exists. Not overwriting. Bye"; exit 1; fi
 	@mkdir -p /tmp/$(TMPDIR)
-	@scripts/db_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) >/dev/null 2>&1
-	@scripts/cm_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) "$(BACKUP_EXCLUDE)" >/dev/null 2>&1
+	@util/backup/db_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) >/dev/null 2>&1
+	@util/backup/cm_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) "$(BACKUP_EXCLUDE)" >/dev/null 2>&1
 	@tar cvzf backups/$(TMPDIR).tgz -C /tmp $(TMPDIR)
 	@rm -rf /tmp/$(TMPDIR)
-
+endif
 
 ## restore: restore database, configmaps and secrets.
 ##     This requires either default K8s config or KUBECONFIG set
@@ -464,9 +466,9 @@ endif
 	@echo using backup file $(BACKUPFILE)
 	$(eval BASEDIR := $(shell basedir=$(BACKUPFILE); basedir="$${basedir##*/}"; basedir="$${basedir%.*}"; echo $${basedir} ))
 	tar xvzf $(BACKUPFILE) -C /tmp
-	@scripts/cm_check.sh /tmp/$(BASEDIR) $(NAMESPACE)
-	@scripts/db_restore.sh /tmp/$(BASEDIR) $(NAMESPACE)
-	@scripts/cm_restore.sh /tmp/$(BASEDIR) $(NAMESPACE)
+	@util/backup/cm_check.sh /tmp/$(BASEDIR) $(NAMESPACE)
+	@util/backup/db_restore.sh /tmp/$(BASEDIR) $(NAMESPACE)
+	@util/backup/cm_restore.sh /tmp/$(BASEDIR) $(NAMESPACE)
 	@rm -rf /tmp/$(BASEDIR)
 ## help: Show this help message
 ##
