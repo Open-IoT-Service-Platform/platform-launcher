@@ -7,7 +7,7 @@ spec:
   args:
     runner: FlinkRunner
     streaming: "true"
-    metricsTopic: {{ .Values.metricsTopic | quote }}
+    metricsTopic: {{ .Values.metricsAggregator.metricsTopic | quote }}
     bootstrapServers: {{ .Values.kafka.service}}
   package:
     url: {{ .Values.metricsAggregator.url }}
