@@ -12,4 +12,4 @@ if [[ $(helm ls -q --all-namespaces | grep "${NAME}\$") ]]; then
 else
     CMD="deploy"
 fi;
-make ${CMD}-oisp DOCKER_TAG=nightly-$(date +"%Y-%m-%d")
+make ${CMD}-oisp DOCKER_TAG=nightly-$(date +"%Y-%m-%d") NOBACKUP=true

@@ -106,7 +106,9 @@ echo "ALTER USER oisp_user WITH PASSWORD '${NEW_USERPASSWORD}';" | kubectl -n ${
 echo "ALTER USER superuser WITH PASSWORD '${NEW_SUPERPASSWORD}';" | kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; psql -U ${USERNAME}  -d ${DBNAME} -h ${HOSTNAME}"
 
 echo restore database
-kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${NEW_SUPERPASSWORD}; pg_restore -c -U ${USERNAME}  -d ${DBNAME} -h ${HOSTNAME}" < ${TMPDIR}/${DUMPFILE}
+kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "mkdir -p /backup"
+kubectl -n ${NAMESPACE} cp ${TMPDIR}/${DUMPFILE} ${CONTAINER}:/backup/${DUMPFILE}
+kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${NEW_SUPERPASSWORD}; pg_restore -c -U ${USERNAME}  -d ${DBNAME} -h ${HOSTNAME} < /backup/${DUMPFILE}; rm -rf /backup"
 
 echo set user rights
 # retrieve new passwords and users
