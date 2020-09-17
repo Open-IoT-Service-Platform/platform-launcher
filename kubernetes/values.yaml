@@ -142,6 +142,7 @@ ruleEngine:
   ftpPassword: password
 
 metricsAggregator:
+  metricsTopic: "metrics"
   url: "http://services-server/metrics-aggregator-bundled-0.1.jar"
 
 websocketServer:
