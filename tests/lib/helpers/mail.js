@@ -27,22 +27,27 @@ var request = require("sync-request");
 const MAIL_URL="http://localhost:1080/api/emails"
 
 
-function waitForNewEmail(num, to=null) {
+function waitForNewEmail(num, to, done, timeout = 5000) {
     var mails = [];
+    var startTime = new Date().getTime();
     while (mails.length < num) {
-	mails = JSON.parse(request("GET", MAIL_URL).getBody("utf-8"));
-	if (to != null) {
-	    mails = mails.filter( mail => mail.to.value.address==to);
-	}
+        var currTime = new Date().getTime();
+        if (currTime - startTime >= timeout) {
+            return done(new Error("Timeout waiting for emails at email index: " + mails.length), + ", expected " + num + " emails");
+        }
+        mails = JSON.parse(request("GET", MAIL_URL).getBody("utf-8"), { socketTimeout: timeout, timeout: timeout });
+        if (to != null) {
+            mails = mails.filter(mail => mail.to.value.address==to);
+        }
     }
 }
 
-function getAllEmailMessages(to=null) {
-    var mails = JSON.parse(request("GET", MAIL_URL).getBody("utf-8"));
+function getAllEmailMessages(to=null, timeout = 60 * 1000) {
+    var mails = JSON.parse(request("GET", MAIL_URL).getBody("utf-8"), { socketTimeout: timeout, timeout: timeout });
     if (to != null) {
-	mails = mails.filter( mail => mail.to.text==to);
+        mails = mails.filter(mail => mail.to.text==to);
     }
-    return mails.map( mail => mail.text.replace("&lt;", "<").replace("&gt;", ">"));
+    return mails.map(mail => mail.text.replace("&lt;", "<").replace("&gt;", ">"));
 }
 
 module.exports ={

@@ -23,31 +23,30 @@
 var helpers = require("../lib/helpers");
 
 
-var checkObservations = function(tempValues, cid, cbManager, deviceToken, accountId, deviceId, componentParamName, waitBetweenSendingSamples=0){
+var checkObservations = function(tempValues, cid, cbManager, deviceToken, accountId, deviceId, componentParamName, waitBetweenSendingSamples=0) {
     var firstObservationTime;
     return new Promise((resolve, reject) => {
-	var index = 0;
-	var nbActuations = 0;
-	process.stdout.write("    ");
+        var index = 0;
+        var nbActuations = 0;
+        process.stdout.write("    ");
 
-	tempValues
-	    .forEach( (value) => {
-		value.ts = null;
-		if (value.expectedActuation !== null) {
-		    nbActuations++;
-		}
-	    });
-	var step;
-	var sendObservationAndCheckRules = function(index) {
-	    process.stdout.write(".".green);
-
+        tempValues.forEach((value) => {
+            value.ts = null;
+            if (value.expectedActuation !== null) {
+                nbActuations++;
+            }
+        });
+        var step;
+        var actuationCounter = 0;
+        var sendObservationAndCheckRules = function(index) {
+            process.stdout.write(".".green);
             if (tempValues[index].hasOwnProperty('delay')){
                 setTimeout(sendActualObservation, tempValues[index].delay);
-            }
-            else{
+            } else {
                 sendActualObservation();
             }
-            function sendActualObservation(){
+            function sendActualObservation() {
+                var currentActuationCounter = actuationCounter;
                 helpers.devices.submitData(tempValues[index].value, deviceToken, accountId, deviceId, cid, function(err, ts) {
                     tempValues[index].ts = ts;
                     if (index === 0) {
@@ -56,54 +55,57 @@ var checkObservations = function(tempValues, cid, cbManager, deviceToken, accoun
                     if (err) {
                         reject(err);
                     }
-
                     if (tempValues[index].expectedActuation === null) {
                         setTimeout(step, waitBetweenSendingSamples);
+                    } else {
+                        var checkActuation = function(currentCounter) {
+                            if (currentCounter >= actuationCounter) {
+                                reject(new Error("Actuation timeout by component id: " + cid +
+                                    ", data index: " + index + ", expected actuation value: " +
+                                    tempValues[index].expectedActuation.toString()));
+                            }
+                        };
+                        setTimeout(checkActuation, 60 * 1000, currentActuationCounter);
                     }
                 });
             }
         };
-	step = function(){
-	    index++;
-	    if (index === tempValues.length) {
-		process.stdout.write("\n");
-		if (nbActuations === 0){
-		    resolve();
-		}
-		else reject(new Error("Wrong number of actuations"));
-	    } else {
-		sendObservationAndCheckRules(index);
-	    }
-	};
 
-	var actuationCallback = function(message) {
-	    --nbActuations;
-	    var expectedActuationValue = tempValues[index].expectedActuation.toString();
-	    var componentParam = message.content.params.filter(function(param){
-		return param.name === componentParamName;
-	    });
-	    if(componentParam.length === 1)
-	    {
-		var param = componentParam[0];
-		var paramValue = param.value.toString();
+        step = function() {
+            index++;
+            if (index === tempValues.length) {
+                process.stdout.write("\n");
+                if (nbActuations === 0) {
+                    resolve();
+                } else {
+                    reject(new Error("Wrong number of actuations"));
+                }
+            } else {
+                sendObservationAndCheckRules(index);
+            }
+        };
 
-		if(paramValue === expectedActuationValue)
-		{
-		    step();
-		}
-		else
-		{
-		    reject(new Error("Param value wrong. Expected: " + expectedActuationValue + " Received: " + paramValue));
-		}
-	    }
-	    else
-	    {
-		reject(new Error("Did not find component param: " + componentParamName));
-	    }
-	};
-	cbManager.set(actuationCallback);
+        var actuationCallback = function(message) {
+            --nbActuations;
+            var expectedActuationValue = tempValues[index].expectedActuation.toString();
+            var componentParam = message.content.params.filter(function(param){
+                return param.name === componentParamName;
+            });
 
-	sendObservationAndCheckRules(index);
+            if (componentParam.length === 1) {
+                var param = componentParam[0];
+                var paramValue = param.value.toString();
+                if (paramValue === expectedActuationValue) {
+                    step();
+                } else {
+                    reject(new Error("Param value wrong. Expected: " + expectedActuationValue + " Received: " + paramValue));
+                }
+            } else {
+                reject(new Error("Did not find component param: " + componentParamName));
+            }
+        };
+        cbManager.set(actuationCallback);
+        sendObservationAndCheckRules(index);
     });
 };
 
