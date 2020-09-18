@@ -281,7 +281,7 @@ flink:
         memory: 128Mi
 
     taskmanager:
-      replicas: 2
+      replicas: 3
       limits:
         cpu: 100m
         memory: 128Mi
