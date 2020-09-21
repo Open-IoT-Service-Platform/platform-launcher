@@ -1,0 +1,12 @@
+apiVersion: oisp.org/v1
+kind: BeamService
+metadata:
+  name: component-splitter
+spec:
+  entryClass: "org.oisp.services.ComponentSplitter"
+  args:
+    runner: FlinkRunner
+    streaming: "true"
+
+  package:
+    url: "http://services-server/component-splitter-bundled-0.1.jar"
