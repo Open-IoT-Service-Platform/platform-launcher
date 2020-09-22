@@ -23,7 +23,7 @@
 var helpers = require("../lib/helpers");
 
 
-var checkObservations = function(tempValues, cid, cbManager, deviceToken, accountId, deviceId, componentParamName, waitBetweenSendingSamples=0) {
+var checkObservations = function(tempValues, cid, cbManager, deviceToken, accountId, deviceId, componentParamName, waitBetweenSendingSamples = 0, timeout = 60 * 1000) {
     var firstObservationTime;
     return new Promise((resolve, reject) => {
         var index = 0;
@@ -65,7 +65,7 @@ var checkObservations = function(tempValues, cid, cbManager, deviceToken, accoun
                                     tempValues[index].expectedActuation.toString()));
                             }
                         };
-                        setTimeout(checkActuation, 60 * 1000, currentActuationCounter);
+                        setTimeout(checkActuation, timeout, currentActuationCounter);
                     }
                 });
             }

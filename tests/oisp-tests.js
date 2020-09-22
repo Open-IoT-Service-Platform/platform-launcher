@@ -302,17 +302,19 @@ process.stdout.write("__________________________________________________________
 process.stdout.write("                                                                     \n");
 process.stdout.write("                           OISP E2E TESTING                          \n".green.bold);
 process.stdout.write("_____________________________________________________________________\n".bold);
-//Callback for WSS
-var cbManager = function(){
 
+var CbManager = function() {
     var wssCB = null;
     return {
-	"cb": function(message){
-	    wssCB(message)
-	},
-	"set": function(newCB){wssCB = newCB}
-    }
-}();
+    	cb: function(message){
+    	    wssCB(message)
+        },
+    	set: function(newCB){wssCB = newCB}
+    };
+};
+
+//Callback for WSS
+var cbManager = new CbManager();
 
 
 describe("Waiting for OISP services to be ready ...\n".bold, function() {
@@ -1146,30 +1148,41 @@ describe("Sending observations and checking rules ...\n".bold, function() {
 });
 
 describe("Do basic rule and alerts subtests ...".bold, function() {
-  before(function(){
-          if (checkTestCondition(["non_essential", "rules"])) {
-              this.skip();
-          }
-  });
+    before(function(){
+        if (checkTestCondition(["non_essential", "rules"])) {
+            this.skip();
+        }
+    });
     var test;
     var descriptions = require("./subtests/rules-and-alerts-tests").descriptions;
     it(descriptions.createBasicRules,function(done) {
-        test = require("./subtests/rules-and-alerts-tests").test(userToken, accountId, deviceId, deviceToken, cbManager);
+        test = require("./subtests/rules-and-alerts-tests").test(userToken, userToken2, accountId,
+            deviceId, deviceToken, cbManager, new CbManager(), new CbManager(), new CbManager(), new CbManager());
         test.createBasicRules(done);
     }).timeout(10000);
-    it(descriptions.sendObservations,function(done) {
+    it(descriptions.sendObservations, function(done) {
         test.sendObservations(done);
     }).timeout(120000);
-    it(descriptions.deleteRuleAndSendDataAgain,function(done) {
+    it(descriptions.deleteRuleAndSendDataAgain, function(done) {
         test.deleteRuleAndSendDataAgain(done);
     }).timeout(120000);
-    it(descriptions.createRulesAndCheckAlarmReset,function(done) {
+    it(descriptions.createRulesAndCheckAlarmReset, function(done) {
         test.createRulesAndCheckAlarmReset(done);
     }).timeout(120000);
-     it(descriptions.cleanup,function(done) {
-     test.cleanup(done);
- }).timeout(10000);
+    it(descriptions.createMultipleDevicesAndComponents, function(done) {
+        test.createMultipleDevicesAndComponents(done);
+    }).timeout(10000);
+    it('Wait for backend synchronization', function(done) {
+        setTimeout(done, BACKEND_DELAY);
+    }).timeout(BACKEND_TIMEOUT);
+    it(descriptions.sendObservationsWithMultipleDevices, function(done) {
+        test.sendObservationsWithMultipleDevices(done);
+    }).timeout(120000);
+    it(descriptions.cleanup,function(done) {
+        test.cleanup(done);
+    }).timeout(10000);
 });
+
 describe("Do time based rule subtests ...".bold, function() {
     before(function(){
             if (checkTestCondition(["non_essential", "rules"])) {
