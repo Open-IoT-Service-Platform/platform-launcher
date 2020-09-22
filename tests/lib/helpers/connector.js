@@ -19,6 +19,7 @@
 // Helper Functions
 //-------------------------------------------------------------------------------------------------------
 
+var WebSocket = require('ws');
 var chai = require('chai');
 var assert = chai.assert;
 
@@ -47,8 +48,43 @@ function wsConnect(connector, deviceToken, deviceId, cb) {
     connector.controlCommandListen(data, cb, function() {});
 }
 
-module.exports={
-    wsConnect: wsConnect
+var sockets = {};
+
+function openWsConnection(deviceToken, deviceId, cb, address, protocols, options) {
+    // Returns a raw ws socket without authentication if the address is specified.
+    // The socket must be handled manually by the caller.
+    if (address) {
+        return new WebSocket(address, protocols, options);
+    } else {
+        var address = config.connector.ws.host + ':' + config.connector.ws.port;
+        if (config.connector.ws.secure) {
+            address = 'wss://' + address;
+        } else {
+            address = 'ws://' + address;
+        }
+        var socket = new WebSocket(address, 'echo-protocol');
+        socket.on('open', () => {
+            var deviceInfo = {
+                type: 'device',
+                deviceId: deviceId,
+                deviceToken: deviceToken
+            };
+            socket.send(JSON.stringify(deviceInfo));
+        });
+        socket.on('message', (message) => {
+            cb(JSON.parse(message).content);
+        });
+        sockets[deviceId] = socket;
+        return socket;
+    }
 }
 
+function closeWsConnection(deviceId) {
+    return sockets[deviceId].close();
+}
 
+module.exports={
+    wsConnect: wsConnect,
+    openWsConnection: openWsConnection,
+    closeWsConnection: closeWsConnection
+};

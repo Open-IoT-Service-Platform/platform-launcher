@@ -44,9 +44,9 @@ function sendActuationCommand(paramName, value, userToken, accountId, actuatorId
                     value: value.toString()
                 }]
             }],
-        complexCommands: []  
+        complexCommands: []
         },
-    }; 
+    };
 
     api.control.sendActuationCommand(data, function(err, response) {
         assert.notEqual(response, null, 'response is null')
@@ -70,7 +70,7 @@ function pullActuations(parameters, deviceToken, accountId, deviceId, cid, cb) {
         accountId: accountId,
         deviceId: deviceId
     };
-    
+
     api.control.pullActuations(data, function(err, response) {
         if (err) {
             cb(err)
@@ -104,11 +104,11 @@ function  saveComplexCommand(name, paramName, value, userToken, accountId, devic
     };
 
     api.control.saveComplexCommand(data, function(err, response) {
-        assert.notEqual(response, null, 'response is null')
+        assert.notEqual(response, null, 'response is null: ' + err);
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null, response)
+            cb(null, response);
         }
     });
 }
