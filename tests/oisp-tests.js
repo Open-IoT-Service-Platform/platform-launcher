@@ -1360,6 +1360,21 @@ describe("Do data sending subtests ...".bold, function() {
      }).timeout(10000);
  });
 
+describe("Streamer subtests...".bold, function() {
+    var test;
+    const descriptions = require("./subtests/streamer-tests").descriptions;
+    it(descriptions.prepareStreamerTestSetup, function(done) {
+	test = require("./subtests/streamer-tests").test(userToken);
+	test.prepareStreamerTestSetup(done);
+    }).timeout(10000);
+    it(descriptions.testWithComponentSplitter, function(done) {
+	test.testWithComponentSplitter(done);
+    }).timeout(30000);
+    it(descriptions.cleanup, function(done) {
+	test.cleanup(done);
+    });
+});
+
 
 describe("Grafana subtests...".bold, function() {
     before(function(){
