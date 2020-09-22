@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       {{ if .Values.use_local_registry }}
-      - image: registry.local:5000/arkocal/services-server:{{ .Values.tag }}
+      - image: registry.local:5000/oisp/services-server:{{ .Values.tag }}
       {{ else }}
       - image: oisp/services-server:{{ .Values.tag }}
       {{ end }}
