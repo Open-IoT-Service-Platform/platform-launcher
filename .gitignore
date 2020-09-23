@@ -12,3 +12,4 @@ oisp-logs_*.zip
 *.pem
 ci_deployer/kubeconfig
 kubernetes/charts/*.tgz
+backups/
