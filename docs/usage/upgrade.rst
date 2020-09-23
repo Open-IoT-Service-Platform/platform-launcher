@@ -1,28 +1,30 @@
 Upgrading OISP
 ==============
 
-This document is currently work-in progres(WIP). It will include the necessary steps to update OISP fail-safe.
+This document is currently work-in progres (WIP). It will include the necessary steps to update OISP fail-safe.
 
 .. note:: Before any update, make sure you have a backup of the system, see :ref:`Backup`.
 
 Upgrading Keycloak manually
 ---------------------------
 
-For the sake of simplicity, the upgrading should only be done when there is only one Keycloak instance.
+For the sake of simplicity, the upgrading should only be done when there is only one keycloak instance.
 
 Upgrading Keycloak Version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Official Keycloak documentation recommends upgrading the version one at a time, meaning not to skip any major releases between the final and the current versions. This guarantees the correct migration  of the configuration files. After each migration, the database of the Keycloak should be exported and be replaced with the old configuration, so that Keycloak can migrate the new configuration by next release upgrade. To export the current configuration  Keycloak offers argument variables which is stored in the keycloak-sh configmap.
+Official keycloak documentation recommends upgrading the version one at a time, meaning not to skip any major releases between the final and the current versions. This guarantees the correct migration of the configuration files. After each migration, the database of the keycloak should be exported and be replaced with the old configuration, so that keycloak can migrate the new configuration by next release upgrade. To export the current configuration keycloak offers argument variables which is stored in the keycloak-sh configmap.
 
 .. code-block:: bash
 
   KUBE_EDITOR=<YOUR_TEXT_EDITOR> kubectl -n <NAMESPACE> edit configmaps keycloak-sh
 
+The configmap should look like this
 
-The configmap should look like this:
+.. note:: The arguments are listed in the line that starts with command 'exec', at data['keycloak.sh']. The rest of the config should already be similar.
 
- .. code-block:: yaml
+
+.. code-block:: yaml
 
   apiVersion: v1
   data:
@@ -47,22 +49,24 @@ The configmap should look like this:
     selfLink: /api/v1/namespaces/oisp/configmaps/keycloak-sh
     uid: bbbc4f7d-8a9a-447e-85df-b796a893efd3
 
-After Keycloak starts and finishes the export, you can get the copy of the current realm data:
-
+After keycloak finishes the export, you can get the copy of the current realm data:
 
 .. code-block:: bash
 
   kubectl -n <NAMESPACE> cp <KEYCLOAK_POD_NAME>:/opt/jboss/keycloak/realms/<EXPORTED FILE> ./<DESTINATION>
 
+The exported file contains realm configuration and users in the database. If you wish to use the configuration file as a template and seperate users from the realm configuration, you can adjust the argument variables. An example of export with users and realm configuration in seperate files is presented at :ref:`UpdatingKeycloakRealm` section.
+
+.. _UpdatingKeycloakRealm:
 
 Updating Keycloak Realm
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Similar to the version upgrading, it is recommended that the user does not skip any major release for smooth migration.
 
-The steps to update Keycloak realm are:
+The steps to update the keycloak realm are:
 
-#. Export the current users and other configurations in seperate files.
+#. Export the current users and realm configuration in seperate files.
 #. Overwrite the current configuration file with the new one.
 #. Import users to the new configuration.
 
@@ -71,9 +75,12 @@ The steps to update Keycloak realm are:
   KUBE_EDITOR=<YOUR_TEXT_EDITOR> kubectl -n <NAMESPACE> edit configmaps keycloak-sh
 
 
+.. note:: The arguments are listed in the line that starts with command 'exec', at data['keycloak.sh']. The rest of the config should already be similar.
+
+
 This time configmap should look like this:
 
-   .. code-block:: yaml
+.. code-block:: yaml
 
     apiVersion: v1
     data:
@@ -98,11 +105,25 @@ This time configmap should look like this:
       selfLink: /api/v1/namespaces/oisp/configmaps/keycloak-sh
       uid: bbbc4f7d-8a9a-447e-85df-b796a893efd3
 
+
+.. note:: After changing the arguments for exporting, keycloak might not function properly (the server might not start). This behavior is not officially documented in the keycloak documentation but it is consistently observed. Do not forget to revert the arguments back after the process is completed, so the server can start.
+
+
 With the SAME_FILE strategy, we get two confiugarition files, one of them only contains the users in the system. The other one contains the rest of the data.
 
-To overrite the current configuration, change keycloak-sh. again:
+If you want to use the realm configuration file as a template for future, there are some secret variables you have to adjust. These are usually the secrets of the clients and private/public keys that are used for encryption. All of the template variables in the configuration file follow the scheme '{{ INSERT-VARIABLE-NAME }}'. It is highly recommended to check `/platform-launcher/docker/keycloak/oisp-realm.json <https://github.com/Open-IoT-Service-Platform/platform-launcher/blob/develop/docker/keycloak/oisp-realm.json>`_ and `/platform-launcher/kubernetes/values.yaml keycloak section <https://github.com/Open-IoT-Service-Platform/platform-launcher/blob/8b84943c71bcae8ed03760a0f64cc762f285f2e9/kubernetes/values.yaml#L167>`_ to learn how to overwrite template variables during runtime.
 
-  .. code-block:: yaml
+There are two ways to import the exported realm configuration file:
+
+* If there are no changes in the general realm configuration (e.g: event listeners, encryption algorithms) and the change does not bring major overwriting or deletion, you can try to import the configuration file directly through keycloak dashboard. For example, if the change is only a new client, you could select only import clients with the option of skipping existing clients. This method may not always work if the change is complex.
+* Either prepare a template from the exported configuration file or put it directly into the keycloak container. Then, adjust the keycloak.sh arguments to make an import with overwriting enabled. This method requires more effort but it is guaranteed to work.
+
+To overwrite the current configuration (the new configuration file is in the keycloak container at this stage), change again the keycloak-sh configmap:
+
+.. note:: The arguments are listed in the line that starts with command 'exec', at data['keycloak.sh']. The rest of the config should already be similar.
+
+
+.. code-block:: yaml
 
    apiVersion: v1
    data:
@@ -127,8 +148,11 @@ To overrite the current configuration, change keycloak-sh. again:
      selfLink: /api/v1/namespaces/oisp/configmaps/keycloak-sh
      uid: bbbc4f7d-8a9a-447e-85df-b796a893efd3
 
-Now delete the pod, after it comes back import the the users configuration file through keycloak dahboard or using keycloak admin console. Make sure to select skip at import strategy because some of the service users might create conflicts. Keycloak tries to import the users in a very tolerable, indestructive way. If the user roles are not defined in the realm, then it simply removes them, or the secret of the keycloak server has changed, it resets passwords of all users that are imported.
 
-After upgrading do not forget to revert keycloak-sh to its old form. Otherwise you might lose curucial data due to overwriting.
+.. note:: The variable NEW_CONFIGURATION_FILE is usually the realm file that is provided by the oisp/keycloak container, which is /opt/jboss/keycloak/realms/oisp-realm.json.
 
-There are also other options that Keycloak offers for exporting/importing. Check them out at `here<https://www.keycloak.org/documentation.html>`_.
+Now delete the pod, after it comes back you can import the users configuration file through keycloak dahboard or using keycloak admin console. Make sure to select the option 'skip if existing' at import strategy because some of the service users might create conflicts. Keycloak tries to import the users in a very tolerable, indestructive way. For example, if the user roles are not defined in the realm, then it simply removes them, or if the secret of the keycloak server has changed, it resets the passwords of all users that are imported.
+
+After upgrading do not forget to revert keycloak-sh to its old form. Otherwise you might lose crucial data due to overwriting.
+
+There are also other options that keycloak offers for exporting/importing. Check them out at `here <https://www.keycloak.org/documentation.html>`_.
