@@ -17,7 +17,10 @@ printf "\n"
 
 printf "\033[1mInstalling kubectl\n"
 printf -- "------------------\033[0m\n"
-sudo snap install kubectl --classic
+#sudo snap install kubectl --classic
+curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/bin/kubectl
 if [ ! -d ~/.kube ]; then
       mkdir ~/.kube
 fi
