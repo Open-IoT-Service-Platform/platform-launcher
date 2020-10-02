@@ -653,8 +653,9 @@ describe("Creating account and device ...\n".bold, function() {
             if (err) {
                 done(new Error("Cannot activate device " + err));
             } else {
-                assert.isString(response.deviceToken, 'device token is not string')
+                assert.isString(response.deviceToken, 'device token is not string');
                 deviceToken = response.deviceToken;
+                helpers.connector.wsConnect(proxyConnector, deviceToken, deviceId, cbManager.cb);
                 done();
             }
         })
@@ -885,17 +886,41 @@ describe("Creating and getting components ... \n".bold, function() {
     }).timeout(10000);
 
     it('Shall send an actuation', function(done){
-
-        helpers.control.sendActuationCommand(componentParamName, 1, userToken, accountId, actuatorId, deviceId, function(err,response) {
+        var actuationValue = 1;
+        helpers.control.sendActuationCommand(componentParamName, actuationValue, userToken, accountId, actuatorId, deviceId, function(err,response) {
             if (err) {
                 done(new Error("Cannot send an actuation: " + err));
             } else {
-                assert.equal(response.status, 'OK', 'cannot send an actuation')
-                done();
+                assert.equal(response.status, 'OK', 'cannot send an actuation');
+                var actuationReceived = false;
+                cbManager.set(function(message) {
+                    var expectedActuationValue = actuationValue;
+                    var componentParam = message.content.params.filter(function(param) {
+                        return param.name === componentParamName;
+                    });
+                    if (componentParam.length == 1) {
+                        var param = componentParam[0];
+                        var paramValue = param.value.toString();
+                        if (parseInt(paramValue) !== expectedActuationValue) {
+                            done(new Error("Param value wrong. Expected: " + expectedActuationValue + " Received: " + paramValue));
+                        } else {
+                            actuationReceived = true;
+                        }
+                    } else {
+                        done(new Error("Did not find component param: " + componentParamName));
+                    }
+                });
+                var checkActuation = function() {
+                    if (actuationReceived) {
+                        done();
+                    } else {
+                        done(new Error("Actuation timed out after sending actuation command"));
+                    }
+                };
+                setTimeout(checkActuation, 5000);
             }
-        })
-
-    })
+        });
+    }).timeout(10000);
 
     it('Shall get list of actuations', function(done) {
         var parameters = {
@@ -1027,8 +1052,6 @@ describe("Sending observations and checking rules ...\n".bold, function() {
                 done(new Error("Did not find component param: " + componentParamName))
             }
         });
-
-        helpers.connector.wsConnect(proxyConnector, deviceToken, deviceId, cbManager.cb);
 
         var sendObservationAndCheckRules = function(component) {
             if ( component ) {
@@ -1364,17 +1387,16 @@ describe("Streamer subtests...".bold, function() {
     var test;
     const descriptions = require("./subtests/streamer-tests").descriptions;
     it(descriptions.prepareStreamerTestSetup, function(done) {
-	test = require("./subtests/streamer-tests").test(userToken);
-	test.prepareStreamerTestSetup(done);
+        test = require("./subtests/streamer-tests").test(userToken);
+        test.prepareStreamerTestSetup(done);
     }).timeout(10000);
     it(descriptions.testWithComponentSplitter, function(done) {
-	test.testWithComponentSplitter(done);
+        test.testWithComponentSplitter(done);
     }).timeout(30000);
     it(descriptions.cleanup, function(done) {
-	test.cleanup(done);
+        test.cleanup(done);
     });
 });
-
 
 describe("Grafana subtests...".bold, function() {
     before(function(){
