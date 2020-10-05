@@ -56,3 +56,5 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: streamer
+      imagePullSecrets:
+        - name: dockercred
