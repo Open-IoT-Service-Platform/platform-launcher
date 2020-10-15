@@ -17,6 +17,13 @@ WORKDIR /modules/oisp-js-policies
 RUN mvn clean package
 RUN cp /modules/oisp-js-policies/target/oisp-js-policies.jar /deployments/oisp-js-policies.jar
 
+FROM node:12-alpine AS keycloak-themes-builder
+
+ADD themes /themes
+
+WORKDIR /themes/fusion/login/resources
+RUN npm install
+
 FROM jboss/keycloak:${KEYCLOAK_VERSION}
 
 RUN mkdir /opt/jboss/keycloak/realms
@@ -24,3 +31,4 @@ ADD --chown=1000 ./oisp-realm.json /opt/jboss/keycloak/realms/oisp-realm.json
 ADD --chown=1000 ./prepare-startup.sh /opt/jboss/keycloak/realms/prepare-realm.sh
 
 COPY --from=keycloak-modules-builder --chown=1000 /deployments /opt/jboss/keycloak/standalone/deployments
+COPY --from=keycloak-themes-builder --chown=1000 /themes/fusion /opt/jboss/keycloak/themes/fusion
