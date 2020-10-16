@@ -13,6 +13,7 @@ spec:
   - hosts:
     - {{ .Values.hosts.frontend }}
     - {{ .Values.hosts.websocketserver }}
+    - {{ .Values.hosts.streamer }}
     secretName: {{ .Values.certmanager.secret }}
   rules:
   - host: {{ .Values.hosts.frontend }}
@@ -43,6 +44,13 @@ spec:
         backend:
           serviceName: websocket-server
           servicePort: 5000
+  - host: {{ .Values.hosts.streamer }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: streamer
+          servicePort: 9000
 
 ---
 
