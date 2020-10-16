@@ -154,6 +154,7 @@ hosts:
     frontend: latest.oisp.info
     websocketserver: ws.latest.oisp.info
     mqttserver: mqtt.latest.oisp.info
+    streamer: streamer.latest.oisp.info
 
 systemuser:
   username: gateway@intel.com
