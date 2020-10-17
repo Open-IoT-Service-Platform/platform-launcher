@@ -10,9 +10,13 @@ kubectl create -f https://github.com/minio/minio-operator/blob/1.0.7/minio-opera
 # Cassandra operator does not have helm chart yet
 helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com
 kubectl create ns cassandra
-kubectl -n cassandra apply -f https://raw.githubusercontent.com/instaclustr/cassandra-operator/v3.1.1/deploy/crds.yaml
-kubectl -n cassandra apply -f https://raw.githubusercontent.com/instaclustr/cassandra-operator/v3.1.1/deploy/bundle.yaml
-kubectl -n cassandra delete cm cassandra-operator-default-config && \
+kubectl -n cassandra apply -f https://raw.githubusercontent.com/instaclustr/cassandra-operator/v6.7.0/deploy/crds.yaml
+# this is UGLY - but the operator is provided with latest tag even though a specific version is downloaded from github
+# In order to keep reproducability a specific tag for the operator is used
+curl https://raw.githubusercontent.com/instaclustr/cassandra-operator/v6.7.0/deploy/bundle.yaml \
+  | sed 's/image: "gcr.io\/cassandra-operator\/cassandra-operator:latest"/image: gcr.io\/cassandra-operator\/cassandra-operator:v6.7.0/g' \
+  | kubectl -n cassandra apply -f -
+kubectl -n cassandra delete cm cassandra-operator-default-config
 
 printf "\n"
 printf "\033[1mInstalling cert-manager\n"
