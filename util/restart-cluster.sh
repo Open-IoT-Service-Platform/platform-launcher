@@ -3,9 +3,15 @@ printf -- "------------\033[0m\n"
 pushd .
 rm -rf ~/k3s
 mkdir ~/k3s
-curl https://raw.githubusercontent.com/rancher/k3s/release/v1.0/docker-compose.yml > ~/k3s/docker-compose.yml
+# The server needs to run with --disable-agent, otherwise the containers will be distributed abount agent and server node.
+# Then we'd need to copy the images to both nodes which takes more time with no benefit (because it all runs on a single node anyhow)
+curl https://raw.githubusercontent.com/rancher/k3s/v1.17.13%2Bk3s1/docker-compose.yml | \
+  sed 's/command: server/command: server --disable-agent/g' \
+  > ~/k3s/docker-compose.yml
 #Compose down is necessary for subsequent runs to succeed
-cd ~/k3s && sudo docker-compose down -v && sudo docker-compose up -d
+export K3S_VERSION=v1.17.13-rc1-k3s1
+export K3S_TOKEN="abcdefghijgklm123456789"
+cd ~/k3s && sudo -E docker-compose down -v && sudo -E docker-compose up -d
 printf "Waiting for k3s to create kubeconfig file\n"
 while [ ! -f ~/k3s/kubeconfig.yaml ]
 do
