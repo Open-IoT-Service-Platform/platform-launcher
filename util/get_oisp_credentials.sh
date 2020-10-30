@@ -1,3 +1,4 @@
+#!/bin/bash
 export SYSTEMUSER_PASSWORD=$(kubectl -n ${NAMESPACE} get -o yaml configmaps oisp-config | shyaml get-value data.mqtt-gateway  | jq -r .frontendSystemPassword)
 export GRAFANA_PASSWORD=$(kubectl -n ${NAMESPACE} get -o yaml configmaps oisp-config | shyaml get-value data.grafana | jq -r .adminPassword)
 export MQTT_BROKER_PASSWORD=$(kubectl -n ${NAMESPACE} get -o yaml configmaps oisp-config | shyaml get-value data.mqtt-broker | jq -r .mqttBrokerPassword)
@@ -13,11 +14,11 @@ export KEYCLOAK_WEBSOCKET_SERVER_SECRET=$(kubectl -n ${NAMESPACE} get -o yaml co
 export KEYCLOAK_FUSION_BACKEND_SECRET=$(kubectl -n ${NAMESPACE} get -o yaml configmaps fusion-config | shyaml get-value data.keycloak | jq -r .credentials.secret)
 # When adding a new secret, it must be created randomly.
 # Add this snippet if you add a new secret to the platform.
-if [ "$KEYCLOAK_WEBSOCKET_SERVER_SECRET" == "null" ]; then
+if [[ "$KEYCLOAK_WEBSOCKET_SERVER_SECRET" == "null" ]] || [[ -z "$KEYCLOAK_WEBSOCKET_SERVER_SECRET" ]]; then
     echo "Keycloak websocket server secret is not present! Randomly creating new one!"
     export KEYCLOAK_WEBSOCKET_SERVER_SECRET=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c ${1:-64})
 fi
-if [ "$KEYCLOAK_FUSION_BACKEND_SECRET" == "null" ]; then
+if [[ "$KEYCLOAK_FUSION_BACKEND_SECRET" == "null" ]] || [[ -z "$KEYCLOAK_FUSION_BACKEND_SECRET" ]]; then
     echo "Keycloak fusion backend secret is not present! Randomly creating new one!"
     export KEYCLOAK_FUSION_BACKEND_SECRET=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c ${1:-64})
 fi

@@ -1194,7 +1194,7 @@ describe("Do basic rule and alerts subtests ...".bold, function() {
     }).timeout(120000);
     it(descriptions.createMultipleDevicesAndComponents, function(done) {
         test.createMultipleDevicesAndComponents(done);
-    }).timeout(10000);
+    }).timeout(20000);
     it('Wait for backend synchronization', function(done) {
         setTimeout(done, BACKEND_DELAY);
     }).timeout(BACKEND_TIMEOUT);
@@ -1409,7 +1409,7 @@ describe("Grafana subtests...".bold, function() {
     it(descriptions.prepareGrafanaTestSetup, function(done) {
         test = require("./subtests/grafana-tests").test(userToken, userToken2);
         test.prepareGrafanaTestSetup(done);
-    }).timeout(10000);
+    }).timeout(20000);
     it(descriptions.checkGrafanaHeartbeat, function(done) {
         test.checkGrafanaHeartbeat(done);
     }).timeout(50000);
