@@ -286,11 +286,10 @@ jobs:
       - setup-branch
       - build-branch
       - e2e-test
-  build-master:
+  build-tagged:
     executor: my-executor
     steps:
       - checkout
-      - check-tagged
       - setup-build-environment
       - setup-branch
       - build-branch
@@ -331,11 +330,13 @@ workflows:
               only:
                 - develop
                 - ci-feature
-      - build-master:
+      - build-tagged:
           filters:
             branches:
               only:
-                - master
+                - develop
+            tags:
+              only: /^v.*/
   nightly:
     triggers:
       - schedule:
