@@ -9,8 +9,8 @@ data:
   {{ else }}
   nodes: {{ .Values.cassandra.nodes | quote}}
   {{ end }}
-  cassandraImage: gcr.io/cassandra-operator/cassandra-3.11.6:latest
-  sidecarImage: gcr.io/cassandra-operator/instaclustr-icarus:latest
+  cassandraImage: gcr.io/cassandra-operator/cassandra-3.11.6:v6.4.0
+  sidecarImage: gcr.io/cassandra-operator/instaclustr-icarus:1.0.1
   {{ if .Values.less_resources }}
   memory: 0.5Gi
   {{ else }}

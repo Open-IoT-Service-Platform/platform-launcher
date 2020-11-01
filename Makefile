@@ -21,7 +21,7 @@ export TEST = 0
 
 COMPOSE_PROJECT_NAME?="oisp"
 CONTAINERS?=$(shell docker-compose --log-level ERROR config --services)
-EXT_CONTAINERS=cassandra;gcr.io/cassandra-operator/cassandra-3.11.6:latest sidecar;gcr.io/cassandra-operator/cassandra-sidecar:latest kafka;confluentinc/cp-kafka:5.0.1
+EXT_CONTAINERS=cassandra;gcr.io/cassandra-operator/cassandra-3.11.6:v6.4.0 cassandra;gcr.io/cassandra-operator/cassandra-operator:v6.7.0 sidecar;gcr.io/cassandra-operator/instaclustr-icarus:1.0.1 kafka;confluentinc/cp-kafka:5.0.1
 CONTAINERS_AGENT=oisp-testsensor oisp-iot-agent
 DOCKER_COMPOSE_ARGS?=
 K3S_NODE=$(shell docker ps --format '{{.Names}}' | grep k3s_agent)
