@@ -34,4 +34,23 @@ while kubectl -n cert-manager get pods -l=app=webhook -o jsonpath="{.items[*].st
 done;
 printf "\033[1m\nCert-manager Webhook ready! Now applying clusterissuer for self-cert.\033[0m\n"
 kubectl apply -f ../kubernetes/cert-manager/clusterissuer-self-cert.yaml
+
+printf "\n"
+printf "\033[1mInstalling Zalando postgres-operator\n"
+printf -- "------------------------\033[0m\n"
+# First, clone the repository and change to the directory
+git clone https://github.com/zalando/postgres-operator.git
+cd postgres-operator
+
+kubectl create ns postgres-operator
+# apply the manifests in the following order
+kubectl create -n postgres-operator -f manifests/configmap.yaml  # configuration
+sed -i "s/namespace: default/namespace: postgres-operator/g" manifests/operator-service-account-rbac.yaml
+kubectl create -n postgres-operator -f manifests/operator-service-account-rbac.yaml  # identity and permissions
+sed -i "s/namespace: default/namespace: postgres-operator/g" manifests/postgres-operator.yaml
+kubectl create -n postgres-operator -f manifests/postgres-operator.yaml  # deployment
+kubectl create -n postgres-operator -f manifests/api-service.yaml  # operator API to be used by UI
+cd ..
+#rm -rf postgres-operator
+printf "\033[1mPostgres operator installed successfully.\033[0m\n"
 printf -- "\033[1mOperators installed successfully.\033[0m\n"
