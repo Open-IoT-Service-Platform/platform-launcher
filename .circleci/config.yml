@@ -125,9 +125,9 @@ commands:
             fi
             git submodule init
             git submodule update
-            if [ "$CIRCLE_BRANCH" = "develop" ] || [ "${BASE_BRANCH}" = "develop" ]; then
+            if [ "$CIRCLE_BRANCH" = "develop" ] || [ "${BASE_BRANCH}" = "develop" ] || [ ! -z "${CIRCLE_TAG}" ]; then
               #If on develop or a PR towards develop assume that all submodules are updated
-              echo Detected that PR is related to develop. Will update all subrepos.
+              echo Detected that PR is related to develop or a TAG. Will update all subrepos.
               make update
             fi
   build-branch:
