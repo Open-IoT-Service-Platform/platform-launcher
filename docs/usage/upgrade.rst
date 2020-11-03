@@ -5,6 +5,46 @@ This document is currently work-in progres (WIP). It will include the necessary 
 
 .. note:: Before any update, make sure you have a backup of the system, see :ref:`Backup`.
 
+
+The recommended order to upgrade the platform is to
+
+#. Upgrade the operators
+#. Upgrade the Helm chart
+#. Upgrade Keycloak manually (if need be)
+
+Upgrade the Operators
+---------------------
+
+Since Helm does not (yet) provide a lifecycle management of CRDs (except installation), everything related to CRDs is managed by a sepatate script.
+Taking the `platform-launcher` repository the script can be found here:
+:file:`util/deploy_operators.sh`. The script assumes a properly set :code:`KUBECONFIG` environment variable:
+
+.. code-block:: bash
+
+  KUBECONFIG=<YOUR CONFIG> ./util/deploy_operators.sh
+
+Upgrade the OISP Helm Chart
+---------------------------
+
+The `platform-launcher` repository contains the helm chart in the :file:`./kubernetes` directory. Helm should not be called directly but
+from the Makefile targets since it is
+executing additional tasks, e.g. auto-backups and copying over the secrets from the running helm chart.
+It is recommended to create a script which contains the necessary steps and which calls then :code:`make upgrade-oisp`, for instance:
+
+.. code-block:: bash
+
+  export NAMESPACE=<YOUR_NAMESPACE>
+  export KUBECONFIG=<YOUR_KUBECONIFG>
+  export DOCKER_TAG=<YOUR_TAG>
+  export HELM_ARGS="--set less_resources=\"false\" --set production=\"true\" "
+  make upgrade-oisp
+
+:code:`<YOUR_NAMESPACE>, <YOUR_KUBECONFIG>, <YOUR_TAG>` need to be replaced by actual values, e.g. :code:`export NAMESPACE=oisp` and
+:code:`export DOCKER_TAG=v2.0.0-beta.1`. Save the script in file
+:file:`upgrade-oisp.sh`. Before executing the script you need to have access to the `oisp` dockerhub repo and
+make sure that you have exported :code:`DOCKERUSER` and :code:`DOCKERPASS` environment variables with the right credentials. Then execute the script with  :code:`sh ./upgrade-oisp.sh`.
+
+
 Upgrading Keycloak manually
 ---------------------------
 
