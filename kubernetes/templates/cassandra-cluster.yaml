@@ -8,6 +8,8 @@ metadata:
   namespace: cassandra
 spec:
   serviceAccountName: cassandra
+  deletePVCs: false
+  fsGroup: 999
   resources:
     {{ if .Values.less_resources }}
     requests:
