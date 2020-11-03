@@ -127,7 +127,6 @@ deploy-oisp: check-docker-cred-env generate_keys
 	$(eval X509CERT:=$(shell cat x509.pem | base64 | tr -d "\n"))
 	cd kubernetes && \
 	kubectl create namespace $(NAMESPACE) && \
-	cp ../oisp-services/services-operator/kubernetes/crd.yml crds/oisp-services.yml && \
 	POSTGRES_PASSWORD="$(call randomPass)" && \
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
 	helm dependency update --namespace $(NAMESPACE) && \

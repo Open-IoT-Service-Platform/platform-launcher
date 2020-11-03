@@ -18,6 +18,9 @@ curl https://raw.githubusercontent.com/instaclustr/cassandra-operator/v6.7.0/dep
   | kubectl -n cassandra apply -f -
 kubectl -n cassandra delete cm cassandra-operator-default-config
 
+## install CRDs for services operator - operator will be installed later by helm
+kubectl apply -f https://raw.githubusercontent.com/Open-IoT-Service-Platform/oisp-services/b23f55fedb345c2f6e719c29801ffd98cf6e54db/services-operator/kubernetes/crd.yml
+
 printf "\n"
 printf "\033[1mInstalling cert-manager\n"
 printf -- "------------------------\033[0m\n"
