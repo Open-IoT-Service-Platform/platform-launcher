@@ -142,7 +142,7 @@ deploy-oisp: check-docker-cred-env generate_keys
 		--set ruleEngine.ftpPassword="$${FTPPASS}" \
 		--set ruleEngine.gearpump.password="$(call randomPass)" \
 		--set websocketServer.password="$(call randomPass)" \
-		--set stolon.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
+		--set postgres.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
 		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_PASSWORD}" \
 		--set postgres.password="$(call randomPass)" \
 		--set keycloak.keycloak.password="$(call randomPass)" \
@@ -175,7 +175,7 @@ upgrade-oisp: check-docker-cred-env backup
 		--set ruleEngine.password="$${RULEENGINE_PASSWORD}" \
 		--set ruleEngine.gearpump.password="$${RULEENGINE_GEARPUMP_PASSWORD}" \
 		--set websocketServer.password="$${WEBSOCKETSERVER_PASSWORD}" \
-		--set stolon.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
+		--set postgres.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
 		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_SU_PASSWORD}" \
 		--set postgres.password="$${POSTGRES_PASSWORD}" \
 		--set keycloak.keycloak.password="$${KEYCLOAK_PASSWORD}" \

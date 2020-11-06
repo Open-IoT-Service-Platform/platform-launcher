@@ -50,7 +50,7 @@ spec:
         - containerPort: 4001
         args:
         - ./wait-for-it.sh
-        - postgres:5432
+        - acid-oisp:5432
         - -t
         - "300000"
         - -s
@@ -76,6 +76,8 @@ spec:
         - ./scripts/docker-start.sh
         - "--disable-rate-limits"
         env:
+        - name: PGSSLMODE
+          value: require
         - name: NODE_ENV
           value: local
         - name: OISP_FRONTEND_CONFIG

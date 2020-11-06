@@ -94,8 +94,8 @@ data:
     "hostname": "acid-oisp-repl",
     "writeHostname": "acid-oisp",
     "port": "5432",
-    "su_username": "{{ .Values.stolon.pgSuperuserName }}",
-    "su_password": "{{ .Values.stolon.pgSuperuserPassword }}",
+    "su_username": "{{ .Values.postgres.pgSuperuserName }}",
+    "su_password": "{{ .Values.postgres.pgSuperuserPassword }}",
     "username": "{{ .Values.postgres.username }}",
     "password": "{{ .Values.postgres.password }}"
     }

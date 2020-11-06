@@ -160,11 +160,8 @@ systemuser:
   username: gateway@intel.com
   password: 7d501829lhbl1or0bb1784462c97bcad6
 
-stolon:
-  pgSuperuserName: superuser
-  pgSuperuserPassword: supersecret
 
-# db values must be same with the postgres config, see stolon values
+# db values must be same with the postgres config
 keycloak:
   init:
     resources:
@@ -240,7 +237,7 @@ keycloak:
       deployPostgres: false
       dbVendor: postgres
       dbName: oisp
-      dbHost: postgres
+      dbHost: acid-oisp
       dbPort: "5432"
       dbUser: superuser
       dbPassword: supersecret
@@ -267,6 +264,8 @@ jwt:
   x509: "No cert set"
 
 postgres:
+  pgSuperuserName: superuser
+  pgSuperuserPassword: supersecret
   username: oisp_user
   password: supersecret
 
