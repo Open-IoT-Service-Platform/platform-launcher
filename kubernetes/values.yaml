@@ -253,13 +253,13 @@ keycloak:
     secret: "supersecret"
     id: "mqtt-broker"
     waitForKeycloak: "keycloak-http:4080"
-  # Change root address of authServerUrl to the URL of oisp-frontend
-  # if industry fusion application is deployed to another namespace
-  # Example: URL of Frontend - https://latest.oisp.info:443
-  #          Auth Server URL for Fusion Backend: https://latest.oisp.info:443/keycloak
   fusionBackend:
-    authServerUrl: "http://keycloak-http:4080/keycloak"
     secret: "supersecret"
+  # Change root address of authServerUrl to the URL of oisp-frontend
+  # if any application that needs access to keycloak is deployed to another namespace
+  # Example: URL of Frontend - https://latest.oisp.info:443
+  #          Auth Server URL for Applications in Other Namespaces: https://latest.oisp.info:443/keycloak
+  authServerUrl: "http://keycloak-http:4080/keycloak"
 
 jwt:
   public: "No key set"
