@@ -124,7 +124,7 @@ data:
     {
     "listenerPort": "4004",
     "realm": "OISP",
-    "auth-server-url": "http://keycloak-http:4080/keycloak",
+    "auth-server-url": "{{ .Values.keycloak.authServerUrl }}",
     "resource": "oisp-frontend",
     "secret": "{{ .Values.keycloak.frontend.secret }}",
     "mqtt-broker-secret": "{{ .Values.keycloak.mqttBroker.secret }}",

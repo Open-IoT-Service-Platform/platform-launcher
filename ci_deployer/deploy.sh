@@ -12,4 +12,4 @@ if [[ $(helm ls -q --all-namespaces | grep "${NAME}\$") ]]; then
 else
     CMD="deploy"
 fi;
-make ${CMD}-oisp DOCKER_TAG=nightly-$(date +"%Y-%m-%d") NOBACKUP=true
+make ${CMD}-oisp DOCKER_TAG=nightly-$(date +"%Y-%m-%d") NOBACKUP=true HELM_ARGS="--set keycloak.authServerUrl=\"https:latest.oisp.info/keycloak\""
