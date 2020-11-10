@@ -3,7 +3,11 @@ data:
   keycloak: |
     {
     "realm": "OISP",
-    "auth-server-url": "{{ .Values.keycloak.fusionBackend.authServerUrl }}",
+    {{ if .Values.less_resources }}
+    "auth-server-url": "{{ .Values.keycloak.authServerUrl }}",
+    {{ else }}
+    "auth-server-url": {{- printf "https://%s/keycloak" .Values.hosts.frontend | quote }},
+    {{ end }}
     "ssl-required": "external",
     "resource": "fusion-backend",
     "verify-token-audience": true,
