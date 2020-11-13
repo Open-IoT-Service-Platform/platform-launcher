@@ -38,6 +38,18 @@ spec:
       {{ else }}
         image: oisp/streamer:{{ .Values.tag }}
       {{ end }}
+        resources:
+      {{ if .Values.less_resources }}
+          requests:
+            cpu: 50m
+          limits:
+            cpu: 50m
+      {{ else }}
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 500m
+      {{ end }}
         ports:
         - containerPort: 9000
         env:

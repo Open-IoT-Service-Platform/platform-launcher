@@ -166,7 +166,8 @@ keycloak:
   init:
     resources:
       requests:
-        cpu: "50m"
+        cpu: "200m"
+        memory: "400M"
   fullnameOverride: "keycloak"
   nameOverride: "keycloak"
   keycloak:

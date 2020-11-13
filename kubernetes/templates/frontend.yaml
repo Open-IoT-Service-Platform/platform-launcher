@@ -162,11 +162,13 @@ spec:
           {{ if .Values.less_resources }}
           requests:
             cpu: 50m
+            memory: 100M
           {{ else }}
           limits:
             cpu: 500m
           requests:
             cpu: 500m
+            memory: 500M
           {{ end }}
       {{ if .Values.jaeger_tracing }}
       - name: jaeger-agent

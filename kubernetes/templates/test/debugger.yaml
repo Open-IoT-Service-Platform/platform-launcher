@@ -67,7 +67,7 @@ spec:
           requests:
             cpu: "50m"
           limits:
-            cpu: "250m"
+            cpu: "50m"
           {{ else }}
           requests:
             cpu: "100m"
