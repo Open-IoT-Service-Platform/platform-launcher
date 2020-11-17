@@ -19,21 +19,12 @@
 // Helper Functions
 //-------------------------------------------------------------------------------------------------------
 
-var oispSdk = require("@open-iot-service-platform/oisp-sdk-js");
-var config = require("../../test-config-mqtt.json");
-var Metric = oispSdk(config).lib.data.metric.init();
-
-
 function setCredential(connector, deviceToken, deviceId, cb) {
     if (!cb) {
         throw "Callback required";
     }
 
-    var deviceInfo = {
-        device_id: deviceId,
-        device_token: deviceToken
-    };
-    connector.setCredential(deviceId, deviceToken)
+    connector.setCredential(deviceId, deviceToken);
     cb(null, "OK");
 }
 
@@ -54,24 +45,24 @@ function submitData(connector, value, deviceToken, accountId, deviceId, cid, cb)
                 on: value.ts
             }]
         }
-    }
+    };
 
     //the next few lines are needed as workaround to work with current sdk
     //once SDK has been updated this can be removed ...
     data.convertToMQTTPayload = function(){
-	     delete this.convertToMQTTPayload
+	     delete this.convertToMQTTPayload;
 	      return this;
-    }
+    };
     data.did = data.deviceId;
     data.accountId = data.body.accountId;
     // ...until here
 
     connector.data(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
             if (response) {
-                cb(null, response)
+                cb(null, response);
             }
         }
     });
@@ -81,7 +72,6 @@ function submitDataList(connector, valueList, deviceToken, accountId, deviceId, 
     if (!cb) {
         throw "Callback required";
     }
-    var ts = new Date().getTime();
 
     var data = {
         userToken: deviceToken,
@@ -91,38 +81,38 @@ function submitDataList(connector, valueList, deviceToken, accountId, deviceId, 
             on: valueList[0].ts,
             data: []
         }
-    }
+    };
 
     valueList.forEach(function(element){
-      var toPush = {
-        componentId: cidList[element.component],
-        value: (typeof element.value === 'string' || Buffer.isBuffer(element.value)) ? element.value : element.value.toString(),
-        on: element.ts
-      }
-      if (element.loc) {
-        toPush.loc = element.loc;
-      }
-      if (element.attributes !== undefined){
-        toPush.attributes = element.attributes;
-      }
-      data.body.data.push(toPush);
+        var toPush = {
+            componentId: cidList[element.component],
+            value: (typeof element.value === 'string' || Buffer.isBuffer(element.value)) ? element.value : element.value.toString(),
+            on: element.ts
+        };
+        if (element.loc) {
+            toPush.loc = element.loc;
+        }
+        if (element.attributes !== undefined){
+            toPush.attributes = element.attributes;
+        }
+        data.body.data.push(toPush);
     });
     //the next few lines are needed as workaround to work with current sdk
     //once SDK has been updated this can be removed ...
     data.convertToMQTTPayload = function(){
-	     delete this.convertToMQTTPayload
+	     delete this.convertToMQTTPayload;
 	      return this;
-    }
+    };
     data.did = data.deviceId;
     data.accountId = data.body.accountId;
     // ...until here
 
     connector.data(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
             if (response) {
-                cb(null, response)
+                cb(null, response);
             }
         }
     });
@@ -132,4 +122,4 @@ module.exports={
     setCredential: setCredential,
     submitData: submitData,
     submitDataList: submitDataList
-}
+};

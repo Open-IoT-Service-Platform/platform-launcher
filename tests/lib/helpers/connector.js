@@ -20,14 +20,7 @@
 //-------------------------------------------------------------------------------------------------------
 
 var WebSocket = require('ws');
-var chai = require('chai');
-var assert = chai.assert;
-
 var config = require("../../test-config.json");
-var oispSdk = require("@open-iot-service-platform/oisp-sdk-js");
-var api = oispSdk(config).api.rest;
-
-
 
 function wsConnect(connector, deviceToken, deviceId, cb) {
     if (!cb) {
@@ -39,7 +32,7 @@ function wsConnect(connector, deviceToken, deviceId, cb) {
         device_token: deviceToken
     };
 
-    connector.updateDeviceInfo(deviceInfo)
+    connector.updateDeviceInfo(deviceInfo);
 
     var data = {
         deviceId: deviceId
@@ -56,7 +49,7 @@ function openWsConnection(deviceToken, deviceId, cb, address, protocols, options
     if (address) {
         return new WebSocket(address, protocols, options);
     } else {
-        var address = config.connector.ws.host + ':' + config.connector.ws.port;
+        address = config.connector.ws.host + ':' + config.connector.ws.port;
         if (config.connector.ws.secure) {
             address = 'wss://' + address;
         } else {

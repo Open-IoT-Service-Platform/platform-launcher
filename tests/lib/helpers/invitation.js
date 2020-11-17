@@ -37,11 +37,11 @@ function createInvitation(userToken, accountId, receiveremail, cb){
     };
 
     api.invitation.createInvitation(data, function(err, response) {
-        assert.notEqual(response, null, 'response is null')
+        assert.notEqual(response, null, 'response is null');
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null, response)
+            cb(null, response);
         }
     });
 }
@@ -58,11 +58,11 @@ function getAllInvitations(userToken, accountId, cb){
     };
 
     api.invitation.getAllInvitations(data, function(err, response) {
-        assert.notEqual(response, null, 'response is null')
+        assert.notEqual(response, null, 'response is null');
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null, response)
+            cb(null, response);
         }
     });
 }
@@ -80,9 +80,9 @@ function getInvitations(userToken, accountId, email, cb){
 
     api.invitation.getInvitations(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null, response)
+            cb(null, response);
         }
     });
 }
@@ -103,9 +103,9 @@ function acceptInvitation(userToken, accountId, inviteId, cb){
 
     api.invitation.acceptInvitation(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null, response)
+            cb(null, response);
         }
     });
 }
@@ -123,9 +123,9 @@ function deleteInvitations(userToken, accountId, receiveremail, cb){
 
     api.invitation.deleteInvitations(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null, response)
+            cb(null, response);
         }
     });
 }
@@ -136,4 +136,4 @@ module.exports={
     getInvitations: getInvitations,
     acceptInvitation: acceptInvitation,
     deleteInvitations: deleteInvitations
-}
+};

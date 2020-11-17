@@ -17,12 +17,12 @@
 
 var chai = require('chai');
 var assert = chai.assert;
+var colors = require('colors'); // jshint ignore:line
 var fs = require('fs');
 
 var config = require("./test-config.json");
 var kafka = require('kafka-node');
 var helpers = require("./lib/helpers");
-var colors = require('colors');
 var promtests = require('./subtests/promise-wrap');
 
 
@@ -75,29 +75,28 @@ describe("Waiting for OISP services to be ready ...\n".bold, function() {
         var getKafkaOffset = function(topic_, partition_, cb) {
             kafkaOffset.fetchLatestOffsets([topic_], function(error, offsets) {
                 if (!error) {
-                    cb(offsets[topic_][partition_])
+                    cb(offsets[topic_][partition_]);
                 }
                 else {
                     setTimeout(function() {
                         getKafkaOffset(topic_, partition_, cb);
-                    }, 1000)
+                    }, 1000);
                 }
-            })
+            });
         };
 
         getKafkaOffset(topic, partition, function(offset) {
             if (offset >= 0) {
-                var topics = [{ topic: topic, offset: offset + 1, partition: partition }]
+                var topics = [{ topic: topic, offset: offset + 1, partition: partition }];
                 var options = { autoCommit: true, fromOffset: true };
 
-                kafkaConsumer = new kafka.Consumer(kafkaClient, topics, options)
+                kafkaConsumer = new kafka.Consumer(kafkaClient, topics, options);
 
                 var oispServicesToMonitor = ['rules-engine'];
                 process.stdout.write("    ");
                 kafkaConsumer.on('message', function(message) {
                     process.stdout.write(".".green);
                     if (kafkaConsumer) {
-                        var now = new Date().getTime();
                         var i = 0;
                         for (i = 0; i < oispServicesToMonitor.length; i++) {
                             if (oispServicesToMonitor[i] != null && oispServicesToMonitor[i].trim() === message.value.trim()) {
@@ -109,7 +108,7 @@ describe("Waiting for OISP services to be ready ...\n".bold, function() {
                                 break;
                             }
                         }
-                        if (i == oispServicesToMonitor.length) {
+                        if (i === oispServicesToMonitor.length) {
                             kafkaConsumer.close(true);
                             kafkaConsumer = null;
                             process.stdout.write("\n");
@@ -119,12 +118,12 @@ describe("Waiting for OISP services to be ready ...\n".bold, function() {
                 });
             }
             else {
-                done(new Error("Cannot get Kafka offset "))
+                done(new Error("Cannot get Kafka offset "));
             }
         });
 
     }).timeout(1000 * 60 * 1000);
-})
+});
 
 describe("get authorization and manage user ...\n".bold, function() {
 
@@ -132,13 +131,8 @@ describe("get authorization and manage user ...\n".bold, function() {
         var username = process.env.USERNAME;
         var password = process.env.PASSWORD;
 
-        var username2 = process.env.USERNAME2;
-        var password2 = process.env.PASSWORD2;
-
         assert.isNotEmpty(username, "no username provided");
         assert.isNotEmpty(password, "no password provided");
-        assert.isNotEmpty(username, "no username2 provided");
-        assert.isNotEmpty(password, "no password2 provided");
 
         getNewUserTokens(done);
     }).timeout(10000);
@@ -156,21 +150,21 @@ describe("get authorization and manage user ...\n".bold, function() {
                     userId = response.payload.sub;
                 }
 
-                    done();
+                done();
             }
-        })
-    })
+        });
+    });
 
     it('Shall get user information', function(done) {
         helpers.users.getUserInfo(userToken, userId, function(err, response) {
             if (err) {
                 done(new Error("Cannot get user information : " + err));
             } else {
-                assert.isString(response.id)
+                assert.isString(response.id);
                 done();
             }
-        })
-    })
+        });
+    });
 
     it('Shall update user information', function(done) {
         var newuserInfo = {
@@ -179,25 +173,25 @@ describe("get authorization and manage user ...\n".bold, function() {
                 "another_attribute":"another_value",
                 "new":"next_string_value"
             }
-        }
+        };
 
         helpers.users.updateUserInfo(userToken, userId, newuserInfo, function(err, response) {
             if (err) {
                 done(new Error("Cannot update user information : " + err));
             } else {
-                assert.equal(response.status, 'OK', 'status error')
+                assert.equal(response.status, 'OK', 'status error');
                 done();
             }
-        })
-    })
-})
+        });
+    });
+});
 
 describe("Creating account and device ...\n".bold, function() {
 
     var accountInfo;
 
     it('Shall create account', function(done) {
-        assert.notEqual(userToken, null, "Invalid user token")
+        assert.notEqual(userToken, null, "Invalid user token");
         helpers.accounts.createAccount(accountName, userToken, function(err, response) {
             if (err) {
                 done(new Error("Cannot create account: " + err));
@@ -206,7 +200,7 @@ describe("Creating account and device ...\n".bold, function() {
                 accountId = response.id;
                 getNewUserTokens(done);
             }
-        })
+        });
     }).timeout(10000);
 
     it('Shall get account info', function (done) {
@@ -217,8 +211,8 @@ describe("Creating account and device ...\n".bold, function() {
                 accountInfo = response;
                 done();
             }
-        })
-    })
+        });
+    });
 
     it('Shall update an account', function (done) {
 
@@ -226,7 +220,7 @@ describe("Creating account and device ...\n".bold, function() {
             "phone":"123456789",
             "another_attribute":"another_value",
             "new":"next_string_value"
-        }
+        };
 
         helpers.accounts.updateAccount(accountId, userToken, accountInfo, function (err, response) {
             if (err) {
@@ -235,8 +229,8 @@ describe("Creating account and device ...\n".bold, function() {
                 assert.deepEqual(response.attributes, accountInfo.attributes, 'new attributes not being updated');
                 done();
             }
-        })
-    })
+        });
+    });
 
     it('Shall get account activation code', function (done) {
 
@@ -247,8 +241,8 @@ describe("Creating account and device ...\n".bold, function() {
                 activationCode = response.activationCode;
                 done();
             }
-        })
-    })
+        });
+    });
 
     it('Shall create prep config', function(done) {
 
@@ -258,8 +252,8 @@ describe("Creating account and device ...\n".bold, function() {
             "userToken": userToken,
             "accountId": accountId,
             "activationCode": activationCode
-        }
-        fs.writeFileSync("oisp-prep-only.conf", JSON.stringify(prepConf))
+        };
+        fs.writeFileSync("oisp-prep-only.conf", JSON.stringify(prepConf));
         done();
-    })
-})
+    });
+});

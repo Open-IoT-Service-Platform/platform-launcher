@@ -1,0 +1,16 @@
+{
+    "env": {
+        "es2017": true,
+        "node": true,
+        "mocha": true
+    },
+    "rules": {
+        "curly": "error",
+        "eqeqeq": "off",
+        "indent": ["error", 4],
+        "max-len": [2, {"code": 160}],
+        "semi": ["error", "always"]
+    },
+    "globals": {},
+    "parser": "esprima"
+}

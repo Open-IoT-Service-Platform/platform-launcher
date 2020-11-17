@@ -10,7 +10,7 @@ RUN apt-get update
 RUN apt-get install -y kubectl
 
 RUN npm install --global n
-RUN n 8
+RUN n 10.21.0
 
 RUN pip3 install locust oisp shyaml
 RUN npm install -g fake-smtp-server

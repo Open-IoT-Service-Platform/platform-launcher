@@ -37,11 +37,11 @@ function getCatalog(userToken, accountId, cb){
     };
 
     api.cmpcatalog.getCatalog(data, function(err, response) {
-        assert.notEqual(response, null, 'response is null')
+        assert.notEqual(response, null, 'response is null');
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null, response)
+            cb(null, response);
         }
     });
 }
@@ -59,11 +59,11 @@ function createCatalog(userToken, accountId, options, cb){
     };
 
     api.cmpcatalog.createCatalog(data, function(err, response) {
-        assert.notEqual(response, null, 'response is null')
+        assert.notEqual(response, null, 'response is null');
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null, response)
+            cb(null, response);
         }
     });
 }
@@ -80,11 +80,11 @@ function getCatalogDetail(userToken, accountId, cid, cb){
     };
 
     api.cmpcatalog.getCatalogDetail(data, function(err, response) {
-        assert.notEqual(response, null, 'response is null')
+        assert.notEqual(response, null, 'response is null');
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null, response)
+            cb(null, response);
         }
     });
 }
@@ -106,11 +106,11 @@ function updateCatalog(userToken, accountId, cid, newmin, newmax, cb){
     };
 
     api.cmpcatalog.updateCatalog(data, function(err, response) {
-        assert.notEqual(response, null, 'response is null')
+        assert.notEqual(response, null, 'response is null');
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null, response)
+            cb(null, response);
         }
     });
 }
@@ -120,4 +120,4 @@ module.exports={
     createCatalog: createCatalog,
     getCatalogDetail: getCatalogDetail,
     updateCatalog: updateCatalog
-}
+};

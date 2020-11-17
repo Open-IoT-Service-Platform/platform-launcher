@@ -42,7 +42,7 @@ function createDevice(name, deviceId, userToken, accountId, cb) {
             tags: ["tag-a", "tag-b"],
             attributes: {
                 os: "linux"
-              }
+            }
         }
     };
 
@@ -51,7 +51,7 @@ function createDevice(name, deviceId, userToken, accountId, cb) {
             cb(err, null);
         }
         else {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null, response);
         }
     });
@@ -72,7 +72,7 @@ function getDevices(userToken, accountId, cb) {
             cb(err, null);
         }
         else {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null, response);
         }
     });
@@ -94,7 +94,7 @@ function getDeviceDetails(userToken, accountId, deviceId, cb) {
             cb(err, null);
         }
         else {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null, response);
         }
     });
@@ -117,7 +117,7 @@ function updateDeviceDetails(userToken, accountId, deviceId, deviceInfo, cb) {
             cb(err, null);
         }
         else {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null, response);
         }
     });
@@ -131,13 +131,13 @@ function getAccountActivationCode(accountId, userToken, cb) {
 
     api.accounts.getAccountActivationCode(data, function(err, response) {
         if(!err){
-            assert.notEqual(response.activationCode, null ,'activation code is null')
-            cb(null,response.activationCode)
+            assert.notEqual(response.activationCode, null ,'activation code is null');
+            cb(null,response.activationCode);
         }
         else{
             cb(err);
         }
-    })
+    });
 }
 
 function activateDevice(userToken, accountId, deviceId, cb) {
@@ -162,12 +162,12 @@ function activateDevice(userToken, accountId, deviceId, cb) {
                 if (err) {
                     cb(err);
                 } else {
-                    assert.notEqual(response, null, 'response is null')
+                    assert.notEqual(response, null, 'response is null');
                     cb(null, response);
                 }
-            })
+            });
         }
-    })
+    });
 }
 
 function activateDeviceWithoutToken(activationCode, deviceId, cb) {
@@ -184,7 +184,7 @@ function activateDeviceWithoutToken(activationCode, deviceId, cb) {
         if (err) {
             cb(err);
         } else {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null, response);
         }
     });
@@ -216,7 +216,7 @@ function addDeviceComponent(name, type, userToken, accountId, deviceId, cb) {
         if (err) {
             cb(err);
         } else {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null, response.cid);
         }
     });
@@ -241,14 +241,14 @@ function submitData(value, deviceToken, accountId, deviceId, cid, cb) {
                 on: ts
             }]
         }
-    }
-    api.devices.submitData(data, function(err, response) {
+    };
+    api.devices.submitData(data, function(err) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
             cb(null, ts);
         }
-    })
+    });
 
 }
 
@@ -268,9 +268,9 @@ function deleteDeviceComponent (userToken, accountId,deviceId, cid , cb) {
 
     api.devices.deleteDeviceComponent(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-           cb(null, response)
+            cb(null, response);
         }
     });
 
@@ -289,9 +289,9 @@ function deleteDevice (userToken, accountId, deviceId, cb) {
 
     api.devices.deleteDevice(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-           cb(null, response)
+            cb(null, response);
         }
     });
 
@@ -309,9 +309,9 @@ function getDeviceTags (userToken, accountId, cb) {
 
     api.devices.getDeviceTags(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-           cb(null, response)
+            cb(null, response);
         }
     });
 
@@ -329,9 +329,9 @@ function getDeviceAttributes (userToken, accountId, cb) {
 
     api.devices.getDeviceAttributes(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-           cb(null, response)
+            cb(null, response);
         }
     });
 
@@ -357,9 +357,9 @@ function countDevices (userToken, accountId, cb) {
 
     api.devices.countDevices(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-           cb(null, response)
+            cb(null, response);
         }
     });
 
@@ -387,9 +387,9 @@ function searchDevices (userToken, accountId, cb) {
 
     api.devices.searchDevices(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-           cb(null, response)
+            cb(null, response);
         }
     });
 }

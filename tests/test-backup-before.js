@@ -17,17 +17,12 @@
 
 var chai = require('chai');
 var assert = chai.assert;
-var fs = require('fs');
-var { Data, Rule, Component, Components } = require('./lib/common');
+var colors = require('colors'); // jshint ignore:line
 
 var config = require("./test-config.json");
 var kafka = require('kafka-node');
 var helpers = require("./lib/helpers");
-var colors = require('colors');
 var promtests = require('./subtests/promise-wrap');
-
-
-var accountName = "oisp-tests";
 
 var userToken;
 var deviceToken;
@@ -41,7 +36,7 @@ var password = process.env.PASSWORD;
 
 var componentId;
 var componentType = "temperature.v1.0";
-var componentName = "temp;"
+var componentName = "temp;";
 
 var getNewUserTokens = function(done) {
 
@@ -81,29 +76,28 @@ describe("Waiting for OISP services to be ready ...\n".bold, function() {
         var getKafkaOffset = function(topic_, partition_, cb) {
             kafkaOffset.fetchLatestOffsets([topic_], function(error, offsets) {
                 if (!error) {
-                    cb(offsets[topic_][partition_])
+                    cb(offsets[topic_][partition_]);
                 }
                 else {
                     setTimeout(function() {
                         getKafkaOffset(topic_, partition_, cb);
-                    }, 1000)
+                    }, 1000);
                 }
-            })
+            });
         };
 
         getKafkaOffset(topic, partition, function(offset) {
             if (offset >= 0) {
-                var topics = [{ topic: topic, offset: offset + 1, partition: partition }]
+                var topics = [{ topic: topic, offset: offset + 1, partition: partition }];
                 var options = { autoCommit: true, fromOffset: true };
 
-                kafkaConsumer = new kafka.Consumer(kafkaClient, topics, options)
+                kafkaConsumer = new kafka.Consumer(kafkaClient, topics, options);
 
                 var oispServicesToMonitor = ['rules-engine'];
                 process.stdout.write("    ");
                 kafkaConsumer.on('message', function(message) {
                     process.stdout.write(".".green);
                     if (kafkaConsumer) {
-                        var now = new Date().getTime();
                         var i = 0;
                         for (i = 0; i < oispServicesToMonitor.length; i++) {
                             if (oispServicesToMonitor[i] != null && oispServicesToMonitor[i].trim() === message.value.trim()) {
@@ -115,7 +109,7 @@ describe("Waiting for OISP services to be ready ...\n".bold, function() {
                                 break;
                             }
                         }
-                        if (i == oispServicesToMonitor.length) {
+                        if (i === oispServicesToMonitor.length) {
                             kafkaConsumer.close(true);
                             kafkaConsumer = null;
                             process.stdout.write("\n");
@@ -125,12 +119,12 @@ describe("Waiting for OISP services to be ready ...\n".bold, function() {
                 });
             }
             else {
-                done(new Error("Cannot get Kafka offset "))
+                done(new Error("Cannot get Kafka offset "));
             }
         });
 
     }).timeout(1000 * 60 * 1000);
-})
+});
 
 describe("get authorization and manage user ...\n".bold, function() {
 
@@ -151,21 +145,21 @@ describe("get authorization and manage user ...\n".bold, function() {
                     userId = response.payload.sub;
                 }
 
-                    done();
+                done();
             }
-        })
-    })
+        });
+    });
 
     it('Shall get user information', function(done) {
         helpers.users.getUserInfo(userToken, userId, function(err, response) {
             if (err) {
                 done(new Error("Cannot get user information : " + err));
             } else {
-                assert.isString(response.id)
+                assert.isString(response.id);
                 done();
             }
-        })
-    })
+        });
+    });
 
     it('Shall update user information', function(done) {
         var newuserInfo = {
@@ -174,18 +168,18 @@ describe("get authorization and manage user ...\n".bold, function() {
                 "another_attribute":"another_attribute",
                 "new":"value"
             }
-        }
+        };
 
         helpers.users.updateUserInfo(userToken, userId, newuserInfo, function(err, response) {
             if (err) {
                 done(new Error("Cannot update user information : " + err));
             } else {
-                assert.equal(response.status, 'OK', 'status error')
+                assert.equal(response.status, 'OK', 'status error');
                 done();
             }
-        })
-    })
-})
+        });
+    });
+});
 
 describe("Get account and create device ...\n".bold, function() {
 
@@ -199,7 +193,7 @@ describe("Get account and create device ...\n".bold, function() {
                 accountInfo = response;
                 done();
             }
-        })
+        });
     }).timeout(10000);
 
 
@@ -209,7 +203,7 @@ describe("Get account and create device ...\n".bold, function() {
             "phone":"987654321",
             "another_attribute":"this_value",
             "new":"cur_string_value"
-        }
+        };
 
         helpers.accounts.updateAccount(accountId, userToken, accountInfo, function (err, response) {
             if (err) {
@@ -218,26 +212,26 @@ describe("Get account and create device ...\n".bold, function() {
                 assert.deepEqual(response.attributes, accountInfo.attributes, 'new attributes not being updated');
                 done();
             }
-        })
-    })
+        });
+    });
 
 
     it('Shall create device', function(done) {
-        assert.notEqual(accountId, null, "Invalid account id")
+        assert.notEqual(accountId, null, "Invalid account id");
 
         helpers.devices.createDevice(deviceName, deviceId, userToken, accountId, function(err, response) {
             if (err) {
                 done(new Error("Cannot create device: " + err));
             } else {
-                assert.equal(response.deviceId, deviceId, 'incorrect device id')
-                assert.equal(response.name, deviceName, 'incorrect device name')
+                assert.equal(response.deviceId, deviceId, 'incorrect device id');
+                assert.equal(response.name, deviceName, 'incorrect device name');
                 done();
             }
-        })
-    })
+        });
+    });
 
     it('Shall activate device without token', function(done) {
-        assert.notEqual(deviceId, null, "Invalid device id")
+        assert.notEqual(deviceId, null, "Invalid device id");
 
         helpers.devices.activateDeviceWithoutToken(activationCode, deviceId, function(err, response) {
             if (err) {
@@ -257,25 +251,25 @@ describe("Get account and create device ...\n".bold, function() {
             } else {
                 if ( id ) {
                     componentId = id;
-                    done()
+                    done();
                 }
                 else {
                     done(new Error("Wrong id for component  " +  componentName ));
                 }
             }
-        })
+        });
 
 
     }).timeout(10000);
 
     it('Shall send data point', function(done) {
 
-        helpers.devices.submitData("22", deviceToken, accountId, deviceId, componentId, function(err, response) {
+        helpers.devices.submitData("22", deviceToken, accountId, deviceId, componentId, function(err) {
             if (err) {
                 done(new Error("Cannot create device: " + err));
             } else {
                 done();
             }
-        })
+        });
     }).timeout(10000);
-})
+});
