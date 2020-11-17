@@ -17,8 +17,6 @@
 
 "use strict";
 
-var uuid = require('uuid/v4');
-
 var chai = require('chai');
 var assert = chai.assert;
 
@@ -51,7 +49,7 @@ function login(username, password, cb) {
             grant.idToken = response.idToken;
         }
         cb(err, grant);
-    })
+    });
 }
 
 
@@ -69,7 +67,7 @@ function tokenInfo(token, cb) {
             assert.equal(response.header.typ,'JWT', "response header type error");
         }
         cb(err, response);
-    })
+    });
 }
 
 function userInfo(token, cb) {
@@ -86,7 +84,7 @@ function userInfo(token, cb) {
             assert.isString(response.id, "no access token retrieved");
         }
         cb(err, response);
-    })
+    });
 }
 
 function refreshAuthToken(oldToken, refreshToken, cb) {

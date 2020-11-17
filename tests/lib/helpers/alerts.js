@@ -17,8 +17,6 @@
 
 "use strict";
 
-var uuid = require('uuid/v4');
-
 var chai = require('chai');
 var assert = chai.assert;
 
@@ -43,7 +41,7 @@ function getListOfAlerts(userToken, accountId, cb) {
             cb(err, null);
         }
         else {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null, response);
         }
     });
@@ -65,7 +63,7 @@ function getAlertDetails(userToken, accountId, alertId, cb) {
             cb(err, null);
         }
         else {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null, response);
         }
     });
@@ -83,15 +81,15 @@ function closeAlert(userToken, accountId, alertId, cb) {
         alertId: alertId
     };
 
-    api.alerts.closeAlert(data, function(err, response) {
+    api.alerts.closeAlert(data, function(err) {
         if (err) {
             cb(err, null);
         }
         else {
             getListOfAlerts(userToken, accountId, function(err,response){
-                assert.notEqual(response, null, 'response is null')
+                assert.notEqual(response, null, 'response is null');
                 cb(null, response);
-            })  
+            });
         }
     });
 }
@@ -108,7 +106,7 @@ function updateAlertStatus(userToken, accountId, alertId, status, cb) {
         statusName: status
     };
 
-    api.alerts.updateAlertStatus(data, function(err, response) {
+    api.alerts.updateAlertStatus(data, function(err) {
         if (err) {
             cb(err, null);
         }
@@ -120,7 +118,7 @@ function updateAlertStatus(userToken, accountId, alertId, status, cb) {
                 else {
                     cb(null, response);
                 }
-            })  
+            });
         }
     });
 }
@@ -137,7 +135,7 @@ function addCommentsToAlert(userToken, accountId, alertId, comments, cb) {
         body: []
     };
 
-    data.body.push(comments)
+    data.body.push(comments);
 
     api.alerts.addCommentsToAlert(data, function(err, response) {
         if (err) {
@@ -155,17 +153,17 @@ function deleteAlert(userToken, accountId, alertId){
         userToken: userToken,
         accountId: accountId,
         alertId: alertId
-    }
+    };
 
     return new Promise((resolve, reject) => {
-	api.alerts.deleteAlert(data, function(err, response){
+        api.alerts.deleteAlert(data, function(err, response){
 	    if (err){
-		reject(err);
+                reject(err);
 	    }
 	    else {
-		resolve(response);
+                resolve(response);
 	    }
-	});
+        });
     });
 }
 

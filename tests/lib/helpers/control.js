@@ -44,16 +44,16 @@ function sendActuationCommand(paramName, value, userToken, accountId, actuatorId
                     value: value.toString()
                 }]
             }],
-        complexCommands: []
+            complexCommands: []
         },
     };
 
     api.control.sendActuationCommand(data, function(err, response) {
-        assert.notEqual(response, null, 'response is null')
+        assert.notEqual(response, null, 'response is null');
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null, response)
+            cb(null, response);
         }
     });
 }
@@ -73,11 +73,11 @@ function pullActuations(parameters, deviceToken, accountId, deviceId, cid, cb) {
 
     api.control.pullActuations(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null, response)
+            cb(null, response);
         }
-    })
+    });
 
 }
 
@@ -123,14 +123,14 @@ function  deleteComplexCommand(name, userToken, accountId) {
     };
 
     return new Promise((resolve, reject) => {
-	api.control.deleteComplexCommand(data, function(err, response) {
+        api.control.deleteComplexCommand(data, function(err, response) {
             if (err) {
-		reject(err);
+                reject(err);
             } else {
-		resolve(response);
+                resolve(response);
             }
-	});
-    })
+        });
+    });
 }
 
 module.exports={
@@ -138,4 +138,4 @@ module.exports={
     pullActuations: pullActuations,
     sendActuationCommand: sendActuationCommand,
     deleteComplexCommand: deleteComplexCommand
-}
+};

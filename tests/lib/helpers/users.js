@@ -17,8 +17,6 @@
 
 "use strict";
 
-var uuid = require('uuid/v4');
-
 var chai = require('chai');
 var assert = chai.assert;
 
@@ -37,12 +35,12 @@ function addUser(userToken, email, password, cb) {
         body: {
             email: email,
             password: password
-        }            
+        }
     };
 
     api.users.addUser(data, function(err, response) {
         if (!err) {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null,response);
         }
         else {
@@ -63,7 +61,7 @@ function getUserInfo(userToken, userId, cb) {
 
     api.users.getUserInfo(data, function(err, response) {
         if (!err) {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null,response);
         }
         else {
@@ -85,7 +83,7 @@ function updateUserInfo(userToken, userId, userInfo, cb) {
 
     api.users.updateUserInfo(data, function(err, response) {
         if (!err) {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null,response);
         }
         else {
@@ -107,7 +105,7 @@ function requestUserPasswordChange(username, cb) {
 
     api.users.requestUserPasswordChange(data, function(err, response) {
         if (!err) {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null,response);
         }
         else {
@@ -122,7 +120,7 @@ function updateUserPassword(token, password, cb) {
     }
 
     var data = {
-            body:{
+        body:{
             token: token,
             password: password
         }
@@ -130,7 +128,7 @@ function updateUserPassword(token, password, cb) {
 
     api.users.updateUserPassword(data, function(err, response) {
         if (!err) {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null,response);
         }
         else {
@@ -155,7 +153,7 @@ function changeUserPassword(userToken, username, oldPasswd, newPasswd, cb) {
 
     api.users.changeUserPassword(data, function(err, response) {
         if (!err) {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null,response);
         }
         else {
@@ -177,7 +175,7 @@ function requestUserActivation(username, cb) {
 
     api.users.requestUserActivation(data, function(err, response) {
         if (!err) {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null,response);
         }
         else {
@@ -199,7 +197,7 @@ function activateUser(token, cb) {
 
     api.users.activateUser(data, function(err, response) {
         if (!err) {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null,response);
         }
         else {
@@ -221,7 +219,7 @@ function deleteUser(userToken, userId, cb) {
 
     api.users.deleteUser(data, function(err, response) {
         if (!err) {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null,response);
         }
         else {
@@ -240,4 +238,4 @@ module.exports={
     requestUserActivation: requestUserActivation,
     activateUser: activateUser,
     deleteUser: deleteUser
-}
+};

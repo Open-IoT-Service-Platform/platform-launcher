@@ -33,41 +33,41 @@ var test = function(username, password, userToken, accountId, deviceId) {
     var newDeviceToken;
 
     return {
-    "getRefreshTokensForDeviceAndUser": function(done) {
-        promtests.authGetToken(username, password)
-        .then(response => {
-            userRefreshToken = response.refreshToken;
-            oldUserToken = response.token;
-            assert.notEqual(userRefreshToken, null, "Cannot get user refresh token.");
-        }).then(() => promtests.activateDevice(oldUserToken, accountId, deviceId))
-        .then(response => {
-            deviceRefreshToken = response.refreshToken;
-            oldDeviceToken = response.deviceToken;
-            assert.notEqual(deviceRefreshToken, null, "Cannot get device refresh token.");
-        }).then(() => { done(); })
-        .catch((err) => { done(err); });
-    },
-    "refreshTokensForDeviceAndUser": function(done) {
-        promtests.refreshAuthToken(oldUserToken, userRefreshToken)
-        .then(response => {
-            newUserToken = response.jwt;
-            return promtests.authTokenInfo(newUserToken);
-        }).then(response => {
-            if (!response) {
-                done('Could not get refreshed user token info: ' + response)
-            }
-            return promtests.refreshAuthToken(oldDeviceToken, deviceRefreshToken);
-        }).then(response => {
-            newDeviceToken = response.jwt;
-            return promtests.authTokenInfo(newDeviceToken);
-        }).then((response) => {
-            if (response) {
-                done();
-            } else {
-                done('Could not get refreshed device token info: ' + response);
-            }
-        });
-    }
+        "getRefreshTokensForDeviceAndUser": function(done) {
+            promtests.authGetToken(username, password)
+                .then(response => {
+                    userRefreshToken = response.refreshToken;
+                    oldUserToken = response.token;
+                    assert.notEqual(userRefreshToken, null, "Cannot get user refresh token.");
+                }).then(() => promtests.activateDevice(oldUserToken, accountId, deviceId))
+                .then(response => {
+                    deviceRefreshToken = response.refreshToken;
+                    oldDeviceToken = response.deviceToken;
+                    assert.notEqual(deviceRefreshToken, null, "Cannot get device refresh token.");
+                }).then(() => { done(); })
+                .catch((err) => { done(err); });
+        },
+        "refreshTokensForDeviceAndUser": function(done) {
+            promtests.refreshAuthToken(oldUserToken, userRefreshToken)
+                .then(response => {
+                    newUserToken = response.jwt;
+                    return promtests.authTokenInfo(newUserToken);
+                }).then(response => {
+                    if (!response) {
+                        done('Could not get refreshed user token info: ' + response);
+                    }
+                    return promtests.refreshAuthToken(oldDeviceToken, deviceRefreshToken);
+                }).then(response => {
+                    newDeviceToken = response.jwt;
+                    return promtests.authTokenInfo(newDeviceToken);
+                }).then((response) => {
+                    if (response) {
+                        done();
+                    } else {
+                        done('Could not get refreshed device token info: ' + response);
+                    }
+                });
+        }
     };
 };
 

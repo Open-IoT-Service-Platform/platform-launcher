@@ -10,10 +10,10 @@ var test = function(token, accountId1) {
     return {
         "prepareSetup": function(done) {
             promtests.createDevice("device1", deviceId1, userToken, accountId1)
-            .then(() => promtests.getAccountActivationCode(accountId1, userToken))
-            .then((res) => { activationCode1 = res.activationCode; })
-            .then(() => { done(); })
-            .catch((err) => { done(err); });
+                .then(() => promtests.getAccountActivationCode(accountId1, userToken))
+                .then((res) => { activationCode1 = res.activationCode; })
+                .then(() => { done(); })
+                .catch((err) => { done(err); });
         },
         "activateExistingDeviceWithoutToken": function(done) {
             promtests.activateDeviceWithoutToken(activationCode1, deviceId1).then((res) => {
@@ -28,20 +28,20 @@ var test = function(token, accountId1) {
         },
         "activateAnotherDeviceWithSameIdInAnotherAccount": function(done) {
             promtests.createAccount("ExistingDeviceIdTest", userToken)
-            .then((res) => { accountId2 = res.id; })
-            .then(() => promtests.authGetToken(process.env.USERNAME, process.env.PASSWORD))
-            .then((grant) => { userToken = grant.token; })
-            .then(() => promtests.createDevice("device1", deviceId1, userToken, accountId2))
-            .then(() => promtests.getAccountActivationCode(accountId2, userToken))
-            .then((res) => { activationCode2 = res.activationCode; })
-            .then(() => promtests.activateDeviceWithoutToken(activationCode2, deviceId1)).then((res) => {
-                if (res.deviceToken) {
-                    done();
-                } else {
-                    done('Cannot activate device with same id in another account.');
-                }
-            })
-            .catch((err) => { done(err); });
+                .then((res) => { accountId2 = res.id; })
+                .then(() => promtests.authGetToken(process.env.USERNAME, process.env.PASSWORD))
+                .then((grant) => { userToken = grant.token; })
+                .then(() => promtests.createDevice("device1", deviceId1, userToken, accountId2))
+                .then(() => promtests.getAccountActivationCode(accountId2, userToken))
+                .then((res) => { activationCode2 = res.activationCode; })
+                .then(() => promtests.activateDeviceWithoutToken(activationCode2, deviceId1)).then((res) => {
+                    if (res.deviceToken) {
+                        done();
+                    } else {
+                        done('Cannot activate device with same id in another account.');
+                    }
+                })
+                .catch((err) => { done(err); });
         },
         "activateNotExistingDeviceWithoutToken": function(done) {
             promtests.activateDeviceWithoutToken(activationCode1, deviceId2).then((res) => {
@@ -56,10 +56,10 @@ var test = function(token, accountId1) {
         },
         "cleanup": function(done) {
             promtests.deleteDevice(userToken, accountId1, deviceId1)
-            .then(() => { promtests.deleteDevice(userToken, accountId1, deviceId2) })
-            .then(() => promtests.deleteAccount(userToken, accountId2))
-            .then(() => { done(); })
-            .catch((err) => { done(err); });
+                .then(() => { promtests.deleteDevice(userToken, accountId1, deviceId2); })
+                .then(() => promtests.deleteAccount(userToken, accountId2))
+                .then(() => { done(); })
+                .catch((err) => { done(err); });
         }
     };
 };

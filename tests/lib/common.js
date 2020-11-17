@@ -22,24 +22,24 @@ class Rule {
 
     addAction(type, target) {
         for(var action of this.actions) {
-            if ( action.type == type ) {
+            if ( action.type === type ) {
                 action.target.push(target);
                 return;
             }
         }
 
-        var action = new Object();
+        action = {};
         action.type = type;
         action.target = [];
-        action.target.push(target)
-        this.actions.push(action)
+        action.target.push(target);
+        this.actions.push(action);
     }
 }
 
 class Component {
     constructor(name, dataType, format, unit, display, min, max, rules, getDataFn, checkDataFn) {
         this._name = name;
-        this.catalog = new Object();
+        this.catalog = {};
         this.catalog.dimension =  name;
         this.catalog.version = "1.0";
         this.catalog.type = "sensor";
@@ -54,15 +54,15 @@ class Component {
         this.catalog.measureunit = unit;
         this.catalog.display = display;
 
-        this.rules = []
+        this.rules = [];
         if ( rules ) {
             this.rules = rules;
         }
         this.data = [];
         if ( getDataFn ) {
             var values = getDataFn(this.name, this, function(obj, value) {
-                obj.data.push(value)
-            })
+                obj.data.push(value);
+            });
             if ( values ) {
                 this.data = values;
             }
@@ -97,7 +97,7 @@ class Component {
 
     upgradeVersion() {
         var version = this.catalog.version.split(".");
-        if ( version.length == 2 ) {
+        if ( version.length === 2 ) {
             this.catalog.version = version[0] + "." + (parseInt(version[1]) + 1);
             return true;
         }
@@ -108,7 +108,7 @@ class Component {
 
     checkData(data) {
         if ( data && this.checkDataFn ) {
-            return this.checkDataFn(this.data, data)
+            return this.checkDataFn(this.data, data);
         }
 
         return "Cannot check data";
@@ -120,13 +120,13 @@ class Component {
             if ( data.expectedActuation != null ) {
                 nb++;
             }
-        })
+        });
         return nb;
     }
 
     checkAlert(value, condition ) {
         for (var i=0; i<this.data.length; i++) {
-            if ( this.data[i].value == value && this.data[i].expectedEmailReason === condition ) {
+            if ( this.data[i].value === value && this.data[i].expectedEmailReason === condition ) {
                 return true;
             }
         }
@@ -137,7 +137,7 @@ class Component {
 
 class Components {
     constructor() {
-        this.list = []
+        this.list = [];
     }
 
     add(component) {
@@ -157,7 +157,7 @@ class Components {
 
     reset() {
         for (var i=0; i<this.list.size; i++) {
-            this.list[i].reset()
+            this.list[i].reset();
         }
     }
 
@@ -184,5 +184,4 @@ module.exports = {
     Rule,
     Component,
     Components
-}
-
+};

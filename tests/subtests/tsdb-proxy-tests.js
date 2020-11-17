@@ -101,7 +101,7 @@ var test = function(userToken) {
                     }
                 };
                 if (!metrics.every(dataBelongsToUser)) {
-                    done('Got unexpected data from proxy: ' + metric.values);
+                    done('Got unexpected data from proxy: ' + metrics);
                 } else {
                     done();
                 }

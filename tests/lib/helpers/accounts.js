@@ -17,8 +17,6 @@
 
 "use strict";
 
-var uuid = require('uuid/v4');
-
 var chai = require('chai');
 var assert = chai.assert;
 
@@ -63,7 +61,7 @@ function getAccountInfo(accountId, userToken, cb) {
 
     api.accounts.getAccountInfo(data, function(err, response) {
         if (!err) {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null, response);
         }
         else {
@@ -85,7 +83,7 @@ function updateAccount(accountId, userToken, newAccountInfo, cb) {
 
     api.accounts.updateAccount(data, function(err, response) {
         if (!err) {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null, response);
         }
         else {
@@ -106,13 +104,13 @@ function getAccountActivationCode(accountId, userToken, cb) {
 
     api.accounts.getAccountActivationCode(data, function(err, response) {
         if(!err){
-            assert.notEqual(response.activationCode, null ,'activation code is null')
-            cb(null,response)
+            assert.notEqual(response.activationCode, null ,'activation code is null');
+            cb(null,response);
         }
         else{
             cb(err);
         }
-    })
+    });
 }
 
 function refreshAccountActivationCode(accountId, userToken, cb) {
@@ -127,13 +125,13 @@ function refreshAccountActivationCode(accountId, userToken, cb) {
 
     api.accounts.refreshAccountActivationCode(data, function(err, response) {
         if(!err){
-            assert.notEqual(response.activationCode, null ,'activation code is null')
-            cb(null,response)
+            assert.notEqual(response.activationCode, null ,'activation code is null');
+            cb(null,response);
         }
         else{
             cb(err);
         }
-    })
+    });
 }
 
 function getAccountUsers(accountId, userToken, cb) {
@@ -147,9 +145,9 @@ function getAccountUsers(accountId, userToken, cb) {
     };
 
     api.accounts.getAccountUsers(data, function(err, response) {
-        assert.notEqual(response, null ,'user list is null')
-        cb(err, response)
-    })
+        assert.notEqual(response, null ,'user list is null');
+        cb(err, response);
+    });
 }
 
 function changeAccountUser(accountId, userToken, userId,  cb) {
@@ -157,7 +155,7 @@ function changeAccountUser(accountId, userToken, userId,  cb) {
         throw "Callback required";
     }
 
-    
+
     var data = {
         userToken: userToken,
         accountId: accountId,
@@ -168,12 +166,12 @@ function changeAccountUser(accountId, userToken, userId,  cb) {
         }
     };
 
-    data.body.accounts[accountId] = 'admin'
+    data.body.accounts[accountId] = 'admin';
 
     api.accounts.changeAccountUser(data, function(err, response) {
-        assert.notEqual(response, null, 'response is null')
-        cb(err, response)
-    })
+        assert.notEqual(response, null, 'response is null');
+        cb(err, response);
+    });
 }
 
 function deleteAccount(userToken, accountId, cb) {
@@ -188,7 +186,7 @@ function deleteAccount(userToken, accountId, cb) {
 
     api.accounts.deleteAccount(data, function(err, response) {
         if (!err) {
-            assert.notEqual(response, null, 'response is null')
+            assert.notEqual(response, null, 'response is null');
             cb(null,response);
         }
         else {

@@ -21,9 +21,11 @@
 
 
 var helpers = require("../lib/helpers");
+var colors = require('colors'); // jshint ignore:line
 
 
-var checkObservations = function(tempValues, cid, cbManager, deviceToken, accountId, deviceId, componentParamName, waitBetweenSendingSamples = 0, timeout = 60 * 1000) {
+var checkObservations = function(tempValues, cid, cbManager, deviceToken, accountId,
+    deviceId, componentParamName, waitBetweenSendingSamples = 0, timeout = 60 * 1000) {
     var firstObservationTime;
     return new Promise((resolve, reject) => {
         var index = 0;
@@ -39,12 +41,6 @@ var checkObservations = function(tempValues, cid, cbManager, deviceToken, accoun
         var step;
         var actuationCounter = 0;
         var sendObservationAndCheckRules = function(index) {
-            process.stdout.write(".".green);
-            if (tempValues[index].hasOwnProperty('delay')){
-                setTimeout(sendActualObservation, tempValues[index].delay);
-            } else {
-                sendActualObservation();
-            }
             function sendActualObservation() {
                 var currentActuationCounter = actuationCounter;
                 helpers.devices.submitData(tempValues[index].value, deviceToken, accountId, deviceId, cid, function(err, ts) {
@@ -68,6 +64,12 @@ var checkObservations = function(tempValues, cid, cbManager, deviceToken, accoun
                         setTimeout(checkActuation, timeout, currentActuationCounter);
                     }
                 });
+            }
+            process.stdout.write(".".green);
+            if (tempValues[index].hasOwnProperty('delay')){
+                setTimeout(sendActualObservation, tempValues[index].delay);
+            } else {
+                sendActualObservation();
             }
         };
 
@@ -111,116 +113,116 @@ var checkObservations = function(tempValues, cid, cbManager, deviceToken, accoun
 
 var addComponent = (componentName, componentType, deviceToken, accountId, deviceId) => {
     return new Promise(function(resolve, reject){
-	helpers.devices.addDeviceComponent(componentName, componentType, deviceToken, accountId, deviceId, function(err, id) {
+        helpers.devices.addDeviceComponent(componentName, componentType, deviceToken, accountId, deviceId, function(err, id) {
 	    if (err) {
-		reject(err);
+                reject(err);
 	    } else {
-		resolve(id);
+                resolve(id);
 	    }
-	});
+        });
     });
 };
 var addActuator = (actuatorName, actuatorType, deviceToken, accountId, deviceId) => {
     return new Promise(function(resolve, reject){
-	helpers.devices.addDeviceComponent(actuatorName, actuatorType, deviceToken, accountId, deviceId, function(err, id) {
+        helpers.devices.addDeviceComponent(actuatorName, actuatorType, deviceToken, accountId, deviceId, function(err, id) {
 	    if (err) {
-		reject(err);
+                reject(err);
 	    } else {
-		resolve(id);
+                resolve(id);
 	    }
-	});
+        });
     });
 };
 var createCommand = (cmdName, componentParamName, onOff, userToken, accountId, deviceId, actuatorId) => {
     return new Promise(function(resolve, reject){
-	helpers.control.saveComplexCommand(cmdName, componentParamName, onOff, userToken, accountId, deviceId, actuatorId, function(err,response) {
+        helpers.control.saveComplexCommand(cmdName, componentParamName, onOff, userToken, accountId, deviceId, actuatorId, function(err,response) {
 	    if (err) {
-		reject(err);
+                reject(err);
 	    } else {
-		if (response.status !== 'OK') {
+                if (response.status !== 'OK') {
 		    reject(new Error("Wrong status: " + response.status));
-		}
-		else {
+                }
+                else {
 		    resolve();
-		}
+                }
 	    }
-	});
+        });
     });
 };
 
 var createSimpleRule = (rule, userToken, accountId, deviceId, resetType="Automatic") => {
     return new Promise(function(resolve, reject){
-	helpers.rules.createRule(rule, userToken, accountId, deviceId, resetType, function(err, id) {
+        helpers.rules.createRule(rule, userToken, accountId, deviceId, resetType, function(err, id) {
 	    if (err) {
-		reject(err);
+                reject(err);
 	    } else {
-		rule.id = id;
-		resolve(id);
+                rule.id = id;
+                resolve(id);
 	    }
-	});
+        });
     });
 };
 
 var createStatisticRule = (rule, userToken, accountId, deviceId) => {
     return new Promise(function(resolve, reject){
-	helpers.rules.createStatisticRule(rule, userToken, accountId, deviceId, function(err, id) {
+        helpers.rules.createStatisticRule(rule, userToken, accountId, deviceId, function(err, id) {
 	    if (err) {
-		reject(err);
+                reject(err);
 	    } else {
-		rule.id = id;
-		resolve();
+                rule.id = id;
+                resolve();
 	    }
-	});
+        });
     });
 };
 
 var createTbRule = (rule, userToken, accountId, deviceId) => {
     return new Promise(function(resolve, reject){
-	helpers.rules.createTbRule(rule, userToken, accountId, deviceId, function(err, id) {
+        helpers.rules.createTbRule(rule, userToken, accountId, deviceId, function(err, id) {
 	    if (err) {
-		reject(err);
+                reject(err);
 	    } else {
-		rule.id = id;
-		resolve();
+                rule.id = id;
+                resolve();
 	    }
-	});
+        });
     });
 };
 
 var deleteComponent = function(userToken, accountId, deviceId, componentId){
     return new Promise((resolve, reject) => {
-	helpers.devices.deleteDeviceComponent (userToken, accountId, deviceId, componentId, function(err, response){
+        helpers.devices.deleteDeviceComponent (userToken, accountId, deviceId, componentId, function(err, response){
 	    if (err) {
-		reject(err);
+                reject(err);
 	    } else {
-		resolve(response);
+                resolve(response);
 	    }
-	});
+        });
     });
 };
 var deleteRule = function(userToken, accountId, ruleId){
     return new Promise((resolve, reject) => {
-	helpers.rules.deleteRule (userToken, accountId, ruleId, function(err, response){
+        helpers.rules.deleteRule (userToken, accountId, ruleId, function(err, response){
 	    if (err) {
-		reject(err);
+                reject(err);
 	    } else {
-		resolve(response);
+                resolve(response);
 	    }
-	});
+        });
     });
 };
 
 var submitDataList = function(valueList, deviceToken, accountId, deviceId, cidList){
     return new Promise((resolve, reject) => {
-	helpers.data.submitDataList(valueList, deviceToken, accountId, deviceId, cidList, function(err, response){
+        helpers.data.submitDataList(valueList, deviceToken, accountId, deviceId, cidList, function(err, response){
 	    if (err) {
-		reject(err);
+                reject(err);
 	    } else {
-		resolve(response);
+                resolve(response);
 	    }
-	});
+        });
     });
-}
+};
 
 var submitDataListAsUser = function(valueList, userToken, accountId, deviceId, cidList) {
     return new Promise((resolve, reject) => {
@@ -237,67 +239,69 @@ var submitDataListAsUser = function(valueList, userToken, accountId, deviceId, c
 
 var submitData = function(value, deviceToken, accountId, deviceId, cid){
     return new Promise((resolve, reject) => {
-	helpers.data.submitData(value, deviceToken, accountId, deviceId, cid, function(err, response){
+        helpers.data.submitData(value, deviceToken, accountId, deviceId, cid, function(err, response){
 	    if (err) {
-		reject(err);
+                reject(err);
 	    } else {
-		resolve(response);
+                resolve(response);
 	    }
-	});
+        });
     });
-}
+};
 
 
 var searchData = function(from, to, userToken, accountId, deviceId, cid, queryMeasureLocation, targetFilter){
     return new Promise((resolve, reject) => {
 	    helpers.data.searchData(from, to, userToken, accountId, deviceId, cid, queryMeasureLocation, targetFilter, function(err, response){
 	    if (err) {
-		reject(err);
+                reject(err);
 	    } else {
-		resolve(response);
+                resolve(response);
 	    }
-	});
+        });
     });
-}
+};
 
 var searchDataMaxItems = function(from, to, userToken, accountId, deviceId, cids, queryMeasureLocation, targetFilter, maxItems, order, aggregators){
     return new Promise((resolve, reject) => {
-	helpers.data.searchDataMaxItems(from, to, userToken, accountId, deviceId, cids, queryMeasureLocation, targetFilter, maxItems, order, aggregators, function(err, response){
+        helpers.data.searchDataMaxItems(from, to, userToken, accountId, deviceId, cids,
+            queryMeasureLocation, targetFilter, maxItems, order, aggregators, function(err, response){
 	    if (err) {
-		reject(err);
+                    reject(err);
 	    } else {
-		resolve(response);
+                    resolve(response);
 	    }
-	});
+            });
     });
-}
+};
 
 
 var searchDataAdvanced = function(from, to, userToken, accountId, deviceIds, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly){
-  return new Promise((resolve, reject) => {
-    if (!Array.isArray(deviceIds)){
-      deviceIds = [deviceIds];
-    }
-	  helpers.data.searchDataAdvanced(from, to, userToken, accountId, deviceIds, cidList, showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly, function(err, response){
+    return new Promise((resolve, reject) => {
+        if (!Array.isArray(deviceIds)){
+            deviceIds = [deviceIds];
+        }
+	  helpers.data.searchDataAdvanced(from, to, userToken, accountId, deviceIds, cidList,
+            showMeasureLocation, returnedMeasureAttributes, aggregations, countOnly, function(err, response){
 	     if (err) {
-         reject(err);
+                    reject(err);
 	     } else {
 		     resolve(response);
 	     }
 	  });
-  });
-}
+    });
+};
 
 var authGetToken = (username, password) => {
-  return new Promise(function(resolve, reject){
-    helpers.auth.login(username, password, function(err, tokens) {
-      if (err) {
-        reject(err);
+    return new Promise(function(resolve, reject){
+        helpers.auth.login(username, password, function(err, tokens) {
+            if (err) {
+                reject(err);
 	    } else {
-        resolve(tokens);
-      }
+                resolve(tokens);
+            }
+        });
     });
-  });
 };
 
 var refreshAuthToken = (oldToken, refreshToken) => {
@@ -313,111 +317,111 @@ var refreshAuthToken = (oldToken, refreshToken) => {
 };
 
 var invitationCreate = (userToken, accountId, receiverEmail) => {
-  return new Promise(function(resolve, reject){
-    helpers.invitation.createInvitation(userToken, accountId, receiverEmail, function(err, response) {
-      if (err) {
-        reject(err);
+    return new Promise(function(resolve, reject){
+        helpers.invitation.createInvitation(userToken, accountId, receiverEmail, function(err, response) {
+            if (err) {
+                reject(err);
 	    } else {
-        resolve(response);
-      }
+                resolve(response);
+            }
+        });
     });
-  });
 };
 
 var invitationAccept = (userToken, accountId, inviteId) => {
-  return new Promise(function(resolve, reject){
-    helpers.invitation.acceptInvitation(userToken, accountId, inviteId, function(err, response) {
-      if (err) {
-        reject(err);
+    return new Promise(function(resolve, reject){
+        helpers.invitation.acceptInvitation(userToken, accountId, inviteId, function(err, response) {
+            if (err) {
+                reject(err);
 	    } else {
-        resolve(response);
-      }
+                resolve(response);
+            }
+        });
     });
-  });
 };
 
 var authTokenInfo = (userToken) => {
-  return new Promise(function(resolve, reject){
-    helpers.auth.tokenInfo(userToken, function(err, response) {
-      if (err) {
-        reject(err);
+    return new Promise(function(resolve, reject){
+        helpers.auth.tokenInfo(userToken, function(err, response) {
+            if (err) {
+                reject(err);
 	    } else {
-        resolve(response);
-      }
+                resolve(response);
+            }
+        });
     });
-  });
 };
 
 var accountCreate = (name, userToken) => {
-  return new Promise(function(resolve, reject){
-    helpers.accounts.createAccount(name, userToken, function(err, response) {
-      if (err) {
-        reject(err);
+    return new Promise(function(resolve, reject){
+        helpers.accounts.createAccount(name, userToken, function(err, response) {
+            if (err) {
+                reject(err);
 	    } else {
-        resolve(response);
-      }
+                resolve(response);
+            }
+        });
     });
-  });
 };
 
 var accountDelete = (userToken, accountId) => {
-  return new Promise(function(resolve, reject){
-    helpers.accounts.deleteAccount(userToken, accountId, function(err, response) {
-      if (err) {
-        reject(err);
+    return new Promise(function(resolve, reject){
+        helpers.accounts.deleteAccount(userToken, accountId, function(err, response) {
+            if (err) {
+                reject(err);
 	    } else {
-        resolve(response);
-      }
+                resolve(response);
+            }
+        });
     });
-  });
 };
 
 var inviteDelete = (userToken, accountId, email) => {
-  return new Promise(function(resolve, reject){
-    helpers.invitation.deleteInvitations(userToken, accountId,email, function(err, response) {
-      if (err) {
-        reject(err);
+    return new Promise(function(resolve, reject){
+        helpers.invitation.deleteInvitations(userToken, accountId,email, function(err, response) {
+            if (err) {
+                reject(err);
 	    } else {
-        resolve(response);
-      }
+                resolve(response);
+            }
+        });
     });
-  });
 };
 
 var createDevice = (name, deviceId, userToken, accountId) => {
-  return new Promise(function(resolve, reject){
-    helpers.devices.createDevice(name, deviceId, userToken, accountId, function(err, response) {
-      if (err) {
-        reject(err);
+    return new Promise(function(resolve, reject){
+        helpers.devices.createDevice(name, deviceId, userToken, accountId, function(err, response) {
+            if (err) {
+                reject(err);
 	    } else {
-        resolve(response);
-      }
+                resolve(response);
+            }
+        });
     });
-  });
 };
 
 var deleteDevice = (userToken, accountId, deviceId) => {
-  return new Promise(function(resolve, reject){
-    helpers.devices.deleteDevice(userToken, accountId, deviceId, function(err, response) {
-      if (err) {
-        reject(err);
+    return new Promise(function(resolve, reject){
+        helpers.devices.deleteDevice(userToken, accountId, deviceId, function(err, response) {
+            if (err) {
+                reject(err);
 	    } else {
-        resolve(response);
-      }
+                resolve(response);
+            }
+        });
     });
-  });
 };
 
 var activateDevice = (userToken, accountId, deviceId) => {
-  return new Promise(function(resolve, reject){
-    helpers.devices.activateDevice(userToken, accountId, deviceId, function(err, response) {
-      if (err) {
-        reject(err);
+    return new Promise(function(resolve, reject){
+        helpers.devices.activateDevice(userToken, accountId, deviceId, function(err, response) {
+            if (err) {
+                reject(err);
 	    } else {
-        resolve(response);
-      }
+                resolve(response);
+            }
+        });
     });
-  });
 };
 
 var activateDeviceWithoutToken = (activationCode, deviceId) => {
@@ -430,7 +434,7 @@ var activateDeviceWithoutToken = (activationCode, deviceId) => {
             }
         });
     });
-}
+};
 
 var getAccountActivationCode = (accountId, userToken) => {
     return new Promise(function(resolve, reject){
@@ -442,7 +446,7 @@ var getAccountActivationCode = (accountId, userToken) => {
             }
         });
     });
-}
+};
 var mqttSetCredential = (connector, userToken, deviceId) => {
     return new Promise(function(resolve, reject) {
         helpers.mqtt.setCredential(connector, userToken, deviceId, function(err, response) {
@@ -457,7 +461,7 @@ var mqttSetCredential = (connector, userToken, deviceId) => {
 
 var mqttSubmitData = (connector, value, deviceToken, accountId, deviceId, cid) => {
     return new Promise(function(resolve, reject) {
-        helpers.mqtt.submitData(connector, value, deviceToken, accountId, deviceId, cid, function(err, response) {
+        helpers.mqtt.submitData(connector, value, deviceToken, accountId, deviceId, cid, function(err) {
             if (err && err.status === 0) {
                 resolve("OK");
             } else {
@@ -468,7 +472,7 @@ var mqttSubmitData = (connector, value, deviceToken, accountId, deviceId, cid) =
 };
 var mqttSubmitDataList = (connector, valueList, deviceToken, accountId, deviceId, cid) => {
     return new Promise(function(resolve, reject) {
-        helpers.mqtt.submitDataList(connector, valueList, deviceToken, accountId, deviceId, cid, function(err, response) {
+        helpers.mqtt.submitDataList(connector, valueList, deviceToken, accountId, deviceId, cid, function(err) {
             if (err && err.status === 0) {
                 resolve("OK");
             } else {
@@ -478,21 +482,21 @@ var mqttSubmitDataList = (connector, valueList, deviceToken, accountId, deviceId
     });
 };
 
-var getAlerts = (userToken, accountId, deviceId) => {
-  return new Promise(function(resolve, reject){
-      helpers.alerts.getListOfAlerts(userToken, accountId, function(err, response) {
-          if (err) {
-              reject(new Error("Cannot get list of alerts: " + err));
-          } else {
-              resolve(response);
-          }
-      });
-  })
+var getAlerts = (userToken, accountId) => {
+    return new Promise(function(resolve, reject){
+        helpers.alerts.getListOfAlerts(userToken, accountId, function(err, response) {
+            if (err) {
+                reject(new Error("Cannot get list of alerts: " + err));
+            } else {
+                resolve(response);
+            }
+        });
+    });
 };
 
 var updateAlert = (userToken, accountId, alertId, status) => {
     return new Promise(function(resolve, reject) {
-        helpers.alerts.updateAlertStatus(userToken, accountId, alertId, status, function(err, response) {
+        helpers.alerts.updateAlertStatus(userToken, accountId, alertId, status, function(err) {
             if (err) {
                 reject(new Error("Cannot update alert status " + err));
             } else {

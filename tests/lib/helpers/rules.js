@@ -18,13 +18,6 @@
 //-------------------------------------------------------------------------------------------------------
 // Helper Functions
 //-------------------------------------------------------------------------------------------------------
-
-
-var uuid = require('uuid/v4');
-
-var chai = require('chai');
-var assert = chai.assert;
-
 var config = require("../../test-config.json");
 var oispSdk = require("@open-iot-service-platform/oisp-sdk-js");
 var api = oispSdk(config).api.rest;
@@ -41,9 +34,9 @@ function getRules(userToken, accountId, cb) {
 
     api.rules.getRules(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null,response)
+            cb(null,response);
         }
     });
 }
@@ -60,11 +53,11 @@ function getRuleDetails(userToken, accountId, ruleId, cb) {
 
     api.rules.getRuleDetails(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            if ( response.id == ruleId ) {
+            if ( response.id === ruleId ) {
                 {
-                    cb(null, response.synchronizationStatus == "Sync" ? true : false)
+                    cb(null, response.synchronizationStatus === "Sync" ? true : false);
                 }
             }
             else {
@@ -119,23 +112,23 @@ function createRule(ruleConfig, userToken, accountId, deviceId, resetType, cb) {
 
     api.rules.createRule(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
             var ruleId = response.id;
-            var syncInterval = setInterval( function(id) {
+            var syncInterval = setInterval( function() {
                 getRuleDetails(userToken, accountId, ruleId, function(err, status) {
                     if (err) {
                         clearInterval(syncInterval);
-                        cb(err)
+                        cb(err);
                     }
                     else {
-                        if ( status == true ) {
+                        if ( status === true ) {
                             clearInterval(syncInterval);
-                            cb(null, ruleId)
+                            cb(null, ruleId);
                         }
                     }
-                })
-            }, 500)
+                });
+            }, 500);
         }
     });
 
@@ -188,23 +181,23 @@ function createStatisticRule(ruleConfig, userToken, accountId, deviceId, cb) {
 
     api.rules.createRule(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
             var ruleId = response.id;
-            var syncInterval = setInterval( function(id) {
+            var syncInterval = setInterval( function() {
                 getRuleDetails(userToken, accountId, ruleId, function(err, status) {
                     if (err) {
                         clearInterval(syncInterval);
-                        cb(err)
+                        cb(err);
                     }
                     else {
-                        if ( status == true ) {
+                        if ( status === true ) {
                             clearInterval(syncInterval);
-                            cb(null, ruleId)
+                            cb(null, ruleId);
                         }
                     }
-                })
-            }, 500)
+                });
+            }, 500);
 
         }
     });
@@ -257,23 +250,23 @@ function createTbRule(ruleConfig, userToken, accountId, deviceId, cb) {
 
     api.rules.createRule(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
             var ruleId = response.id;
-            var syncInterval = setInterval( function(id) {
+            var syncInterval = setInterval(function() {
                 getRuleDetails(userToken, accountId, ruleId, function(err, status) {
                     if (err) {
                         clearInterval(syncInterval);
-                        cb(err)
+                        cb(err);
                     }
                     else {
-                        if ( status == true ) {
+                        if ( status === true ) {
                             clearInterval(syncInterval);
-                            cb(null, ruleId)
+                            cb(null, ruleId);
                         }
                     }
-                })
-            }, 500)
+                });
+            }, 500);
         }
     });
 }
@@ -329,9 +322,9 @@ function updateRule(ruleConfig, userToken, accountId, ruleId, cb) {
 
     api.rules.updateRule(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-            cb(null,response)
+            cb(null,response);
         }
     });
 }
@@ -356,7 +349,7 @@ function updateRuleStatus(userToken, accountId, ruleId, status, cb) {
             cb(err, null);
         }
         else {
-            cb(null,response)
+            cb(null,response);
         }
     });
 }
@@ -397,9 +390,9 @@ function createDraftRule (draftname, userToken, accountId, cb) {
 
     api.rules.createDraftRule(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-           cb(null, response)
+            cb(null, response);
         }
     });
 
@@ -419,9 +412,9 @@ function cloneRule (userToken, accountId, ruleId , cb) {
 
     api.rules.cloneRule(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-           cb(null, response)
+            cb(null, response);
         }
     });
 
@@ -440,9 +433,9 @@ function deleteDraftRule (userToken, accountId,ruleId , cb) {
 
     api.rules.deleteDraftRule(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-           cb(null, response)
+            cb(null, response);
         }
     });
 
@@ -461,9 +454,9 @@ function deleteRule (userToken, accountId,ruleId , cb) {
 
     api.rules.deleteRule(data, function(err, response) {
         if (err) {
-            cb(err)
+            cb(err);
         } else {
-           cb(null, response)
+            cb(null, response);
         }
     });
 
@@ -481,4 +474,4 @@ module.exports={
     cloneRule: cloneRule,
     deleteDraftRule: deleteDraftRule,
     deleteRule: deleteRule
-}
+};

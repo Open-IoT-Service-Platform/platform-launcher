@@ -43,8 +43,10 @@ printf "\033[1mInstalling test dependencies\n"
 printf -- "----------------------------\033[0m\n"
 sudo pip install shyaml
 sudo apt -qq install nodejs npm make git
-sudo npm install -g n
-sudo n 8
+curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh -o install_nvm.sh
+bash install_nvm.sh
+source ~/.profile
+nvm install 10
 sudo npm install -g nodemailer
 sleep 3
 

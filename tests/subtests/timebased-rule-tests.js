@@ -36,12 +36,12 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     var componentParamName = "LED";
 
     rules[switchOnCmdName] = {
-	name: "oisp-tests-rule-tb-gt20-30s",
-	tbComponent: componentName,
-	tbConditionOperator: ">=",
-	tbConditionValue: "20", //>=20 temp
-	tbTimelimit: 30, //wait 30s
-	actions: [
+        name: "oisp-tests-rule-tb-gt20-30s",
+        tbComponent: componentName,
+        tbConditionOperator: ">=",
+        tbConditionValue: "20", //>=20 temp
+        tbTimelimit: 30, //wait 30s
+        actions: [
             {
                 type: "actuation",
                 target: [ switchOnCmdName ]
@@ -50,12 +50,12 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     };
 
     rules[switchOffCmdName] = {
-	name: "oisp-tests-rule-tb-lower20-30s",
-	tbComponent: componentName,
-	tbConditionOperator: "<",
-	tbConditionValue: "20", //temp < 20
-	tbTimelimit: 10,
-	actions: [
+        name: "oisp-tests-rule-tb-lower20-30s",
+        tbComponent: componentName,
+        tbConditionOperator: "<",
+        tbConditionValue: "20", //temp < 20
+        tbTimelimit: 10,
+        actions: [
             {
                 type: "actuation",
                 target: [ switchOffCmdName ]
@@ -63,80 +63,80 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
         ],
     };
     var temperatureValues = [
-	{
-        value: 20,
-        expectedActuation: null,
-        delay: 0
-	},
-	{
+        {
+            value: 20,
+            expectedActuation: null,
+            delay: 0
+        },
+        {
 	    value: 21,
 	    expectedActuation: null,
 	    delay: 1000
-	},
-	{
+        },
+        {
 	    value: 22,
 	    expectedActuation: null,
 	    delay: 2000
-	},
-	{
+        },
+        {
 	    value: 23,
 	    expectedActuation: null,
 	    delay: 4000
-	},
-	{
+        },
+        {
 	    value: 24,
 	    expectedActuation: null,
 	    delay: 8000
-	},
-	{
+        },
+        {
 	    value: 25,
 	    expectedActuation: null,
 	    delay: 8000
-	},
-	{
+        },
+        {
 	    value: 49,
 	    expectedActuation: 1,
 	    delay: 10000
-	},
-	{
+        },
+        {
 	    value: 50,
 	    expectedActuation: 1,
 	    delay: 1000
-	},
-	{
+        },
+        {
 	    value: 51,
 	    expectedActuation: 1,
 	    delay: 1000
-	},
-	{
+        },
+        {
 	    value: 19,
 	    expectedActuation: null,
 	    delay: 1000
-	},
-	{
+        },
+        {
 	    value: 19.1,
 	    expectedActuation: null,
 	    delay: 2000
-	},
-	{
+        },
+        {
 	    value: 19.2,
 	    expectedActuation: null,
 	    delay: 4000
-	},
-	{
+        },
+        {
 	    value: 19.3,
 	    expectedActuation: 0,
 	    delay: 10000
-	},
-	{
+        },
+        {
 	    value: 20.1,
 	    expectedActuation: null,
 	    delay: 1000
-	},
-	{
-        value: 20.2,
-        expectedActuation: null,
-        delay: 1000
+        },
+        {
+            value: 20.2,
+            expectedActuation: null,
+            delay: 1000
         }
     ];
 
@@ -144,20 +144,20 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     //********************* Main Object *****************//
     //---------------------------------------------------//
     return {
-	"createTbRules": function(done) {
+        "createTbRules": function(done) {
 	    //To be independent of main tests, own sensors, actuators, and commands have to be created
 	    promtests.addComponent(componentName, componentType, userToken, accountId, deviceId)
-		.then((id) => {componentId = id; rules[switchOffCmdName].cid = componentId; rules[switchOnCmdName].cid = componentId;})
-		.then(()   => promtests.addActuator(actuatorName, actuatorType, userToken, accountId, deviceId))
-		.then((id) => {actuatorId = id;})
-		.then(()   => promtests.createCommand(switchOffCmdName, componentParamName, 0, userToken, accountId, deviceId, actuatorId))
-		.then(()   => promtests.createCommand(switchOnCmdName, componentParamName, 1, userToken, accountId, deviceId, actuatorId))
-		.then(()   => promtests.createTbRule(rules[switchOffCmdName], userToken, accountId, deviceId))
-		.then(()   => promtests.createTbRule(rules[switchOnCmdName], userToken, accountId, deviceId))
-		.then(()   => {done();})
-		.catch((err) => {done(err);});
-	},
-	"sendObservations": function(done){
+                .then((id) => {componentId = id; rules[switchOffCmdName].cid = componentId; rules[switchOnCmdName].cid = componentId;})
+                .then(()   => promtests.addActuator(actuatorName, actuatorType, userToken, accountId, deviceId))
+                .then((id) => {actuatorId = id;})
+                .then(()   => promtests.createCommand(switchOffCmdName, componentParamName, 0, userToken, accountId, deviceId, actuatorId))
+                .then(()   => promtests.createCommand(switchOnCmdName, componentParamName, 1, userToken, accountId, deviceId, actuatorId))
+                .then(()   => promtests.createTbRule(rules[switchOffCmdName], userToken, accountId, deviceId))
+                .then(()   => promtests.createTbRule(rules[switchOnCmdName], userToken, accountId, deviceId))
+                .then(()   => {done();})
+                .catch((err) => {done(err);});
+        },
+        "sendObservations": function(done){
 	    assert.notEqual(componentId, null, "CommponentId not defined");
 	    assert.notEqual(rules[switchOnCmdName].id, null, "Rule not defined");
 	    assert.notEqual(rules[switchOffCmdName].id, null, "Rule not defined");
@@ -166,42 +166,42 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
 	    assert.notEqual(deviceId, null, "DeviceId not defined");
 
 	    promtests.checkObservations(temperatureValues, rules[switchOnCmdName].cid, cbManager, deviceToken, accountId, deviceId, componentParamName)
-		.then(() => {done();})
-		.catch((err) => { done(err);});
-	},
-	"cleanup": function(done){
+                .then(() => {done();})
+                .catch((err) => { done(err);});
+        },
+        "cleanup": function(done){
 	    var getListOfAlerts = function(userToken, accountId){
-		return new Promise((resolve, reject) => {
+                return new Promise((resolve, reject) => {
 		    helpers.alerts.getListOfAlerts(userToken, accountId, function(err, response) {
-			if (err) {
+                        if (err) {
 			    reject(err);
-			} else {
+                        } else {
 			    resolve(response);
-			}
+                        }
 		    });
-		});
+                });
 	    };
 	    //delete 2 most recent alerts
 	    //delete new components
 	    promtests.deleteComponent(userToken, accountId, deviceId, componentId)
-		.then(() => promtests.deleteComponent(userToken, accountId, deviceId, actuatorId))
+                .then(() => promtests.deleteComponent(userToken, accountId, deviceId, actuatorId))
 	    //delete new commands
-		.then(() => helpers.control.deleteComplexCommand(switchOnCmdName, userToken, accountId))
-		.then(() => helpers.control.deleteComplexCommand(switchOffCmdName, userToken, accountId))
+                .then(() => helpers.control.deleteComplexCommand(switchOnCmdName, userToken, accountId))
+                .then(() => helpers.control.deleteComplexCommand(switchOffCmdName, userToken, accountId))
 	    //delete Statistic Rules
-		.then(() => promtests.deleteRule(userToken, accountId, rules[switchOnCmdName].id))
-		.then(() => promtests.deleteRule(userToken, accountId, rules[switchOffCmdName].id))
-		.then(() => getListOfAlerts(userToken, accountId))
-		.then((alerts) => {
+                .then(() => promtests.deleteRule(userToken, accountId, rules[switchOnCmdName].id))
+                .then(() => promtests.deleteRule(userToken, accountId, rules[switchOffCmdName].id))
+                .then(() => getListOfAlerts(userToken, accountId))
+                .then((alerts) => {
 		    var prm1 = helpers.alerts.deleteAlert(userToken, accountId, alerts[0].alertId);
 		    var prm2 = helpers.alerts.deleteAlert(userToken, accountId, alerts[1].alertId);
 		    var prm3 = helpers.alerts.deleteAlert(userToken, accountId, alerts[2].alertId);
-            var prm4 = helpers.alerts.deleteAlert(userToken, accountId, alerts[3].alertId);
+                    var prm4 = helpers.alerts.deleteAlert(userToken, accountId, alerts[3].alertId);
 		    return Promise.all([prm1, prm2, prm3, prm4]);
-		})
-		.then(() => {done();})
-		.catch((err) => {done(err);});
-	}
+                })
+                .then(() => {done();})
+                .catch((err) => {done(err);});
+        }
     };
 };
 

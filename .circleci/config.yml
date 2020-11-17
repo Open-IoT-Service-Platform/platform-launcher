@@ -130,6 +130,20 @@ commands:
               echo Detected that PR is related to develop or a TAG. Will update all subrepos.
               make update
             fi
+  e2e-linter:
+    description: "Run linting on E2E tests"
+    steps:
+      - run:
+          name: Lint E2E tests
+          shel: /bin/bash
+          command: |
+            cd tests
+            source ~/.profile
+            nvm use 10
+            sudo chown circleci -R /home/circleci/.npm
+            sudo chmod 755 -R /home/circleci/.npm
+            npm install
+            node_modules/grunt-cli/bin/grunt validate
   build-branch:
     description: "Build branch"
     steps:
@@ -284,6 +298,7 @@ jobs:
       - check-signed
       - setup-build-environment
       - setup-branch
+      - e2e-linter
       - build-branch
       - e2e-test
   build-tagged:
@@ -292,6 +307,7 @@ jobs:
       - checkout
       - setup-build-environment
       - setup-branch
+      - e2e-linter
       - build-branch
       - e2e-test
       - push-images:
@@ -302,6 +318,7 @@ jobs:
       - checkout
       - setup-build-environment
       - setup-branch
+      - e2e-linter
       - build-branch
       - e2e-test
       - push-images:
