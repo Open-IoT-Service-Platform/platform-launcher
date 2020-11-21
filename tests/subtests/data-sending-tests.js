@@ -22,6 +22,7 @@
 var test = function(userToken, accountId, deviceId, deviceToken) {
     var chai = require('chai');
     var assert = chai.assert;
+    var errors = require('../lib/helpers').errors;
     var componentNames = ["temperature-sensor-sdt", "humidity-sensor-sdt", "metadata-sensor-sdt", "binarystate-senosr-sdt", "binarydata-sensor-sdt"];
     var componentTypes = ["temperature.v1.0", "humidity.v1.0", "metaData.v1.0", "binaryState.v1.0", "images.v1.0"];
     var componentBasicTypes = ["number", "number", "string", "boolean", "bytearray"];
@@ -955,7 +956,10 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
                 .then(() => promtests.submitDataListAsUser(dataValues7,
                     admin2Token, accountId, deviceId, componentId, {}).catch(e => e))
                 .then((result) => {
-                    assert.equal(result, 'Access denied');
+                    result = JSON.parse(result);
+                    assert.equal(result.code, errors.Generic.NotAuthorized.code);
+                    assert.equal(result.status, errors.Generic.NotAuthorized.status);
+                    assert.equal(result.message, errors.Generic.NotAuthorized.message);
                     done();
                 })
                 .catch((err) => {
