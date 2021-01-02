@@ -8,7 +8,8 @@ kubectl create -f https://github.com/minio/minio-operator/blob/1.0.7/minio-opera
 #kubectl create ns zookeeper
 #helm install zookeeper-operator --namespace=zookeeper banzaicloud-stable/zookeeper-operator
 # Cassandra operator does not have helm chart yet
-helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com
+helm repo add incubator https://charts.helm.sh/incubator
+helm repo add stable https://charts.helm.sh/stable
 kubectl create ns cassandra
 kubectl -n cassandra apply -f https://raw.githubusercontent.com/instaclustr/cassandra-operator/v6.7.0/deploy/crds.yaml
 # this is UGLY - but the operator is provided with latest tag even though a specific version is downloaded from github
