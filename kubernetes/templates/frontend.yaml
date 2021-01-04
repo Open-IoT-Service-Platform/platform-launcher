@@ -76,8 +76,13 @@ spec:
         - ./scripts/docker-start.sh
         - "--disable-rate-limits"
         env:
+        {{ if .Values.production }}
+        - name: NODE_ENV
+          value: production
+        {{ else }}
         - name: NODE_ENV
           value: local
+        {{ end }}
         - name: OISP_FRONTEND_CONFIG
           valueFrom:
             configMapKeyRef:
