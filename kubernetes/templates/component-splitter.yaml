@@ -9,4 +9,4 @@ spec:
     streaming: "true"
 
   package:
-    url: "http://services-server/component-splitter-bundled-0.1.jar"
+    url: "http://services-server/component-splitter-bundled-0.1.1.jar"

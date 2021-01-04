@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: flink-jobmanager
+  name: {{ .Values.flink.url }}
 spec:
   type: ClusterIP
   ports:
@@ -10,7 +10,7 @@ spec:
   - name: blob
     port: 6124
   - name: ui
-    port: 8081
+    port: {{ .Values.flink.restPort }}
   selector:
     app: flink
     component: jobmanager

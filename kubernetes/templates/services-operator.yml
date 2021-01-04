@@ -18,8 +18,10 @@ spec:
       {{ else }}
       - image: oisp/services-operator:{{ .Values.tag }}
       {{ end }}
-
         name: services-operator
+        volumeMounts:
+        - mountPath: /tmp
+          name: beamservices-operator-data
         env:
         - name: OISP_FRONTEND_CONFIG
           valueFrom:
@@ -93,6 +95,8 @@ spec:
               name: oisp-config
         - name: OISP_NAMESPACE
           value: {{.Release.Namespace}}
+        - name: OISP_FLINK_REST
+          value: http://{{ .Values.flink.restUrl }}:{{ .Values.flink.restPort }}
         resources:
           requests:
             cpu: 50m
@@ -100,6 +104,10 @@ spec:
             cpu: 50m
       imagePullSecrets:
         - name: dockercred
+      volumes:
+      - name: beamservices-operator-data
+        emptyDir:
+          sizeLimit: "2Gi"
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -118,3 +126,14 @@ subjects:
   - kind: ServiceAccount
     name: beamservices-operator
     namespace: {{.Release.Namespace}}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: beamservices-operator-data
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi

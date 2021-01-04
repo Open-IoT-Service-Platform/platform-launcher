@@ -7,6 +7,7 @@ spec:
   args:
     runner: FlinkRunner
     streaming: "true"
+    checkpointingInterval: {{ .Values.metricsAggregator.checkpointingInterval | quote }}
     metricsTopic: {{ .Values.metricsAggregator.metricsTopic | quote }}
     bootstrapServers: {{ .Values.kafka.service}}
   package:

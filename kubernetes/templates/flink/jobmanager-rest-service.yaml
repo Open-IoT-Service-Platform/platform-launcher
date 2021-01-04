@@ -6,8 +6,8 @@ spec:
   type: NodePort
   ports:
   - name: rest
-    port: 8081
-    targetPort: 8081
+    port: {{ .Values.flink.restPort }}
+    targetPort: {{ .Values.flink.restPort }}
   selector:
     app: flink
     component: jobmanager

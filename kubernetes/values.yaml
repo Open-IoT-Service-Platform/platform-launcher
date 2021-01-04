@@ -1,6 +1,6 @@
 # Credentials to pull images from docker registry
 imageCredentials:
-    registry: index.docker.io
+    registry: docker.io
     username: invalid_username
     password: invalid_password
 
@@ -23,8 +23,11 @@ numberReplicas:
     minio: 4
 
 minio:
+  httpurl: http://minio:9000
+  endpoint: minio:9000
   accesskey: minio
   secretkey: minio123
+  mcimage: minio/mc:latest
 
 certmanager:
   secret: selfsigned-cert-tls
@@ -133,17 +136,13 @@ mqtt:
 ruleEngine:
   username: "rule_engine@intel.com"
   password: password
-  gearpump:
-    username: admin
-    password: password
-#  url: "ftp://82.165.114.145/files/rule-engine-bundled-0.1.jar"
-  url: "http://services-server/rule-engine-bundled-0.1.jar"
-  ftpUsername: "ftp"
-  ftpPassword: password
+  url: "http://services-server/rule-engine-bundled-0.1.1.jar"
+  checkpointingInterval : "10000"
 
 metricsAggregator:
   metricsTopic: "metrics"
-  url: "http://services-server/metrics-aggregator-bundled-0.1.jar"
+  url: "http://services-server/metrics-aggregator-bundled-0.1.1.jar"
+  checkpointingInterval : "10000"
 
 websocketServer:
   username: api_actuator
@@ -285,6 +284,9 @@ less_resources: true
 production: false
 
 flink:
+  restPort: 8081
+  restUrl: flink-jobmanager-rest
+  url: flink-jobmanager
   resources:
     jobmanager:
       limits:
@@ -293,7 +295,6 @@ flink:
       requests:
         cpu: 100m
         memory: 128Mi
-
     taskmanager:
       replicas: 3
       limits:
@@ -302,3 +303,6 @@ flink:
       requests:
         cpu: 100m
         memory: 128Mi
+  checkpoints:
+    bucket: flink-checkpoints
+    endpoint: state
