@@ -3,7 +3,11 @@ kind: Deployment
 metadata:
   name: flink-taskmanager
 spec:
+  {{ if .Values.less_resources }}
+  replicas: 1
+  {{ else }}
   replicas: {{ .Values.flink.resources.taskmanager.replicas }}
+  {{ end }}
   selector:
     matchLabels:
       app: flink
