@@ -76,8 +76,9 @@ subsets:
 EOF
 (cd ${TARGETDIR}; npm install)
 echo all prepared go to ${TARGETDIR} and start application
+kubectl -n oisp label svc oisp-kafka-headless app=kafka
 echo recommended settings for kubeflow
-echo kubectl -n oisp label svc oisp-kafka-headless app=kafka
-echo sudo -E KUBECONFIG=~/k3s/kubeconfig.yaml kubefwd -n oisp svc -l "app in (backend, kafka, websocket-server, oisp-stolon-proxy, keycloak, redis, grafana, oisp-stolon-keeper)"
-echo \#sudo ip route add 10.42.0.0/16 via \<ip of k3s-agent\> \# needed to use kafka, since kafka uses ip addresses rather domain names. kubefwd does not route ip addresses.
+echo sudo -E KUBECONFIG=~/k3s/kubeconfig.yaml kubefwd -n oisp svc -l \""app in (backend, kafka, websocket-server, oisp-stolon-proxy, keycloak, redis, grafana, oisp-stolon-keeper)"\"
+echo For routing kafka messages between k3s-agent and host:
+echo sudo ip route add 10.42.0.0/16 via \<ip of k3s-agent\> \# needed to use kafka, since kafka uses ip addresses rather domain names. kubefwd does not route ip addresses.
 popd
