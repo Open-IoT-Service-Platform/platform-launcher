@@ -61,6 +61,13 @@ spec:
             cpu: 250m
           {{ end }}
         env:
+        {{ if .Values.production }}
+        - name: NODE_ENV
+          value: production
+        {{ else }}
+        - name: NODE_ENV
+          value: local
+        {{ end }}
         - name: OISP_MQTT_GATEWAY_CONFIG
           valueFrom:
             configMapKeyRef:
