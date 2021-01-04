@@ -16,9 +16,11 @@ spec:
     spec:
       containers:
       - name: taskmanager
-        image: flink:1.7
+        image: flink:1.10.2
         workingDir: /opt/flink
-        command: ["/bin/bash", "-c", "$FLINK_HOME/bin/taskmanager.sh start; \
+        command: ["/bin/bash", "-c", "mkdir -p /opt/flink/plugins/s3; \
+          cp /opt/flink/opt/flink-s3-fs-hadoop-*.jar /opt/flink/plugins/s3; \
+          $FLINK_HOME/bin/taskmanager.sh start; \
           while :;
           do
             if [[ -f $(find log -name '*taskmanager*.log' -print -quit) ]];

@@ -14,11 +14,20 @@ spec:
         app: flink
         component: jobmanager
     spec:
+      initContainers:
+      - name: create-checkpointing-dir
+        image: {{ printf "%s/%s" .Values.imageCredentials.registry .Values.minio.mcimage }}
+        env:
+        - name: MC_HOST_oisp
+          value: {{ printf "http://%s:%s@%s" .Values.minio.accesskey .Values.minio.secretkey .Values.minio.endpoint }}
+        command: ["/bin/bash", "-c", "mc mb -p oisp/{{ .Values.flink.checkpoints.bucket }}"]
       containers:
       - name: jobmanager
-        image: flink:1.7
+        image: flink:1.10.2
         workingDir: /opt/flink
-        command: ["/bin/bash", "-c", "$FLINK_HOME/bin/jobmanager.sh start;\
+        command: ["/bin/bash", "-c", "mkdir -p /opt/flink/plugins/s3; \
+          cp /opt/flink/opt/flink-s3-fs-hadoop-*.jar /opt/flink/plugins/s3 ; \
+          $FLINK_HOME/bin/jobmanager.sh start;\
           while :;
           do
             if [[ -f $(find log -name '*jobmanager*.log' -print -quit) ]];
@@ -30,7 +39,7 @@ spec:
           name: rpc
         - containerPort: 6124
           name: blob
-        - containerPort: 8081
+        - containerPort: {{ .Values.flink.restPort }}
           name: ui
         livenessProbe:
           tcpSocket:

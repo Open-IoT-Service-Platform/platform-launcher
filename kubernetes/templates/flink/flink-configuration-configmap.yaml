@@ -16,6 +16,14 @@ data:
     restart-strategy: fixed-delay
     restart-strategy.fixed-delay.attempts: 30
     restart-strategy.fixed-delay.delay: 10 s
+    web.timeout: 60000
+    state.backend: filesystem
+    state.checkpoints.dir: s3://{{ .Values.flink.checkpoints.bucket }}/{{ .Values.flink.checkpoints.endpoint }}
+    s3.endpoint: {{ .Values.minio.httpurl }}
+    s3.path.style.access: true
+    s3.access-key: {{ .Values.minio.accesskey }}
+    s3.secret-key: {{ .Values.minio.secretkey }}
+
   log4j.properties: |+
     log4j.rootLogger=INFO, file
     log4j.logger.akka=INFO
