@@ -9,44 +9,20 @@ if [ ! ${#BASH_SOURCE[@]} -eq 1 ]; then
     exit 1;
 fi
 
-# Find rule-engine instance. Assumes that only one instance exists
-RULE_ENGINE=$(kubectl -n ${NAMESPACE} get pods| grep rule-engine| cut -d " " -f 1)
-echo rule-engine: ${RULE_ENGINE}
-# Source environment
-source <(../../get_oisp_container_config.sh ${NAMESPACE} ${RULE_ENGINE})
+# Find App config line of rule-engine service
+JOBMANAGER=$(kubectl -n oisp get pods | grep flink-jobmanager| cut -d " " -f 1)
+ARGS=$(kubectl -n oisp logs $JOBMANAGER | grep JSONConfig | tail -1)
+if [ ! -z "$ARGS" ]; then
+  echo Args of rule-engine:
+  echo $ARGS
 
-##########################
-# Replace rule-engine Service
-# create headless service
-##########################
-IPADDRESS=$(hostname -I | cut -d " " -f 1)
-echo selected IP address ${IPADDRESS}
-kubectl -n ${NAMESPACE} delete svc rule-engine
-cat << EOF | kubectl -n ${NAMESPACE} create -f -
-apiVersion: v1
-kind: Service
-metadata:
-  name: rule-engine
-  namespace: ${NAMESPACE}
-spec:
-  clusterIP: None
-  ports:
-  - protocol: TCP
-    port: 8090
-    targetPort: 8090
-    name: "8090"
----
-apiVersion: v1
-kind: Endpoints
-metadata:
-  name: rule-engine
-  namespace: ${NAMESPACE}
-subsets:
-- addresses:
-  - ip: ${IPADDRESS}
-  ports:
-  - port: 8090
-    name: "8090"
-EOF
-echo all prepared
+  #shutdown existing rule-engine service
+  kubectl -n oisp delete bs/rule-engine
+  echo all prepared
+  echo sudo -E KUBECONFIG=~/k3s/kubeconfig.yaml kubefwd -n oisp svc
+  echo \#sudo ip route add 10.42.0.0/16 via \<ip of k3s-agent\> \# needed to use kafka, since kafka uses ip addresses rather domain names. kubefwd does not route ip addresses.
+else
+  echo rule-engine not yet ready - try again after 1 minutes
+fi
+
 popd
