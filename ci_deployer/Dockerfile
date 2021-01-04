@@ -17,6 +17,6 @@ RUN wget https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz && tar xvzf helm-*.t
 RUN addgroup -S deployer && adduser -S deployer -G deployer -h /home/deployer/
 USER deployer
 WORKDIR /home/deployer
-RUN helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com
+RUN helm repo add incubator https://charts.helm.sh/incubator
 ADD kubeconfig /home/deployer/.kube/config
 ADD deploy.sh /home/deployer/deploy.sh
