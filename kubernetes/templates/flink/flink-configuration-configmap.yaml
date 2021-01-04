@@ -7,7 +7,11 @@ metadata:
 data:
   flink-conf.yaml: |+
     jobmanager.rpc.address: flink-jobmanager
+    {{ if .Values.less_resources }}
+    taskmanager.numberOfTaskSlots: 3
+    {{ else }}
     taskmanager.numberOfTaskSlots: 1
+    {{ end }}
     blob.server.port: 6124
     jobmanager.rpc.port: 6123
     taskmanager.rpc.port: 6122
