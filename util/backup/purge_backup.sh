@@ -17,6 +17,7 @@
 
 cmdname=$(basename $0)
 DEBUG=true # uncomment to switch on debug
+DRYRUN=true # uncomment to avoid filesystem commands
 
 
 # checks whether monthly backup is already stored for the month
@@ -27,26 +28,28 @@ check_monthly()
     local filename=$2
     local tmpdir=$1
     local monthly=${filename/daily/monthly}
-    local pattern='^(backup_.*_monthly_).*'
+    local pattern='(^backup_.*_monthly_[0-9]{4}-[0-9]{2}).*'
     [[ $monthly =~ $pattern ]]
-    local monthly_prefix=${BASH_REMATCH[1]}$(date +"%Y-%m")
+    local monthly_prefix=${BASH_REMATCH[1]}
     if [ "${DEBUG}" = "true" ]; then
-        echo $filename - $tmpdir - $monthly -  $monthly_prefix >&2
+        echo check_monthly debug: $filename - $tmpdir - $monthly -  $monthly_prefix >&2
     fi 
-    if [ ! -f "$tmpdir/$monthly_prefix*" ]; then
+    if [ ! -z "$monthly_prefix" ] && [ -z "$(ls $tmpdir/$monthly_prefix* 2>/dev/null)" ]; then
         echo $monthly
     fi
 }
 
 
 # return the filelist
-# parameters: <tmpdir>
+# parameters: <type> <tmpdir>
+# type: "daily" or "monthly"
 # tmpdir: name of dir or bucket
 # return "true" or "false"
-getdailyfilelist()
+getfilelist()
 {
-    local tmpdir=$1
-    echo $(cd ${tmpdir}; ls backup_*_daily_*.tgz)
+    local tmpdir=$2
+    local type=$1
+    echo $(cd ${tmpdir}; ls backup_*_${type}_*.tgz)
 }
 
 usage()
@@ -69,20 +72,22 @@ then
     usage
 fi
 
-#SECONDSPERWEEK=$(( 60*60*24*7 ))
-SECONDSPERWEEK=$(( 7 ))
+SECONDSPERWEEK=$(( 60*60*24*7 ))
+SECONDSPERYEAR=$(( 60*60*24*365 ))
 TMPDIR=$1
 
 NOW=$(date +"%s")
-PATTERN='^backup.*_(.*)\.tgz$'
-FILELIST=$(getdailyfilelist ${TMPDIR})
-
+PATTERN='^backup.*_([0-9].*)\.tgz$'
+DAILYFILELIST=$(getfilelist "daily" ${TMPDIR})
+MONTHLYFILELIST=$(getfilelist "monthly" ${TMPDIR})
 if [ "${DEBUG}" = "true" ]; then
-    echo ${FILELIST}
+    echo DAILYFILELIST: ${DAILYFILELIST}
+    echo MONTHLYFILELIST: ${MONTHLYFILELIST}
 fi
 
+#First look for daily backups older than 7 days
 PURGELIST=()
-for value in ${FILELIST}; do
+for value in ${DAILYFILELIST[@]}; do
     [[ $value =~ ${PATTERN} ]]
     timestamp=$(date +"%s" -d "${BASH_REMATCH[1]}")
     diff=$(( $NOW - $timestamp ));
@@ -92,12 +97,52 @@ for value in ${FILELIST}; do
 done
 
 if [ "${DEBUG}" = "true" ]; then
-    echo Purge list ${PURGELIST[@]}
+    echo Daily purge list ${PURGELIST[@]}
 fi
 
-for value in ${PURGELIST}; do
-    result=$(check_monthly $TMPDIR ${PURGELIST[0]})
-    if [ ! -z "$result" ]; then
-        mv $TMPDIR/${value} ${TMPDIR}/$result
+# In case there is already a monthly backup for the month
+# delete the daily, otherwise move the daily to monthly backup
+for value in ${PURGELIST[@]}; do
+    result=$(check_monthly $TMPDIR ${value})
+    if [ -z "$result" ]; then
+        if [ "${DEBUG}" = "true" ]; then
+            echo rm $TMPDIR/${value}
+        fi
+        if [ ! "${DRYRUN}" = "true" ]; then
+            rm $TMPDIR/${value}
+        fi
+    else
+        if [ "${DEBUG}" = "true" ]; then
+            echo mv $TMPDIR/${value} ${TMPDIR}/$result
+        fi
+        if [ ! "${DRYRUN}" = "true" ]; then
+            mv $TMPDIR/${value} ${TMPDIR}/$result
+        fi
+    fi
+done
+
+# Search for montly backups older than one year
+# and delete them
+PURGELIST=()
+for value in ${MONTHLYFILELIST[@]}; do
+    [[ $value =~ ${PATTERN} ]]
+    timestamp=$(date +"%s" -d "${BASH_REMATCH[1]}")
+    diff=$(( $NOW - $timestamp ));
+    if [ "$diff" -gt ${SECONDSPERYEAR} ]; then
+        PURGELIST+=(${BASH_REMATCH[0]})
+    fi
+done
+
+if [ "${DEBUG}" = "true" ]; then
+    echo Monthly purge list ${PURGELIST[@]}
+fi
+
+# delete too old monthly backups
+for value in ${PURGELIST[@]}; do
+    if [ "${DEBUG}" = "true" ]; then
+        echo rm $TMPDIR/${value}
+    fi
+    if [ ! "${DRYRUN}" = "true" ]; then
+        rm $TMPDIR/${value}
     fi
 done
