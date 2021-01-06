@@ -20,6 +20,59 @@ DEBUG=true # uncomment to switch on debug
 DRYRUN=true # uncomment to avoid filesystem commands
 
 
+# list files, for s3 or regular filesystem
+# parameters: <backupdir> <pattern>
+listfiles()
+{
+    local backupdir=$1
+    local pattern=$2
+    if [ "${DEBUG}" = "true" ]; then
+        echo listfiles $backupdir and pattern "$pattern" >&2
+    fi
+    if [[ $backupdir == s3\:\/\/* ]]; then
+        files=($(s3cmd ls "$backupdir/$pattern" | awk '{print $4}'))
+        result=()
+        for value in "${files[@]}"; do
+            result+=(${value#"$backupdir/"})
+        done
+        echo "${result[@]}"
+    else
+        echo $(cd $backupdir; ls $pattern 2>/dev/null)
+    fi
+}
+
+
+# rm a file, for s3 or regular filesystem
+# parameters: <file>
+rmfile()
+{
+    local filename=$1
+    if [ "${DEBUG}" = "true" ]; then
+        echo rmfile $filename >&2
+    fi
+    if [[ $filename == s3\:\/\/* ]]; then
+        s3cmd del $filename
+    else
+        rm $filename
+    fi
+}
+
+# mv a file, for s3 or regular filesystem
+# parameters: <file1> <file2>
+mvfile()
+{
+    local filename1=$1
+    local filename2=$2
+    if [ "${DEBUG}" = "true" ]; then
+        echo mvfile $filename1 $filename2 >&2
+    fi
+    if [[ $filename == s3\:\/\/* ]]; then
+        s3cmd mv $filename1 $filename2
+    else
+        mv $filename1 $filename2
+    fi
+}
+
 # checks whether monthly backup is already stored for the month
 # parameters: <tmpdir> <filename>
 # returns monthly name if a mohthly not already exists
@@ -34,22 +87,24 @@ check_monthly()
     if [ "${DEBUG}" = "true" ]; then
         echo check_monthly debug: $filename - $tmpdir - $monthly -  $monthly_prefix >&2
     fi 
-    if [ ! -z "$monthly_prefix" ] && [ -z "$(ls $tmpdir/$monthly_prefix* 2>/dev/null)" ]; then
+    if [ ! -z "$monthly_prefix" ] && [ -z "$(listfiles "$tmpdir" "$monthly_prefix*" 2>/dev/null)" ]; then
         echo $monthly
     fi
 }
 
 
-# return the filelist
-# parameters: <type> <tmpdir>
+# return a filelist
+# parameters: <type> <backupdir>
 # type: "daily" or "monthly"
-# tmpdir: name of dir or bucket
-# return "true" or "false"
+# backupdir: name of dir or bucket
 getfilelist()
 {
     local tmpdir=$2
     local type=$1
-    echo $(cd ${tmpdir}; ls backup_*_${type}_*.tgz)
+    if [ "${DEBUG}" = "true" ]; then
+        echo getfilelist debug: $tmpdir -- $type >&2
+    fi 
+    echo $(listfiles ${tmpdir} "backup_*_${type}_*.tgz")
 }
 
 usage()
@@ -74,12 +129,15 @@ fi
 
 SECONDSPERWEEK=$(( 60*60*24*7 ))
 SECONDSPERYEAR=$(( 60*60*24*365 ))
-TMPDIR=$1
+BACKUPDIR=$1
 
+#listfiles $BACKUPDIR "*"
+
+#exit 0
 NOW=$(date +"%s")
 PATTERN='^backup.*_([0-9].*)\.tgz$'
-DAILYFILELIST=$(getfilelist "daily" ${TMPDIR})
-MONTHLYFILELIST=$(getfilelist "monthly" ${TMPDIR})
+DAILYFILELIST=$(getfilelist "daily" ${BACKUPDIR})
+MONTHLYFILELIST=$(getfilelist "monthly" ${BACKUPDIR})
 if [ "${DEBUG}" = "true" ]; then
     echo DAILYFILELIST: ${DAILYFILELIST}
     echo MONTHLYFILELIST: ${MONTHLYFILELIST}
@@ -103,20 +161,20 @@ fi
 # In case there is already a monthly backup for the month
 # delete the daily, otherwise move the daily to monthly backup
 for value in ${PURGELIST[@]}; do
-    result=$(check_monthly $TMPDIR ${value})
+    result=$(check_monthly $BACKUPDIR ${value})
     if [ -z "$result" ]; then
         if [ "${DEBUG}" = "true" ]; then
-            echo rm $TMPDIR/${value}
+            echo rm $BACKUPDIR/${value}
         fi
         if [ ! "${DRYRUN}" = "true" ]; then
-            rm $TMPDIR/${value}
+            rmfile $BACKUPDIR/${value}
         fi
     else
         if [ "${DEBUG}" = "true" ]; then
-            echo mv $TMPDIR/${value} ${TMPDIR}/$result
+            echo mv $BACKUPDIR/${value} ${BACKUPDIR}/$result
         fi
         if [ ! "${DRYRUN}" = "true" ]; then
-            mv $TMPDIR/${value} ${TMPDIR}/$result
+            mvfile $BACKUPDIR/${value} ${BACKUPDIR}/$result
         fi
     fi
 done
@@ -140,9 +198,10 @@ fi
 # delete too old monthly backups
 for value in ${PURGELIST[@]}; do
     if [ "${DEBUG}" = "true" ]; then
-        echo rm $TMPDIR/${value}
+        echo rm $BACKUPDIR/${value}
     fi
     if [ ! "${DRYRUN}" = "true" ]; then
-        rm $TMPDIR/${value}
+        rmfile $BACKUPDIR/${value}
     fi
 done
+
