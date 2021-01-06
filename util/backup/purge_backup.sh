@@ -17,7 +17,7 @@
 
 cmdname=$(basename $0)
 DEBUG=true # uncomment to switch on debug
-DRYRUN=true # uncomment to avoid filesystem commands
+#DRYRUN=true # uncomment to avoid filesystem commands
 
 
 # list files, for s3 or regular filesystem
@@ -30,10 +30,13 @@ listfiles()
         echo listfiles $backupdir and pattern "$pattern" >&2
     fi
     if [[ $backupdir == s3\:\/\/* ]]; then
-        files=($(s3cmd ls "$backupdir/$pattern" | awk '{print $4}'))
+        files=($(s3cmd ls "$backupdir" | awk '{print $4}'))
         result=()
         for value in "${files[@]}"; do
-            result+=(${value#"$backupdir/"})
+            strippedfile=${value#"$backupdir/"}
+            if [[ $strippedfile == $pattern ]]; then
+                result+=($strippedfile)
+            fi
         done
         echo "${result[@]}"
     else
@@ -66,7 +69,7 @@ mvfile()
     if [ "${DEBUG}" = "true" ]; then
         echo mvfile $filename1 $filename2 >&2
     fi
-    if [[ $filename == s3\:\/\/* ]]; then
+    if [[ $filename1 == s3\:\/\/* ]]; then
         s3cmd mv $filename1 $filename2
     else
         mv $filename1 $filename2
@@ -86,7 +89,7 @@ check_monthly()
     local monthly_prefix=${BASH_REMATCH[1]}
     if [ "${DEBUG}" = "true" ]; then
         echo check_monthly debug: $filename - $tmpdir - $monthly -  $monthly_prefix >&2
-    fi 
+    fi
     if [ ! -z "$monthly_prefix" ] && [ -z "$(listfiles "$tmpdir" "$monthly_prefix*" 2>/dev/null)" ]; then
         echo $monthly
     fi
