@@ -1028,7 +1028,7 @@ describe('Sending observations and checking rules ...\n'.bold, function() {
                                     component.data[currentDataIndex].expectedActuation.toString()));
                                 }
                             };
-                            setTimeout(checkActuation, 60 * 1000, currentActuationCounter);
+                            setTimeout(checkActuation, 120 * 1000, currentActuationCounter);
                         }
                     });
             } else {

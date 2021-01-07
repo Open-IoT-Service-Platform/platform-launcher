@@ -17,6 +17,8 @@ spec:
         image: oisp/frontend:{{ .Values.tag }}
         {{ end }}
         env:
+        - name: PGSSLMODE
+          value: require
         - name: NODE_ENV
           value: local
         - name: OISP_FRONTEND_CONFIG
@@ -79,7 +81,7 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: keycloak
-        command: ["./wait-for-it.sh", "postgres:5432", "-t", "300", "--", "./wait-for-it.sh", "keycloak-http:4080", "-t", "300", "--", "node", "admin", "addSystemUsers"]
+        command: ["./wait-for-it.sh", "acid-oisp:5432", "-t", "300", "--", "./wait-for-it.sh", "keycloak-http:4080", "-t", "300", "--", "node", "admin", "addSystemUsers"]
       restartPolicy: Never
       imagePullSecrets:
         - name: dockercred

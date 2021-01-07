@@ -1,0 +1,12 @@
+dependencies:
+- name: keycloak
+  repository: https://codecentric.github.io/helm-charts
+  version: 6.0.4
+- name: kafka
+  repository: https://charts.helm.sh/incubator
+  version: 0.20.8
+- name: kafka
+  repository: https://charts.helm.sh/incubator
+  version: 0.20.8
+digest: sha256:f46e0b13a7bed5db5a4b5546df6fc9b33578119ae5afd74e3e3d6f544d12a5c2
+generated: "2021-01-07T11:26:37.244849101+01:00"
