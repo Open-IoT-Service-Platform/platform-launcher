@@ -46,7 +46,8 @@ const imap_username = process.env.IMAP_USERNAME;
 const imap_password = process.env.IMAP_PASSWORD;
 
 const BACKEND_DELAY = 5000;
-const BACKEND_TIMEOUT = 10000;
+const BACKEND_TIMEOUT = 12000;
+const GENERIC_TIMEOUT = 15000;
 const TIMEOUT_FACTOR = 2;
 // Use this to keep track of received mails and wait for new ones
 // instead of deleting old mails
@@ -1141,7 +1142,7 @@ describe('Do basic rule and alerts subtests ...'.bold, function() {
         test = require('./subtests/rules-and-alerts-tests').test(userToken, userToken2, accountId,
             deviceId, deviceToken, cbManager, new CbManager(), new CbManager(), new CbManager(), new CbManager());
         test.createBasicRules(done);
-    }).timeout(10000);
+    }).timeout(GENERIC_TIMEOUT);
     it(descriptions.sendObservations, function(done) {
         test.sendObservations(done);
     }).timeout(120000);
@@ -1162,7 +1163,7 @@ describe('Do basic rule and alerts subtests ...'.bold, function() {
     }).timeout(120000);
     it(descriptions.cleanup, function(done) {
         test.cleanup(done);
-    }).timeout(10000);
+    }).timeout(GENERIC_TIMEOUT);
 });
 
 describe('Do time based rule subtests ...'.bold, function() {
