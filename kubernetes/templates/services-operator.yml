@@ -126,14 +126,3 @@ subjects:
   - kind: ServiceAccount
     name: beamservices-operator
     namespace: {{.Release.Namespace}}
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: beamservices-operator-data
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 4Gi
