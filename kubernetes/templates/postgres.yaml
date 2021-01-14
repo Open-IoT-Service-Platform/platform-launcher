@@ -4,6 +4,8 @@ metadata:
   name: acid-oisp
 #  namespace: default
 spec:
+  patroni:
+    synchronous_mode: true
   teamId: "acid"
   volume:
     size: 1Gi

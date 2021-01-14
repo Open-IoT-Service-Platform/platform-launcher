@@ -61,6 +61,8 @@ spec:
             cpu: 250m
           {{ end }}
         env:
+        - name: PGSSLMODE
+          value: require
         {{ if .Values.production }}
         - name: NODE_ENV
           value: production
