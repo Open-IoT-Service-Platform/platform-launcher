@@ -490,11 +490,9 @@ ifndef BACKUPFILE
 endif
 	@$(eval TMPDIR := backup_$(NAMESPACE)_$(shell date +'%Y-%m-%d_%H-%M-%S'))
 	@echo using backup file $(BACKUPFILE) and copying to localfile $(TMPDIR).tgz
-	#$(eval BASEDIR := $(shell basedir=$(BACKUPFILE); basedir="$${basedir##*/}"; basedir="$${basedir%.*}"; echo $${basedir} ))
 ifdef S3BUCKET
 	@echo Copy $(BACKUPFILE) from bucket $(S3BUCKET) to /tmp/$(BACKUPFILE)
 	@s3cmd get $(S3BUCKET)/$(BACKUPFILE)  /tmp/$(TMPDIR).tgz || exit 1
-#	@tar xvzf /tmp/$(BACKUPFILE) -C /tmp || exit 1
 else
 	@cp $(BACKUPFILE) /tmp/$(TMPDIR).tgz
 endif
