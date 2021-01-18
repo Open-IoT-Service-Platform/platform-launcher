@@ -438,6 +438,7 @@ push-images:
 	@$(call msg,"Pushing docker images to registry");
 	@docker-compose -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml push $(CONTAINERS)
 
+
 ## backup: backup database, configmaps and secrets.
 ##     This requires either default K8s config or KUBECONFIG set
 ##     A tar file is created containing the files
@@ -447,30 +448,65 @@ ifeq ($(NOBACKUP),false)
 	@$(call msg,"Creating backup");
 	@mkdir -p backups
 	@$(eval TMPDIR := backup_$(NAMESPACE)_$(shell date +'%Y-%m-%d_%H-%M-%S'))
+	@$(eval TARGETNAME := backup_$(NAMESPACE)_daily_$(shell date -Iseconds).tgz)
 	@if [ -d "/tmp/$(TMPDIR)" ]; then echo "Backup file already exists. Not overwriting. Bye"; exit 1; fi
 	@mkdir -p /tmp/$(TMPDIR)
-	@util/backup/db_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) >/dev/null 2>&1
-	@util/backup/cm_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) "$(BACKUP_EXCLUDE)" >/dev/null 2>&1
-	@tar cvzf backups/$(TMPDIR).tgz -C /tmp $(TMPDIR)
+	@util/backup/db_dump.sh /tmp/$(TMPDIR) $(NAMESPACE)  2>&1 || exit 1
+	@util/backup/cm_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) "$(BACKUP_EXCLUDE)" 2>&1 || exit 1
+	@tar cvzf backups/$(TARGETNAME) -C /tmp $(TMPDIR)
 	@rm -rf /tmp/$(TMPDIR)
 endif
+ifdef S3BUCKET
+	s3cmd put backups/$(TARGETNAME) $(S3BUCKET)/$(TARGETNAME)
+endif
+
+## purge-backups: looks into S3 Bucket or local backups folder and purges
+##                daily backups older than 7 days. Keeps one backup per month.
+##     This requires either default K8s config or KUBECONFIG set
+##     A tar file is created containing the files
+##
+purge-backups:
+	@$(call msg,"Purging backups");
+ifdef S3BUCKET
+	@echo Purging S3 backups in $(S3BUCKET)
+	@util/backup/purge_backup.sh $(S3BUCKET)
+else
+	@echo purging local backups
+	@util/backup/purge_backup.sh backups
+endif
+
 
 ## restore: restore database, configmaps and secrets.
 ##     This requires either default K8s config or KUBECONFIG set
 ##     Parameters: BACKUPFILE var must be set or the most recent timestamp is selected
 ##
 restore:
+ifdef S3BUCKET
+	@if [ -z "$(BACKUPFILE)" ]; then echo "BACKUPFILE should be set when S3BUCKET is set"; exit 1; fi
+endif
 ifndef BACKUPFILE
 		@echo Look for most recent backup file
-		@$(eval BACKUPFILE := $(shell ls backups/backup_*|sort -V| tail -n 1))
+		@$(eval BACKUPFILE := $(shell ls backups/backup_*|sort -V| head -n 1))
 endif
-	@echo using backup file $(BACKUPFILE)
-	$(eval BASEDIR := $(shell basedir=$(BACKUPFILE); basedir="$${basedir##*/}"; basedir="$${basedir%.*}"; echo $${basedir} ))
-	tar xvzf $(BACKUPFILE) -C /tmp
-	@util/backup/cm_check.sh /tmp/$(BASEDIR) $(NAMESPACE)
-	@util/backup/db_restore.sh /tmp/$(BASEDIR) $(NAMESPACE)
-	@util/backup/cm_restore.sh /tmp/$(BASEDIR) $(NAMESPACE)
-	@rm -rf /tmp/$(BASEDIR)
+	@$(eval TMPDIR := backup_$(NAMESPACE)_$(shell date +'%Y-%m-%d_%H-%M-%S'))
+	@echo using backup file $(BACKUPFILE) and copying to localfile $(TMPDIR).tgz
+ifdef S3BUCKET
+	@echo Copy $(BACKUPFILE) from bucket $(S3BUCKET) to /tmp/$(BACKUPFILE)
+	@s3cmd get $(S3BUCKET)/$(BACKUPFILE)  /tmp/$(TMPDIR).tgz || exit 1
+else
+	@cp $(BACKUPFILE) /tmp/$(TMPDIR).tgz
+endif
+	@mkdir /tmp/$(TMPDIR)
+	@tar xvzf /tmp/$(TMPDIR).tgz --strip-components=1 -C /tmp/$(TMPDIR)
+
+	@util/backup/cm_check.sh /tmp/$(TMPDIR) $(NAMESPACE)
+	@util/backup/db_restore.sh /tmp/$(TMPDIR) $(NAMESPACE)
+	@util/backup/cm_restore.sh /tmp/$(TMPDIR) $(NAMESPACE)
+ifdef S3BUCKET
+	@rm -rf /tmp/$(BACKUPFILE)
+else
+	@rm -rf /tmp/$(TMPDIR) /tmp/$(TMPDIR).tgz
+endif
 ## help: Show this help message
 ##
 help:
