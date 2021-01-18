@@ -16,7 +16,7 @@
 # limitations under the License.
 
 cmdname=$(basename $0)
-DEBUG=true # uncomment to switch on debug
+#DEBUG=true # uncomment to switch on debug
 #DRYRUN=true # uncomment to avoid filesystem commands
 
 
@@ -170,6 +170,7 @@ for value in ${PURGELIST[@]}; do
             echo rm $BACKUPDIR/${value}
         fi
         if [ ! "${DRYRUN}" = "true" ]; then
+            echo Removing file $BACKUPDIR/${value}
             rmfile $BACKUPDIR/${value}
         fi
     else
@@ -177,6 +178,7 @@ for value in ${PURGELIST[@]}; do
             echo mv $BACKUPDIR/${value} ${BACKUPDIR}/$result
         fi
         if [ ! "${DRYRUN}" = "true" ]; then
+            echo Renaming file $BACKUPDIR/${value} to ${BACKUPDIR}/$result
             mvfile $BACKUPDIR/${value} ${BACKUPDIR}/$result
         fi
     fi
@@ -204,6 +206,7 @@ for value in ${PURGELIST[@]}; do
         echo rm $BACKUPDIR/${value}
     fi
     if [ ! "${DRYRUN}" = "true" ]; then
+        echo Removing file $BACKUPDIR/${value}
         rmfile $BACKUPDIR/${value}
     fi
 done

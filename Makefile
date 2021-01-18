@@ -438,6 +438,7 @@ push-images:
 	@$(call msg,"Pushing docker images to registry");
 	@docker-compose -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml push $(CONTAINERS)
 
+
 ## backup: backup database, configmaps and secrets.
 ##     This requires either default K8s config or KUBECONFIG set
 ##     A tar file is created containing the files
@@ -456,8 +457,24 @@ ifeq ($(NOBACKUP),false)
 	@rm -rf /tmp/$(TMPDIR)
 endif
 ifdef S3BUCKET
-	@s3cmd put backups/$(TMPDIR).tgz $(S3BUCKET)/$(TMPDIR).tgz
+	s3cmd put backups/$(TARGETNAME) $(S3BUCKET)/$(TARGETNAME)
 endif
+
+## purge-backups: looks into S3 Bucket or local backups folder and purges
+##                daily backups older than 7 days. Keeps one backup per month.
+##     This requires either default K8s config or KUBECONFIG set
+##     A tar file is created containing the files
+##
+purge-backups:
+	@$(call msg,"Purging backups");
+ifdef S3BUCKET
+	@echo Purging S3 backups in $(S3BUCKET)
+	@util/backup/purge_backup.sh $(S3BUCKET)
+else
+	@echo purging local backups
+	@util/backup/purge_backup.sh backups
+endif
+
 
 ## restore: restore database, configmaps and secrets.
 ##     This requires either default K8s config or KUBECONFIG set
@@ -476,13 +493,14 @@ endif
 	#$(eval BASEDIR := $(shell basedir=$(BACKUPFILE); basedir="$${basedir##*/}"; basedir="$${basedir%.*}"; echo $${basedir} ))
 ifdef S3BUCKET
 	@echo Copy $(BACKUPFILE) from bucket $(S3BUCKET) to /tmp/$(BACKUPFILE)
-	@s3cmd get $(S3BUCKET)/$(BACKUPFILE)  /tmp/$(BACKUPFILE) || exit 1
-	@tar xvzf /tmp/$(BACKUPFILE) -C /tmp || exit 1
+	@s3cmd get $(S3BUCKET)/$(BACKUPFILE)  /tmp/$(TMPDIR).tgz || exit 1
+#	@tar xvzf /tmp/$(BACKUPFILE) -C /tmp || exit 1
 else
 	@cp $(BACKUPFILE) /tmp/$(TMPDIR).tgz
+endif
 	@mkdir /tmp/$(TMPDIR)
 	@tar xvzf /tmp/$(TMPDIR).tgz --strip-components=1 -C /tmp/$(TMPDIR)
-endif
+
 	@util/backup/cm_check.sh /tmp/$(TMPDIR) $(NAMESPACE)
 	@util/backup/db_restore.sh /tmp/$(TMPDIR) $(NAMESPACE)
 	@util/backup/cm_restore.sh /tmp/$(TMPDIR) $(NAMESPACE)
