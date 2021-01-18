@@ -69,6 +69,16 @@ services:
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
+  backup-service:
+    image: oisp/backup-service:${DOCKER_TAG}
+    build:
+      context: ./docker/backup-service
+      args:
+        gittag: automated-backups
+        #gittag: ${GIT_COMMIT_PLATFORM_LAUNCHER}
+      labels:
+        - oisp=true
+        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
   keycloak:
     image: oisp/keycloak:${DOCKER_TAG}
     build:
