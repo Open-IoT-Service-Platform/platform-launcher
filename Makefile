@@ -446,12 +446,13 @@ backup:
 ifeq ($(NOBACKUP),false)
 	@$(call msg,"Creating backup");
 	@mkdir -p backups
-	@$(eval TMPDIR := backup_$(NAMESPACE)_daily_$(shell date -Iseconds))
+	@$(eval TMPDIR := backup_$(NAMESPACE)_$(shell date +'%Y-%m-%d_%H-%M-%S'))
+	@$(eval TARGETNAME := backup_$(NAMESPACE)_daily_$(shell date -Iseconds).tgz)
 	@if [ -d "/tmp/$(TMPDIR)" ]; then echo "Backup file already exists. Not overwriting. Bye"; exit 1; fi
 	@mkdir -p /tmp/$(TMPDIR)
 	@util/backup/db_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) >/dev/null 2>&1
 	@util/backup/cm_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) "$(BACKUP_EXCLUDE)" >/dev/null 2>&1
-	@tar cvzf backups/$(TMPDIR).tgz -C /tmp $(TMPDIR)
+	@tar cvzf backups/$(TARGETNAME) -C /tmp $(TMPDIR)
 	@rm -rf /tmp/$(TMPDIR)
 endif
 ifdef S3BUCKET
@@ -468,24 +469,27 @@ ifdef S3BUCKET
 endif
 ifndef BACKUPFILE
 		@echo Look for most recent backup file
-		@$(eval BACKUPFILE := $(shell ls backups/backup_*|sort -V| tail -n 1))
+		@$(eval BACKUPFILE := $(shell ls backups/backup_*|sort -V| head -n 1))
 endif
-	@echo using backup file $(BACKUPFILE)
-	$(eval BASEDIR := $(shell basedir=$(BACKUPFILE); basedir="$${basedir##*/}"; basedir="$${basedir%.*}"; echo $${basedir} ))
+	@$(eval TMPDIR := backup_$(NAMESPACE)_$(shell date +'%Y-%m-%d_%H-%M-%S'))
+	@echo using backup file $(BACKUPFILE) and copying to localfile $(TMPDIR).tgz
+	#$(eval BASEDIR := $(shell basedir=$(BACKUPFILE); basedir="$${basedir##*/}"; basedir="$${basedir%.*}"; echo $${basedir} ))
 ifdef S3BUCKET
 	@echo Copy $(BACKUPFILE) from bucket $(S3BUCKET) to /tmp/$(BACKUPFILE)
 	@s3cmd get $(S3BUCKET)/$(BACKUPFILE)  /tmp/$(BACKUPFILE) || exit 1
 	@tar xvzf /tmp/$(BACKUPFILE) -C /tmp || exit 1
 else
-	tar xvzf $(BACKUPFILE) -C /tmp
+	@cp $(BACKUPFILE) /tmp/$(TMPDIR).tgz
+	@mkdir /tmp/$(TMPDIR)
+	@tar xvzf /tmp/$(TMPDIR).tgz --strip-components=1 -C /tmp/$(TMPDIR)
 endif
-	@util/backup/cm_check.sh /tmp/$(BASEDIR) $(NAMESPACE)
-	@util/backup/db_restore.sh /tmp/$(BASEDIR) $(NAMESPACE)
-	@util/backup/cm_restore.sh /tmp/$(BASEDIR) $(NAMESPACE)
+	@util/backup/cm_check.sh /tmp/$(TMPDIR) $(NAMESPACE)
+	@util/backup/db_restore.sh /tmp/$(TMPDIR) $(NAMESPACE)
+	@util/backup/cm_restore.sh /tmp/$(TMPDIR) $(NAMESPACE)
 ifdef S3BUCKET
 	@rm -rf /tmp/$(BACKUPFILE)
 else
-	@rm -rf /tmp/$(BASEDIR)
+	@rm -rf /tmp/$(TMPDIR) /tmp/$(TMPDIR).tgz
 endif
 ## help: Show this help message
 ##
