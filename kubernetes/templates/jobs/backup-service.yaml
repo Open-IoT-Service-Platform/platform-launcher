@@ -1,0 +1,121 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: backup-service
+spec:
+  schedule: "0 1 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          initContainers:
+          - name: backup-service-init
+            image: oisp/backup-service:{{ .Values.tag }}
+            imagePullPolicy: IfNotPresent
+            args:
+            - /bin/sh
+            - -c
+            - s3cmd ls ${S3BUCKET}
+            env:
+            - name: TERM
+              value: xterm
+            - name: S3BUCKET
+              value: s3://{{ .Values.backup.bucket }}
+            volumeMounts:
+            - name: backup-service-cfg
+              mountPath: /home/backupuser/.s3cfg
+              subPath: s3cfg
+          serviceAccountName: backup-service
+          containers:
+          - name: backup-service
+            image: oisp/backup-service:{{ .Values.tag }}
+            imagePullPolicy: IfNotPresent
+            args:
+            - /bin/sh
+            - -c
+            - make backup; make purge-backups
+            env:
+            - name: TERM
+              value: xterm
+            - name: S3BUCKET
+              value: s3://{{ .Values.backup.bucket }}
+            volumeMounts:
+            - name: backup-service-cfg
+              mountPath: /home/backupuser/.s3cfg
+              subPath: s3cfg
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup-service-cfg
+            configMap:
+              name: backup-service
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup-service
+  labels:
+    app: backup-service
+data:
+  s3cfg: |+
+    # Setup endpoint
+    host_base = {{ .Values.minio.endpoint }}
+    host_bucket = {{ .Values.minio.endpoint }}
+    bucket_location = emea-1
+    use_https = False
+
+    # Setup access keys
+    access_key = {{ .Values.minio.accesskey }}
+    secret_key = {{ .Values.minio.secretkey }}
+
+    # Enable S3 v4 signature APIs
+    signature_v2 = False
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: backup-setup
+  annotations:
+    "helm.sh/hook-weight": "40"
+spec:
+  template:
+    spec:
+      containers:
+      - name: create-checkpointing-dir
+        image: oisp/backup-service:{{ .Values.tag }}
+        args:
+        - /bin/sh
+        - -c
+        - s3cmd mb ${S3BUCKET} || [ $? == 13 ] || exit 1
+        env:
+        - name: TERM
+          value: xterm
+        - name: S3BUCKET
+          value: s3://{{ .Values.backup.bucket }}
+        volumeMounts:
+        - name: backup-service-cfg
+          mountPath: /home/backupuser/.s3cfg
+          subPath: s3cfg
+      restartPolicy: OnFailure
+      volumes:
+      - name: backup-service-cfg
+        configMap:
+          name: backup-service
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backup-service
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: backup-service
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: backup-service
+    namespace: {{.Release.Namespace}}
+          
