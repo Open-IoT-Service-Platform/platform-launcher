@@ -29,6 +29,9 @@ minio:
   secretkey: minio123
   mcimage: minio/mc:latest
 
+backup:
+  bucket: backup
+
 certmanager:
   secret: selfsigned-cert-tls
   issuer: letsencrypt-self
