@@ -3,7 +3,7 @@ FROM alpine:3.13.0
 ARG gittag
 
 RUN apk update && apk upgrade
-RUN apk add --update make curl git bash ncurses jq py-pip openssl docker-compose
+RUN apk add --update make curl git bash ncurses jq py-pip coreutils
 RUN pip install shyaml s3cmd
 
 # Install kubectl
@@ -13,7 +13,6 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s 
 
 RUN adduser -D backupuser
 
-#RUN mkdir /home/backupuser && chown backupuser /home/backupuser
 
 USER backupuser
 

@@ -451,8 +451,8 @@ ifeq ($(NOBACKUP),false)
 	@$(eval TARGETNAME := backup_$(NAMESPACE)_daily_$(shell date -Iseconds).tgz)
 	@if [ -d "/tmp/$(TMPDIR)" ]; then echo "Backup file already exists. Not overwriting. Bye"; exit 1; fi
 	@mkdir -p /tmp/$(TMPDIR)
-	@util/backup/db_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) >/dev/null 2>&1
-	@util/backup/cm_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) "$(BACKUP_EXCLUDE)" >/dev/null 2>&1
+	@util/backup/db_dump.sh /tmp/$(TMPDIR) $(NAMESPACE)  2>&1 || exit 1
+	@util/backup/cm_dump.sh /tmp/$(TMPDIR) $(NAMESPACE) "$(BACKUP_EXCLUDE)" 2>&1 || exit 1
 	@tar cvzf backups/$(TARGETNAME) -C /tmp $(TMPDIR)
 	@rm -rf /tmp/$(TMPDIR)
 endif
