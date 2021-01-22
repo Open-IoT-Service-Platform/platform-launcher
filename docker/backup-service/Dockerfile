@@ -16,10 +16,8 @@ RUN adduser -D backupuser
 
 USER backupuser
 
-#RUN cd /home/backupuser/ && git clone https://github.com/Open-IoT-Service-Platform/platform-launcher.git && cd platform-launcher && git checkout ${gittag}
-RUN cd /home/backupuser/ && git clone https://github.com/wagmarcel/platform-launcher.git && cd platform-launcher && git checkout ${gittag}
+RUN cd /home/backupuser/ && git clone https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 
 WORKDIR /home/backupuser/platform-launcher
-
 
 CMD ["tail", "-f", "/dev/null"]
