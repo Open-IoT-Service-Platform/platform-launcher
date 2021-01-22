@@ -44,6 +44,8 @@ spec:
               mountPath: /home/backupuser/.s3cfg
               subPath: s3cfg
           restartPolicy: OnFailure
+          imagePullSecrets:
+          - name: dockercred
           volumes:
           - name: backup-service-cfg
             configMap:
@@ -96,6 +98,8 @@ spec:
           mountPath: /home/backupuser/.s3cfg
           subPath: s3cfg
       restartPolicy: OnFailure
+      imagePullSecrets:
+      - name: dockercred
       volumes:
       - name: backup-service-cfg
         configMap:
@@ -118,4 +122,3 @@ subjects:
   - kind: ServiceAccount
     name: backup-service
     namespace: {{.Release.Namespace}}
-          
