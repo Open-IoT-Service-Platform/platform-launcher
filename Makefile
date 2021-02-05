@@ -507,6 +507,23 @@ ifdef S3BUCKET
 else
 	@rm -rf /tmp/$(TMPDIR) /tmp/$(TMPDIR).tgz
 endif
+
+## backup-db only, backup is saved in backups/database.sql
+##
+backup-db:
+	$(call msg, "Creating DB backup");
+	mkdir -p backups;
+	util/backup/db_dump.sh backups $(NAMESPACE)
+
+## restore-db only, from backups/database.sql
+##
+restore-db:
+ifndef BACKUPFILE
+	$(eval BACKUPFIL := backups/database.sql)
+endif
+	$(call msg, "Restoring DB backup");
+	export DBONLY=true && util/backup/db_restore.sh backups/ $(NAMESPACE)
+
 ## help: Show this help message
 ##
 help:
