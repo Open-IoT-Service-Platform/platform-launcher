@@ -9,7 +9,9 @@ spec:
     password: {{ .Values.ruleEngine.password }}
   args:
     runner: FlinkRunner
+    {{ if .Values.production }}
     checkpointingInterval: {{ .Values.ruleEngine.checkpointingInterval | quote }}
+    {{ end }}
     streaming: "true"
     JSONConfig:
       format: |
