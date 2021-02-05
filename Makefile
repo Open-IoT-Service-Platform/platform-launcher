@@ -131,7 +131,7 @@ deploy-oisp: check-docker-cred-env generate_keys
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
 	helm dependency update --namespace $(NAMESPACE) && \
 	helm install $(NAME) . --namespace $(NAMESPACE) \
-		--timeout 600s \
+		--timeout 1200s \
 		--set imageCredentials.username="$$DOCKERUSER" \
 		--set imageCredentials.password="$$DOCKERPASS" \
 		--set systemuser.password="$(call randomPass)" \
