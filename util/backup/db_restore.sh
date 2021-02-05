@@ -58,11 +58,21 @@ fi
 
 TMPDIR=$1
 NAMESPACE=$2
-CONTAINER=${NAMESPACE}-stolon-keeper-0
+
+if kubectl -n ${NAMESPACE} get pod ${NAMESPACE}-stolon-keeper-0 > /dev/null 2>&1; then
+    CONTAINER=${NAMESPACE}-stolon-keeper-0
+elif kubectl -n ${NAMESPACE} get pod acid-${NAMESPACE}-1 > /dev/null 2>&1; then
+    CONTAINER=acid-${NAMESPACE}-0
+else
+    echo "No database container found"
+    exit 1
+fi
+echo "Found database container:" $CONTAINER
+
 DBNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".dbname")
 USERNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".su_username")
 PASSWORD=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".su_password")
-HOSTNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".hostname")
+HOSTNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".writeHostname")
 
 if [ ${DEBUG} = "true" ]; then
   echo parameters:
@@ -86,24 +96,47 @@ if [ ! -f "${TMPDIR}/${DUMPFILE}" ]; then
   exit 1
 fi
 
-# retrieve new passwords
-echo set new passwords
-OISPCONFIG=($(ls ${TMPDIR}/oisp-config.json))
-# sanity test. This file musst exist in a sane backup
-if [ ! -f "${OISPCONFIG}" ]; then
-  echo oisp-config.json not found in db backup. Bye!
-  exit 1;
-fi
-NEW_USERPASSWORD=$(read_postgres_oisp_config ${OISPCONFIG} password)
-NEW_SUPERPASSWORD=$(read_postgres_oisp_config ${OISPCONFIG} su_password)
-# sanity check: If one of paramters is empty - stop
-if [ -z "${NEW_USERPASSWORD}" ] || [ -z "${NEW_SUPERPASSWORD}" ]; then
-  echo NEW_PASSWORDS are empty - Bye
-  exit 1
-fi
+echo "DBONLY:" ${DBONLY}
+if [ -z "${DBONLY}" ]; then
+    # retrieve new passwords
+    echo set new passwords
+    OISPCONFIG=($(ls ${TMPDIR}/oisp-config.json))
+    # sanity test. This file musst exist in a sane backup
+    if [ ! -f "${OISPCONFIG}" ]; then
+	echo oisp-config.json not found in db backup. Bye!
+    exit 1;
+    fi
+    NEW_USERPASSWORD=$(read_postgres_oisp_config ${OISPCONFIG} password)
+    NEW_SUPERPASSWORD=$(read_postgres_oisp_config ${OISPCONFIG} su_password)
+    # sanity check: If one of paramters is empty - stop
+    if [ -z "${NEW_USERPASSWORD}" ] || [ -z "${NEW_SUPERPASSWORD}" ]; then
+	echo NEW_PASSWORDS are empty - Bye
+    exit 1
+    fi
 
-echo "ALTER USER oisp_user WITH PASSWORD '${NEW_USERPASSWORD}';" | kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; psql -U ${USERNAME}  -d ${DBNAME} -h ${HOSTNAME}"
-echo "ALTER USER superuser WITH PASSWORD '${NEW_SUPERPASSWORD}';" | kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; psql -U ${USERNAME}  -d ${DBNAME} -h ${HOSTNAME}"
+    # Strip quotes
+    PASSWORD="${PASSWORD%\"}"
+    PASSWORD="${PASSWORD#\"}"
+    echo "password:" ${PASSWORD}
+    echo "new superpassword:" ${NEW_SUPERPASSWORD}
+
+    echo kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=require; psql -h ${HOSTNAME} -U ${USERNAME}  -d ${DBNAME}"
+
+    if (echo "ALTER USER oisp_user WITH PASSWORD '${NEW_USERPASSWORD}';" | kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=require; psql -h ${HOSTNAME} -U ${USERNAME}  -d ${DBNAME}"); then
+	echo "User password changed"
+    else
+	echo "Failed to change user password."
+	exit 1;
+    fi
+    echo "Moving on  the superuser"
+
+    echo "ALTER USER superuser WITH PASSWORD '${NEW_SUPERPASSWORD}';" | kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=require;  psql -h ${HOSTNAME} -U ${USERNAME}  -d ${DBNAME} -h ${HOSTNAME}"
+    echo "Password restored"
+else
+    SCRIPT_DIR=$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+    source ${SCRIPT_DIR}/../get_oisp_credentials.sh
+    NEW_SUPERPASSWORD=${POSTGRES_SU_PASSWORD}
+fi
 
 echo restore database
 kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "mkdir -p /backup"

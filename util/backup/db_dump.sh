@@ -43,7 +43,17 @@ fi
 
 TMPDIR=$1
 NAMESPACE=$2
-CONTAINER=${NAMESPACE}-stolon-keeper-0
+
+if kubectl -n ${NAMESPACE} get pod ${NAMESPACE}-stolon-keeper-0; then
+    CONTAINER=${NAMESPACE}-stolon-keeper-0
+elif kubectl -n ${NAMESPACE} get pod acid-${NAMESPACE}-0; then
+    CONTAINER=acid-${NAMESPACE}-0
+else
+    echo "No database container found"
+    exit 1
+fi
+echo "Found database container:" $CONTAINER
+
 DBNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".dbname")
 USERNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".su_username")
 PASSWORD=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".su_password")
@@ -64,6 +74,7 @@ if [ -z "${USERNAME}" ] || [ -z "${DBNAME}" ] || [ -z "${PASSWORD}" ] || [ -z "$
   echo paramters not healthy. Some are empty - Bye
   exit 1
 fi
+
 # create dir
 mkdir -p ${TMPDIR}
 # if file exists, exit
@@ -73,6 +84,12 @@ if [ -f "${TMPDIR}/${DUMPFILE}" ]; then
 fi
 
 echo Dump database
-kubectl -n ${NAMESPACE} exec ${CONTAINER} -- /bin/bash -c "mkdir -p /backup; export PGPASSWORD=${PASSWORD}; pg_dump -U ${USERNAME} ${DBNAME} -h ${HOSTNAME} -F c -b  > /backup/${DUMPFILE}"
+if kubectl -n ${NAMESPACE} exec ${CONTAINER} -- /bin/bash -c "export PGSSL=require; mkdir -p /backup; export PGPASSWORD=${PASSWORD}; pg_dump -h localhost -U ${USERNAME} ${DBNAME} -F c -b  > /backup/${DUMPFILE}"; then
+    echo "Backup created successfully inside cluster"
+else
+    echo "Backup could not be created."
+    exit 1
+fi
+
 kubectl -n ${NAMESPACE} cp ${CONTAINER}:/backup/${DUMPFILE} ${TMPDIR}/${DUMPFILE}
 kubectl -n ${NAMESPACE} exec ${CONTAINER} -- /bin/bash -c "rm -rf /backup"
