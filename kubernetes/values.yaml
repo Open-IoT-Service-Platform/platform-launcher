@@ -188,7 +188,7 @@ ruleEngine:
 
 metricsAggregator:
   metricsTopic: "metrics"
-  url: "http://services-server/metrics-aggregator-bundled-0.1.1.jar"
+  url: "http://services-server/metrics-aggregator-bundled-0.2.0.jar"
   checkpointingInterval : "10000"
 
 websocketServer:
