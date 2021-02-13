@@ -169,7 +169,7 @@ commands:
             retval=2;
             until [ ${retval} -eq 0 ]; do
               make undeploy-oisp
-              make deploy-oisp-test DOCKER_TAG=test
+              (for i in {1..20}; do sleep 60; echo .; done&) &&  make deploy-oisp-test DOCKER_TAG=test
               make test
               retval=$?
             done
