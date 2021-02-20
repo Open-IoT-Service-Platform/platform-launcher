@@ -56,12 +56,7 @@ services:
     image: oisp/mqtt-gateway:${DOCKER_TAG}
     build:
       context: ./oisp-mqtt-gw
-      dockerfile: Dockerfile-gateway
-  mqtt-broker:
-    image: oisp/mqtt-broker:${DOCKER_TAG}
-    build:
-      context: ./oisp-mqtt-gw
-      dockerfile: Dockerfile-broker
+      dockerfile: Dockerfile
   grafana:
     image: oisp/grafana:${DOCKER_TAG}
     build:

@@ -1,0 +1,80 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: emqx-cert-insert
+  annotations:
+    "helm.sh/hook-weight": "40"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+    "helm.sh/hook": post-install, post-upgrade
+spec:
+  template:
+    spec:
+      serviceAccountName: emqx-cert-insert
+      containers:
+      - name: emqx-cert-insert
+        image: oisp/backup-service:{{ .Values.tag }}
+        args:
+          - kubectl
+          - -n
+          - {{ .Release.Namespace }}
+          - patch
+          - sts
+          - {{ .Values.emqx.fullnameOverride }}
+          - --patch-file
+          - /patch.yaml
+        volumeMounts:
+        - name: patch-cfg
+          mountPath: /patch.yaml
+          subPath: patchfile
+      restartPolicy: OnFailure
+      volumes:
+      - name: patch-cfg
+        configMap:
+          name: emqx-cert-insert
+  backoffLimit: 10
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: emqx-cert-insert
+  labels:
+    app: emqx-cert-insert
+data:
+  patchfile: |+
+    spec:
+      template:
+        spec:
+          containers:
+          - name: {{ .Values.emqx.fullnameOverride }}   
+            volumeMounts:
+            - mountPath: {{ .Values.mqtt.certs.rootpath }}
+              name: cert
+              readOnly: true
+          volumes:  
+          - name: cert
+            secret:
+              defaultMode: 420
+              items:
+              - key: tls.crt
+                path: {{ .Values.mqtt.certs.cafile }}
+              - key: tls.key
+                path: {{ .Values.mqtt.certs.keyfile }}
+              secretName: {{ .Values.certmanager.secret }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: emqx-cert-insert
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: emqx-cert-insert
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: emqx-cert-insert
+    namespace: {{.Release.Namespace}}

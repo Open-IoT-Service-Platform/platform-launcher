@@ -16,3 +16,13 @@ dependencies:
   version: 0.20.8
   repository: "@incubator"
   condition: less_resources
+- name: emqx
+  alias: emqxtest
+  version: 4.2.6
+  repository: https://repos.emqx.io/charts
+  condition: less_resources
+- name: emqx
+  alias: emqx
+  version: 4.2.6
+  repository: https://repos.emqx.io/charts
+  condition: production

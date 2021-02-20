@@ -37,7 +37,7 @@
 		        "topic": "heartbeat"
 		},
 		"mqtt": {
-            "host": "mqtt-server",
+            "host": "emqx",
             "port": 8883,
             "qos": 1,
             "retain": false,
