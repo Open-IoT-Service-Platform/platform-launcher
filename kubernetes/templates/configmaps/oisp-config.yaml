@@ -143,7 +143,6 @@ data:
     "password": "{{ .Values.keycloak.keycloak.password }}"
     }
   keycloak-frontend-secret: {{ .Values.keycloak.frontend.secret }}
-  keycloak-mqtt-broker-secret: {{ .Values.keycloak.mqttBroker.secret }}
   keycloak-websocket-server-secret: {{ .Values.keycloak.websocketServer.secret }}
   gateway: |
     {
@@ -207,30 +206,15 @@ data:
     }
   mqtt-gateway: |
     {
-    "mqttBrokerUrl": "localhost",
-    "mqttBrokerPort": "8883",
+    "mqttBrokerUrl": "{{ .Values.mqtt.broker.url }}",
+    "mqttBrokerLocalPort": "{{ .Values.mqtt.broker.localport }}",
     "mqttBrokerUsername": "{{ .Values.mqtt.broker.username }}",
     "mqttBrokerPassword": "{{ .Values.mqtt.broker.password }}",
-    "frontendUri": "frontend",
-    "frontendPort": "4001",
-    "frontendSystemUser": "{{ .Values.systemuser.username }}",
-    "frontendSystemPassword": "{{ .Values.systemuser.password }}",
+    "authServicePort": "{{ .Values.mqtt.gateway.port }}",
     "redisConf": "@@OISP_REDIS_CONFIG",
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
     "postgresConfig": "@@OISP_POSTGRES_CONFIG",
-    "aesKey": "/app/keys/mqtt/mqtt_gw_secret.key"
-    }
-  mqtt-broker: |
-    {
-    "redisConf": "@@OISP_REDIS_CONFIG",
-    "jwtPubKey": "/app/keys/public.pem",
-    "mqttBrokerUserName": "{{ .Values.mqtt.broker.username }}",
-    "mqttBrokerPassword": "{{ .Values.mqtt.broker.password }}",
-    "mqttBrokerPort": "8883",
-    "aesKey": "/app/keys/mqtt/mqtt_gw_secret.key",
-    "cafile": "{{ .Values.mqtt.certs.rootpath }}/{{ .Values.mqtt.certs.cafile }}",
-    "keyfile": "{{ .Values.mqtt.certs.rootpath }}/{{ .Values.mqtt.certs.keyfile }}",
-    "certfile": "{{ .Values.mqtt.certs.rootpath }}/{{ .Values.mqtt.certs.certfile }}"
+    "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG"
     }
   streamer: |
     {

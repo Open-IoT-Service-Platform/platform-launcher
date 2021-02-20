@@ -2,32 +2,31 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: mqtt-server
-  name: mqtt-server
+    app: mqtt-gateway
+  name: mqtt-gateway
 spec:
   ports:
-  - port: 8883
-  clusterIP: None
+  - port: {{ .Values.mqtt.gateway.port }}
   selector:
-    app: mqtt-server
+    app: mqtt-gateway
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mqtt-server
+  name: mqtt-gateway
   labels:
-    app: mqtt-server
+    app: mqtt-gateway
 spec:
-  serviceName: "mqtt-server"
+  serviceName: "mqtt-gateway"
   replicas: 1
   selector:
     matchLabels:
-      app: mqtt-server
+      app: mqtt-gateway
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: mqtt-server
+        app: mqtt-gateway
     spec:
       containers:
       - name: mqtt-gateway
@@ -36,20 +35,16 @@ spec:
         {{ else }}
         image: oisp/mqtt-gateway:{{ .Values.tag }}
         {{ end }}
+        ports:
+        - containerPort: {{ .Values.mqtt.gateway.port }}
         command: ["./wait-for-it.sh"]
         args:
-        - localhost:8883
-        - -t
-        - "3000000"
-        - -s
-        - --
-        - ./wait-for-it.sh
         - redis:6379
         - -t
         - "300000"
         - -s
         - --
-        - "./start-analytics-gateway.sh"
+        - "./start-mqtt-kafka-bridge.sh"
         resources:
           {{ if .Values.less_resources }}
           requests:
@@ -83,99 +78,20 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: kafka
+        - name: OISP_KEYCLOAK_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: keycloak
         - name: OISP_POSTGRES_CONFIG
           valueFrom:
             configMapKeyRef:
               name: oisp-config
               key: postgres
         volumeMounts:
-        - mountPath: /app/keys
-          name: jwt-keys
-          readOnly: true
         readinessProbe:
           httpGet:
             path: /v1/api/health
-            port: 4005
-      - name: mqtt-broker
-        {{ if .Values.use_local_registry }}
-        image: registry.local:5000/oisp/mqtt-broker:{{ .Values.tag }}
-        {{ else }}
-        image: oisp/mqtt-broker:{{ .Values.tag }}
-        {{ end }}
-        ports:
-        - containerPort: 8883
-        resources:
-          {{ if .Values.less_resources }}
-          limits:
-            cpu: 100m
-          requests:
-            cpu: 100m
-          {{ else }}
-          limits:
-            cpu: 1000m
-          requests:
-            cpu: 250m
-          {{ end }}
-        env:
-        - name: OISP_MQTT_BROKER_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              name: oisp-config
-              key: mqtt-broker
-        - name: OISP_REDIS_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              name: oisp-config
-              key: redis
-        - name: OISP_KEYCLOAK_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              name: oisp-config
-              key: keycloak
-        readinessProbe:
-          httpGet:
-            path: /v1/api/health
-            port: 4005
-        volumeMounts:
-        - mountPath: /app/keys
-          name: jwt-keys
-          readOnly: true
-        - mountPath: {{ .Values.mqtt.certs.rootpath }}
-          name: cert
-          readOnly: true
+            port: {{ .Values.mqtt.gateway.port }}
       imagePullSecrets:
       - name: dockercred
-      volumes:
-      - name: jwt-keys
-        secret:
-          defaultMode: 420
-          items:
-          - key: jwt.publickey
-            path: public.pem
-          - key: jwt.privatekey
-            path: private.pem
-          - key: mqtt.key
-            path: mqtt/mqtt_gw_secret.key
-          secretName: oisp-secrets
-      - name: cert
-        secret:
-          defaultMode: 420
-          items:
-          - key: tls.crt
-            path: {{ .Values.mqtt.certs.cafile }}
-          - key: tls.key
-            path: {{ .Values.mqtt.certs.keyfile }}
-          secretName: {{ .Values.certmanager.secret }}
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: mqtt
-spec:
-  rules:
-  - host: {{ .Values.hosts.mqttserver }}
-    http:
-      paths:
-      - backend:
-          serviceName: mqtt-server
-          servicePort: 8883
