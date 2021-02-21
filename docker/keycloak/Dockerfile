@@ -1,8 +1,8 @@
 ARG KEYCLOAK_VERSION="8.0.1"
 
-FROM maven:3.6.1-jdk-8-alpine AS keycloak-modules-builder
+FROM maven:3.6.3-jdk-8-slim AS keycloak-modules-builder
 
-RUN apk update && apk add build-base
+RUN apt -y -qq update && apt -y -qq install build-essential
 
 RUN mkdir /deployments
 
