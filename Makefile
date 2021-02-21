@@ -320,7 +320,7 @@ build: .init
 	@if [[ $$(printf "$(CONTAINERS)" | grep "opentsdb") ]]; then \
 		docker-compose -f docker-compose.yml build $(DOCKER_COMPOSE_ARGS) hbase; \
 	fi
-	@docker-compose -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml build --parallel $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
+	@docker-compose -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml build $(PARALLEL_BUILD) $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
 
 ## update: Update all subrepositories to latest origin/develop
 ##     For competabilty, this will also backup and remove setup-environment.sh
