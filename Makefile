@@ -20,6 +20,7 @@ BRANCH:=$(shell git branch| grep \*| cut -d ' ' -f2)
 export TEST = 0
 
 COMPOSE_PROJECT_NAME?="oisp"
+PARALLEL_BUILD?="--parallel"
 CONTAINERS?=$(shell docker-compose --log-level ERROR config --services)
 EXT_CONTAINERS=cassandra;gcr.io/cassandra-operator/cassandra-3.11.6:v6.4.0 cassandra;gcr.io/cassandra-operator/cassandra-operator:v6.7.0 sidecar;gcr.io/cassandra-operator/instaclustr-icarus:1.0.1 kafka;confluentinc/cp-kafka:5.0.1
 CONTAINERS_AGENT=oisp-testsensor oisp-iot-agent
@@ -320,7 +321,7 @@ build: .init
 	@if [[ $$(printf "$(CONTAINERS)" | grep "opentsdb") ]]; then \
 		docker-compose -f docker-compose.yml build $(DOCKER_COMPOSE_ARGS) hbase; \
 	fi
-	@docker-compose -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml build --parallel $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
+	@docker-compose -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml build $(PARALLEL_BUILD) $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
 
 ## update: Update all subrepositories to latest origin/develop
 ##     For competabilty, this will also backup and remove setup-environment.sh
