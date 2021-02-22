@@ -1,9 +1,11 @@
 printf "\033[1mInstalling docker\n"
 printf -- "-----------------\033[0m\n"
 sudo apt -qq update
-sudo apt -qq install docker.io -y
-sudo systemctl start docker
-sudo systemctl enable docker
+sudo apt-get -qq install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt -qq update
+sudo apt-get install -y docker-ce=5:19.03.15~3-0~ubuntu-$(lsb_release -cs) docker-ce-cli=5:19.03.15~3-0~ubuntu-$(lsb_release -cs) containerd.io
 printf "\033[1mSuccessfully installed %s\033[0m\n" "$(docker --version)"
 printf "\n"
 
@@ -42,7 +44,7 @@ cd $CURR_DIR
 printf "\033[1mInstalling test dependencies\n"
 printf -- "----------------------------\033[0m\n"
 sudo pip install shyaml
-sudo apt -qq install nodejs npm make git
+sudo apt -qq -y install nodejs npm make git
 curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh -o install_nvm.sh
 bash install_nvm.sh
 source ~/.profile
