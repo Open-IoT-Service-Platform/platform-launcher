@@ -76,8 +76,6 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: backup-setup
-  annotations:
-    "helm.sh/hook-weight": "40"
 spec:
   template:
     spec:
