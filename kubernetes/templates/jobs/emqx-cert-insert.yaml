@@ -27,6 +27,8 @@ spec:
           mountPath: /patch.yaml
           subPath: patchfile
       restartPolicy: OnFailure
+      imagePullSecrets:
+      - name: dockercred
       volumes:
       - name: patch-cfg
         configMap:
