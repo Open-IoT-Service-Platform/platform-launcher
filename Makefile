@@ -144,6 +144,7 @@ deploy-oisp: check-docker-cred-env generate_keys
 		--set ruleEngine.gearpump.password="$(call randomPass)" \
 		--set websocketServer.password="$(call randomPass)" \
 		--set stolon.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
+		--set postgres.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
 		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_PASSWORD}" \
 		--set postgres.password="$(call randomPass)" \
 		--set keycloak.keycloak.password="$(call randomPass)" \
@@ -179,6 +180,7 @@ upgrade-oisp: check-docker-cred-env backup
 		--set ruleEngine.gearpump.password="$${RULEENGINE_GEARPUMP_PASSWORD}" \
 		--set websocketServer.password="$${WEBSOCKETSERVER_PASSWORD}" \
 		--set stolon.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
+		--set postgres.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
 		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_SU_PASSWORD}" \
 		--set postgres.password="$${POSTGRES_PASSWORD}" \
 		--set keycloak.keycloak.password="$${KEYCLOAK_PASSWORD}" \
@@ -527,7 +529,7 @@ ifndef BACKUPFILE
 	$(eval BACKUPFIL := backups/database.sql)
 endif
 	$(call msg, "Restoring DB backup");
-	export DBONLY=true && util/backup/db_restore.sh backups/ $(NAMESPACE)
+	export DBONLY=true && export DBHOSTNAME=acid-oisp && util/backup/db_restore.sh backups/ $(NAMESPACE)
 
 ## help: Show this help message
 ##

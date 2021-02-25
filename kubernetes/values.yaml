@@ -310,7 +310,9 @@ jwt:
   x509: "No cert set"
 
 postgres:
-  username: oisp_user
+  pgSuperuserName: superuser
+  pgSuperuserPassword: supersecret
+  username: oispuser
   password: supersecret
 
 # Docker image tag

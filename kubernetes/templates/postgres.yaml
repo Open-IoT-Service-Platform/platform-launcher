@@ -1,0 +1,31 @@
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: acid-oisp
+#  namespace: default
+spec:
+  patroni:
+    synchronous_mode: true
+  teamId: "acid"
+  volume:
+    size: 10Gi
+  numberOfInstances: 2
+  users:
+    superuser:  # database owner
+    - superuser
+    - createdb
+    oispuser: []  # role for application foo
+#  databases:
+#    foo: superuser  # dbname: owner
+#  preparedDatabases:
+#    bar: {}
+  postgresql:
+    version: "12"
+# TODO make this template dependent (low resources mode)
+  resources:
+    requests:
+      cpu: 50m
+      memory: 200Mi
+    limits:
+      cpu: 50m
+      memory: 200Mi
