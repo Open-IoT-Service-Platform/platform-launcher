@@ -10,7 +10,7 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s 
     mv ./kubectl /usr/local/bin/kubectl
 
 # Install helm
-RUN wget https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz && tar xvzf helm-*.tar.gz && mv linux-amd64/helm /usr/local/bin/helm
+RUN wget https://get.helm.sh/helm-v3.5.2-linux-amd64.tar.gz && tar xvzf helm-*.tar.gz && mv linux-amd64/helm /usr/local/bin/helm
 
 #RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
