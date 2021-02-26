@@ -512,24 +512,24 @@ endif
 ifdef S3BUCKET
 	@rm -rf /tmp/$(BACKUPFILE)
 else
-	@rm -rf /tmp/$(TMPDIR) /tmp/$(TMPDIR).tgz
+	@rm -rf /tmp/${TMPDIR} /tmp/$(TMPDIR).tgz
 endif
 
-## backup-db only, backup is saved in backups/database.sql
+## backup-db only, backup is saved in TMPDIR/database.sql
 ##
 backup-db:
 	$(call msg, "Creating DB backup");
 	mkdir -p backups;
-	util/backup/db_dump.sh backups $(NAMESPACE)
+	util/backup/db_dump.sh $(TMPDIR) $(NAMESPACE)
 
-## restore-db only, from backups/database.sql
+## restore-db only, from TMPDIR/database.sql
 ##
 restore-db:
 ifndef BACKUPFILE
 	$(eval BACKUPFIL := backups/database.sql)
 endif
 	$(call msg, "Restoring DB backup");
-	export DBONLY=true && export DBHOSTNAME=acid-oisp && util/backup/db_restore.sh backups/ $(NAMESPACE)
+	export DBONLY=true && util/backup/db_restore.sh $(TMPDIR) $(NAMESPACE)
 
 ## help: Show this help message
 ##
@@ -543,10 +543,10 @@ help:
 #-----------------
 
 define msg
-	tput setaf 2 && \
-	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo "" && \
+	@tput setaf 2 && \
+	for i in $(shell seq 1 60 ); do echo -n "-"; done; echo "" && \
 	echo -e "\t"$1 && \
-	for i in $(shell seq 1 120 ); do echo -n "-"; done; echo "" && \
+	for i in $(shell seq 1 60 ); do echo -n "-"; done; echo "" && \
 	tput sgr0
 endef
 

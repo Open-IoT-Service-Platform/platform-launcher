@@ -57,7 +57,7 @@ echo "Found database container:" $CONTAINER
 DBNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".dbname")
 USERNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".su_username")
 PASSWORD=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".su_password")
-HOSTNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".hostname")
+DBHOSTNAME="${DBHOSTNAME:-$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".hostname")}"
 
 if [ "${DEBUG}" = "true" ]; then
   echo parameters:
@@ -66,11 +66,11 @@ if [ "${DEBUG}" = "true" ]; then
   echo DBNAME = ${DBNAME}
   echo USERNAME = ${USERNAME}
   echo PASSWORD = ${PASSWORD}
-  echo HOSTNAME = ${HOSTNAME}
+  echo DBHOSTNAME = ${DBHOSTNAME}
 fi
 
 # sanity check: If one of paramters is empty - stop
-if [ -z "${USERNAME}" ] || [ -z "${DBNAME}" ] || [ -z "${PASSWORD}" ] || [ -z "${HOSTNAME}" ]; then
+if [ -z "${USERNAME}" ] || [ -z "${DBNAME}" ] || [ -z "${PASSWORD}" ] || [ -z "${DBHOSTNAME}" ]; then
   echo paramters not healthy. Some are empty - Bye
   exit 1
 fi
