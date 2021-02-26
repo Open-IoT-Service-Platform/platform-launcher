@@ -72,7 +72,7 @@ echo "Found database container:" $CONTAINER
 DBNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".dbname")
 USERNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".su_username")
 PASSWORD=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".su_password")
-HOSTNAME=$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".writeHostname")
+DBHOSTNAME="${DBHOSTNAME:-$(kubectl -n ${NAMESPACE} get cm/oisp-config -o jsonpath='{..postgres}'| jq ".writeHostname")}"
 
 if [ ${DEBUG} = "true" ]; then
   echo parameters:
@@ -81,11 +81,11 @@ if [ ${DEBUG} = "true" ]; then
   echo DBNAME = ${DBNAME}
   echo USERNAME = ${USERNAME}
   echo PASSWORD = ${PASSWORD}
-  echo HOSTNAME = ${HOSTNAME}
+  echo DBHOSTNAME = ${DBHOSTNAME}
 fi
 
 # sanity check: If one of paramters is empty - stop
-if [ -z "${USERNAME}" ] || [ -z "${DBNAME}" ] || [ -z "${PASSWORD}" ] || [ -z "${HOSTNAME}" ]; then
+if [ -z "${USERNAME}" ] || [ -z "${DBNAME}" ] || [ -z "${PASSWORD}" ] || [ -z "${DBHOSTNAME}" ]; then
   echo USERNAME is empty - Bye
   exit 1
 fi
@@ -120,9 +120,9 @@ if [ -z "${DBONLY}" ]; then
     echo "password:" ${PASSWORD}
     echo "new superpassword:" ${NEW_SUPERPASSWORD}
 
-    echo kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=require; psql -h ${HOSTNAME} -U ${USERNAME}  -d ${DBNAME}"
+    echo kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=require; psql -h ${DBHOSTNAME} -U ${USERNAME}  -d ${DBNAME}"
 
-    if (echo "ALTER USER oisp_user WITH PASSWORD '${NEW_USERPASSWORD}';" | kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=require; psql -h ${HOSTNAME} -U ${USERNAME}  -d ${DBNAME}"); then
+    if (echo "ALTER USER oisp_user WITH PASSWORD '${NEW_USERPASSWORD}';" | kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=require; psql -h ${DBHOSTNAME} -U ${USERNAME}  -d ${DBNAME}"); then
 	echo "User password changed"
     else
 	echo "Failed to change user password."
@@ -130,7 +130,7 @@ if [ -z "${DBONLY}" ]; then
     fi
     echo "Moving on  the superuser"
 
-    echo "ALTER USER superuser WITH PASSWORD '${NEW_SUPERPASSWORD}';" | kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=require;  psql -h ${HOSTNAME} -U ${USERNAME}  -d ${DBNAME} -h ${HOSTNAME}"
+    echo "ALTER USER superuser WITH PASSWORD '${NEW_SUPERPASSWORD}';" | kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=require;  psql -h ${DBHOSTNAME} -U ${USERNAME}  -d ${DBNAME} -h ${DBHOSTNAME}"
     echo "Password restored"
 else
     SCRIPT_DIR=$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
@@ -141,7 +141,7 @@ fi
 echo restore database
 kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "mkdir -p /backup"
 kubectl -n ${NAMESPACE} cp ${TMPDIR}/${DUMPFILE} ${CONTAINER}:/backup/${DUMPFILE}
-kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${NEW_SUPERPASSWORD}; pg_restore -c -U ${USERNAME}  -d ${DBNAME} -h ${HOSTNAME} < /backup/${DUMPFILE}; rm -rf /backup"
+kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${NEW_SUPERPASSWORD}; pg_restore -c -U ${USERNAME}  -d ${DBNAME} -h ${DBHOSTNAME} < /backup/${DUMPFILE}; rm -rf /backup"
 
 echo set user rights
 # retrieve new passwords and users
