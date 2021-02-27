@@ -43,25 +43,32 @@ Build local platform based on git tags
 
 A local platform is mainly meant for functional testing, it is therefore not providing any high availability and should not be used for production deployments.
 It can be built and deployed independently of whether you have dockerhub access to OISP repository.
-In the following, we describe the build, deploy, and test of ``v2.0.0-beta.1`` version on Ubuntu 18.04 LTS
+In the following, we describe the build, deploy, and test of ``v2.0.1-beta.1`` version on Ubuntu 18.04 LTS
 
 .. code-block:: bash
 
-  sudo apt install net-tools
+  sudo apt install net-tools git make
   git clone https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 
   cd platform-launcher/
-  git checkout v2.0.0-beta.1
+  git checkout v2.0.1-beta.1
   cd util/
   sudo bash ./setup-ubuntu18.04.sh
-  cd ..
+  sudo chown -R $USER ~/.config ~/k3s ~/.cache
+  sudo usermod  -aG docker $USER
+
+After that one has to logout and login to make sure the docker group assignment becomes active. After login, move again to the
+diretory is ``platform-launcher``
+
+.. code-block:: bash
+
   git submodule update --init --recursive
   export NODOCKERLOGIN=true
 
-  sudo -E DEBUG=true  DOCKER_TAG=v2.0.0-beta.1 make build
-  sudo -E DEBUG=true make DOCKER_TAG=v2.0.0-beta.1 import-images
-  sudo -E DEBUG=true make DOCKER_TAG=v2.0.0-beta.1 deploy-oisp-test
-  sudo make test
+  DEBUG=true  DOCKER_TAG=v2.0.1-beta.1 make build
+  DEBUG=true make DOCKER_TAG=v2.0.1-beta.1 import-images
+  DEBUG=true make DOCKER_TAG=v2.0.1-beta.1 deploy-oisp-test
+  make test
 
 
 .. _access-and-login:
