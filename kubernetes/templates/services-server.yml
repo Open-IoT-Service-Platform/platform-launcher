@@ -31,7 +31,7 @@ spec:
       {{ if .Values.use_local_registry }}
       - image: registry.local:5000/oisp/services-server:{{ .Values.tag }}
       {{ else }}
-      - image: oisp/services-server:{{ .Values.tag }}
+      - image: {{ .Values.imagePrefix }}/services-server:{{ .Values.tag }}
       {{ end }}
         name: services-server
         resources:

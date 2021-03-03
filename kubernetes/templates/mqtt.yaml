@@ -33,7 +33,7 @@ spec:
         {{ if .Values.use_local_registry }}
         image: registry.local:5000/oisp/mqtt-gateway:{{ .Values.tag }}
         {{ else }}
-        image: oisp/mqtt-gateway:{{ .Values.tag }}
+        image: {{ .Values.imagePrefix }}/mqtt-gateway:{{ .Values.tag }}
         {{ end }}
         ports:
         - containerPort: {{ .Values.mqtt.gateway.port }}

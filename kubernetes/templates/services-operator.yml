@@ -16,7 +16,7 @@ spec:
       {{ if .Values.use_local_registry }}
       - image: registry.local:5000/oisp/services-operator:{{ .Values.tag }}
       {{ else }}
-      - image: oisp/services-operator:{{ .Values.tag }}
+      - image: {{ .Values.imagePrefix }}/services-operator:{{ .Values.tag }}
       {{ end }}
         name: services-operator
         volumeMounts:

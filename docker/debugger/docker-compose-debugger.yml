@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   debugger:
-    image: oisp/debugger:${DOCKER_TAG}
+    image: ${DOCKER_PREFIX:-oisp}/debugger:${DOCKER_TAG}
     build:
       context: docker/debugger
       labels:

@@ -1,3 +1,7 @@
+# The following two should always be changed together!
+imagePrefix: oisp
+keycloakImageVar: &keycloakImage "oisp/keycloak"
+
 # Credentials to pull images from docker registry
 imageCredentials:
     registry: docker.io
@@ -222,7 +226,7 @@ keycloak:
   nameOverride: "keycloak"
   keycloak:
     image:
-      repository: oisp/keycloak
+      repository: *keycloakImage
       pullSecrets:
       - dockercred
       tag: latest

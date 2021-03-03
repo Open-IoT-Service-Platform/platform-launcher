@@ -17,34 +17,34 @@ version: '3.7'
 
 services:
   websocket-server:
-    image: oisp/websocket-server:${DOCKER_TAG}
+    image: ${DOCKER_PREFIX:-oisp}/websocket-server:${DOCKER_TAG}
     build:
       context: ./oisp-websocket-server
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_WEBSOCKET_SERVER}
   frontend:
-    image: oisp/frontend:${DOCKER_TAG}
+    image: ${DOCKER_PREFIX:-oisp}/frontend:${DOCKER_TAG}
     build:
       context: ./oisp-frontend/public-interface
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_FRONTEND}
   backend:
-    image: oisp/backend:${DOCKER_TAG}
+    image: ${DOCKER_PREFIX:-oisp}/backend:${DOCKER_TAG}
     build:
       context: ./oisp-backend
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_BACKEND}
   streamer:
-    image: oisp/streamer:${DOCKER_TAG}
+    image: ${DOCKER_PREFIX:-oisp}/streamer:${DOCKER_TAG}
     build:
       context: ./oisp-services/frontends/oisp-streamer
       labels:
         - oisp=true
   kairosdb:
-    image: oisp/kairosdb:${DOCKER_TAG}
+    image: ${DOCKER_PREFIX:-oisp}/kairosdb:${DOCKER_TAG}
     build:
       context: ./docker/kairosdb
       args:
@@ -53,39 +53,39 @@ services:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_OPENTSDB}
   mqtt-gateway:
-    image: oisp/mqtt-gateway:${DOCKER_TAG}
+    image: ${DOCKER_PREFIX:-oisp}/mqtt-gateway:${DOCKER_TAG}
     build:
       context: ./oisp-mqtt-gw
       dockerfile: Dockerfile
   grafana:
-    image: oisp/grafana:${DOCKER_TAG}
+    image: ${DOCKER_PREFIX:-oisp}/grafana:${DOCKER_TAG}
     build:
       context: ./docker/grafana
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
   backup-service:
-    image: oisp/backup-service:${DOCKER_TAG}
+    image: ${DOCKER_PREFIX:-oisp}/backup-service:${DOCKER_TAG}
     build:
       context: ./docker/backup-service
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
   keycloak:
-    image: oisp/keycloak:${DOCKER_TAG}
+    image: ${DOCKER_PREFIX:-oisp}/keycloak:${DOCKER_TAG}
     build:
       context: ./docker/keycloak
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
   services-operator:
-    image: oisp/services-operator:${DOCKER_TAG}
+    image: ${DOCKER_PREFIX:-oisp}/services-operator:${DOCKER_TAG}
     build:
       context: oisp-services/services-operator
       labels:
         - oisp=true
   services-server:
-    image: oisp/services-server:${DOCKER_TAG}
+    image: ${DOCKER_PREFIX:-oisp}/services-server:${DOCKER_TAG}
     build:
       context: ./oisp-services
       labels:

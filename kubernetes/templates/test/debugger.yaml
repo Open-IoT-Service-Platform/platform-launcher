@@ -46,7 +46,7 @@ spec:
         {{ if .Values.use_local_registry }}
         image: registry.local:5000/oisp/debugger:{{ .Values.tag }}
         {{ else }}
-        image: oisp/debugger:{{ .Values.tag }}
+        image: {{ .Values.imagePrefix }}/debugger:{{ .Values.tag }}
         {{ end }}
         imagePullPolicy: IfNotPresent
         ports:

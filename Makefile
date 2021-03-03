@@ -28,6 +28,7 @@ K3S_NODE=$(shell docker ps --format '{{.Names}}' | grep k3s_agent)
 KEYCLOAK_HELM_REPO:="https://codecentric.github.io/helm-charts"
 KEYCLOAK_HELM_REPO_NAME:="codecentric"
 export DOCKER_TAG?=latest
+export DOCKER_PREFIX?=oisp
 export GIT_COMMIT_PLATFORM_LAUNCHER=$(git rev-parse HEAD)
 export GIT_COMMIT_FRONTEND=$(git -C oisp-frontend rev-parse HEAD)
 export GIT_COMMIT_GEARPUMP=$(git -C oisp-gearpump-rule-engine rev-parse HEAD)
@@ -154,6 +155,8 @@ deploy-oisp: check-docker-cred-env generate_keys
 		--set jwt.private="$(PRIVATEKEY)" \
 		--set jwt.x509="$(X509CERT)" \
 		--set tag=$(DOCKER_TAG) \
+		--set imagePrefix=$(DOCKER_PREFIX) \
+		--set keycloak.keycloak.image.repository=$(DOCKER_PREFIX)/keycloak \
 		--set keycloak.keycloak.image.tag=$(DOCKER_TAG) \
 		$(HELM_ARGS)
 
@@ -187,6 +190,8 @@ upgrade-oisp: check-docker-cred-env backup
 		--set jwt.private="$${JWT_PRIVATE}" \
 		--set jwt.x509="$${JWT_X509}" \
 		--set tag=$(DOCKER_TAG) \
+		--set imagePrefix=$(DOCKER_PREFIX) \
+		--set keycloak.keycloak.image.repository=$(DOCKER_PREFIX)/keycloak \
 		--set keycloak.keycloak.image.tag=$(DOCKER_TAG) \
 		$(HELM_ARGS)
 
@@ -239,7 +244,7 @@ wait-until-ready:
 import-images:
 	@$(foreach image,$(CONTAINERS), \
 		printf $(image); \
-		docker save oisp/$(image):$(DOCKER_TAG) -o /tmp/$(image) && printf " is saved" && \
+		docker save $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) -o /tmp/$(image) && printf " is saved" && \
 		docker cp /tmp/$(image) $(K3S_NODE):/tmp/$(image) && printf ", copied" && \
 		docker exec -it $(K3S_NODE) ctr image import /tmp/$(image) >> /dev/null && printf ", imported\n"; \
 	)
@@ -257,7 +262,7 @@ import-images:
 import-images-agent:
 	@$(foreach image,$(CONTAINERS_AGENT), \
 		printf $(image); \
-		docker save oisp/$(image):$(DOCKER_TAG) -o /tmp/$(image) && printf " is saved" && \
+		docker save $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) -o /tmp/$(image) && printf " is saved" && \
 		docker cp /tmp/$(image) $(K3S_NODE):/tmp/$(image) && printf ", copied" && \
 		docker exec -it $(K3S_NODE) ctr image import /tmp/$(image) >> /dev/null && printf ", imported\n"; \
 	)
@@ -265,8 +270,8 @@ import-images-agent:
 import-images-to-local-registry:
 	@$(foreach image,$(CONTAINERS), \
                 printf $(image); \
-                docker tag oisp/$(image):$(DOCKER_TAG) registry.local:5000/oisp/$(image):$(DOCKER_TAG) && \
-                docker push registry.local:5000/oisp/$(image):$(DOCKER_TAG) && printf " done\n"; \
+                docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) registry.local:5000/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+                docker push registry.local:5000/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && printf " done\n"; \
         )
 
 ## open-shell: Open a shell to a random pod in DEPLOYMENT.
