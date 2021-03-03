@@ -32,7 +32,7 @@ spec:
         {{ if .Values.use_local_registry }}
         image: registry.local:5000/oisp/grafana:{{ .Values.tag }}
         {{ else }}
-        image: oisp/grafana:{{ .Values.tag }}
+        image: {{ .Values.imagePrefix }}/grafana:{{ .Values.tag }}
         {{ end }}
         ports:
         - containerPort: 3000

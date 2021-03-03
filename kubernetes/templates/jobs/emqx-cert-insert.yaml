@@ -12,7 +12,7 @@ spec:
       serviceAccountName: emqx-cert-insert
       containers:
       - name: emqx-cert-insert
-        image: oisp/backup-service:{{ .Values.tag }}
+        image: {{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
         args:
           - kubectl
           - -n

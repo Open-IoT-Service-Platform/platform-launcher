@@ -10,7 +10,7 @@ spec:
         spec:
           initContainers:
           - name: backup-service-init
-            image: oisp/backup-service:{{ .Values.tag }}
+            image: {{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
             imagePullPolicy: IfNotPresent
             args:
             - /bin/sh
@@ -28,7 +28,7 @@ spec:
           serviceAccountName: backup-service
           containers:
           - name: backup-service
-            image: oisp/backup-service:{{ .Values.tag }}
+            image: {{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
             imagePullPolicy: IfNotPresent
             args:
             - /bin/sh
@@ -81,7 +81,7 @@ spec:
     spec:
       containers:
       - name: create-checkpointing-dir
-        image: oisp/backup-service:{{ .Values.tag }}
+        image: {{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
         args:
         - /bin/sh
         - -c
