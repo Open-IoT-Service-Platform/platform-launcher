@@ -86,6 +86,7 @@ kafka:
   requestTimeout: 20000
   maxRetryTime: 2000
   retries: 5
+  maxPayloadSize: "20000000"
   resources:
     requests:
       cpu: 500m
@@ -117,6 +118,7 @@ kafkatest:
   requestTimeout: 20000
   maxRetryTime: 5000
   retries: 10
+  maxPayloadSize: "20000000"
   resources:
     requests:
       cpu: 50m
