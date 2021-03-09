@@ -115,7 +115,6 @@ data:
     }
   frontend-security: |
     {
-    "captcha_test_code": "s09ef48213s8fe8fw8rwer5489wr8wd5",
     "interaction_token_permision_key": "password",
     "private_pem_path": "./keys/private.pem",
     "public_pem_path": "./keys/public.pem"
