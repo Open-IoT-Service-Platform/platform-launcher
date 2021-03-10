@@ -80,6 +80,10 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: backup-setup
+  annotations:
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+    "helm.sh/hook": post-install  
 spec:
   template:
     spec:
