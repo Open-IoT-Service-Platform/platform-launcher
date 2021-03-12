@@ -1,8 +1,8 @@
 apiVersion: v1
-appVersion: "1.0.4"
+appVersion: "2.0.2-beta.1"
 description: OISP Helm Chart
 name: oisp
-version: 0.1.0
+version: 2.0.2-beta.1
 dependencies:
 - name: keycloak
   version: 6.0.4
