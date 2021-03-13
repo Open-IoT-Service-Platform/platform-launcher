@@ -23,6 +23,8 @@ Taking the `platform-launcher` repository the script can be found here:
 
   KUBECONFIG=<YOUR CONFIG> ./util/deploy_operators.sh
 
+.. _section-upgrade-helm:
+
 Upgrade the OISP Helm Chart
 ---------------------------
 
@@ -196,3 +198,24 @@ Now delete the pod, after it comes back you can import the users configuration f
 After upgrading do not forget to revert keycloak-sh to its old form. Otherwise you might lose crucial data due to overwriting.
 
 There are also other options that keycloak offers for exporting/importing. Check them out at `here <https://www.keycloak.org/documentation.html>`_.
+
+
+Updating from v2.0.1 to v2.0.2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#. Prepare kafka update by removing the old stateful-set: 
+
+.. code-block:: bash
+
+  keycloak -n <NAMESPACE> delete sts/oisp-kafka --cascade=false
+
+2. Apply update with helm (cf. :ref:`section-upgrade-helm`)
+
+3. Change ingress to route mqtt traffic to EMQX
+
+.. code-block:: bash
+
+  kubectl -n ingress-nginx edit cm/tcp-services
+  EDIT THE FOLLOWING:  "8883": oisp-staging/mqtt-server:8883 => "8883": oisp-staging/emqx:8883
+
+
