@@ -1,4 +1,4 @@
-ARG KEYCLOAK_VERSION="12.0.0"
+ARG KEYCLOAK_VERSION="12.0.4"
 
 FROM maven:3.6.3-jdk-8-slim AS keycloak-modules-builder
 
