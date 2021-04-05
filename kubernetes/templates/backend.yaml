@@ -34,6 +34,21 @@ spec:
       labels:
         app: backend
     spec:
+      initContainers:
+      - name: wait-for-kairos
+        {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/oisp/wait-for-it:{{ .Values.tag }}
+        {{ else }}
+        image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        {{ end }}
+        args: ["kairosdb:8080", "--", "echo", "kariosds is up"]
+      - name: wait-for-kafka
+        {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/oisp/wait-for-it:{{ .Values.tag }}
+        {{ else }}
+        image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        {{ end }}
+        args: [{{ .Values.kafka.service }}, "--", "echo", "kafka is up"]
       containers:
       - name: backend
         {{ if .Values.use_local_registry }}
@@ -43,21 +58,8 @@ spec:
         {{ end }}
         ports:
         - containerPort: 8080
-        args:
-        - ./wait-for-it.sh
-        - "kairosdb:8080"
-        - -t
-        - "600000"
-        - -s
-        - --
-        - ./wait-for-it.sh
-        - {{ .Values.kafka.service}}
-        - -t
-        - "300000"
-        - -s
-        - --
-        - make
-        - runjar
+        command: ["make"]
+        args: ["runjar"]
         env:
         - name: OISP_BACKEND_CONFIG
           valueFrom:

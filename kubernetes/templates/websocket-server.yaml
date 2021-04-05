@@ -31,6 +31,28 @@ spec:
       labels:
         app: websocket-server
     spec:
+      initContainers:
+      - name: wait-for-redis
+        {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/oisp/wait-for-it:{{ .Values.tag }}
+        {{ else }}
+        image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        {{ end }}
+        args: ["redis:6379", "--", "echo", "redis is up"]
+      - name: wait-for-kafka
+        {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/oisp/wait-for-it:{{ .Values.tag }}
+        {{ else }}
+        image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        {{ end }}
+        args: [{{ .Values.kafka.service }}, "--", "echo", "kafka is up"]
+      - name: wait-for-keycloak
+        {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/oisp/wait-for-it:{{ .Values.tag }}
+        {{ else }}
+        image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        {{ end }}
+        args: ["keycloak-http:4080", "--", "echo", "keycloak is up"]
       containers:
       - name: websocket-server
         {{ if .Values.use_local_registry }}
@@ -42,21 +64,6 @@ spec:
         - containerPort: 5000
           protocol: TCP
         args:
-        - ./wait-for-it.sh
-        - redis:6379
-        - -t
-        - "300000"
-        - --
-        - ./wait-for-it.sh
-        - {{ .Values.kafka.service}}
-        - "-t"
-        - "300000"
-        - "--"
-        - ./wait-for-it.sh
-        - keycloak-http:4080
-        - -t
-        - "300000"
-        - --
         - ./scripts/docker-start.sh
         resources:
           {{ if .Values.less_resources }}
