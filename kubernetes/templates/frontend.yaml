@@ -41,6 +41,101 @@ spec:
       labels:
         app: frontend
     spec:
+      initContainers:
+      - name: wait-for-redis
+        {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/oisp/wait-for-it:{{ .Values.tag }}
+        {{ else }}
+        image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        {{ end }}
+        args: ["redis:6379", "--", "echo", "redis is up"]
+      - name: wait-for-kafka
+        {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/oisp/wait-for-it:{{ .Values.tag }}
+        {{ else }}
+        image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        {{ end }}
+        args: [{{ .Values.kafka.service }}, "--", "echo", "kafka is up"]
+      - name: wait-for-keycloak
+        {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/oisp/wait-for-it:{{ .Values.tag }}
+        {{ else }}
+        image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        {{ end }}
+        args: ["keycloak-http:4080", "--", "echo", "keycloak is up"]
+      - name: prepare-db
+        {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/oisp/frontend:{{ .Values.tag }}
+        {{ else }}
+        image: {{ .Values.imagePrefix }}/frontend:{{ .Values.tag }}
+        {{ end }}
+        env:
+        - name: NODE_ENV
+          value: local
+        - name: PGSSLMODE
+          value: require
+        - name: OISP_FRONTEND_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: frontend
+        - name: OISP_POSTGRES_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: postgres
+        - name: OISP_REDIS_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: redis
+        - name: OISP_KAFKA_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: kafka
+        - name: OISP_SMTP_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: smtp
+        - name: OISP_FRONTENDSECURITY_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: frontend-security
+        - name: OISP_GATEWAY_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: gateway
+        - name: OISP_BACKENDHOST_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: backend-host
+        - name: OISP_WEBSOCKETUSER_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: websocket-user
+        - name: OISP_RULEENGINE_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: rule-engine
+        - name: OISP_MAIL_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: mail
+        - name: OISP_KEYCLOAK_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: keycloak
+        command: ["/bin/bash", "-c"]
+        args: ["node admin createDB; node admin updateDB; node admin addSystemUsers"]
       containers:
       - name: frontend
         {{ if .Values.use_local_registry }}
@@ -78,11 +173,10 @@ spec:
         - ./scripts/docker-start.sh
         - "--disable-rate-limits"
         env:
-        {{ if .Values.production }}
         - name: NODE_ENV
+        {{ if .Values.production }}
           value: production
         {{ else }}
-        - name: NODE_ENV
           value: local
         {{ end }}
         - name: OISP_FRONTEND_CONFIG
