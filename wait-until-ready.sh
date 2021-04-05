@@ -91,12 +91,11 @@ while kubectl -n $NAMESPACE get pods | grep -q Pending; \
     done;
 
 check_deployment backend ${NAMESPACE} backend 60
-check_job dbsetup ${NAMESPACE} 60
-check_sts keycloak ${NAMESPACE} 60
 check_deployment frontend ${NAMESPACE} frontend 60
-check_deployment kairosdb ${NAMESPACE} kairosdb 60
-check_deployment websocket-server ${NAMESPACE} websocket-server 60
-check_deployment mqtt-gateway ${NAMESPACE} mqtt-gateway 360
-check_beamservice rule-engine ${NAMESPACE} 240
+check_deployment mqtt-server ${NAMESPACE} mqtt-server 60
+check_deployment kairosdb ${NAMESPACE} mqtt-server 60
+check_deployment websocket-server ${NAMESPACE} mqtt-server 60
+check_sts keycloak ${NAMESPACE} 60
+check_beamservice rule-engine ${NAMESPACE} 180
 printf "\ndone\n"
 exit 0;
