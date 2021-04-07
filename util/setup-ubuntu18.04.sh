@@ -9,17 +9,14 @@ sudo apt-get install -y docker-ce=5:19.03.15~3-0~ubuntu-$(lsb_release -cs) docke
 printf "\033[1mSuccessfully installed %s\033[0m\n" "$(docker --version)"
 printf "\n"
 
-printf "\033[1mInstalling docker-compose\n"
-printf -- "-------------------------\033[0m\n"
-sudo curl -L "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-sudo usermod -aG docker $USER
-printf "\033[1mSuccessfully installed %s \033[0m\n" "$(docker-compose --version)"
+printf "\033[1mInstalling k3d\n"
+printf -- "-----------------\033[0m\n"
+curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
+printf "\033[1mSuccessfully installed %s\033[0m\n" "$(k3d --version)"
 printf "\n"
 
 printf "\033[1mInstalling kubectl\n"
 printf -- "------------------\033[0m\n"
-#sudo snap install kubectl --classic
 curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
 chmod +x ./kubectl
 sudo mv ./kubectl /usr/bin/kubectl
@@ -27,7 +24,6 @@ if [ ! -d ~/.kube ]; then
       mkdir ~/.kube
 fi
 printf "\033[1mSuccessfully installed kubectl\033[0m\n"
-export PATH=$PATH:/snap/bin
 kubectl version --short
 printf "\n"
 
