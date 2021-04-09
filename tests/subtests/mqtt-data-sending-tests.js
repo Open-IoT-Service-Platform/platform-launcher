@@ -366,7 +366,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager, mqtt
         },
         "receiveSingleDataPoint": function(done) {
             var listOfExpectedResults = flattenArray(dataValues1);
-            promtests.searchData(BASE_TIMESTAMP, 1 + BASE_TIMESTAMP, deviceToken, accountId, newDeviceId, componentId[0], false, {})
+            promtests.searchData(BASE_TIMESTAMP, 1 + BASE_TIMESTAMP, userToken, accountId, newDeviceId, componentId[0], false, {})
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series! (Expected:1, got:" + result.series.length + ")");}
                     var comparisonResult = comparePoints(listOfExpectedResults, result.series[0].points);
@@ -385,7 +385,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager, mqtt
             var foundComponentsMap = pValues.numComponents;
             var listOfExpectedResults = pValues.listOfExpectedResults;
 
-            promtests.searchData(BASE_TIMESTAMP + 1020, BASE_TIMESTAMP + 1080, deviceToken, accountId, newDeviceId, componentId, false, {})
+            promtests.searchData(BASE_TIMESTAMP + 1020, BASE_TIMESTAMP + 1080, userToken, accountId, newDeviceId, componentId, false, {})
                 .then((result) => {
                     if (result.series.length !== componentId.length) {
                         return done("Wrong number  of point series!");
@@ -414,7 +414,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager, mqtt
             var foundComponentMap = pValues.numComponents;
             var flattenedDataValues = pValues.flattenedDataValues;
             promtests.searchDataAdvanced(100000 + BASE_TIMESTAMP, 700000 + BASE_TIMESTAMP,
-                deviceToken, accountId, newDeviceId, componentId, true, undefined, undefined, undefined)
+                userToken, accountId, newDeviceId, componentId, true, undefined, undefined, undefined)
                 .then((result) => {
                     var mapping = findMapping(foundComponentMap, componentId, result.data[0].components);
                     if (result.data[0].components.length !== componentId.length) {
