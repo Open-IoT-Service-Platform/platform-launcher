@@ -587,7 +587,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
         },
         "receiveAggregatedDataPoints": function(done) {
             var listOfExpectedResults = flattenArray(dataValues1);
-            promtests.searchData(dataValues1Time, -1, deviceToken, accountId, deviceId, componentId[0], false, {})
+            promtests.searchData(dataValues1Time, -1, userToken, accountId, deviceId, componentId[0], false, {})
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     var comparisonResult = comparePoints(listOfExpectedResults, result.series[0].points);
@@ -620,7 +620,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             var foundComponentsMap = pValues.numComponents;
             var listOfExpectedResults = pValues.listOfExpectedResults;
 
-            promtests.searchData(dataValues2Time, -1, deviceToken, accountId, deviceId, componentId, false, {})
+            promtests.searchData(dataValues2Time, -1, userToken, accountId, deviceId, componentId, false, {})
                 .then((result) => {
                     if (result.series.length !== componentId.length) {
                         return done("Wrong number  of point series!");
@@ -660,7 +660,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
         },
         "receiveDataPointsWithLoc": function(done) {
             var flattenedDataValues = flattenArray(dataValues3);
-            promtests.searchData(dataValues3Time, -1, deviceToken, accountId, deviceId, componentId[0], true, {})
+            promtests.searchData(dataValues3Time, -1, userToken, accountId, deviceId, componentId[0], true, {})
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     var comparisonResult = comparePoints(flattenedDataValues, result.series[0].points);
@@ -693,7 +693,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             var pValues = prepareValues(dataValues4);
             var foundComponentMap = pValues.numComponents;
             var flattenedDataValues = pValues.flattenedDataValues;
-            promtests.searchDataAdvanced(dataValues4Time, -1, deviceToken, accountId, deviceId, componentId, true, undefined, undefined, undefined)
+            promtests.searchDataAdvanced(dataValues4Time, -1, userToken, accountId, deviceId, componentId, true, undefined, undefined, undefined)
                 .then((result) => {
                     var mapping = findMapping(foundComponentMap, componentId, result.data[0].components);
                     if (result.data[0].components.length !== componentId.length) {
@@ -728,7 +728,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             var pValues = prepareValues(dataValues4);
             var foundComponentMap = pValues.numComponents;
             var flattenedDataValues = flattenArray(dataValues4);
-            promtests.searchDataAdvanced(dataValues4Time, -1, deviceToken, accountId, deviceId, componentId, false, keys, undefined, undefined)
+            promtests.searchDataAdvanced(dataValues4Time, -1, userToken, accountId, deviceId, componentId, false, keys, undefined, undefined)
                 .then((result) => {
                     if (result.data[0].components.length !== 5) {
                         return done("Wrong number of point series!");
@@ -765,7 +765,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
                 flattenArray(dataValues2).length +
                 flattenArray(dataValues3).length +
                 flattenArray(dataValues4).length;
-            promtests.searchDataAdvanced(dataValues1Time, -1, deviceToken, accountId, deviceId, componentId, false, undefined, undefined, true)
+            promtests.searchDataAdvanced(dataValues1Time, -1, userToken, accountId, deviceId, componentId, false, undefined, undefined, true)
                 .then((result) => {
                     if (result.data[0].components.length !== 5) {
                         return done("Wrong number of point series!");
@@ -799,7 +799,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
                 return acc;
             }, [[Number.MIN_VALUE, Number.MAX_VALUE, 0, 0, 0], [Number.MIN_VALUE, Number.MAX_VALUE, 0, 0, 0]]);
 
-            promtests.searchDataAdvanced(dataValues1Time, -1, deviceToken, accountId, deviceId, componentId, false, undefined, "only", false)
+            promtests.searchDataAdvanced(dataValues1Time, -1, userToken, accountId, deviceId, componentId, false, undefined, "only", false)
                 .then((result) => {
                     if (result.data[0].components.length !== 5) {
                         return done("Wrong number of point series!");
@@ -820,7 +820,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
         },
         "receiveSubset": function(done) {
             promtests.searchDataAdvanced(dataValues2Time + 30, dataValues2Time + 60,
-                deviceToken, accountId, deviceId, [componentId[0]], false, undefined, undefined, false)
+                userToken, accountId, deviceId, [componentId[0]], false, undefined, undefined, false)
                 .then((result) => {
                     if (result.data[0].components.length !== 1) {done("Wrong number of point series!");}
                     assert.equal(result.rowCount, 3);
@@ -852,7 +852,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
         },
         "receiveMaxAmountOfSamples": function(done) {
             promtests.searchDataAdvanced(BASE_TIMESTAMP + 1000000, MAX_SAMPLES * 1000000 + BASE_TIMESTAMP,
-                deviceToken, accountId, deviceId, [componentId[0]], false, undefined, undefined, false)
+                userToken, accountId, deviceId, [componentId[0]], false, undefined, undefined, false)
                 .then((result) => {
                     if (result.data[0].components.length !== 1) {return done("Wrong number of point series!");}
                     assert.equal(result.rowCount, MAX_SAMPLES);
@@ -903,7 +903,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
         "receivePartiallySentData": function(done) {
             var listOfExpectedResults = flattenArray(dataValues5)
                 .filter((elem) => elem.component !== 2);
-            promtests.searchData(dataValues5StartTime, dataValues5StopTime, deviceToken, accountId, deviceId, componentId[0], false, {})
+            promtests.searchData(dataValues5StartTime, dataValues5StopTime, userToken, accountId, deviceId, componentId[0], false, {})
                 .then((result) => {
                     if (result.series.length !== 1) {
                         return done("Wrong number of point series!");
@@ -993,7 +993,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
         },
         "receiveDataFromAdmin": function(done) {
             var listOfExpectedResults = dataValues6;
-            promtests.searchData(dataValues6StartTime, dataValues6StopTime, deviceToken, accountId, deviceId, componentId[0], false, {})
+            promtests.searchData(dataValues6StartTime, dataValues6StopTime, userToken, accountId, deviceId, componentId[0], false, {})
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     var comparisonResult = comparePoints(listOfExpectedResults, result.series[0].points);
@@ -1064,7 +1064,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
         },
         "receiveRawData": function(done) {
             promtests.searchData(BASE_TIMESTAMP + 1000000, MAX_SAMPLES * DOWNSAMPLE_MULT * 1000 + 1000000 + BASE_TIMESTAMP,
-                deviceToken, accountId, deviceId, componentId[1], false, {})
+                userToken, accountId, deviceId, componentId[1], false, {})
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     assert.equal(result.series[0].points.length, MAX_SAMPLES_RETRIVE);
@@ -1081,7 +1081,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
         },
         "receiveMaxItems": function(done) {
             promtests.searchDataMaxItems(BASE_TIMESTAMP + 1000000, MAX_SAMPLES * DOWNSAMPLE_MULT * 1000 + 1000000 + BASE_TIMESTAMP,
-                deviceToken, accountId, deviceId, [componentId[1]], false, {}, MAX_ITEMS_TEST_SAMPLES)
+                userToken, accountId, deviceId, [componentId[1]], false, {}, MAX_ITEMS_TEST_SAMPLES)
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     assert.equal(result.series[0].points.length, MAX_ITEMS_TEST_SAMPLES);
@@ -1099,7 +1099,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             var aggregator = {};
             aggregator[componentId[1]] = {"name": "avg"};
             promtests.searchDataMaxItems(BASE_TIMESTAMP + 1000000, MAX_SAMPLES * DOWNSAMPLE_MULT * 1000 + 1000000 + BASE_TIMESTAMP,
-                deviceToken, accountId, deviceId, [componentId[1]], false, {}, null, null, aggregator)
+                userToken, accountId, deviceId, [componentId[1]], false, {}, null, null, aggregator)
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     assert.equal(result.series[0].points.length, MAX_SAMPLES_RETRIVE);
@@ -1118,7 +1118,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             var aggregator = {};
             aggregator[componentId[1]] = {"name": "max"};
             promtests.searchDataMaxItems(BASE_TIMESTAMP + 1000000, MAX_SAMPLES * DOWNSAMPLE_MULT * 1000 + 1000000 + BASE_TIMESTAMP,
-                deviceToken, accountId, deviceId, [componentId[1]], false, {}, null, null, aggregator)
+                userToken, accountId, deviceId, [componentId[1]], false, {}, null, null, aggregator)
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     assert.equal(result.series[0].points.length, MAX_SAMPLES_RETRIVE);
@@ -1137,7 +1137,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             var aggregator = {};
             aggregator[componentId[1]] = {"name": "min"};
             promtests.searchDataMaxItems(BASE_TIMESTAMP + 1000000, MAX_SAMPLES * DOWNSAMPLE_MULT * 1000 + 1000000 + BASE_TIMESTAMP,
-                deviceToken, accountId, deviceId, [componentId[1]], false, {}, null, null, aggregator)
+                userToken, accountId, deviceId, [componentId[1]], false, {}, null, null, aggregator)
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     assert.equal(result.series[0].points.length, MAX_SAMPLES_RETRIVE);
@@ -1156,7 +1156,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             var aggregator = {};
             aggregator[componentId[1]] = {"name": "sum"};
             promtests.searchDataMaxItems(BASE_TIMESTAMP + 1000000, MAX_SAMPLES * DOWNSAMPLE_MULT * 1000 + 1000000 + BASE_TIMESTAMP,
-                deviceToken, accountId, deviceId, [componentId[1]], false, {}, MAX_ITEMS_TEST_SAMPLES, null, aggregator)
+                userToken, accountId, deviceId, [componentId[1]], false, {}, MAX_ITEMS_TEST_SAMPLES, null, aggregator)
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     assert.equal(result.series[0].points.length, MAX_ITEMS_TEST_SAMPLES);
@@ -1179,7 +1179,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             var aggregator = {};
             aggregator[componentId[1]] = {"name": "avg", "sampling": {"unit": "seconds", "value": 3}};
             promtests.searchDataMaxItems(BASE_TIMESTAMP + 1000000, MAX_SAMPLES * DOWNSAMPLE_MULT * 1000 + 1000000 + BASE_TIMESTAMP,
-                deviceToken, accountId, deviceId, [componentId[1]], false, {}, null, null, aggregator)
+                userToken, accountId, deviceId, [componentId[1]], false, {}, null, null, aggregator)
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     var numExptectedSamples = Math.ceil(MAX_SAMPLES_RETRIVE/3.0);
@@ -1203,7 +1203,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             var aggregator = {};
             aggregator[componentId[1]] = {"name": "avg", "sampling": {"unit": "milliseconds", "value": 1500}};
             promtests.searchDataMaxItems(BASE_TIMESTAMP + 1000000, MAX_SAMPLES * DOWNSAMPLE_MULT * 1000 + 1000000 + BASE_TIMESTAMP,
-                deviceToken, accountId, deviceId, [componentId[1]], false, {}, null, null, aggregator)
+                userToken, accountId, deviceId, [componentId[1]], false, {}, null, null, aggregator)
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     var numExptectedSamples = Math.ceil(MAX_SAMPLES_RETRIVE/1.5);
@@ -1227,7 +1227,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             var aggregator = {};
             aggregator[componentId[1]] = {"name": "avg", "sampling": {"unit": "minutes", "value": 1}};
             promtests.searchDataMaxItems(BASE_TIMESTAMP + 1000000, MAX_SAMPLES * DOWNSAMPLE_MULT * 1000 + 1000000 + BASE_TIMESTAMP,
-                deviceToken, accountId, deviceId, [componentId[1]], false, {}, null, null, aggregator)
+                userToken, accountId, deviceId, [componentId[1]], false, {}, null, null, aggregator)
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     var numExptectedSamples = Math.ceil(MAX_SAMPLES_RETRIVE/60);
@@ -1251,7 +1251,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             var orders = {};
             orders[componentId[1]] = "desc";
             promtests.searchDataMaxItems(BASE_TIMESTAMP + 1000000, MAX_SAMPLES * DOWNSAMPLE_MULT * 1000 + 1000000 + BASE_TIMESTAMP,
-                deviceToken, accountId, deviceId, [componentId[1]], false, {}, null, orders, null)
+                userToken, accountId, deviceId, [componentId[1]], false, {}, null, orders, null)
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     assert.equal(result.series[0].points.length, MAX_SAMPLES_RETRIVE);
@@ -1270,7 +1270,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             var orders = {};
             orders[componentId[1]] = "desc";
             promtests.searchDataMaxItems(BASE_TIMESTAMP + 1000000, MAX_SAMPLES * DOWNSAMPLE_MULT * 1000 + 1000000 + BASE_TIMESTAMP,
-                deviceToken, accountId, deviceId, [componentId[1]], false, {}, 1, orders, null)
+                userToken, accountId, deviceId, [componentId[1]], false, {}, 1, orders, null)
                 .then((result) => {
                     if (result.series.length !== 1) {return done("Wrong number of point series!");}
                     assert.equal(result.series[0].points.length, 1);
@@ -1289,7 +1289,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             aggregator[componentId[1]] = {"name": "avg"};
             aggregator[componentId[0]] = {"name": "max", "sampling": {"unit": "seconds", "value": 1000}};
             promtests.searchDataMaxItems(BASE_TIMESTAMP + 1000000, MAX_SAMPLES * DOWNSAMPLE_MULT * 1000 + 1000000 + BASE_TIMESTAMP,
-                deviceToken, accountId, deviceId, [componentId[1], componentId[0]], false, {}, 100, null, aggregator)
+                userToken, accountId, deviceId, [componentId[1], componentId[0]], false, {}, 100, null, aggregator)
                 .then((result) => {
                     if (result.series.length !== 2) {return done("Wrong number of point series!");}
                     // the ordering of components in the results are non-deterministic
