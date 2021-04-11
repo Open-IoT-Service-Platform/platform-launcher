@@ -14,7 +14,11 @@ spec:
         spec:
           initContainers:
           - name: backup-service-init
+            {{ if .Values.use_local_registry }}
+            image: k3d-oisp.localhost:12345/oisp/backup-service:{{ .Values.tag }}
+            {{ else }}
             image: {{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
+            {{ end }}
             imagePullPolicy: IfNotPresent
             args:
             - /bin/sh
@@ -32,7 +36,11 @@ spec:
           serviceAccountName: backup-service
           containers:
           - name: backup-service
+            {{ if .Values.use_local_registry }}
+            image: k3d-oisp.localhost:12345/oisp/backup-service:{{ .Values.tag }}
+            {{ else }}
             image: {{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
+            {{ end }}
             imagePullPolicy: IfNotPresent
             args:
             - /bin/sh
@@ -83,13 +91,17 @@ metadata:
   annotations:
     "helm.sh/hook-weight": "0"
     "helm.sh/hook-delete-policy": "before-hook-creation"
-    "helm.sh/hook": post-install  
+    "helm.sh/hook": post-install
 spec:
   template:
     spec:
       containers:
       - name: create-checkpointing-dir
+        {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/oisp/backup-service:{{ .Values.tag }}
+        {{ else }}
         image: {{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
+        {{ end }}
         args:
         - /bin/sh
         - -c

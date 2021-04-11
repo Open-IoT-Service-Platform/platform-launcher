@@ -31,7 +31,7 @@ spec:
       containers:
       - name: mqtt-gateway
         {{ if .Values.use_local_registry }}
-        image: registry.local:5000/oisp/mqtt-gateway:{{ .Values.tag }}
+        image: k3d-oisp.localhost:12345/oisp/mqtt-gateway:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/mqtt-gateway:{{ .Values.tag }}
         {{ end }}

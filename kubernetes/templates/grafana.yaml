@@ -30,7 +30,7 @@ spec:
       containers:
       - name: grafana
         {{ if .Values.use_local_registry }}
-        image: registry.local:5000/oisp/grafana:{{ .Values.tag }}
+        image: k3d-oisp.localhost:12345/oisp/grafana:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/grafana:{{ .Values.tag }}
         {{ end }}

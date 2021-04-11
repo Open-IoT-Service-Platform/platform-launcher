@@ -14,7 +14,7 @@ spec:
       serviceAccountName: beamservices-operator
       containers:
       {{ if .Values.use_local_registry }}
-      - image: registry.local:5000/oisp/services-operator:{{ .Values.tag }}
+      - image: k3d-oisp.localhost:12345/oisp/services-operator:{{ .Values.tag }}
       {{ else }}
       - image: {{ .Values.imagePrefix }}/services-operator:{{ .Values.tag }}
       {{ end }}
