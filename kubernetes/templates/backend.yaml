@@ -35,7 +35,7 @@ spec:
       containers:
       - name: backend
         {{ if .Values.use_local_registry }}
-        image: registry.local:5000/oisp/backend:{{ .Values.tag }}
+        image: k3d-oisp.localhost:12345/oisp/backend:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/backend:{{ .Values.tag }}
         {{ end }}

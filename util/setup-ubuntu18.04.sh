@@ -15,6 +15,14 @@ curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
 printf "\033[1mSuccessfully installed %s\033[0m\n" "$(k3d --version)"
 printf "\n"
 
+printf "\033[1mInstalling k3d docker repo\n"
+printf -- "-----------------------\033[0m\n"
+k3d registry create oisp.localhost -p 12345
+echo "Adding to /etc/hosts:"
+echo "" | sudo tee -a /etc/hosts
+echo "127.0.0.1 k3d-oisp.localhost" | sudo tee -a /etc/hosts
+
+
 printf "\033[1mInstalling kubectl\n"
 printf -- "------------------\033[0m\n"
 curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
