@@ -244,37 +244,30 @@ wait-until-ready:
 ## import-images: Import images listed in CONTAINERS into local cluster
 ##
 import-images:
-	@$(foreach image,$(CONTAINERS), \
-		printf $(image); \
-		docker save $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) -o /tmp/$(image) && printf " is saved" && \
-		docker cp /tmp/$(image) $(K3S_NODE):/tmp/$(image) && printf ", copied" && \
-		docker exec -it $(K3S_NODE) ctr image import /tmp/$(image) >> /dev/null && printf ", imported\n"; \
+	$(foreach image,$(CONTAINERS), \
+		printf $(image) && \
+		docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		docker push k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		printf ", imported\n"
 	)
 	@$(foreach image,$(EXT_CONTAINERS), \
 		arr=( $(subst ;, ,$(image)) ); \
 		printf $${arr[1]};  \
 		docker pull $${arr[1]} > /dev/null && printf ", pulled" && \
-		docker save $${arr[1]} -o /tmp/$${arr[0]} > /dev/null && printf ", saved" && \
-		docker cp /tmp/$${arr[0]} $(K3S_NODE):/tmp/$${arr[0]} && printf ", copied" && \
-		docker exec -it $(K3S_NODE) ctr image import /tmp/$${arr[0]} > /dev/null && printf ", imported\n"; \
+		docker tag $${arr[1]} k3d-oisp.localhost:12345/$${arr[1]} && \
+		docker push k3d-oisp.localhost:12345/$${arr[1]} && \
+		printf ", saved\n";
 	)
 
 ## import-images-agent: Import images to deploy OISP-Agent
 ##
 import-images-agent:
 	@$(foreach image,$(CONTAINERS_AGENT), \
-		printf $(image); \
-		docker save $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) -o /tmp/$(image) && printf " is saved" && \
-		docker cp /tmp/$(image) $(K3S_NODE):/tmp/$(image) && printf ", copied" && \
-		docker exec -it $(K3S_NODE) ctr image import /tmp/$(image) >> /dev/null && printf ", imported\n"; \
+		printf $(image) && \
+		docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		docker push k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		printf ", imported\n"
 	)
-
-import-images-to-local-registry:
-	@$(foreach image,$(CONTAINERS), \
-                printf $(image); \
-                docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) registry.local:5000/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
-                docker push registry.local:5000/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && printf " done\n"; \
-        )
 
 ## open-shell: Open a shell to a random pod in DEPLOYMENT.
 ##     By default thi will try to open a shell to a debugger pod.
@@ -283,7 +276,7 @@ open-shell:
 	@$(call msg, "Opening shell to pod: $(SELECTED_POD)")
 	kubectl -n $(NAMESPACE) exec -it $(SELECTED_POD) /bin/bash
 
-## restart-cluster: Create a new k3s cluster from scratch and
+
 ##     install the dependencies for OISP
 ##
 restart-cluster:
