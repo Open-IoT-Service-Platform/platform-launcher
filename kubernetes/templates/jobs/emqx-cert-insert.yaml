@@ -12,7 +12,11 @@ spec:
       serviceAccountName: emqx-cert-insert
       containers:
       - name: emqx-cert-insert
+        {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/oisp/backup-service:{{ .Values.tag }}
+        {{ else }}
         image: {{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
+        {{ end }}
         args:
           - kubectl
           - -n
@@ -47,12 +51,12 @@ data:
       template:
         spec:
           containers:
-          - name: {{ .Values.emqx.fullnameOverride }}   
+          - name: {{ .Values.emqx.fullnameOverride }}
             volumeMounts:
             - mountPath: {{ .Values.mqtt.certs.rootpath }}
               name: cert
               readOnly: true
-          volumes:  
+          volumes:
           - name: cert
             secret:
               defaultMode: 420
