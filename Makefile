@@ -29,6 +29,7 @@ KEYCLOAK_HELM_REPO:="https://codecentric.github.io/helm-charts"
 KEYCLOAK_HELM_REPO_NAME:="codecentric"
 export DOCKER_TAG?=latest
 export DOCKER_PREFIX?=oisp
+
 export GIT_COMMIT_PLATFORM_LAUNCHER=$(git rev-parse HEAD)
 export GIT_COMMIT_FRONTEND=$(git -C oisp-frontend rev-parse HEAD)
 export GIT_COMMIT_GEARPUMP=$(git -C oisp-gearpump-rule-engine rev-parse HEAD)
@@ -37,6 +38,8 @@ export GIT_COMMIT_BACKEND=$(git -C oisp-backend rev-parse HEAD)
 
 NOBACKUP?=false
 DEBUG?=false
+USE_LOCAL_REGISTRY?=false
+
 ifeq  ($(DEBUG),true)
 CONTAINERS:=$(CONTAINERS) debugger
 endif
@@ -77,7 +80,9 @@ BACKUP_EXCLUDE:=sh.helm stolon default-token oisp-stolon-token
 # ===================
 check-docker-cred-env:
 	@if [ "$$NODOCKERLOGIN" = "true" ]; then \
-		echo "Not using a docker registry. Images must be imported"; exit 0; \
+		echo "No docker login. Images must be imported"; exit 0; \
+	elif [ "$$USE_LOCAL_REGISTRY" = "true" ]; then \
+		echo "Using local registry. Images must be imported"; exit 0; \
 	else \
 		if [ "$$DOCKERUSER" = "" ]; then \
 			echo "DOCKERUSER env var is undefined"; exit 1; \
@@ -131,6 +136,9 @@ deploy-oisp: check-docker-cred-env generate_keys
 	POSTGRES_PASSWORD="$(call randomPass)" && \
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
 	helm dependency update --namespace $(NAMESPACE) && \
+	if [ "$$USE_LOCAL_REGISTRY" = "true" ]; then \
+		KEYCLOAK_REGISTRY=k3d-oisp.localhost:12345/ ; \
+	fi; \
 	helm install $(NAME) . --namespace $(NAMESPACE) \
 		--timeout 1200s \
 		--set imageCredentials.username="$$DOCKERUSER" \
@@ -156,8 +164,9 @@ deploy-oisp: check-docker-cred-env generate_keys
 		--set jwt.x509="$(X509CERT)" \
 		--set tag=$(DOCKER_TAG) \
 		--set imagePrefix=$(DOCKER_PREFIX) \
-		--set keycloak.keycloak.image.repository=$(DOCKER_PREFIX)/keycloak \
+		--set keycloak.keycloak.image.repository=$${KEYCLOAK_REGISTRY}$(DOCKER_PREFIX)/keycloak \
 		--set keycloak.keycloak.image.tag=$(DOCKER_TAG) \
+		--set use_local_registry=$(USE_LOCAL_REGISTRY) \
 		$(HELM_ARGS)
 
 ## upgrade-oisp: Upgrade already deployed HELM chart
@@ -168,6 +177,9 @@ upgrade-oisp: check-docker-cred-env backup
 	cd kubernetes && \
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
 	helm dependency update --namespace $(NAMESPACE) && \
+	if [ "$$USE_LOCAL_REGISTRY" = "true" ]; then \
+		KEYCLOAK_REGISTRY=k3d-oisp.localhost:12345/ ; \
+	fi; \
 	helm upgrade $(NAME) . --namespace $(NAMESPACE) \
 		--timeout 600s \
 		--set imageCredentials.username="$$DOCKERUSER" \
@@ -191,8 +203,9 @@ upgrade-oisp: check-docker-cred-env backup
 		--set jwt.x509="$${JWT_X509}" \
 		--set tag=$(DOCKER_TAG) \
 		--set imagePrefix=$(DOCKER_PREFIX) \
-		--set keycloak.keycloak.image.repository=$(DOCKER_PREFIX)/keycloak \
+		--set keycloak.keycloak.image.repository=$${KEYCLOAK_REGISTRY}$(DOCKER_PREFIX)/keycloak \
 		--set keycloak.keycloak.image.tag=$(DOCKER_TAG) \
+		--set use_local_registry=$(USE_LOCAL_REGISTRY) \
 		$(HELM_ARGS)
 
 
