@@ -67,7 +67,7 @@ diretory is ``platform-launcher``
 
   DEBUG=true  DOCKER_TAG=v2.0.1-beta.1 make build
   DEBUG=true make DOCKER_TAG=v2.0.1-beta.1 import-images
-  DEBUG=true make DOCKER_TAG=v2.0.1-beta.1 deploy-oisp-test
+  DEBUG=true make DOCKER_TAG=v2.0.1-beta.1 USE_LOCAL_REGISTRY=true deploy-oisp-test
   make test
 
 
