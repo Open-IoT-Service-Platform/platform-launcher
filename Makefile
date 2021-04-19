@@ -257,19 +257,20 @@ wait-until-ready:
 ## import-images: Import images listed in CONTAINERS into local cluster
 ##
 import-images:
-	$(foreach image,$(CONTAINERS), \
+	$(foreach image, $(CONTAINERS), \
 		printf $(image) && \
 		docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
 		docker push k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
-		printf ", imported\n"
+		printf ", imported\n" \
 	)
+
 	@$(foreach image,$(EXT_CONTAINERS), \
 		arr=( $(subst ;, ,$(image)) ); \
 		printf $${arr[1]};  \
 		docker pull $${arr[1]} > /dev/null && printf ", pulled" && \
 		docker tag $${arr[1]} k3d-oisp.localhost:12345/$${arr[1]} && \
 		docker push k3d-oisp.localhost:12345/$${arr[1]} && \
-		printf ", saved\n";
+		printf ", saved\n"; \
 	)
 
 ## import-images-agent: Import images to deploy OISP-Agent
