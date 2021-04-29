@@ -251,6 +251,11 @@ keycloak:
           configMapKeyRef:
             name: oisp-config
             key: keycloak-websocket-server-secret
+      - name: OISP_MQTT_BROKER_SECRET
+        valueFrom:
+          configMapKeyRef:
+            name: oisp-config
+            key: keycloak-mqtt-broker-secret
       - name: FUSION_BACKEND_SECRET
         valueFrom:
           configMapKeyRef:
@@ -295,7 +300,8 @@ keycloak:
     secret: "supersecret"
   websocketServer:
     secret: "supersecret"
-    id: "websocket-server"
+  mqttBroker:
+    secret: "supersecret"
   fusionBackend:
     secret: "supersecret"
   # Change root address of authServerUrl to the URL of oisp-frontend
