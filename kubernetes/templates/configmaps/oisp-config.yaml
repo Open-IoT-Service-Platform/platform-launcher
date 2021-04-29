@@ -14,7 +14,8 @@ data:
     "gatewayConfig": "@@OISP_GATEWAY_CONFIG",
     "jaegerTracing": {{ .Values.jaeger_tracing }},
     "grafanaConfig": "@@OISP_GRAFANA_CONFIG",
-    "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG"
+    "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG",
+    "keycloakClientSecret": "{{ .Values.keycloak.frontend.secret }}"
     }
   websocket-server: |
     {
@@ -22,6 +23,7 @@ data:
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
     "redisConfig": "@@OISP_REDIS_CONFIG",
     "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG",
+    "keycloakClientSecret": "{{ .Values.keycloak.websocketServer.secret }}",
     "uri": ""
     }
   backend: |
@@ -130,10 +132,9 @@ data:
     {{ end }}
     "resource": "oisp-frontend",
     "secret": "{{ .Values.keycloak.frontend.secret }}",
-    "mqtt-broker-secret": "{{ .Values.keycloak.mqttBroker.secret }}",
-    "mqtt-broker-id": "{{ .Values.keycloak.mqttBroker.id }}",
+    "mqtt-broker-id": "mqtt-broker",
     "websocket-server-secret": "{{ .Values.keycloak.websocketServer.secret }}",
-    "websocket-server-id": "{{ .Values.keycloak.websocketServer.id }}",
+    "websocket-server-id": "websocket-server",
     "ssl-required": "external"
     }
   keycloak-admin: |
@@ -143,6 +144,7 @@ data:
     }
   keycloak-frontend-secret: {{ .Values.keycloak.frontend.secret }}
   keycloak-websocket-server-secret: {{ .Values.keycloak.websocketServer.secret }}
+  keycloak-mqtt-broker-secret: {{ .Values.keycloak.mqttBroker.secret }}
   gateway: |
     {
     "username": "{{ .Values.systemuser.username }}",
@@ -213,7 +215,8 @@ data:
     "redisConf": "@@OISP_REDIS_CONFIG",
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
     "postgresConfig": "@@OISP_POSTGRES_CONFIG",
-    "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG"
+    "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG",
+    "keycloakClientSecret": "{{ .Values.keycloak.mqttBroker.secret }}"
     }
   streamer: |
     {
