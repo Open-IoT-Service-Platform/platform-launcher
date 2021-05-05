@@ -34,7 +34,7 @@ spec:
       containers:
       - name: websocket-server
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/oisp/websocket-server:{{ .Values.tag }}
+        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/websocket-server:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/websocket-server:{{ .Values.tag }}
         {{ end }}

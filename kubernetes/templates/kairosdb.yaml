@@ -29,7 +29,7 @@ spec:
       containers:
       - name: kairosdb
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/oisp/kairosdb:{{ .Values.tag }}
+        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/kairosdb:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/kairosdb:{{ .Values.tag }}
         {{ end }}
