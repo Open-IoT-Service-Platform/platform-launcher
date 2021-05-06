@@ -77,9 +77,8 @@ commands:
             sh util/deploy_operators.sh &&
             make import-images DOCKER_TAG=test_${TEST_ID} DEBUG=true &&
             (make undeploy-oisp || true) &&
-            make deploy-oisp-test DOCKER_TAG=test_${TEST_ID} USE_LOCAL_REGISTRY=true
-            --set keycloak.keycloak.image.tag=test_${TEST_ID}\" &&
-            make DOCKER_TAG=test_${TEST_ID} test) || rm .can_delete_if_success"         &&
+            make deploy-oisp-test DOCKER_TAG=test_${TEST_ID} USE_LOCAL_REGISTRY=true &&
+            make DOCKER_TAG=test_${TEST_ID} test) || rm .can_delete_if_success" &&
             ssh arkocal@82.165.71.183
             "cd /tmp/${TEST_ID}/${CIRCLE_PROJECT_REPONAME} &&
             export KUBECONFIG=\$(k3d get-kubeconfig) &&
