@@ -37,7 +37,7 @@ spec:
           containers:
           - name: backup-service
             {{ if .Values.use_local_registry }}
-            image: k3d-oisp.localhost:12345/oisp/backup-service:{{ .Values.tag }}
+            image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
             {{ else }}
             image: {{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
             {{ end }}
@@ -98,7 +98,7 @@ spec:
       containers:
       - name: create-checkpointing-dir
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/oisp/backup-service:{{ .Values.tag }}
+        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
         {{ end }}
