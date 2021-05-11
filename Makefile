@@ -259,6 +259,7 @@ import-images:
 		printf $(image) && \
 		docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
 		docker push k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		docker rmi k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
 		printf ", imported\n" \
 	)
 
@@ -268,6 +269,7 @@ import-images:
 		docker pull $${arr[1]} > /dev/null && printf ", pulled" && \
 		docker tag $${arr[1]} k3d-oisp.localhost:12345/$${arr[1]} && \
 		docker push k3d-oisp.localhost:12345/$${arr[1]} && \
+		docker rmi k3d-oisp.localhost:12345/$${arr[1]} && \
 		printf ", saved\n"; \
 	)
 
