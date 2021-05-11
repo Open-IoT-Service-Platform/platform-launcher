@@ -1,6 +1,3 @@
-# Javascript Node CircleCI 2.0 configuration file
-# Check https://circleci.com/docs/2.0/language-javascript/ for more details
-#
 version: 2.1
 executors:
   my-executor:
@@ -160,8 +157,6 @@ commands:
           command: |
             export PATH=$PATH:/snap/bin
             make import-images DOCKER_TAG=test DEBUG=true
-            docker create -it --name re-tmp oisp/rule-engine:test /bin/sh
-            docker cp re-tmp:/rule-engine-bundled-0.1.jar .
             npm install nodemailer
             export NODOCKERLOGIN=true
             retval=2;
@@ -172,24 +167,6 @@ commands:
               retval=$?
             done
           no_output_timeout: 20m
-  push-jar-over-ftp:
-    description: "Push rule engine to FTP server"
-    steps:
-      - run:
-          shell: /bin/bash
-          name: Push jar to ftp server
-          command: |
-            HOST='82.165.114.145'
-            USER='ftp'
-            PASSWD=${FTPPASS}
-            ftp -n -v $HOST \<< EOT
-            user $USER $PASSWD
-            prompt
-            pass
-            cd files
-            put rule-engine-bundled-0.1.jar
-            bye
-            EOT
   push-images:
     description: "Push images"
     parameters:
@@ -320,7 +297,6 @@ jobs:
       - e2e-test
       - push-images:
           tag: "date"
-      - push-jar-over-ftp
   deploy-production:
     executor: deployer
     steps:
