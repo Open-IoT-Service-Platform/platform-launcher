@@ -26,3 +26,7 @@ dependencies:
   version: 4.2.6
   repository: https://repos.emqx.io/charts
   condition: production
+- name: reloader
+  alias: reloader
+  version: 0.0.89
+  repository: https://stakater.github.io/stakater-charts
