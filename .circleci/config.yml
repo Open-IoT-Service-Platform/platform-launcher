@@ -347,8 +347,7 @@ workflows:
       - build-tagged:
           filters:
             branches:
-              only:
-                - develop
+              ignore: /.*/
             tags:
               only: /^v.*/
   nightly:
