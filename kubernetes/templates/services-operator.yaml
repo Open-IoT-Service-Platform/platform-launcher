@@ -19,6 +19,8 @@ spec:
       - image: {{ .Values.imagePrefix }}/services-operator:{{ .Values.tag }}
       {{ end }}
         name: services-operator
+        command: ["kopf"]
+        args: ["run", "--log-format", "plain", "--standalone", "/opt/beamservicesoperator.py"]
         volumeMounts:
         - mountPath: /tmp
           name: beamservices-operator-data
