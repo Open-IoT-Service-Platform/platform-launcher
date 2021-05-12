@@ -13,6 +13,8 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
+  annotations:
+    configmap.reloader.stakater.com/reload: "oisp-config"
   name: mqtt-gateway
   labels:
     app: mqtt-gateway
