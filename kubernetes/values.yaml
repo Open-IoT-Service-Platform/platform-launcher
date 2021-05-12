@@ -23,7 +23,7 @@ imap:
 numberReplicas:
     frontend: 1
     backend: 1
-    debugger: 0
+    debugger: 1
     minio: 4
 
 minio:
