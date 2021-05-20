@@ -241,6 +241,8 @@ keycloak:
         value: "http://frontend:4004/keycloak/users/:userId/accounts"
       - name: OISP_FRONTEND_USER_DELETE_ENDPOINT
         value: "http://frontend:4004/keycloak/users/:userId"
+      - name: PGSSLMODE
+        value: require
       - name: OISP_FRONTEND_SECRET
         valueFrom:
           configMapKeyRef:
@@ -292,7 +294,7 @@ keycloak:
       deployPostgres: false
       dbVendor: postgres
       dbName: oisp
-      dbHost: postgres
+      dbHost: acid-oisp
       dbPort: "5432"
       dbUser: superuser
       dbPassword: supersecret
