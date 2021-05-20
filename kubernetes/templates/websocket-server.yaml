@@ -71,6 +71,8 @@ spec:
         env:
         - name: NODE_ENV
           value: local
+        - name: PGSSLMODE
+          value: require
         - name: OISP_WEBSOCKET_SERVER_CONFIG
           valueFrom:
             configMapKeyRef:

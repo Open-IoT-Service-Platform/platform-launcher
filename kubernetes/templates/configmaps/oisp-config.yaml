@@ -93,8 +93,8 @@ data:
   postgres: |
     {
     "dbname": "oisp",
-    "hostname": "postgres-ro",
-    "writeHostname": "postgres",
+    "hostname": "acid-oisp-repl",
+    "writeHostname": "acid-oisp",
     "port": "5432",
     "su_username": "{{ .Values.stolon.pgSuperuserName }}",
     "su_password": "{{ .Values.stolon.pgSuperuserPassword }}",

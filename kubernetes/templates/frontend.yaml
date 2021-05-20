@@ -52,7 +52,7 @@ spec:
         - containerPort: 4001
         args:
         - ./wait-for-it.sh
-        - postgres:5432
+        - acid-oisp:5432
         - -t
         - "300000"
         - -s
@@ -85,6 +85,8 @@ spec:
         - name: NODE_ENV
           value: local
         {{ end }}
+        - name: PGSSLMODE
+          value: require
         - name: OISP_FRONTEND_CONFIG
           valueFrom:
             configMapKeyRef:

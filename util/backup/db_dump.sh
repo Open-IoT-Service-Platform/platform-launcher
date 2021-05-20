@@ -84,7 +84,7 @@ if [ -f "${TMPDIR}/${DUMPFILE}" ]; then
 fi
 
 echo Dump database
-if kubectl -n ${NAMESPACE} exec ${CONTAINER} -- /bin/bash -c "export PGSSL=require; mkdir -p /backup; export PGPASSWORD=${PASSWORD}; pg_dump -h localhost -U ${USERNAME} ${DBNAME} -F c -b  > /backup/${DUMPFILE}"; then
+if kubectl -n ${NAMESPACE} exec ${CONTAINER} -- /bin/bash -c "export PGSSL=require; mkdir -p /backup; export PGPASSWORD=${PASSWORD}; pg_dump -h ${DBHOSTNAME} -U ${USERNAME} ${DBNAME} -F c -b  > /backup/${DUMPFILE}"; then
     echo "Backup created successfully inside cluster"
 else
     echo "Backup could not be created."

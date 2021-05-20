@@ -65,6 +65,8 @@ spec:
         - name: NODE_ENV
           value: local
         {{ end }}
+        - name: PGSSLMODE
+          value: require
         - name: OISP_MQTT_GATEWAY_CONFIG
           valueFrom:
             configMapKeyRef:
