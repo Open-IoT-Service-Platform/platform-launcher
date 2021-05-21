@@ -2334,20 +2334,7 @@
       "subComponents" : { },
       "config" : { }
     } ],
-    "org.keycloak.keys.KeyProvider" : [ {
-      "id" : "b30510a5-af80-4788-8634-78acfee61691",
-      "name" : "rsa",
-      "providerId" : "rsa",
-      "subComponents" : { },
-      "config" : {
-        "privateKey" : [ "{{ INSERT-PRIVATE-KEY }}" ],
-        "certificate" : [ "{{ INSERT-PUBLIC-CERT }}" ],
-        "active" : [ "true" ],
-        "priority" : [ "200" ],
-        "enabled" : [ "true" ],
-        "algorithm" : [ "RS256" ]
-      }
-    } ]
+    "org.keycloak.keys.KeyProvider" : [ ]
   },
   "internationalizationEnabled" : false,
   "supportedLocales" : [ ],

@@ -101,13 +101,3 @@ spec:
         workingDir: /app
       imagePullSecrets:
       - name: dockercred
-      volumes:
-      - name: jwt-keys
-        secret:
-          defaultMode: 420
-          items:
-          - key: jwt.publickey
-            path: public.pem
-          - key: jwt.privatekey
-            path: private.pem
-          secretName: oisp-secrets

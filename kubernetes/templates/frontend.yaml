@@ -152,10 +152,6 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: grafana
-        volumeMounts:
-        - mountPath: /app/keys
-          name: jwt-keys
-          readOnly: true
         livenessProbe:
           httpGet:
             path: /v1/api/health
@@ -193,13 +189,3 @@ spec:
       {{ end }}
       imagePullSecrets:
         - name: dockercred
-      volumes:
-      - name: jwt-keys
-        secret:
-          defaultMode: 420
-          items:
-          - key: jwt.publickey
-            path: public.pem
-          - key: jwt.privatekey
-            path: private.pem
-          secretName: oisp-secrets
