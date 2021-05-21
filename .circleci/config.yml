@@ -203,7 +203,7 @@ commands:
             if [ "$DOCKER_PUSH_LATEST" = "true" ]; then
               echo Pushing images with latest tag
               if [ -z "$PUSH_DRYRUN" ]; then
-                make push-images
+                make push-images DOCKER_PREFIX=oisp
               else
                 echo Only dry run mode. Not pushing to dockerhub!
               fi
