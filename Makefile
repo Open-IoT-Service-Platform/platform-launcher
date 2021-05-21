@@ -118,19 +118,10 @@ deploy-oisp-test: check-docker-cred-env
 		do printf "."; sleep 5; done;
 	@echo
 
-generate_keys:
-	@openssl genpkey -algorithm RSA -out private.pem -pkeyopt rsa_keygen_bits:2048 && \
-	openssl rsa -pubout -in private.pem -out public.pem && \
-	openssl req -new -x509 -key private.pem -out x509.pem -batch -days 3650;
-
 ## deploy-oisp: Deploy repository as HELM chart
 ##
-deploy-oisp: check-docker-cred-env generate_keys
-	# First generate ssh keys
+deploy-oisp: check-docker-cred-env
 	@$(call msg,"Starting first deploy");
-	$(eval PUBLICKEY:=$(shell cat public.pem | base64 | tr -d "\n"))
-	$(eval PRIVATEKEY:=$(shell cat private.pem | base64 | tr -d "\n"))
-	$(eval X509CERT:=$(shell cat x509.pem | base64 | tr -d "\n"))
 	cd kubernetes && \
 	kubectl create namespace $(NAMESPACE) && \
 	POSTGRES_PASSWORD="$(call randomPass)" && \
@@ -159,9 +150,6 @@ deploy-oisp: check-docker-cred-env generate_keys
 		--set keycloak.mqttBroker.secret="$(call randomPass)" \
 		--set keycloak.websocketServer.secret="$(call randomPass)" \
 		--set keycloak.fusionBackend.secret="$(call randomPass)" \
-		--set jwt.public="$(PUBLICKEY)" \
-		--set jwt.private="$(PRIVATEKEY)" \
-		--set jwt.x509="$(X509CERT)" \
 		--set tag=$(DOCKER_TAG) \
 		--set imagePrefix=$(DOCKER_PREFIX) \
 		--set keycloak.keycloak.image.repository=$${KEYCLOAK_REGISTRY}$(DOCKER_PREFIX)/keycloak \
@@ -198,9 +186,6 @@ upgrade-oisp: check-docker-cred-env backup
 		--set keycloak.mqttBroker.secret="$${KEYCLOAK_MQTT_BROKER_SECRET}" \
 		--set keycloak.websocketServer.secret="$${KEYCLOAK_WEBSOCKET_SERVER_SECRET}" \
 		--set keycloak.fusionBackend.secret="$${KEYCLOAK_FUSION_BACKEND_SECRET}" \
-		--set jwt.public="$${JWT_PUBLIC}" \
-		--set jwt.private="$${JWT_PRIVATE}" \
-		--set jwt.x509="$${JWT_X509}" \
 		--set tag=$(DOCKER_TAG) \
 		--set imagePrefix=$(DOCKER_PREFIX) \
 		--set keycloak.keycloak.image.repository=$${KEYCLOAK_REGISTRY}$(DOCKER_PREFIX)/keycloak \

@@ -268,20 +268,6 @@ keycloak:
       startup.sh: |
         #!/bin/sh
         sh /opt/jboss/keycloak/realms/prepare-realm.sh
-    extraVolumes: |
-      - name: jwt-keys
-        secret:
-          secretName: oisp-secrets
-          items:
-          - key: jwt.x509
-            path: x509.pem
-          - key: jwt.privatekey
-            path: private.pem
-          defaultMode: 420
-    extraVolumeMounts: |
-      - name: jwt-keys
-        mountPath: "/keys"
-        readOnly: true
     service:
       httpPort: 4080
       httpsPort: 4043
