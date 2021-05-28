@@ -938,7 +938,7 @@
         "jsonType.label" : "String"
       }
     } ],
-    "defaultClientScopes" : [ "web-origins", "mqtt-broker", "websocket-server", "roles", "accounts", "type", "email", "offline_access" ],
+    "defaultClientScopes" : [ "web-origins", "oisp-frontend", "mqtt-broker", "websocket-server", "roles", "accounts", "type", "email", "offline_access" ],
     "optionalClientScopes" : [ "microprofile-jwt" ],
     "authorizationSettings" : {
       "allowRemoteResourceManagement" : true,
