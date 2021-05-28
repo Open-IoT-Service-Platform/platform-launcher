@@ -63,7 +63,10 @@ if (accessType.length > 0) {
 if (accessType && accessType === DEVICE) {
     var deviceId = keycloakSession.getContext().getRequestHeaders()
         .getRequestHeader("X-DeviceID")[0];
+    var deviceUID = keycloakSession.getContext().getRequestHeaders()
+        .getRequestHeader("X-DeviceUID")[0];
     token.setSubject(deviceId);
+    userSession.setNote("deviceUID", deviceUID);
     exports = DEVICE;
 } else {
     // legacy uid comes from imported existing users
