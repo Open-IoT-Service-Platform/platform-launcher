@@ -20,8 +20,6 @@ var assert = chai.assert;
 var colors = require('colors'); // jshint ignore:line
 var fs = require('fs');
 
-var config = require("./test-config.json");
-var kafka = require('kafka-node');
 var helpers = require("./lib/helpers");
 var promtests = require('./subtests/promise-wrap');
 
@@ -53,79 +51,13 @@ process.stdout.write("                                                          
 process.stdout.write("                           OISP TEST PREP                            \n".green.bold);
 process.stdout.write("_____________________________________________________________________\n".bold);
 
-
-
-describe("Waiting for OISP services to be ready ...\n".bold, function() {
-
+describe("get authorization and manage user ...\n".bold, function() {
     before(function(done) {
         userToken = null;
         accountId = null;
         deviceId = "00-11-22-33-44-55";
         done();
     });
-
-    it('Shall wait for oisp services to start', function(done) {
-        var kafkaConsumer;
-        var topic = config["connector"]["kafka"]["topic"];
-        var partition = 0;
-        var kafkaAddress = config["connector"]["kafka"]["host"] + ":" + config["connector"]["kafka"]["port"];
-        var kafkaClient = new kafka.KafkaClient({ kafkaHost: kafkaAddress });
-        var kafkaOffset = new kafka.Offset(kafkaClient);
-
-        var getKafkaOffset = function(topic_, partition_, cb) {
-            kafkaOffset.fetchLatestOffsets([topic_], function(error, offsets) {
-                if (!error) {
-                    cb(offsets[topic_][partition_]);
-                }
-                else {
-                    setTimeout(function() {
-                        getKafkaOffset(topic_, partition_, cb);
-                    }, 1000);
-                }
-            });
-        };
-
-        getKafkaOffset(topic, partition, function(offset) {
-            if (offset >= 0) {
-                var topics = [{ topic: topic, offset: offset + 1, partition: partition }];
-                var options = { autoCommit: true, fromOffset: true };
-
-                kafkaConsumer = new kafka.Consumer(kafkaClient, topics, options);
-
-                var oispServicesToMonitor = ['rules-engine'];
-                process.stdout.write("    ");
-                kafkaConsumer.on('message', function(message) {
-                    process.stdout.write(".".green);
-                    if (kafkaConsumer) {
-                        var i = 0;
-                        for (i = 0; i < oispServicesToMonitor.length; i++) {
-                            if (oispServicesToMonitor[i] != null && oispServicesToMonitor[i].trim() === message.value.trim()) {
-                                oispServicesToMonitor[i] = null;
-                            }
-                        }
-                        for (i = 0; i < oispServicesToMonitor.length; i++) {
-                            if (oispServicesToMonitor[i] != null) {
-                                break;
-                            }
-                        }
-                        if (i === oispServicesToMonitor.length) {
-                            kafkaConsumer.close(true);
-                            kafkaConsumer = null;
-                            process.stdout.write("\n");
-                            done();
-                        }
-                    }
-                });
-            }
-            else {
-                done(new Error("Cannot get Kafka offset "));
-            }
-        });
-
-    }).timeout(1000 * 60 * 1000);
-});
-
-describe("get authorization and manage user ...\n".bold, function() {
 
     it('Shall authenticate', function(done) {
         var username = process.env.USERNAME;
