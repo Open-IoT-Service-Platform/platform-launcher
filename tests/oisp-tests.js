@@ -24,7 +24,6 @@ const mqttConfig = require('./test-config-mqtt.json');
 const oispSdk = require('@open-iot-service-platform/oisp-sdk-js');
 const proxyConnector = oispSdk(config).lib.proxies.getControlConnector('ws');
 const mqttConnector = oispSdk(mqttConfig).lib.proxies.getProxyConnector('mqtt');
-const kafka = require('kafka-node');
 const helpers = require('./lib/helpers');
 const promtests = require('./subtests/promise-wrap');
 const Gm = require('gm').subClass({imageMagick: true});
@@ -313,8 +312,7 @@ const CbManager = function() {
 // Callback for WSS
 const cbManager = new CbManager();
 
-
-describe('Waiting for OISP services to be ready ...\n'.bold, function() {
+describe('get authorization and manage user ...\n'.bold, function() {
     before(function(done) {
         userToken = null;
         userToken2 = null;
@@ -328,66 +326,6 @@ describe('Waiting for OISP services to be ready ...\n'.bold, function() {
 
         done();
     });
-
-    it('Shall wait for oisp services to start', function(done) {
-        let kafkaConsumer;
-        const topic = config['connector']['kafka']['topic'];
-        const partition = 0;
-        const kafkaAddress = config['connector']['kafka']['host'] + ':' + config['connector']['kafka']['port'];
-        const kafkaClient = new kafka.KafkaClient({kafkaHost: kafkaAddress});
-        const kafkaOffset = new kafka.Offset(kafkaClient);
-
-        var getKafkaOffset = function(topic_, partition_, cb) {
-            kafkaOffset.fetchLatestOffsets([topic_], function(error, offsets) {
-                if (!error) {
-                    cb(offsets[topic_][partition_]);
-                } else {
-                    setTimeout( function() {
-                        getKafkaOffset(topic_, partition_, cb);
-                    }, 1000);
-                }
-            });
-        };
-
-        getKafkaOffset(topic, partition, function(offset) {
-            if ( offset >= 0 ) {
-                const topics = [{topic: topic, offset: offset+1, partition: partition}];
-                const options = {autoCommit: true, fromOffset: true};
-
-                kafkaConsumer = new kafka.Consumer(kafkaClient, topics, options);
-
-                const oispServicesToMonitor = ['rules-engine'];
-                process.stdout.write('    ');
-                kafkaConsumer.on('message', function(message) {
-                    process.stdout.write('.'.green);
-                    if ( kafkaConsumer ) {
-                        let i=0;
-                        for (i=0; i<oispServicesToMonitor.length; i++) {
-                            if ( oispServicesToMonitor[i] != null && oispServicesToMonitor[i].trim() === message.value.trim() ) {
-                                oispServicesToMonitor[i] = null;
-                            }
-                        }
-                        for (i=0; i<oispServicesToMonitor.length; i++) {
-                            if ( oispServicesToMonitor[i] != null ) {
-                                break;
-                            }
-                        }
-                        if ( i === oispServicesToMonitor.length ) {
-                            kafkaConsumer.close(true);
-                            kafkaConsumer = null;
-                            process.stdout.write('\n');
-                            done();
-                        }
-                    }
-                });
-            } else {
-                done(new Error('Cannot get Kafka offset '));
-            }
-        });
-    }).timeout(1000*60*1000);
-});
-
-describe('get authorization and manage user ...\n'.bold, function() {
     it('Shall authenticate', function(done) {
         const username = process.env.USERNAME;
         const password = process.env.PASSWORD;
