@@ -204,6 +204,7 @@ upgrade-oisp: check-docker-cred-env backup
 undeploy-oisp:
 	@cd kubernetes && \
 	(kubectl delete -n $(NAMESPACE) bs --all || echo "Beam services not (or already) deleted") && \
+	(kubectl delete -n $(NAMESPACE) bsqls --all || echo "Beam SQL services not (or already) deleted") && \
 	( helm uninstall $(NAME) --namespace $(NAMESPACE) || echo helm uninstall failed)  && \
 	(kubectl delete namespace $(NAMESPACE) || echo "namespace not (or already) deleted") && \
 	(kubectl -n cassandra delete cassandradatacenter $(NAMESPACE) || echo "cassandra dc not (or already) deleted")
