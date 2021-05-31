@@ -20,7 +20,7 @@ spec:
       {{ end }}
         name: services-operator
         command: ["kopf"]
-        args: ["run", "--log-format", "plain", "--standalone", "/opt/beamservicesoperator.py"]
+        args: ["run", "--log-format", "plain", "--standalone", "-A", "/opt/beamservicesoperator.py", "/opt/beamsqlstatementsetoperator.py"]
         volumeMounts:
         - mountPath: /tmp
           name: beamservices-operator-data

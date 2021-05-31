@@ -96,3 +96,9 @@ services:
       context: ./docker/wait-for-it/
       labels:
         - oisp=true
+  simple-flink-sql-gateway:
+    image: ${DOCKER_PREFIX:-oisp}/simple-flink-sql-gateway:${DOCKER_TAG}
+    build:
+      context: ./oisp-services/simple-flink-sql-gateway
+      labels:
+        - oisp=true

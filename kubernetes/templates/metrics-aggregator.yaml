@@ -1,16 +1,176 @@
-apiVersion: oisp.org/v1
-kind: BeamService
+apiVersion: oisp.org/v1alpha1
+kind: BeamSqlTable
+metadata:
+  name: metrics
+spec:
+  connector: kafka
+  fields:
+    'aid': STRING
+    'value': STRING
+    'dvalue': AS CAST(`value` AS DOUBLE)
+    'on': BIGINT
+    'ts': AS epoch2SQL(`on`, 'Europe/Berlin')
+    'cid': STRING
+    'systemon': BIGINT
+    'dataType': STRING
+    'watermark': FOR `ts` AS `ts` - INTERVAL '5' SECOND
+  kafka:
+    topic: metrics
+    properties:
+      bootstrap.servers: oisp-kafka-headless:9092
+      fetch.message.max.bytes: 15728640
+    scan.startup.mode: latest-offset
+  value:
+    format: json
+    json.fail-on-missing-field: false
+    json.ignore-parse-errors: true
+---
+apiVersion: oisp.org/v1alpha1
+kind: BeamSqlTable
+metadata:
+  name: metrics-sink
+spec:
+  connector: kafka
+  fields:
+    'aid': STRING
+    'value': STRING
+    'on': BIGINT
+    'cid': STRING
+    'systemon': BIGINT
+    'dataType': STRING
+  kafka:
+    topic: metrics
+    properties:
+      bootstrap.servers: oisp-kafka-headless:9092
+      fetch.message.max.bytes: 15728640
+    scan.startup.mode: latest-offset
+  value:
+    format: json
+    json.fail-on-missing-field: false
+    json.ignore-parse-errors: true
+---
+apiVersion: oisp.org/v1alpha1
+kind: BeamSqlStatementSet
 metadata:
   name: metrics-aggregator
 spec:
-  entryClass: "org.oisp.services.MetricsAggregator"
-  args:
-    runner: FlinkRunner
-    streaming: "true"
-    {{ if .Values.production }}
-    checkpointingInterval: {{ .Values.metricsAggregator.checkpointingInterval | quote }}
-    {{ end }}
-    metricsTopic: {{ .Values.metricsAggregator.metricsTopic | quote }}
-    bootstrapServers: {{ .Values.kafka.service}}
-  package:
-    url: {{ .Values.metricsAggregator.url }}
+  sqlstatements:
+    - |
+      insert into `metrics-sink`
+      with aggregation as
+      (select
+        TUMBLE_START(ts, INTERVAL '60' MINUTE) as `window-start`,
+        AVG(`dvalue`) as average, SUM(`dvalue`) as `sum`,
+        MIN(`dvalue`) as `min`, MAX(`dvalue`) as `max`,
+        COUNT(`on`) as `count`,
+        dataType,
+        cid,
+        aid
+        from metrics
+        where regexp_extract(cid, '^([^\.]*)$',1) is not null and `dataType`='Number'
+        group by TUMBLE(ts, INTERVAL '60' MINUTE), cid, aid, dataType)
+      select
+        aid,
+        concat(cid, '.aggregator.AVG.hours') as cid,
+        dataType,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `on`,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `systemOn`,
+        cast(average as String) as `value`
+        from aggregation
+      union all
+      select
+        aid,
+        concat(cid, '.aggregator.COUNT.hours') as cid,
+        dataType,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `on`,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `systemOn`,
+        cast(`count` as String) as `value`
+        from aggregation
+      union all
+      select
+        aid,
+        concat(cid, '.aggregator.MAX.hours') as cid,
+        dataType,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `on`,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `systemOn`,
+        cast(`max` as String) as `value`
+        from aggregation
+      union all
+      select
+        aid,
+        concat(cid, '.aggregator.MIN.hours') as cid,
+        dataType,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `on`,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `systemOn`,
+        cast(`min` as String) as `value`
+        from aggregation
+        union all
+      select
+        aid,
+        concat(cid, '.aggregator.SUM.hours') as cid,
+        dataType,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `on`,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `systemOn`,
+        cast(`sum` as String) as `value`
+        from aggregation;
+    - |
+      insert into `metrics-sink`
+      with aggregation as
+      (select
+        TUMBLE_START(ts, INTERVAL '60' SECOND) as `window-start`,
+        AVG(`dvalue`) as average, SUM(`dvalue`) as `sum`,
+        MIN(`dvalue`) as `min`, MAX(`dvalue`) as `max`,
+        COUNT(`on`) as `count`,
+        dataType,
+        cid,
+        aid
+        from metrics
+        where regexp_extract(cid, '^([^\.]*)$',1) is not null and `dataType`='Number'
+        group by TUMBLE(ts, INTERVAL '60' SECOND), cid, aid, dataType)
+      select
+        aid,
+        concat(cid, '.aggregator.AVG.minutes') as cid,
+        dataType,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `on`,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `systemOn`,
+        cast(average as String) as `value`
+        from aggregation
+      union all
+      select
+        aid,
+        concat(cid, '.aggregator.COUNT.minutes') as cid,
+        dataType,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `on`,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `systemOn`,
+        cast(`count` as String) as `value`
+        from aggregation
+      union all
+      select
+        aid,
+        concat(cid, '.aggregator.MAX.minutes') as cid,
+        dataType,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `on`,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `systemOn`,
+        cast(`max` as String) as `value`
+        from aggregation
+      union all
+      select
+        aid,
+        concat(cid, '.aggregator.MIN.minutes') as cid,
+        dataType,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `on`,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `systemOn`,
+        cast(`min` as String) as `value`
+        from aggregation
+        union all
+      select
+        aid,
+        concat(cid, '.aggregator.SUM.minutes') as cid,
+        dataType,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `on`,
+        (unix_timestamp(cast (`window-start` as string)) + 30) * 1000 as `systemOn`,
+        cast(`sum` as String) as `value`
+        from aggregation;
+  tables:
+    - metrics
+    - metrics-sink
