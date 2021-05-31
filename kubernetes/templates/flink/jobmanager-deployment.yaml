@@ -23,17 +23,12 @@ spec:
         command: ["/bin/bash", "-c", "mc mb -p oisp/{{ .Values.flink.checkpoints.bucket }}"]
       containers:
       - name: jobmanager
-        image: flink:1.10.2
+        image: flink:{{ .Values.flink.version }}
         workingDir: /opt/flink
         command: ["/bin/bash", "-c", "mkdir -p /opt/flink/plugins/s3; \
           cp /opt/flink/opt/flink-s3-fs-hadoop-*.jar /opt/flink/plugins/s3 ; \
-          $FLINK_HOME/bin/jobmanager.sh start;\
-          while :;
-          do
-            if [[ -f $(find log -name '*jobmanager*.log' -print -quit) ]];
-              then tail -f -n +1 log/*jobmanager*.log;
-            fi;
-          done"]
+          $FLINK_HOME/bin/jobmanager.sh start-foreground; \
+          "]
         ports:
         - containerPort: 6123
           name: rpc
@@ -51,6 +46,33 @@ spec:
           mountPath: /opt/flink/conf
         securityContext:
           runAsUser: 9999  # refers to user _flink_ from official flink image, change if necessary
+      - name: sql-gateway
+         {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/simple-flink-sql-gateway:{{ .Values.tag }}
+        {{ else }}
+        image: {{ .Values.imagePrefix }}/simple-flink-sql-gateway:{{ .Values.tag }}
+        {{ end }}
+        workingDir: /opt/gateway
+        command: ["/bin/bash", "-c", "nodejs gateway.js"]
+        env:
+        - name: SIMPLE_FLINK_SQL_GATEWAY_PORT
+          value: {{ .Values.flink.sqlClientPort | quote }}
+        - name: DEBUG
+          value: express:*
+        ports:
+        - containerPort: {{ .Values.flink.sqlClientPort }}
+          name: rest
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.flink.sqlClientPort }}
+          initialDelaySeconds: 30
+          periodSeconds: 3
+        #volumeMounts:
+        #- name: flink-config-volume
+        #  mountPath: /opt/flink/conf
+        securityContext:
+          runAsUser: 9999  # refers to user _flink_ from official flink image, change if necessary
       volumes:
       - name: flink-config-volume
         configMap:
@@ -59,4 +81,4 @@ spec:
           - key: flink-conf.yaml
             path: flink-conf.yaml
           - key: log4j.properties
-            path: log4j.properties
+            path: log4j-console.properties

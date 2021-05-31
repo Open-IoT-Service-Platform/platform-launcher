@@ -189,12 +189,7 @@ mqtt:
 ruleEngine:
   username: "rule_engine@intel.com"
   password: password
-  url: "http://services-server/rule-engine-bundled-0.1.1.jar"
-  checkpointingInterval : "10000"
-
-metricsAggregator:
-  metricsTopic: "metrics"
-  url: "http://services-server/metrics-aggregator-bundled-0.1.1.jar"
+  url: "http://services-server/rule-engine-bundled-0.1.2.jar"
   checkpointingInterval : "10000"
 
 websocketServer:
@@ -320,6 +315,8 @@ less_resources: true
 production: false
 
 flink:
+  version: 1.13.0
+  sqlClientPort: 9000
   restPort: 8081
   restUrl: flink-jobmanager-rest
   url: flink-jobmanager
