@@ -44,28 +44,28 @@ spec:
       initContainers:
       - name: wait-for-redis
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/oisp/wait-for-it:{{ .Values.tag }}
+        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ end }}
         args: ["redis:6379", "--", "echo", "redis is up"]
       - name: wait-for-kafka
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/oisp/wait-for-it:{{ .Values.tag }}
+        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ end }}
         args: [{{ .Values.kafka.service }}, "--", "echo", "kafka is up"]
       - name: wait-for-keycloak
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/oisp/wait-for-it:{{ .Values.tag }}
+        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ end }}
         args: ["keycloak-http:4080", "--", "echo", "keycloak is up"]
       - name: prepare-db
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/oisp/frontend:{{ .Values.tag }}
+        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/frontend:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/frontend:{{ .Values.tag }}
         {{ end }}
