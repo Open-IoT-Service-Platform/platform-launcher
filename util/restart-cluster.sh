@@ -4,7 +4,8 @@ SCRIPTDIR=$(dirname "$0")
 CLUSTERNAME=${CLUSTERNAME:-oispcluster}
 
 k3d cluster delete ${CLUSTERNAME} || echo "Cluster ${CLUSTERNAME} could not be deleted/ does not exist"
-k3d cluster create ${CLUSTERNAME} --registry-use k3d-oisp.localhost:12345
+# Image version must be specified as an environment variable or the script must be called from the Makefile
+k3d cluster create ${CLUSTERNAME} --registry-use k3d-oisp.localhost:12345 --image=${K3S_IMAGE}
 
 printf "\033[1mKubernetes cluster started\033[0m\n"
 kubectl cluster-info
