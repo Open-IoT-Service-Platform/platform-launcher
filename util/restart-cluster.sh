@@ -12,7 +12,7 @@ kubectl cluster-info
 
 printf "\033[1mSet routing between docker and host for K3S\033[0m\n"
 ## Needed for Kafka testing and cert-Manager
-AGENTID=$(docker ps | grep 'k3d-${CLUSTERNAME}-server-0' | awk '{print $1}')
+AGENTID=$(docker ps | grep "k3d-${CLUSTERNAME}-server-0" | awk '{print $1}')
 ## TODO check if agentid is there! It sometimes skips with docker inspect takes at least 1 arg.
 AGENTIP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${AGENTID})
 sudo route add -net 10.42.0.0 netmask 255.255.0.0 gw ${AGENTIP}
