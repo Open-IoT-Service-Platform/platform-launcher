@@ -1,3 +1,5 @@
+CURR_DIR=$(pwd)
+
 printf "\033[1mInstalling docker\n"
 printf -- "-----------------\033[0m\n"
 sudo apt -qq update
@@ -35,7 +37,6 @@ printf "\033[1mSuccessfully installed kubectl\033[0m\n"
 kubectl version --short
 printf "\n"
 
-CURR_DIR=$(pwd)
 printf "\033[1mInstalling helm\n"
 printf -- "---------------\033[0m\n"
 cd /tmp
@@ -60,4 +61,5 @@ printf "\033[1mInstalling S3 tools\n"
 printf -- "----------------------------\033[0m\n"
 sudo apt -qq install s3cmd
 
-./restart-cluster.sh
+cd $CURR_DIR/..
+make restart-cluster
