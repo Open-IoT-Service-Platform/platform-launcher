@@ -27,8 +27,11 @@ DOCKER_COMPOSE_ARGS?=
 K3S_NODE=$(shell docker ps --format '{{.Names}}' | grep k3s_agent)
 KEYCLOAK_HELM_REPO:="https://codecentric.github.io/helm-charts"
 KEYCLOAK_HELM_REPO_NAME:="codecentric"
+export K3S_IMAGE?=rancher/k3s:v1.20.6-k3s1
 export DOCKER_TAG?=latest
 export DOCKER_PREFIX?=oisp
+# Try setting this to true if you are getting cgroups error in k3s image
+export K3D_FIX_CGROUPV2?=false 
 
 export GIT_COMMIT_PLATFORM_LAUNCHER=$(git rev-parse HEAD)
 export GIT_COMMIT_FRONTEND=$(git -C oisp-frontend rev-parse HEAD)
