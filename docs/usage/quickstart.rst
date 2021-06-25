@@ -371,3 +371,20 @@ To configure the cert-manager:
 
 1. Install issuer `kubectl apply -f kubernetes/cert-manager/clusterissuer-prod.yaml`. Note that it is managing certificates cluster wide and thus does not have a namespace.
 2. Adapt email address in  `kubernetes/certificate_web_prod.yaml`. Install the certificate in namespace oisp: `kubectl apply -f kubernetes/certificate_web_prod.yaml -n oisp`
+
+Updating Keycloak Realm Keys
+----------------------------
+
+Using Keycloak adapters, OISP supports automatic key rotation for token signing. Keys can be managed in Keycloak at 'Realm Settings -> Keys'. Active keys can be marked as passive, by clicking the specific key under the 'Active' section. Passive keys are still valid, but they will no longer be used for signing new tokens. Passive keys can also be re-activated using the 'Passive' section. You can also disable keys. Disabled keys are still stored in Keycloak, but they are not used/valid. In the 'Providers' tab you can add new keys or completely delete old ones. To test automatic key rotation, try:
+
+#. Log in with a test account
+#. Mark all current RSA Keys as passive
+#. Generate a new RSA Key and make it active
+#. Try to log in with a new account, you should see that it uses the new key
+#. Try using the token of old account, it should still be valid
+#. Disable all the passive keys
+#. Soon enough, the token of the old account should be rejected by OISP. This does not happen immediately, because tokens are by default cached for 10 minutes. You can change this time by adjusting the corresponding keycloak config in the corresponding oisp service (i.e. frontend, mqtt-gateway). Refer to Keycloak Node.js Adapter Documentation for configuration details.
+
+.. note:: For token signing, we are talking about RSA keys. By default Keycloak also has other keys generated with different algorithms(i.e. for password signing).
+
+.. note:: In theory, Keycloak also supports editing keys through the Admin REST API. However, this is currently not documented on the Keycloak Documentation. In the future we are planning to create automatic tests for the key rotation, so that you can also refer to.
