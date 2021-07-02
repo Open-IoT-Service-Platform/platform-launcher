@@ -3,7 +3,7 @@ executors:
   my-executor:
     machine:
       enabled: true
-      image: ubuntu-1604:202004-01
+      image: ubuntu-2004:202104-01
     working_directory: ~/repo
     environment:
       shell: /bin/bash
@@ -96,7 +96,7 @@ commands:
           name: Setup build environment
           command: |
             cd util && \
-            bash setup-ubuntu18.04.sh
+            bash setup-ubuntu20.04.sh
             # create 8GB swap
             sudo dd if=/dev/zero of=/swapfile bs=1M count=8000
             sudo mkswap /swapfile
