@@ -31,7 +31,7 @@ export K3S_IMAGE?=rancher/k3s:v1.20.6-k3s1
 export DOCKER_TAG?=latest
 export DOCKER_PREFIX?=oisp
 # Try setting this to true if you are getting cgroups error in k3s image
-export K3D_FIX_CGROUPV2?=false 
+export K3D_FIX_CGROUPV2?=false
 
 export GIT_COMMIT_PLATFORM_LAUNCHER=$(git rev-parse HEAD)
 export GIT_COMMIT_FRONTEND=$(git -C oisp-frontend rev-parse HEAD)
@@ -321,9 +321,6 @@ test: prepare-tests test-prep-only
 ##
 build: .init
 	@$(call msg,"Building OISP containers");
-	@if [[ $$(printf "$(CONTAINERS)" | grep "opentsdb") ]]; then \
-		docker-compose -f docker-compose.yml build $(DOCKER_COMPOSE_ARGS) hbase; \
-	fi
 	@docker-compose -f docker-compose.yml -f docker/debugger/docker-compose-debugger.yml build --parallel $(DOCKER_COMPOSE_ARGS) $(CONTAINERS);
 
 ## update: Update all subrepositories to latest origin/develop
