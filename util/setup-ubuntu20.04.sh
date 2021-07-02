@@ -1,4 +1,5 @@
 CURR_DIR=$(pwd)
+SCRIPT_PATH=$(realpath $0)
 
 printf "\033[1mInstalling docker\n"
 printf -- "-----------------\033[0m\n"
@@ -10,6 +11,23 @@ sudo apt -qq update
 sudo apt-get install -y docker-ce=5:19.03.15~3-0~ubuntu-$(lsb_release -cs) docker-ce-cli=5:19.03.15~3-0~ubuntu-$(lsb_release -cs) containerd.io
 printf "\033[1mSuccessfully installed %s\033[0m\n" "$(docker --version)"
 printf "\n"
+
+if [[ -z $(groups | grep docker) ]];
+then
+    sudo usermod -a -G docker $USER;
+    echo "$USER has been added to the docker group.";
+    echo "Script is being restarted for changes to take effect.";
+    sudo -u $USER /bin/bash $SCRIPT_PATH;
+    exit;
+fi;
+
+printf "\033[1mInstalling docker-compose\n"
+printf -- "-----------------\033[0m\n"
+sudo curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/bin/docker-compose
+sudo chmod +x /usr/bin/docker-compose
+printf "\033[1mSuccessfully installed docker-compose %s\033[0m\n"
+printf "\n"
+
 
 printf "\033[1mInstalling k3d\n"
 printf -- "-----------------\033[0m\n"
@@ -48,8 +66,8 @@ cd $CURR_DIR
 
 printf "\033[1mInstalling test dependencies\n"
 printf -- "----------------------------\033[0m\n"
+sudo apt -qq -y install nodejs npm make git python3-pip
 sudo pip install shyaml
-sudo apt -qq -y install nodejs npm make git
 curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh -o install_nvm.sh
 bash install_nvm.sh
 source ~/.profile
@@ -61,5 +79,5 @@ printf "\033[1mInstalling S3 tools\n"
 printf -- "----------------------------\033[0m\n"
 sudo apt -qq install s3cmd
 
-cd $CURR_DIR/..
+cd $(dirname $SCRIPT_PATH)/..
 make restart-cluster
