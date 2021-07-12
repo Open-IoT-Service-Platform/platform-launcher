@@ -35,6 +35,14 @@ var USER_EXPIRE = 1440; // 24 hours in minutes
 var currentTimeInSeconds = new Date().getTime() / 1000;
 var expire = keycloakSession.getContext().getRequestHeaders()
     .getRequestHeader("X-Token-Expire");
+var accessType = keycloakSession.getContext().getRequestHeaders()
+    .getRequestHeader("X-Access-Type");
+if (accessType.length > 0) {
+    accessType = accessType[0];
+} else {
+    accessType = USER;
+}
+
 if (expire.length > 0) {
     expire = parseInt(expire[0]);
     token.expiration(currentTimeInSeconds + expire);
@@ -46,7 +54,7 @@ if (expire.length > 0) {
     forEach.call(user.getClientRoleMappings(client).toArray(), function(roleModel) {
         roles.add(roleModel.getName());
     });
-    if (roles.contains('user')) {
+    if (roles.contains('user') && accessType === USER) {
         token.expiration(currentTimeInSeconds + USER_EXPIRE * 60);
     } else {
         token.expiration(currentTimeInSeconds + DEFAULT_EXPIRE * 60)
@@ -54,13 +62,7 @@ if (expire.length > 0) {
 }
 
 // Set type and subject id
-var accessType = keycloakSession.getContext().getRequestHeaders()
-    .getRequestHeader("X-Access-Type");
-if (accessType.length > 0) {
-    accessType = accessType[0];
-}
-
-if (accessType && accessType === DEVICE) {
+if (accessType === DEVICE) {
     var deviceId = keycloakSession.getContext().getRequestHeaders()
         .getRequestHeader("X-DeviceID")[0];
     var deviceUID = keycloakSession.getContext().getRequestHeaders()
