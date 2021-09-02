@@ -336,7 +336,7 @@ update: clean
 	@$(call msg,"Git Update (dev only)");
 	@git submodule update --init
 	@git submodule foreach --recursive "git fetch origin && git checkout origin/develop && git submodule update --init"
-	@git submodule foreach --recursive "git fetch origin && git checkout origin/develop"
+	@git submodule foreach --recursive "git fetch origin && git checkout origin/develop && git stash -a"
 
 ## docker-clean: Remove all docker images and containers.
 ##     This also includes non-oisp containers.
