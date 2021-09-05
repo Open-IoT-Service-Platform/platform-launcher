@@ -118,11 +118,10 @@ commands:
               BASE_BRANCH=$(curl "$url" | jq '.base.ref' | tr -d '"')
               echo Detected Pull Request with Base Branch ${BASE_BRANCH}
             fi
-            git submodule init
-            git submodule update
-            if [ "$CIRCLE_BRANCH" = "develop" ] || [ "${BASE_BRANCH}" = "develop" ] || [ ! -z "${CIRCLE_TAG}" ]; then
+            git submodule update --recursive --init
+            if ( [[ "$CIRCLE_BRANCH" = "develop" ]] || [[ "${BASE_BRANCH}" = "develop" ]] ) && [ -z "${CIRCLE_TAG}" ]; then
               #If on develop or a PR towards develop assume that all submodules are updated
-              echo Detected that PR is related to develop or a TAG. Will update all subrepos.
+              echo Detected that PR is related to develop branch and not tagged. Will update all subrepos.
               make update
             fi
   e2e-linter:
