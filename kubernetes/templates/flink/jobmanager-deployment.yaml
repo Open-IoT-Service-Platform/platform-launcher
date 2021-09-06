@@ -82,3 +82,5 @@ spec:
             path: flink-conf.yaml
           - key: log4j.properties
             path: log4j-console.properties
+      imagePullSecrets:
+        - name: dockercred
