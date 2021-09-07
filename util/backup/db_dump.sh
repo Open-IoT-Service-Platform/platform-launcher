@@ -44,8 +44,8 @@ fi
 TMPDIR=$1
 NAMESPACE=$2
 
-if kubectl -n ${NAMESPACE} get pod ${NAMESPACE}-stolon-keeper-0; then
-    CONTAINER=${NAMESPACE}-stolon-keeper-0
+if kubectl -n ${NAMESPACE}  get pods --selector=app=${NAMESPACE}-stolon-proxy -o jsonpath='{.items[*].metadata.name}'; then
+    CONTAINER=$(kubectl -n ${NAMESPACE}  get pods --selector=app=${NAMESPACE}-stolon-proxy -o jsonpath='{.items[*].metadata.name}')
 elif kubectl -n ${NAMESPACE} get pod acid-${NAMESPACE}-0; then
     CONTAINER=acid-${NAMESPACE}-0
 else
