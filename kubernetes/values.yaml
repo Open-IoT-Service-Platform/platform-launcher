@@ -301,7 +301,7 @@ jwt:
 postgres:
   pgSuperuserName: superuser
   pgSuperuserPassword: supersecret
-  username: oispuser
+  username: oisp_user
   password: supersecret
 
 # Docker image tag
