@@ -180,13 +180,16 @@ Updating from v2.0.1 to v2.0.2
   kubectl -n ingress-nginx edit cm/tcp-services
   EDIT THE FOLLOWING:  "8883": oisp-staging/mqtt-server:8883 => "8883": oisp-staging/emqx:8883
 
-Updating from v2.0.3.beta.1 to v2.0.4.beta.1
+Updating from v2.0.3.beta.1 to v2.0.4.beta.3
 --------------------------------------------
 Before updating OISP, update keycloak first:
 
 1. Login into **Keycloak Admin Dashboard**
-2. In the OISP realm, navigate to: **Clients** -> **oisp-frontend** -> **Client Scopes**
-3. In the menu below, add the following scopes to the **Default Client Scopes**:
+2. In the OISP realm, navigate to: **Client Scopes** and create a new scope with the name **oisp-frontend**.
+3. Go to the newly created **oisp-frontend** scope, and click on the mappers section. Create a new mapper with the name **oisp-frontend**, select **Audience** as the mapper type and **oisp-frontend** as the **Included Client Audience**. Leave **Included Custom Audience** empty. Make sure that the option **Add to Access Token** is on and **Add to ID Token** is off.
+4. Now, navigate to: **Clients** -> **oisp-frontend** -> **Client Scopes**
+5. In the menu below, add the following scope to the **Default Client Scopes**:
     - **oisp-frontend**
+6. Again, in the menu below, remove the following scope from the **Optional Client Scopes** and add it back into the **Default Client Scopes**:
     - **offline_access**
-4. You can now update OISP to **v2.0.4.beta.1**
+7. You can now update OISP to **v2.0.4.beta.3**
