@@ -47,14 +47,7 @@ if (expire.length > 0) {
     expire = parseInt(expire[0]);
     token.expiration(currentTimeInSeconds + expire);
 } else {
-    var ArrayList = Java.type("java.util.ArrayList");
-    var roles = new ArrayList();
-    var client = keycloakSession.getContext().getClient();
-    var forEach = Array.prototype.forEach;
-    forEach.call(user.getClientRoleMappings(client).toArray(), function(roleModel) {
-        roles.add(roleModel.getName());
-    });
-    if (roles.contains('user') && accessType === USER) {
+    if (accessType === USER) {
         token.expiration(currentTimeInSeconds + USER_EXPIRE * 60);
     } else {
         token.expiration(currentTimeInSeconds + DEFAULT_EXPIRE * 60)
