@@ -52,6 +52,13 @@ commands:
             touch /tmp/ci_test.lock;"
       - run:
           shell: /bin/bash
+          name: Cleanup
+          command: >-
+              ssh arkocal@82.165.71.183
+              "cd /tmp/${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM}/${CIRCLE_PROJECT_REPONAME}/ &&
+              make restart-cluster"
+      - run:
+          shell: /bin/bash
           name: Build
           command: >-
             export TEST_ID=${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM} &&
@@ -62,9 +69,8 @@ commands:
       - run:
           shell: /bin/bash
           name: Test
-# export DOCKERUSER=$DOCKERUSER passes the local variable to remote connection.
           command: >-
-            export TEST_ID=${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM} &&
+            (export TEST_ID=${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM} &&
             touch .can_delete_if_success &&
             ssh arkocal@82.165.71.183
             "cd /tmp/${TEST_ID}/${CIRCLE_PROJECT_REPONAME} &&
@@ -75,13 +81,14 @@ commands:
             make import-images DOCKER_TAG=test_${TEST_ID} DEBUG=true &&
             (make undeploy-oisp || true) &&
             make deploy-oisp-test DOCKER_TAG=test_${TEST_ID} USE_LOCAL_REGISTRY=true &&
-            make DOCKER_TAG=test_${TEST_ID} test) || rm .can_delete_if_success" &&
-            ssh arkocal@82.165.71.183
-            "cd /tmp/${TEST_ID}/${CIRCLE_PROJECT_REPONAME} &&
-            export KUBECONFIG=\$(k3d get-kubeconfig) &&
-            export NAMESPACE=${TEST_ID} &&
-            make undeploy-oisp &&
-            (rm /tmp/ci_test.lock || true)" &&
+            make DOCKER_TAG=test_${TEST_ID} test)") ||
+            (rm .can_delete_if_success)
+      # Provoke error in next step by removing .can_delete_if_success early
+      - run:
+          shell: /bin/bash
+          name: Remove locks and check success
+          command: >-
+            ssh arkocal@82.165.71.183 "(rm /tmp/ci_test.lock || true)" &&
             rm .can_delete_if_success
 
 ################################################################################
