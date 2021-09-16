@@ -29,8 +29,8 @@ var LEGACY_UID = "legacy_app_uid";
 var placeholder = "placeholder@placeholder.org";
 
 // Set expire date depending on role
-var DEFAULT_EXPIRE = 5256000; // 10 years in minutes
-var USER_EXPIRE = 1440; // 24 hours in minutes
+var DEFAULT_EXPIRE = 1440; // 24 hours in minutes
+var USER_EXPIRE = 60; // 1 hour in minutes
 
 var currentTimeInSeconds = new Date().getTime() / 1000;
 var expire = keycloakSession.getContext().getRequestHeaders()
