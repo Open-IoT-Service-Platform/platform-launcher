@@ -120,15 +120,10 @@ if [ -z "${DBONLY}" ]; then
     echo "password:" ${PASSWORD}
     echo "new superpassword:" ${NEW_SUPERPASSWORD}
 
-<<<<<<< HEAD
-    echo kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=require; psql -h ${DBHOSTNAME} -U ${USERNAME}  -d ${DBNAME}"
 
-    if (echo "ALTER USER oisp_user WITH PASSWORD '${NEW_USERPASSWORD}';" | kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=require; psql -h ${DBHOSTNAME} -U ${USERNAME}  -d ${DBNAME}"); then
-=======
     echo kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=allow; psql -h ${HOSTNAME} -U ${USERNAME}  -d ${DBNAME}"
 
     if (echo "ALTER USER oisp_user WITH PASSWORD '${NEW_USERPASSWORD}';" | kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=allow; psql -h ${HOSTNAME} -U ${USERNAME}  -d ${DBNAME}"); then
->>>>>>> e9d3fcb... Fix backup scripts for stolon
 	echo "User password changed"
     else
 	echo "Failed to change user password."
@@ -136,11 +131,8 @@ if [ -z "${DBONLY}" ]; then
     fi
     echo "Moving on  the superuser"
 
-<<<<<<< HEAD
-    echo "ALTER USER superuser WITH PASSWORD '${NEW_SUPERPASSWORD}';" | kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=require;  psql -h ${DBHOSTNAME} -U ${USERNAME}  -d ${DBNAME} -h ${DBHOSTNAME}"
-=======
+
     echo "ALTER USER superuser WITH PASSWORD '${NEW_SUPERPASSWORD}';" | kubectl -n ${NAMESPACE} exec -i ${CONTAINER} -- /bin/bash -c "export PGPASSWORD=${PASSWORD}; export PGSSLMODE=allow;  psql -h ${HOSTNAME} -U ${USERNAME}  -d ${DBNAME} -h ${HOSTNAME}"
->>>>>>> e9d3fcb... Fix backup scripts for stolon
     echo "Password restored"
 else
     SCRIPT_DIR=$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
