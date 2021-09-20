@@ -4,6 +4,7 @@ set -e
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 STOLON_PODNAME="oisp-stolon-keeper-0"
+STOLON_SERVICE="postgres"
 ZALANDO_PODNAME="acid-oisp-0"
 ZALANDO_SERVICE="acid-oisp"
 ZALANDO_DBNAME="oisp"
@@ -16,7 +17,7 @@ echo "Migrating from ${STOLON_HOSTNAME} to ${ZALANDO_HOSTNAME}, dumping to: /tmp
 
 # Dump Stolon DB to TMPDIR/database.sql
 rm -rf ${TMPDIR}/database.sql
-(export TMPDIR && export DBHOSTNAME=${STOLON_PODNAME} && export NAMESPACE=${NAMESPACE} && cd $DIR/../../ && make backup-db) || (echo "DB dumping from Stolon failed" && exit 1)
+(export TMPDIR && export DBHOSTNAME=${STOLON_SERVICE} && export NAMESPACE=${NAMESPACE} && cd $DIR/../../ && make backup-db) || (echo "DB dumping from Stolon failed" && exit 1)
 echo "Done dumping Stolon to ${TMPDIR}/database.sql"
 
 (kubectl -n ${NAMESPACE} exec ${ZALANDO_PODNAME} -- psql -U superuser -l | grep "oisp" && echo "DB Oisp found") || \
