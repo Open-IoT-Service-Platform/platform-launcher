@@ -31,7 +31,7 @@ OISP provides:
 * Kubernetes only design - can be deployed on every Kubernetes cluster
 
 ..
-          Start by cloning the repo **and checking out the develop branch**. This documentation assumes you are running an Ubuntu system (preferably 18.04 LTS), but other Linux distributions should also work with minor modifications.
+          Start by cloning the repo **and checking out the develop branch**. This documentation assumes you are running an Ubuntu system (preferably 20.04 LTS), but other Linux distributions should also work with minor modifications.
 
 .. note:: Most of the functionality described in this documentation is packed into the ``Makefile`` in the project root. Run ``make help`` for a list of available commands with descriptions.
 
@@ -43,7 +43,7 @@ Build local platform based on git tags
 
 A local platform is mainly meant for functional testing, it is therefore not providing any high availability and should not be used for production deployments.
 It can be built and deployed independently of whether you have dockerhub access to OISP repository.
-In the following, we describe the build, deploy, and test of ``v2.0.1-beta.1`` version on Ubuntu 18.04 LTS
+In the following, we describe the build, deploy, and test of ``v2.0.4-beta.3`` version on Ubuntu 20.04 LTS
 
 .. code-block:: bash
 
@@ -51,9 +51,9 @@ In the following, we describe the build, deploy, and test of ``v2.0.1-beta.1`` v
   git clone https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 
   cd platform-launcher/
-  git checkout v2.0.1-beta.1
+  git checkout v2.0.4-beta.3
   cd util/
-  sudo bash ./setup-ubuntu18.04.sh
+  sudo bash ./setup-ubuntu20.04.sh
   sudo chown -R $USER ~/.config ~/k3s ~/.cache
   sudo usermod  -aG docker $USER
 
@@ -65,9 +65,9 @@ diretory is ``platform-launcher``
   git submodule update --init --recursive
   export NODOCKERLOGIN=true
 
-  DEBUG=true  DOCKER_TAG=v2.0.1-beta.1 make build
-  DEBUG=true make DOCKER_TAG=v2.0.1-beta.1 import-images
-  DEBUG=true make DOCKER_TAG=v2.0.1-beta.1 USE_LOCAL_REGISTRY=true deploy-oisp-test
+  DEBUG=true  DOCKER_TAG=v2.0.4-beta.3 make build
+  DEBUG=true make DOCKER_TAG=v2.0.4-beta.3 import-images
+  DEBUG=true make DOCKER_TAG=v2.0.4-beta.3 USE_LOCAL_REGISTRY=true deploy-oisp-test
   make test
 
 
@@ -274,15 +274,15 @@ If you wish to deploy on an external cluster, make sure the following conditions
 
 Creating a lightweight local kubernetes cluster
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Run the following commands from the repository root to create a local k3s cluster on an Ubuntu 18.04 host:
+Run the following commands from the repository root to create a local k3s cluster on an Ubuntu 20.04 host:
 
 .. code-block:: bash
 
   cd util
   sudo apt install net-tools
-  sudo bash setup-ubuntu-18.04.sh
+  sudo bash setup-ubuntu-20.04.sh
 
-.. note:: The script should also run on Ubuntu 16.04 LTS, but you might need to ``export PATH=$PATH:/snap/bin`` first. On other Linux distributions, please install the snap packages in the script manually, and run the script afterwards.
+.. note:: The script should also run on Ubuntu 16.04 LTS and 18.04 LTS, but you might need to ``export PATH=$PATH:/snap/bin`` first. On other Linux distributions, please install the snap packages in the script manually, and run the script afterwards.
 
 The cluster is created in two Docker containers, one for the master and one for the worker. If you like, you can modify the script to make k3s run on bare metal instead of Docker, but the containerized setup is recommended, to avoid issues like port clashes.
 
