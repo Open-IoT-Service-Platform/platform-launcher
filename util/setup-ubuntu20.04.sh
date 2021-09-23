@@ -75,6 +75,11 @@ nvm install 10
 sudo npm install -g nodemailer
 sleep 3
 
+printf "\033[1mInstalling jq\n";
+printf -- "---------------\033[0m\n";
+sudo apt-get -q install jq;
+printf "\n";
+
 printf "\033[1mInstalling S3 tools\n"
 printf -- "----------------------------\033[0m\n"
 sudo apt -qq install s3cmd
