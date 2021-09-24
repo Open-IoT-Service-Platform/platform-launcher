@@ -263,8 +263,8 @@ keycloak:
         cpu: "50m"
     startupScripts:
       startup.sh: |
-        #!/bin/sh
-        sh /opt/jboss/keycloak/realms/prepare-realm.sh
+        #!/bin/bash
+        bash /opt/jboss/keycloak/realms/prepare-realm.sh
     service:
       httpPort: 4080
       httpsPort: 4043
