@@ -407,66 +407,7 @@
   "webAuthnPolicyPasswordlessCreateTimeout" : 0,
   "webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister" : false,
   "webAuthnPolicyPasswordlessAcceptableAaguids" : [ ],
-  "users" : [ {
-    "id" : "8a561605-7b80-44b8-aa65-4368e292a60f",
-    "createdTimestamp" : 1614222112374,
-    "username" : "service-account-fusion-backend",
-    "enabled" : true,
-    "totp" : false,
-    "emailVerified" : false,
-    "serviceAccountClientId" : "fusion-backend",
-    "credentials" : [ ],
-    "disableableCredentialTypes" : [ ],
-    "requiredActions" : [ ],
-    "realmRoles" : [ "uma_authorization", "offline_access" ],
-    "clientRoles" : {
-      "oisp-frontend" : [ "user" ],
-      "fusion-backend" : [ "uma_protection" ],
-      "account" : [ "view-profile", "manage-account" ]
-    },
-    "notBefore" : 0,
-    "groups" : [ ]
-  }, {
-    "id" : "d2a2f87d-ca88-4b17-a716-7ce07ec7f71d",
-    "createdTimestamp" : 1574012647096,
-    "username" : "service-account-oisp-frontend",
-    "enabled" : true,
-    "totp" : false,
-    "emailVerified" : false,
-    "email" : "service-account-oisp-frontend@placeholder.org",
-    "serviceAccountClientId" : "oisp-frontend",
-    "credentials" : [ ],
-    "disableableCredentialTypes" : [ ],
-    "requiredActions" : [ ],
-    "realmRoles" : [ "uma_authorization", "offline_access" ],
-    "clientRoles" : {
-      "realm-management" : [ "impersonation", "view-realm", "view-clients", "view-users", "manage-users" ],
-      "oisp-frontend" : [ "uma_protection" ],
-      "account" : [ "view-profile", "manage-account" ]
-    },
-    "notBefore" : 0,
-    "groups" : [ ]
-  }, {
-    "id" : "d5c1fe02-043a-4a62-ba0f-d3260bf4d9a7",
-    "createdTimestamp" : 1576086685765,
-    "username" : "service-account-realm-management",
-    "enabled" : true,
-    "totp" : false,
-    "emailVerified" : false,
-    "email" : "service-account-realm-management@placeholder.org",
-    "serviceAccountClientId" : "realm-management",
-    "credentials" : [ ],
-    "disableableCredentialTypes" : [ ],
-    "requiredActions" : [ ],
-    "realmRoles" : [ "uma_authorization", "offline_access" ],
-    "clientRoles" : {
-      "realm-management" : [ "uma_protection" ],
-      "oisp-frontend" : [ "user" ],
-      "account" : [ "view-profile", "manage-account" ]
-    },
-    "notBefore" : 0,
-    "groups" : [ ]
-  } ],
+  "users" : "{{ INSERT-SERVICE-ACCOUNTS }}",
   "scopeMappings" : [ {
     "client" : "oisp-frontend",
     "roles" : [ "uma_authorization" ]

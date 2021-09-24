@@ -28,7 +28,9 @@ FROM jboss/keycloak:${KEYCLOAK_VERSION}
 
 RUN mkdir /opt/jboss/keycloak/realms
 ADD --chown=1000 ./oisp-realm.json /opt/jboss/keycloak/realms/oisp-realm.json
+ADD --chown=1000 ./service-accounts.json /opt/jboss/keycloak/realms/service-accounts.json
 ADD --chown=1000 ./prepare-startup.sh /opt/jboss/keycloak/realms/prepare-realm.sh
+ADD --chown=1000 ./migrate-realm.sh /opt/jboss/keycloak/realms/migrate-realm.sh
 
 COPY --from=keycloak-modules-builder --chown=1000 /deployments /opt/jboss/keycloak/standalone/deployments
 COPY --from=keycloak-themes-builder --chown=1000 /themes/fusion /opt/jboss/keycloak/themes/fusion
