@@ -44,6 +44,7 @@ printf -- "------------------------\033[0m\n"
 # First, clone the repository and change to the directory
 git clone https://github.com/zalando/postgres-operator.git
 cd postgres-operator
+git checkout v1.7.0
 
 kubectl apply -f manifests/postgresql.crd.yaml
 kubectl create -f manifests/configmap.yaml  # configuration
