@@ -9,7 +9,7 @@ ZALANDO_PODNAME="acid-oisp-0"
 ZALANDO_SERVICE="acid-oisp"
 ZALANDO_DBNAME="oisp"
 
-ZALANDO_OISP_USER="oispuser"
+ZALANDO_OISP_USER="oisp_user"
 NAMESPACE="${NAMESPACE:-oisp}"
 
 TMPDIR="/tmp/stolon-zalando-migration/"
@@ -30,6 +30,6 @@ echo "Database oisp exists, ready for migration"
      make restore-db) || (echo "DB restoration failed" && exit 1)
 
 echo "Found following users and maybe more (sanity check:)"
-kubectl -n ${NAMESPACE} exec ${ZALANDO_PODNAME} -- psql -d oisp -U oispuser -c "SELECT email FROM dashboard.users;" | tail
+kubectl -n ${NAMESPACE} exec ${ZALANDO_PODNAME} -- psql -d oisp -U oisp_user -c "SELECT email FROM dashboard.users;" | tail
 
 echo "Data migration successful, configuration can be updated to use Zalando from now on."
