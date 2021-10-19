@@ -59,10 +59,8 @@ fi
 TMPDIR=$1
 NAMESPACE=$2
 
-if kubectl -n ${NAMESPACE}  get pods --selector=app=${NAMESPACE}-stolon-proxy -o jsonpath='{.items[*].metadata.name}' > /dev/null 2>&1; then
-    CONTAINER=$(kubectl -n ${NAMESPACE}  get pods --selector=app=${NAMESPACE}-stolon-proxy -o jsonpath='{.items[*].metadata.name}')
-elif kubectl -n ${NAMESPACE} get pod acid-${NAMESPACE}-1 > /dev/null 2>&1; then
-    CONTAINER=acid-${NAMESPACE}-0
+if kubectl -n ${NAMESPACE} get pod acid-oisp-1 > /dev/null 2>&1; then
+    CONTAINER=acid-oisp-0
 else
     echo "No database container found"
     exit 1
