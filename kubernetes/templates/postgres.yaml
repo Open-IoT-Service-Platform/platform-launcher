@@ -14,7 +14,7 @@ spec:
     superuser:  # database owner
     - superuser
     - createdb
-    oispuser: []  # role for application foo
+#    oispuser: []  # role for application foo
 #  databases:
 #    foo: superuser  # dbname: owner
 #  preparedDatabases:
