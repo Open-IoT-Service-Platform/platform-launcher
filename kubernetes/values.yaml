@@ -238,6 +238,11 @@ keycloak:
         value: "http://frontend:4004/keycloak/users/:userId"
       - name: PGSSLMODE
         value: require
+      - name: FORCE_MIGRATION
+        valueFrom:
+          configMapKeyRef:
+            name: oisp-config
+            key: keycloak-force-migration
       - name: OISP_FRONTEND_SECRET
         valueFrom:
           configMapKeyRef:
@@ -292,6 +297,7 @@ keycloak:
   # Example: URL of Frontend - https://latest.oisp.info:443
   #          Auth Server URL for Applications in Other Namespaces: https://latest.oisp.info:443/keycloak
   authServerUrl: "http://keycloak-http:4080/keycloak"
+  forceMigration: ""
 
 jwt:
   public: "No key set"

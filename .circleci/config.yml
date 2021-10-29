@@ -156,6 +156,10 @@ commands:
             yes| make build DOCKER_TAG="test" DEBUG=true
   e2e-test:
     description: "E2E test"
+    parameters:
+      upgrade-test:
+        type: string
+        default: "false"
     steps:
       - run:
           shell: /bin/bash
@@ -166,9 +170,22 @@ commands:
             npm install nodemailer
             export NODOCKERLOGIN=true
             retval=2;
+            export DOCKER_TAG=test
+            export USE_LOCAL_REGISTRY=true
+            # If CURRENT_RELEASE_VERSION is set, do an upgrade test from the release version to latest
+            if [[ "<< parameters.upgrade-test >>" = "true" ]] && [[ -n "${CURRENT_RELEASE_VERSION}" ]];
+            then
+              export DOCKER_TAG="${CURRENT_RELEASE_VERSION}"
+              export USE_LOCAL_REGISTRY=false
+            fi
             until [ ${retval} -eq 0 ]; do
               make undeploy-oisp
-              (for i in {1..20}; do sleep 60; echo .; done&) &&  make deploy-oisp-test DOCKER_TAG=test USE_LOCAL_REGISTRY=true
+              (for i in {1..20}; do sleep 60; echo .; done&) &&  make deploy-oisp-test
+              if [[ "<< parameters.upgrade-test >>" = "true" ]] && [[ -n "${CURRENT_RELEASE_VERSION}" ]];
+              then
+                (for i in {1..20}; do sleep 60; echo .; done&) &&  make upgrade-oisp DOCKER_TAG=test USE_LOCAL_REGISTRY=true KEYCLOAK_FORCE_MIGRATION="true"
+                kubectl -n $(NAMESPACE) scale deployment debugger --replicas=1
+              fi
               make test
               retval=$?
             done
@@ -300,7 +317,8 @@ jobs:
       - setup-branch
       - e2e-linter
       - build-branch
-      - e2e-test
+      - e2e-test:
+          upgrade-test: "true"
       - push-images:
           tag: "date"
   deploy-production:

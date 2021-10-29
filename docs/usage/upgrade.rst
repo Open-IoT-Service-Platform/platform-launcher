@@ -12,6 +12,15 @@ The recommended order to upgrade the platform is to
 #. Upgrade the Helm chart
 #. Upgrade Keycloak manually (if need be)
 
+Upgrade tests in the CI
+-----------------------
+
+From now on, CI will try to do upgrade tests in its nightly builds. It will first deploy the current release version of OISP and will try to update it to the latest alongside with database migrations.
+
+It is important that the CURRENT_RELEASE_VERSION environment variable is properly set in the CI for this test to work. If someone wants to skip this test, then they can also simply set this variable to empty string.
+
+Check CI configuration file for more information on the matter.
+
 Upgrade the Operators
 ---------------------
 
@@ -51,6 +60,23 @@ Upgrading Keycloak manually
 ---------------------------
 
 For simplicity, the update should be performed with only one Keycloak instance.
+
+Upgrading Keycloak with automated migration script
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can now use the environment variable 'FORCE_MIGRATION' in the oisp/keycloak container and set it to a non-empty string (e.g: by editing the oisp-config configmap) to trigger an automatic keycloak migration. You can also pass this as an argument to 'make upgrade-oisp' like 'make upgrade-oisp FORCE_MIGRATION="true"'. The migration script takes a backup of your current system in the keycloak pod and tries to migrate it to the current version. Nevertheless it is important to backup before doing the migration, because if something goes wrong and the pod dies, you might potentially lose your backup. Here are the things to look out for, when using this option.
+
+#. As long as the FORCE_MIGRATION variable is set to something non-empty, keycloak will try to migrate on every restart. After a successful migration, it is vital that the variable is set to an empty string again. Note that this is also valid, if you are using the 'Makefile' for the migration, it will not revert the environment variable back.
+#. The directory for the backup is '/opt/jboss/keycloak/realms', backup files end with '*-backup'.json.
+#. Due to the nature of keycloak, it is hard to provide meaningful logs during the migration, however all the logs will be written in the '/opt/jboss/keycloak/realms', specifically with two files: 'export_logs' and 'import_logs'
+#. When you start a migration, the script will first attempt to export current data for backup, and them import the changes. There is a hard time limit for both of these tasks, and keycloak will fail if it cannot manage to migrate before the timeout.
+#. This method of migration is less prone to bugs, because the migration is done internally, the manual upgrade must be the last resort.
+
+
+
+
+
+
 
 Upgrading Keycloak Version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
