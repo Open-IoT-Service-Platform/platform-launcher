@@ -145,6 +145,7 @@ data:
   keycloak-frontend-secret: {{ .Values.keycloak.frontend.secret }}
   keycloak-websocket-server-secret: {{ .Values.keycloak.websocketServer.secret }}
   keycloak-mqtt-broker-secret: {{ .Values.keycloak.mqttBroker.secret }}
+  keycloak-force-migration: "{{ .Values.keycloak.forceMigration }}"
   gateway: |
     {
     "username": "{{ .Values.systemuser.username }}",
