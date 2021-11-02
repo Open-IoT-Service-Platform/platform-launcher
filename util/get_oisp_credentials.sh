@@ -26,10 +26,6 @@ if [[ "$KEYCLOAK_FUSION_BACKEND_SECRET" == "null" ]] || [[ -z "$KEYCLOAK_FUSION_
     echo "Keycloak fusion backend secret is not present! Randomly creating new one!"
     export KEYCLOAK_FUSION_BACKEND_SECRET=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c ${1:-64})
 fi
-# tr "." "_" because jq cannot handle keys with "."
-export JWT_PRIVATE=$(kubectl -n ${NAMESPACE} -o json get secret oisp-secrets | tr "." "_" | jq -r .data.jwt_privatekey)
-export JWT_PUBLIC=$(kubectl -n ${NAMESPACE} -o json get secret oisp-secrets | tr "." "_" | jq -r .data.jwt_publickey)
-export JWT_X509=$(kubectl -n ${NAMESPACE} -o json get secret oisp-secrets | tr "." "_" | jq -r .data.jwt_x509)
 
 # Check whether SYSTEMUSER_PASSWORD is recovered to make sure the tools are installed
 # and the namespace is valid
