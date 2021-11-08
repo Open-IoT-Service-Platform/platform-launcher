@@ -41,6 +41,7 @@ spec:
       labels:
         app: debugger
     spec:
+      serviceAccountName: debug-test
       containers:
       - name: debugger
         {{ if .Values.use_local_registry }}
@@ -81,7 +82,11 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
-
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: debug-test
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -95,15 +100,38 @@ rules:
    resources: ["pods/exec"]
    verbs: ["create"]
 ---
-
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: pod-reader-binding
 subjects:
   - kind: ServiceAccount
-    name: "default"
+    name: debug-test
 roleRef:
   kind: Role
   name: pod-reader
   apiGroup: rbac.authorization.k8s.io
+{{ if not .Values.production }}
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: crd-test-binding
+subjects:
+  - kind: ServiceAccount
+    name: debug-test
+roleRef:
+  kind: Role
+  name: crd-tester
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: crd-tester
+rules:
+ - apiGroups:
+   - oisp.org
+   resources: ["beamsqlstatementsets", "beamsqltables", "beamsqlviews"]
+   verbs: ["get", "list", "apply", "create", "delete", "patch"]
+{{ end }}
