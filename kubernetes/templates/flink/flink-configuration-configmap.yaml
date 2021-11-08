@@ -8,7 +8,7 @@ data:
   flink-conf.yaml: |+
     jobmanager.rpc.address: flink-jobmanager
     {{ if .Values.less_resources }}
-    taskmanager.numberOfTaskSlots: 3
+    taskmanager.numberOfTaskSlots: 10
     {{ else }}
     taskmanager.numberOfTaskSlots: 1
     {{ end }}

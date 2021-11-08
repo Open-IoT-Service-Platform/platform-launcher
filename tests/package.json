@@ -21,6 +21,7 @@
     "gm": "^1.23.1",
     "imap": "^0.8.19",
     "kafka-node": "^2.4.0",
+    "kafkajs": "^1.15.0",
     "mailparser": "^2.2.0",
     "mocha": "^4.0.1",
     "nodemailer": "^4.6.6",

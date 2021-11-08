@@ -77,6 +77,7 @@
 		"mqtt": "${OISP_TESTS_SKIP_MQTT}",
 		"alerts": "${OISP_TESTS_SKIP_ALERTS}",
 		"scale": "${OISP_TESTS_SKIP_SCALE}",
-		"streamer": "${OISP_TESTS_SKIP_STREAMER}"
+		"streamer": "${OISP_TESTS_SKIP_STREAMER}",
+		"services": "${OISP_TESTS_SKIP_SERVICES}"
 	}
 }
