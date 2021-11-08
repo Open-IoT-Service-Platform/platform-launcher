@@ -1,48 +1,28 @@
-apiVersion: oisp.org/v1alpha1
+apiVersion: oisp.org/v1alpha2
 kind: BeamSqlTable
 metadata:
   name: metrics
 spec:
+  name: metrics
   connector: kafka
   fields:
-    'aid': STRING
-    'value': STRING
-    'dvalue': AS CAST(`value` AS DOUBLE)
-    'on': BIGINT
-    'ts': AS epoch2SQL(`on`, 'Europe/Berlin')
-    'cid': STRING
-    'systemon': BIGINT
-    'dataType': STRING
-    'watermark': FOR `ts` AS `ts` - INTERVAL '5' SECOND
+    - 'aid': STRING
+    - 'cid': STRING
+    - 'dataType': STRING
+    - 'dvalue': AS CAST(`value` AS DOUBLE)
+    - 'on': BIGINT
+    - 'systemon': BIGINT
+    - 'ts': AS epoch2SQL(`on`, 'Europe/Berlin')
+    - 'value': STRING
+    - 'watermark': FOR `ts` AS `ts` - INTERVAL '5' SECOND
   kafka:
     topic: metrics
     properties:
-      bootstrap.servers: oisp-kafka-headless:9092
-      fetch.message.max.bytes: 15728640
-    scan.startup.mode: latest-offset
-  value:
-    format: json
-    json.fail-on-missing-field: false
-    json.ignore-parse-errors: true
----
-apiVersion: oisp.org/v1alpha1
-kind: BeamSqlTable
-metadata:
-  name: metrics-sink
-spec:
-  connector: kafka
-  fields:
-    'aid': STRING
-    'value': STRING
-    'on': BIGINT
-    'cid': STRING
-    'systemon': BIGINT
-    'dataType': STRING
-  kafka:
-    topic: metrics
-    properties:
-      bootstrap.servers: oisp-kafka-headless:9092
-      fetch.message.max.bytes: 15728640
+      {{- $kafka := ternary .Values.kafkatest .Values.kafka .Values.less_resources -}}
+      {{- with $kafka }}
+      bootstrap.servers: "{{ .fullBrokerList }}"
+      fetch.message.max.bytes: {{ index .configurationOverrides "message.max.bytes" }}
+      {{- end }}
     scan.startup.mode: latest-offset
   value:
     format: json
@@ -56,7 +36,7 @@ metadata:
 spec:
   sqlstatements:
     - |
-      insert into `metrics-sink`
+      insert into `metrics`
       with aggregation as
       (select
         TUMBLE_START(ts, INTERVAL '60' MINUTE) as `window-start`,
@@ -114,7 +94,7 @@ spec:
         cast(`sum` as String) as `value`
         from aggregation;
     - |
-      insert into `metrics-sink`
+      insert into `metrics`
       with aggregation as
       (select
         TUMBLE_START(ts, INTERVAL '60' SECOND) as `window-start`,
@@ -173,4 +153,3 @@ spec:
         from aggregation;
   tables:
     - metrics
-    - metrics-sink
