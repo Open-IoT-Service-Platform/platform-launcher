@@ -175,6 +175,8 @@ commands:
             # If CURRENT_RELEASE_VERSION is set, do an upgrade test from the release version to latest
             if [[ "<< parameters.upgrade-test >>" = "true" ]] && [[ -n "${CURRENT_RELEASE_VERSION}" ]];
             then
+              export DOCKERLOGIN="${DOCKER_USERNAME}"
+              export DOCKERPASS="${DOCKER_PASSWORD}"
               export DOCKER_TAG="${CURRENT_RELEASE_VERSION}"
               export USE_LOCAL_REGISTRY=false
             fi
@@ -183,6 +185,7 @@ commands:
               (for i in {1..20}; do sleep 60; echo .; done&) &&  make deploy-oisp-test
               if [[ "<< parameters.upgrade-test >>" = "true" ]] && [[ -n "${CURRENT_RELEASE_VERSION}" ]];
               then
+                (for i in {1..20}; do sleep 60; echo .; done&) && make wait-until-ready
                 (for i in {1..20}; do sleep 60; echo .; done&) &&  make upgrade-oisp DOCKER_TAG=test USE_LOCAL_REGISTRY=true KEYCLOAK_FORCE_MIGRATION="true"
                 kubectl -n $(NAMESPACE) scale deployment debugger --replicas=1
               fi
