@@ -18,6 +18,7 @@ spec:
         app: flink
         component: taskmanager
     spec:
+      serviceAccountName: flink-jobmanager
       containers:
       - name: taskmanager
         image: flink:{{ .Values.flink.version }}

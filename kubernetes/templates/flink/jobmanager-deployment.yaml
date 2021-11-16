@@ -14,13 +14,14 @@ spec:
         app: flink
         component: jobmanager
     spec:
+      serviceAccountName: flink-jobmanager
       initContainers:
       - name: create-checkpointing-dir
         image: {{ printf "%s/%s" .Values.imageCredentials.registry .Values.minio.mcimage }}
         env:
         - name: MC_HOST_oisp
           value: {{ printf "http://%s:%s@%s" .Values.minio.accesskey .Values.minio.secretkey .Values.minio.endpoint }}
-        command: ["/bin/bash", "-c", "mc mb -p oisp/{{ .Values.flink.checkpoints.bucket }}"]
+        command: ["/bin/bash", "-c", "mc mb -p oisp/{{ .Values.flink.highAvailability.bucket }}"]
       containers:
       - name: jobmanager
         image: flink:{{ .Values.flink.version }}
@@ -53,7 +54,9 @@ spec:
         image: {{ .Values.imagePrefix }}/simple-flink-sql-gateway:{{ .Values.tag }}
         {{ end }}
         workingDir: /opt/gateway
-        command: ["/bin/bash", "-c", "nodejs gateway.js"]
+        command: ["/bin/bash", "-c", "mkdir -p /opt/flink/plugins/s3; \
+          cp /opt/flink/opt/flink-s3-fs-hadoop-*.jar /opt/flink/plugins/s3 ; \
+          nodejs gateway.js"]
         env:
         - name: SIMPLE_FLINK_SQL_GATEWAY_PORT
           value: {{ .Values.flink.sqlClientPort | quote }}
@@ -68,9 +71,9 @@ spec:
             port: {{ .Values.flink.sqlClientPort }}
           initialDelaySeconds: 30
           periodSeconds: 3
-        #volumeMounts:
-        #- name: flink-config-volume
-        #  mountPath: /opt/flink/conf
+        volumeMounts:
+        - name: flink-config-volume
+          mountPath: /opt/flink/conf
         securityContext:
           runAsUser: 9999  # refers to user _flink_ from official flink image, change if necessary
       volumes:
@@ -82,5 +85,33 @@ spec:
             path: flink-conf.yaml
           - key: log4j.properties
             path: log4j-console.properties
+          - key: sql-client-defaults.yaml
+            path: sql-client-defaults.yaml
       imagePullSecrets:
         - name: dockercred
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: flink-jobmanager
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: flink-jobmanager
+rules:
+ - apiGroups: [""] # "" indicates the core API group
+   resources: ["configmaps"]
+   verbs: ["create", "edit", "delete", "watch", "get", "list", "patch", "update"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: flink-jobmanager
+subjects:
+  - kind: ServiceAccount
+    name: flink-jobmanager
+roleRef:
+  kind: Role
+  name: flink-jobmanager
+  apiGroup: rbac.authorization.k8s.io
