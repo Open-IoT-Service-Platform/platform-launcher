@@ -22,12 +22,18 @@ data:
     restart-strategy.fixed-delay.attempts: 30
     restart-strategy.fixed-delay.delay: 10 s
     web.timeout: 60000
-    state.backend: filesystem
-    state.checkpoints.dir: s3://{{ .Values.flink.checkpoints.bucket }}/{{ .Values.flink.checkpoints.endpoint }}
+    state.checkpoints.dir: s3://{{ .Values.flink.highAvailability.bucket }}/{{ .Values.flink.highAvailability.checkpointsDir }}
+    state.savepoints.dir: s3://{{ .Values.flink.highAvailability.bucket }}/{{ .Values.flink.highAvailability.savepointsDir }}
+    execution.checkpointing.interval: 60 s
     s3.endpoint: {{ .Values.minio.httpurl }}
     s3.path.style.access: true
     s3.access-key: {{ .Values.minio.accesskey }}
     s3.secret-key: {{ .Values.minio.secretkey }}
+    cluster.evenly-spread-out-slots: {{ .Values.flink.highAvailability.evenlySpreadOut }}
+    kubernetes.cluster-id: {{ .Values.flink.highAvailability.clusterId }}
+    kubernetes.namespace: {{.Release.Namespace}}
+    high-availability: org.apache.flink.kubernetes.highavailability.KubernetesHaServicesFactory
+    high-availability.storageDir: s3://{{ .Values.flink.highAvailability.bucket }}/{{ .Values.flink.highAvailability.recoveryDir }}
 
   log4j.properties: |+
     monitorInterval=30
@@ -69,3 +75,33 @@ data:
     # Suppress the irrelevant (wrong) warnings from the Netty channel handler
     logger.netty.name = org.apache.flink.shaded.akka.org.jboss.netty.channel.DefaultChannelPipeline
     logger.netty.level = OFF
+
+  sql-client-defaults.yaml: |+
+    tables: []
+    functions:
+      - name: epoch2sql
+        from: class
+        class: info.oisp.Epoch2SQLTimestamp
+      - name: getJsonField
+        from: class
+        class: info.oisp.GetJsonField
+    catalogs: [] # empty list
+    execution:
+      planner: blink
+      type: streaming
+      time-characteristic: event-time
+      periodic-watermarks-interval: 200
+      result-mode: table
+      max-table-result-rows: 1000000
+      parallelism: 1
+      max-parallelism: 128
+      min-idle-state-retention: 0
+      max-idle-state-retention: 0
+      current-catalog: default_catalog
+      current-database: default_database
+      restart-strategy:
+        type: fallback
+    deployment:
+      response-timeout: 5000
+      gateway-address: ""
+      gateway-port: 0
