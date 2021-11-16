@@ -346,6 +346,10 @@ flink:
       requests:
         cpu: 100m
         memory: 128Mi
-  checkpoints:
-    bucket: flink-checkpoints
-    endpoint: state
+  highAvailability:
+    bucket: flink
+    savepointsDir: savepoints
+    recoveryDir: recovery
+    checkpointsDir: checkpoints
+    clusterId: cluster-1
+    evenlySpreadOut: true
