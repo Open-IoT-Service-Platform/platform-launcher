@@ -1,0 +1,22 @@
+name: Makefile CI
+
+on:
+  push:
+    branches: [ beamsql-testing ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Build platform
+      run: DOCKER_TAG=test NODOCKERLOGIN=true DEBUG=true make build
+      
+    - name: Deploy
+      run: DOCKER_TAG=test NODOCKERLOGIN=true DEBUG=true deploy-oisp-test
+      
+    - name: Run test
+      run: make test
