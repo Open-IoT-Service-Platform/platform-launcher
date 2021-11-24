@@ -57,6 +57,7 @@ data:
     "timeoutMs": 10000,
     "topicsObservations": {{ .metricsTopic | quote }},
     "topicsRuleEngine": "rules-update",
+    "topicsActuations": "actuations",
     "topicsHeartbeatName": "heartbeat",
     "topicsHeartbeatInterval": 5000,
     "maxPayloadSize": {{ .maxPayloadSize | int }},
