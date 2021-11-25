@@ -19,6 +19,9 @@
 // Helper Functions
 //-------------------------------------------------------------------------------------------------------
 
+var mqtt = require('mqtt');
+var config = require("../../test-config-mqtt.json");
+
 function setCredential(connector, deviceToken, deviceId, cb) {
     if (!cb) {
         throw "Callback required";
@@ -118,7 +121,55 @@ function submitDataList(connector, valueList, deviceToken, accountId, deviceId, 
     });
 }
 
+var clients = {};
+
+function closeMqttConnection(deviceId) {
+    clients[deviceId].end();
+    clients[deviceId] = null;
+}
+
+function openMqttConnection(deviceToken, deviceId, topics, cbManager, cb, address, options) {
+    if (clients[deviceId]) {
+        closeMqttConnection(deviceId);
+    }
+
+    if (!options) {
+        options = {};
+    }
+    options.username = deviceId;
+    options.password = deviceToken;
+    if (!address) {
+        address = config.connector.mqtt.host + ":" + config.connector.mqtt.port;
+        if (config.connector.mqtt.secure) {
+            address = "mqtts://" + address;
+            options.rejectUnauthorized = false;
+        } else {
+            address = "mqtt://" + address;
+        }
+    }
+
+    var client = mqtt.connect(address, options);
+
+    client.on('connect', function() {
+        client.subscribe(topics, function(err, t) {
+            if (err) {
+                cb(err);
+                return;
+            }
+            cb();
+        });
+    });
+
+    client.on('message', function(topic, message) {
+        cbManager.cb(message, topic);
+    });
+
+    clients[deviceId] = client;
+}
+
 module.exports={
+    openMqttConnection: openMqttConnection,
+    closeMqttConnection: closeMqttConnection,
     setCredential: setCredential,
     submitData: submitData,
     submitDataList: submitDataList

@@ -1220,9 +1220,9 @@ describe('Do data sending subtests ...'.bold, function() {
     it(descriptions.send8000SamplesForAutoDownsampleTest, function(done) {
         test.send8000SamplesForAutoDownsampleTest(done);
     }).timeout(100000);
-    /* it(descriptions.send8000SamplesForMultiAggregationTest,function(done) {
+    /*it(descriptions.send8000SamplesForMultiAggregationTest,function(done) {
        test.send8000SamplesForMultiAggregationTest(done);
-     }).timeout(100000);*/
+   }).timeout(100000);*/
     it(descriptions.waitForBackendSynchronization, function(done) {
         // Due to low profile of test environment and the fact that Kafka/Backend is processing all the 1000s of samples
         // separately, we need to give the backend more time to settle
@@ -1393,6 +1393,32 @@ describe('Services Operator subtests...'.bold, function() {
         test = require('./subtests/services-operator-tests').test(userToken);
         test.testUpgradedOperatorSave(done);
     }).timeout(100000);
+    it(descriptions.cleanup, function(done) {
+        test.cleanup(done);
+    }).timeout(10000);
+});
+
+describe('Do MQTT feedback subtests ...'.bold, function() {
+    before(function() {
+        if (checkTestCondition(['non_essential', 'mqtt'])) {
+            this.skip();
+        }
+    });
+    let test;
+    const descriptions = require('./subtests/mqtt-feedback-tests').descriptions;
+    it(descriptions.setup, function(done) {
+        test = require('./subtests/mqtt-feedback-tests').test(userToken, mqttConnector);
+        test.setup(done);
+    }).timeout(20000);
+    it(descriptions.openMqttConnection, function(done) {
+        test.openMqttConnection(done);
+    }).timeout(10000);
+    it(descriptions.receiveControlActuation, function(done) {
+        test.receiveControlActuation(done);
+    }).timeout(25000);
+    it(descriptions.receiveAlertActuation, function(done) {
+        test.receiveAlertActuation(done);
+    }).timeout(25000);
     it(descriptions.cleanup, function(done) {
         test.cleanup(done);
     }).timeout(10000);
