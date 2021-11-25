@@ -50,7 +50,7 @@
                 "health_status": "device/{deviceid}/health",
                 "control_command": "device/{gwid}/control",
                 "ingestion_response": "device/{deviceid}/metric/response",
-                "actuation": "device/metric/{deviceid}/actuation"
+                "actuation": "server/{accountid}/DCMD/{gatewayId}/{deviceid}"
             }
 		}
 	}

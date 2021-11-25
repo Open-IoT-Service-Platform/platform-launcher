@@ -24,6 +24,7 @@
     "kafkajs": "^1.15.0",
     "mailparser": "^2.2.0",
     "mocha": "^4.0.1",
+    "mqtt": "^4.2.8",
     "nodemailer": "^4.6.6",
     "request-promise": "^4.2.4",
     "sleep": "^6.3.0",
