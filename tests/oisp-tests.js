@@ -1282,6 +1282,11 @@ describe('Do data sending subtests ...'.bold, function() {
 });
 
 describe('Streamer subtests...'.bold, function() {
+    before(function() {
+        if (checkTestCondition(['non_essential'])) {
+            this.skip();
+        }
+    });
     let test;
     const descriptions = require('./subtests/streamer-tests').descriptions;
     it(descriptions.prepareStreamerTestSetup, function(done) {
@@ -1372,6 +1377,22 @@ describe('Services Operator subtests...'.bold, function() {
     it(descriptions.SendDataToAggregatorAndCheckResult, function(done) {
         test.SendDataToAggregatorAndCheckResult(done);
     }).timeout(10000);
+    it(descriptions.updateTestOperator, function(done) {
+        test = require('./subtests/services-operator-tests').test(userToken);
+        test.updateTestOperator(done);
+    }).timeout(100000);
+    it(descriptions.testUpgradedOperator, function(done) {
+        test = require('./subtests/services-operator-tests').test(userToken);
+        test.testUpgradedOperator(done);
+    }).timeout(100000);
+    it(descriptions.updateTestOperatorSave, function(done) {
+        test = require('./subtests/services-operator-tests').test(userToken);
+        test.updateTestOperatorSave(done);
+    }).timeout(100000);
+    it(descriptions.testUpgradedOperatorSave, function(done) {
+        test = require('./subtests/services-operator-tests').test(userToken);
+        test.testUpgradedOperatorSave(done);
+    }).timeout(100000);
     it(descriptions.cleanup, function(done) {
         test.cleanup(done);
     }).timeout(10000);
