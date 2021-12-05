@@ -25,11 +25,13 @@ var test = function() {
     const kafka = new Kafka({
         clientId: "test-client",
         brokers: [`${config.connector.kafka.host}:${config.connector.kafka.port}`],
-        logLevel: logLevel.NOTHING
+        logLevel: logLevel.NOTHING,
+        retry: {
+            retries: 8
+        }
     });
-    const consumer = kafka.consumer({ groupId: 'test-group' });
-    const producer = kafka.producer();
-    const admin = kafka.admin();
+    var consumer;
+    var producer;
     const inputTopic = 'test-input';
     const outputTopic = 'test-output';
     var bsqlresource = `
@@ -83,7 +85,7 @@ spec:
         json.fail-on-missing-field: false
         json.ignore-parse-errors: true
 ---
-apiVersion: oisp.org/v1alpha1
+apiVersion: oisp.org/v1alpha2
 kind: BeamSqlStatementSet
 metadata:
   name: test-aggregator
@@ -98,6 +100,38 @@ spec:
     - test-output
 `;
 
+    var bsqlupdateSave = `
+apiVersion: oisp.org/v1alpha2
+kind: BeamSqlStatementSet
+metadata:
+  name: test-aggregator
+  namespace: oisp
+spec:
+  updateStrategy: savepoint
+  sqlstatements:
+    - |
+      insert into \`test-output\`
+      select cid, sum(\`dvalue\` + 1) from \`test-input\` group by cid;
+  tables:
+    - test-input
+    - test-output
+`;
+
+    var bsqlupdate = `
+apiVersion: oisp.org/v1alpha1
+kind: BeamSqlStatementSet
+metadata:
+  name: test-aggregator
+  namespace: oisp
+spec:
+  sqlstatements:
+    - |
+      insert into \`test-output\`
+      select cid, sum(\`dvalue\` + 1) from \`test-input\` group by cid;
+  tables:
+    - test-input
+    - test-output
+`;
 
     var submitToK8s = function(k8sResource) {
         return new Promise((resolve, reject) => {
@@ -142,12 +176,26 @@ EOF`;
         });
     };
 
+
     const initKafka = async function() {
+        producer = await kafka.producer();
         await producer.connect();
+        const randomGroup = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        consumer = await kafka.consumer({ groupId: randomGroup });
         await consumer.connect();
-        await admin.connect();
+        await consumer.subscribe({ topic: outputTopic });
+    };
+
+    const startKafkaConsumer = async function() {
 
     };
+
+
+    const stopKafkaConsumer = async function() {
+        await consumer.disconnect();
+        await consumer.stop();
+    };
+
 
 
     const messages = [
@@ -162,20 +210,36 @@ EOF`;
         });
     };
 
-    var aggrResults = [
+    var aggrResults1 = [
         {"cid": "cid", "value": 1.0},
         {"cid": "cid", "value": 3.0},
         {"cid": "cid", "value": 8.0}
     ];
-    var aggrProcessed = 0;
+
+    var aggrResults2 = [
+        {"cid": "cid", "value": 2.0},
+        {"cid": "cid", "value": 5.0},
+        {"cid": "cid", "value": 11.0}
+    ];
+
+    var aggrResults3 = [
+        {"cid": "cid", "value": 13.0},
+        {"cid": "cid", "value": 16.0},
+        {"cid": "cid", "value": 22.0}
+    ];
+
+    var aggrProcessed;
+    var aggrResultsRef;
     
-    const receiveTestDataFromKafka = async function() {
-        await consumer.subscribe({ topic: outputTopic, fromBeginning: true });
+    const receiveTestDataFromKafka = async function(aggrResults) {
+        aggrProcessed = 0;
+        aggrResultsRef = aggrResults;
         await consumer.run({
             eachMessage: ({ topic, partition, message }) => {
-                var element = aggrResults.shift();
+                var element = aggrResultsRef.shift();
+
                 if (undefined === element) {
-                    return;
+                    throw new Error("No element found for comparison");
                 }
                 var messageElement = JSON.parse(message.value.toString());
                 assert.deepEqual(element, messageElement, 'Kafka element does not match');
@@ -183,6 +247,7 @@ EOF`;
             }
         });
     };
+
     const waitForTestData = function() {
         return new Promise((resolve, reject) =>
             setTimeout(() => {
@@ -191,6 +256,11 @@ EOF`;
                 } else {
                     resolve();
                 }}, 5000));
+    };
+
+    const waitForOperator = function(delay) {
+        return new Promise((resolve) =>
+            setTimeout(resolve, delay));
     };
 
     return {
@@ -202,12 +272,48 @@ EOF`;
         },
         "SendDataToAggregatorAndCheckResult": done => {
             initKafka()
+                .then(() => startKafkaConsumer())
+                .then(() => receiveTestDataFromKafka(aggrResults1))
                 .then(() => sendTestDataToKafka())
-                .then(() => receiveTestDataFromKafka())
                 .then(() => waitForTestData())
+                .then(() => stopKafkaConsumer())
                 .then(() => done())
                 .catch((e) => done(e));
 
+        },
+        "updateTestOperator": done => {
+            submitToK8s(bsqlupdate)
+                .then(() => waitForOperator(5000))
+                .then(() => checkReadiness("bsqls", "test-aggregator"))
+                .then(() => done())
+                .catch((e) => done(e));
+        },
+        "updateTestOperatorSave": done => {
+            submitToK8s(bsqlupdateSave)
+                .then(() => waitForOperator(5000))
+                .then(() => checkReadiness("bsqls", "test-aggregator"))
+                .then(() => done())
+                .catch((e) => done(e));
+        },
+        "testUpgradedOperator": done => {
+            initKafka()
+                .then(() => startKafkaConsumer())
+                .then(() => receiveTestDataFromKafka(aggrResults2))
+                .then(() => sendTestDataToKafka())
+                .then(() => waitForTestData())
+                .then(() => stopKafkaConsumer())
+                .then(() => done())
+                .catch((e) => done(e));
+        },
+        "testUpgradedOperatorSave": done => {
+            initKafka()
+                .then(() => startKafkaConsumer())
+                .then(() => receiveTestDataFromKafka(aggrResults3))
+                .then(() => sendTestDataToKafka())
+                .then(() => waitForTestData())
+                .then(() => stopKafkaConsumer())
+                .then(() => done())
+                .catch((e) => done(e));
         },
         "cleanup": function(done) {
             removeK8sObj("bsqls", "test-aggregator")
@@ -222,6 +328,10 @@ EOF`;
 var descriptions = {
     "prepareTestSetup": "Deploy test operator and wait for readyness",
     "SendDataToAggregatorAndCheckResult": "Send data to aggregator and check result",
+    "updateTestOperator": "Update test operator without savepoints",
+    "testUpgradedOperator": "Send data to updated operator and check results",
+    "updateTestOperatorSave": "Update test operator with savepoints",
+    "testUpgradedOperatorSave": "Send data to savepoint updated operator and check results",
     "cleanup": "Cleanup test operator"
 };
 
