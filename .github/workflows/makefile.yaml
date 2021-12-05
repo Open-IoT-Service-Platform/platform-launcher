@@ -7,15 +7,11 @@ on:
   push:
     branches:
       - develop
-      - '**-v[0-9]+.[0-9]+'
-      - '**-test'
-    tags:
-      - 'v**'
-
+      - '**-debugtest'
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
@@ -38,6 +34,7 @@ jobs:
 
     - name: Build platform
       run: |
+        set +o pipefail
         export TERM=vt100
         yes | DOCKER_TAG=test NODOCKERLOGIN=true DEBUG=true make build
 
@@ -55,15 +52,16 @@ jobs:
         retval=2;
         export DOCKER_TAG=test
         export USE_LOCAL_REGISTRY=true
-        until [ ${retval} -eq 0 ]; do
+        until [ ${retval} -eq 0 ] || [ ${loops} -gt 3 ]; do
           make undeploy-oisp
           (for i in {1..20}; do sleep 60; echo .; done&) &&  make deploy-oisp-test
-          if [[ "<< parameters.upgrade-test >>" = "true" ]] && [[ -n "${CURRENT_RELEASE_VERSION}" ]];
-            then
-              (for i in {1..20}; do sleep 60; echo .; done&) &&  make upgrade-oisp DOCKER_TAG=test USE_LOCAL_REGISTRY=true KEYCLOAK_FORCE_MIGRATION="true"
-              kubectl -n $(NAMESPACE) scale deployment debugger --replicas=1
-            fi
           make test
           retval=$?
+          loops=$((loops+1))
         done
+        echo Test return value: ${retval}
+        exit ${retval}
+    - name: debug with upterm
+      if: failure()
+      uses: lhotari/action-upterm@v1
 
