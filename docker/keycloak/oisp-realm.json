@@ -2197,6 +2197,8 @@
     "strictTransportSecurity" : "max-age=31536000; includeSubDomains"
   },
   "smtpServer" : { },
+  "loginTheme": "fusion",
+  "accountTheme": "fusion",
   "eventsEnabled" : false,
   "eventsListeners" : [ "jboss-logging", "oisp-event-listener" ],
   "enabledEventTypes" : [ ],
