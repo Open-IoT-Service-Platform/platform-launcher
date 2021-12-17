@@ -967,7 +967,7 @@ describe('Sending observations and checking rules ...\n'.bold, function() {
                                     component.data[currentDataIndex].expectedActuation.toString()));
                                 }
                             };
-                            setTimeout(checkActuation, 60 * 1000, currentActuationCounter);
+                            setTimeout(checkActuation, 60 * 2000, currentActuationCounter);
                         }
                     });
             } else {
@@ -997,7 +997,7 @@ describe('Sending observations and checking rules ...\n'.bold, function() {
         });
 
         sendObservationAndCheckRules(components.first);
-    }).timeout(60*1000);
+    }).timeout(60*3000);
 
     // ---------------------------------------------------------------
 
@@ -1083,7 +1083,7 @@ describe('Do basic rule and alerts subtests ...'.bold, function() {
     }).timeout(GENERIC_TIMEOUT);
     it(descriptions.sendObservations, function(done) {
         test.sendObservations(done);
-    }).timeout(120000);
+    }).timeout(300000);
     it(descriptions.deleteRuleAndSendDataAgain, function(done) {
         test.deleteRuleAndSendDataAgain(done);
     }).timeout(120000);
@@ -1098,7 +1098,7 @@ describe('Do basic rule and alerts subtests ...'.bold, function() {
     }).timeout(BACKEND_TIMEOUT);
     it(descriptions.sendObservationsWithMultipleDevices, function(done) {
         test.sendObservationsWithMultipleDevices(done);
-    }).timeout(120000);
+    }).timeout(300000);
     it(descriptions.cleanup, function(done) {
         test.cleanup(done);
     }).timeout(GENERIC_TIMEOUT);
