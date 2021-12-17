@@ -25,7 +25,7 @@ var colors = require('colors'); // jshint ignore:line
 
 
 var checkObservations = function(tempValues, cid, cbManager, deviceToken, accountId,
-    deviceId, componentParamName, waitBetweenSendingSamples = 0, timeout = 60 * 1000) {
+    deviceId, componentParamName, waitBetweenSendingSamples = 0, timeout = 60 * 2000) {
     var firstObservationTime;
     return new Promise((resolve, reject) => {
         var index = 0;
