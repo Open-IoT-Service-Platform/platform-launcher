@@ -75,6 +75,10 @@ jobs:
           done
   docker-action:
     needs: build
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      NAMESPACE: ${{ secrets.NAMESPACE }}
     runs-on: ubuntu-latest
     container:
       image: oisp/deployer:latest
@@ -86,7 +90,9 @@ jobs:
       - name: Deploy Test
         run: |
           export TERM=vt100
+          export HOME=/home/deployer
           cd /home/deployer
+          export KUBECONFIG=/home/deployer/.kube/config
           export HELM_ARGS="--atomic \
             --set less_resources=\"false\" --set production=\"true\" \
             --set certmanager.secret=\"frontend-web-prod-tls\" \
