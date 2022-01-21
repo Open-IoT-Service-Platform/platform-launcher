@@ -2,7 +2,17 @@ name: End2End Test
 
 on:
   workflow_call:
-
+    inputs:
+      UPGRADE_TEST:
+        description: 'Set to "true" to enable version upgrade testing before E2E testing'
+        default: ''
+        required: false
+        type: string
+      CURRENT_RELEASE_VERSION:
+        description: 'Release version to upgrade from, must be a valid docker tag'
+        default: ''
+        required: false
+        type: string
   pull_request:
     branches:
       - develop
@@ -52,9 +62,23 @@ jobs:
         retval=2;
         export DOCKER_TAG=test
         export USE_LOCAL_REGISTRY=true
+        # If CURRENT_RELEASE_VERSION is set, do an upgrade test from the release version to latest
+        if [[ ${{ inputs.UPGRADE_TEST }} = "true" ]] && [[ -n ${{ inputs.CURRENT_RELEASE_VERSION }} ]];
+        then
+          export DOCKERLOGIN=${{ secrets.DOCKER_USERNAME }}
+          export DOCKERPASS=${{ secrets.DOCKER_PASSWORD }}
+          export DOCKER_TAG=${{ inputs.CURRENT_RELEASE_VERSION }}
+          export USE_LOCAL_REGISTRY=false
+        fi
         until [ ${retval} -eq 0 ] || [ ${loops} -gt 3 ]; do
           make undeploy-oisp
           (for i in {1..20}; do sleep 60; echo .; done&) &&  make deploy-oisp-test
+          if [[ ${{ inputs.UPGRADE_TEST }} = "true" ]] && [[ -n ${{ inputs.CURRENT_RELEASE_VERSION }} ]];
+          then
+            (for i in {1..20}; do sleep 60; echo .; done&) && make wait-until-ready
+            (for i in {1..20}; do sleep 60; echo .; done&) &&  make upgrade-oisp DOCKER_TAG=test USE_LOCAL_REGISTRY=true KEYCLOAK_FORCE_MIGRATION="true"
+            kubectl -n $(NAMESPACE) scale deployment debugger --replicas=1
+          fi
           make test
           retval=$?
           loops=$((loops+1))
