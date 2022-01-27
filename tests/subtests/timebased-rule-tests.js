@@ -95,17 +95,17 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
         },
         {
 	    value: 49,
-	    expectedActuation: 1,
+	    expectedActuation: true,
 	    delay: 10000
         },
         {
 	    value: 50,
-	    expectedActuation: 1,
+	    expectedActuation: true,
 	    delay: 1000
         },
         {
 	    value: 51,
-	    expectedActuation: 1,
+	    expectedActuation: true,
 	    delay: 1000
         },
         {
@@ -125,7 +125,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
         },
         {
 	    value: 19.3,
-	    expectedActuation: 0,
+	    expectedActuation: false,
 	    delay: 10000
         },
         {
@@ -134,9 +134,9 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
 	    delay: 1000
         },
         {
-            value: 20.2,
-            expectedActuation: null,
-            delay: 1000
+        value: 20.2,
+        expectedActuation: null,
+        delay: 1000
         }
     ];
 

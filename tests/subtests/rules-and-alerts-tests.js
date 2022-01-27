@@ -24,6 +24,8 @@ var test = function(userToken1, userToken2, accountId, deviceId, deviceToken,
     var chai = require('chai');
     var assert = chai.assert;
     var helpers = require("../lib/helpers");
+    var mqttConfig = require('./../test-config-mqtt.json');
+    var gatewayId = "00-11-22-33-44-55";
     var componentName = "temperature-sensor-rat";
     var componentType = "temperature.v1.0";
     var actuatorName = "powerswitch-actuator-rat";
@@ -178,47 +180,47 @@ var test = function(userToken1, userToken2, accountId, deviceId, deviceToken,
         },
         {
             value: 21,
-            expectedActuation: 1,
+            expectedActuation: true
         },
         {
             value: 17.9,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 17.5,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 8,
-            expectedActuation: 0,
+            expectedActuation: false
         },
         {
             value: 16.8,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 17.3,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 1,
-            expectedActuation: 0
+            expectedActuation: false
         },
         {
             value: 17,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 30.1,
-            expectedActuation: 1 // switch on
+            expectedActuation: true // switch on
         },
         {
             value: 25.0,
-            expectedActuation: 1
+            expectedActuation: true
         },
         {
             value: 9.0,
-            expectedActuation: 0 //switch off
+            expectedActuation: false //switch off
         },
         {
             value: 17.0,
@@ -226,7 +228,7 @@ var test = function(userToken1, userToken2, accountId, deviceId, deviceToken,
         },
         {
             value: 5,
-            expectedActuation: 0
+            expectedActuation: false
         }
     ];
 
@@ -237,27 +239,27 @@ var test = function(userToken1, userToken2, accountId, deviceId, deviceToken,
         },
         {
             value: 21,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 17.9,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 17.5,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 8,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 16.8,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 17.3,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 1,
@@ -265,7 +267,7 @@ var test = function(userToken1, userToken2, accountId, deviceId, deviceToken,
         },
         {
             value: 17,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 30.1,
@@ -296,27 +298,27 @@ var test = function(userToken1, userToken2, accountId, deviceId, deviceToken,
         },
         {
             value: 15,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 12,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 10,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 8,
-            expectedActuation: 0,
+            expectedActuation: false
         },
         {
             value: 9,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 10,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 1,
@@ -324,7 +326,7 @@ var test = function(userToken1, userToken2, accountId, deviceId, deviceToken,
         },
         {
             value: 17,
-            expectedActuation: null,
+            expectedActuation: null
         },
         {
             value: 30.1,
@@ -451,7 +453,7 @@ var test = function(userToken1, userToken2, accountId, deviceId, deviceToken,
                 .then(() => { done(); })
                 .catch((err) => { done(err); });
         },
-        "sendObservationsWithMultipleDevices": function(done) {
+        "openMultipleMqttConnections": function(done) {
             assert.notEqual(componentId1_1, null, "CommponentId1_1 not defined");
             assert.notEqual(componentId1_2, null, "CommponentId1_2 not defined");
             assert.notEqual(componentId2_1, null, "CommponentId2_1 not defined");
@@ -470,10 +472,28 @@ var test = function(userToken1, userToken2, accountId, deviceId, deviceToken,
             assert.notEqual(deviceToken1_2, undefined, "Device Token 1_2 not defined");
             assert.notEqual(deviceToken2_1, undefined, "Device Token 2_1 not defined");
             assert.notEqual(deviceToken2_2, undefined, "Device Token 2_2 not defined");
-            helpers.connector.openWsConnection(deviceToken1_1, deviceId1_1, cbManager2.cb);
-            helpers.connector.openWsConnection(deviceToken1_2, deviceId1_2, cbManager3.cb);
-            helpers.connector.openWsConnection(deviceToken2_1, deviceId2_1, cbManager4.cb);
-            helpers.connector.openWsConnection(deviceToken2_2, deviceId2_2, cbManager5.cb);
+            var topic = mqttConfig.connector.mqtt.topic.actuation;
+            var topic1_1 = topic.replace("{accountid}", accountId);
+            topic1_1 = topic1_1.replace("{gatewayId}", gatewayId);
+            topic1_1 = topic1_1.replace("{deviceid}", deviceId1_1);
+            var topic1_2 = topic.replace("{accountid}", accountId);
+            topic1_2 = topic1_2.replace("{gatewayId}", gatewayId);
+            topic1_2 = topic1_2.replace("{deviceid}", deviceId1_2);
+            var topic2_1 = topic.replace("{accountid}", accountId2);
+            topic2_1 = topic2_1.replace("{gatewayId}", gatewayId);
+            topic2_1 = topic2_1.replace("{deviceid}", deviceId2_1);
+            var topic2_2 = topic.replace("{accountid}", accountId);
+            topic2_2 = topic2_2.replace("{gatewayId}", gatewayId);
+            topic2_2 = topic2_2.replace("{deviceid}", deviceId1_1);
+            helpers.mqtt.openMqttConnection(deviceToken1_1, deviceId1_1, [topic1_1], cbManager2, () => {
+                helpers.mqtt.openMqttConnection(deviceToken1_2, deviceId1_2, [topic1_2], cbManager3, () => {
+                    helpers.mqtt.openMqttConnection(deviceToken2_1, deviceId2_1, [topic2_1], cbManager4, () => {
+                        helpers.mqtt.openMqttConnection(deviceToken2_2, deviceId2_2, [topic2_2], cbManager5, done);
+                    });
+                });
+            });
+        },
+        "sendObservationsWithMultipleDevices": function(done) {
             var promises = [];
             promises.push(promtests.checkObservations(temperatureValues, componentId1_1,
                 cbManager2, deviceToken1_1, accountId, deviceId1_1, componentParamName, 0));
@@ -517,10 +537,10 @@ var test = function(userToken1, userToken2, accountId, deviceId, deviceToken,
                 })
             // delete multiple actuation test resources
                 .then(() => {
-                    helpers.connector.closeWsConnection(deviceId1_1);
-                    helpers.connector.closeWsConnection(deviceId1_2);
-                    helpers.connector.closeWsConnection(deviceId2_1);
-                    helpers.connector.closeWsConnection(deviceId2_2);
+                    helpers.mqtt.closeMqttConnection(deviceId1_1);
+                    helpers.mqtt.closeMqttConnection(deviceId1_2);
+                    helpers.mqtt.closeMqttConnection(deviceId2_1);
+                    helpers.mqtt.closeMqttConnection(deviceId2_2);
                 })
                 .then(() => promtests.deleteDevice(userToken1, accountId, deviceId1_1))
                 .then(() => promtests.deleteDevice(userToken1, accountId, deviceId1_2))
@@ -556,6 +576,7 @@ var descriptions = {
     "deleteRuleAndSendDataAgain": "Shall send observation with recreated rule and not trigger events",
     "createRulesAndCheckAlarmReset": "Shall send observation and not triggering Manual reset rules",
     "createMultipleDevicesAndComponents": "Shall create and active multiple devices and add a component for each",
+    "openMultipleMqttConnections": "Shall open multiple mqtt connections with multiple devices",
     "sendObservationsWithMultipleDevices": "Shall send observations with multiple devices and trigger events for basic rules with all of the devices",
     "cleanup": "Cleanup devices, components, commands, rules created for subtest"
 };
