@@ -8,14 +8,17 @@ on:
 jobs:
   test:
     uses: Open-IoT-Service-Platform/platform-launcher/.github/workflows/makefile.yaml@develop
+    with:
+      UPGRADE_TEST: "true"
+      CURRENT_RELEASE_VERSION: ${{ secrets.CURRENT_RELEASE_VERSION }}
   build:
     needs: test
     runs-on: ubuntu-20.04
     env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          DOCKER_PREFIX: ${{ secrets.DOCKER_PREFIX }}
-          PUSH_DRYRUN: ''
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      DOCKER_PREFIX: ${{ secrets.DOCKER_PREFIX }}
+      PUSH_DRYRUN: ''
     steps:
       - uses: actions/checkout@v2
         with:
