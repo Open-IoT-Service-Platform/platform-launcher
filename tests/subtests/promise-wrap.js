@@ -25,7 +25,7 @@ var colors = require('colors'); // jshint ignore:line
 
 
 var checkObservations = function(tempValues, cid, cbManager, deviceToken, accountId,
-    deviceId, componentParamName, waitBetweenSendingSamples = 0, timeout = 60 * 2000) {
+    deviceId, componentParamName, waitBetweenSendingSamples = 0, timeout = 60 * 3000) {
     var firstObservationTime;
     return new Promise((resolve, reject) => {
         var index = 0;
@@ -88,15 +88,16 @@ var checkObservations = function(tempValues, cid, cbManager, deviceToken, accoun
         };
 
         var actuationCallback = function(message) {
+            message = JSON.parse(message);
             --nbActuations;
-            var expectedActuationValue = tempValues[index].expectedActuation.toString();
-            var componentParam = message.content.params.filter(function(param){
-                return param.name === componentParamName;
+            var expectedActuationValue = tempValues[index].expectedActuation;
+            var componentParam = message.metrics.filter(function(metric){
+                return metric.name === componentParamName;
             });
 
             if (componentParam.length === 1) {
                 var param = componentParam[0];
-                var paramValue = param.value.toString();
+                var paramValue = param.value;
                 if (paramValue === expectedActuationValue) {
                     step();
                 } else {

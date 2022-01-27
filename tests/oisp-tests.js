@@ -31,6 +31,7 @@ const {Data, Rule, Component, Components} = require('./lib/common');
 
 const accountName = 'oisp-tests';
 const deviceName = 'oisp-tests-device';
+const gatewayId = "00-11-22-33-44-55";
 
 const actuatorName = 'powerswitch-actuator';
 const actuatorType = 'powerswitch.v1.0';
@@ -147,16 +148,16 @@ function stringCheckData(sentData, receivedData) {
 
 function temperatureData(componentName) {
     const data = [
-        new Data(-15, 1, componentName + ' <= 15'),
-        new Data( -5, 1, componentName + ' <= 15'),
-        new Data( 5, 1, componentName + ' <= 15'),
-        new Data( 15, 1, componentName + ' <= 15'),
+        new Data(-15, true, componentName + ' <= 15'),
+        new Data( -5, true, componentName + ' <= 15'),
+        new Data( 5, true, componentName + ' <= 15'),
+        new Data( 15, true, componentName + ' <= 15'),
         new Data( 25, null, null),
-        new Data( 30, 0, componentName + ' > 25'),
+        new Data( 30, false, componentName + ' > 25'),
         new Data( 20, null, null),
-        new Data( 14, 1, componentName + ' <= 15'),
+        new Data( 14, true, componentName + ' <= 15'),
         new Data( 20, null, null),
-        new Data( 28, 0, componentName + ' > 25'),
+        new Data( 28, false, componentName + ' > 25'),
     ];
 
     return data;
@@ -298,13 +299,13 @@ process.stdout.write('                           OISP E2E TESTING               
 process.stdout.write('_____________________________________________________________________\n'.bold);
 
 const CbManager = function() {
-    let wssCB = null;
+    let mqttCB = () => {};
     return {
     	cb: function(message) {
-    	    wssCB(message);
+    	    mqttCB(message);
         },
     	set: function(newCB) {
-            wssCB = newCB;
+            mqttCB = newCB;
         },
     };
 };
@@ -408,7 +409,7 @@ describe('Creating account and device ...\n'.bold, function() {
                 getNewUserTokens(done);
             }
         });
-    }).timeout(10000);
+    }).timeout(15000);
 
     it('Shall get account info', function(done) {
         helpers.accounts.getAccountInfo(accountId, userToken, function(err, response) {
@@ -574,11 +575,15 @@ describe('Creating account and device ...\n'.bold, function() {
             } else {
                 assert.isString(response.deviceToken, 'device token is not string');
                 deviceToken = response.deviceToken;
-                helpers.connector.wsConnect(proxyConnector, deviceToken, deviceId, cbManager.cb);
-                done();
+                var topic = mqttConfig.connector.mqtt.topic.actuation;
+                topic = topic.replace("{accountid}", accountId);
+                topic = topic.replace("{gatewayId}", deviceId);
+                topic = topic.replace("{deviceid}", deviceId);
+                var topics = [topic];
+                helpers.mqtt.openMqttConnection(deviceToken, deviceId, topics, cbManager, done);
             }
         });
-    }).timeout(5000);
+    }).timeout(15000);
 
     it('Shall get detail of one device', function(done) {
         helpers.devices.getDeviceDetails(userToken, accountId, deviceId, function(err, response) {
@@ -794,30 +799,31 @@ describe('Creating and getting components ... \n'.bold, function() {
     }).timeout(10000);
 
     it('Shall send an actuation', function(done) {
-        const actuationValue = 1;
+        const actuationValue = "1";
+        let actuationReceived = false;
+        cbManager.set(function(message) {
+            message = JSON.parse(message);
+            const expectedActuationValue = true;
+            const componentParam = message.metrics.filter(function(metric) {
+                return metric.name === componentParamName;
+            });
+            if (componentParam.length === 1) {
+                const param = componentParam[0];
+                const paramValue = param.value;
+                if (paramValue !== expectedActuationValue) {
+                    done(new Error('Param value wrong. Expected: ' + expectedActuationValue + ' Received: ' + paramValue));
+                } else {
+                    actuationReceived = true;
+                }
+            } else {
+                done(new Error('Did not find component param: ' + componentParamName));
+            }
+        });
         helpers.control.sendActuationCommand(componentParamName, actuationValue, userToken, accountId, actuatorId, deviceId, function(err, response) {
             if (err) {
                 done(new Error('Cannot send an actuation: ' + err));
             } else {
                 assert.equal(response.status, 'OK', 'cannot send an actuation');
-                let actuationReceived = false;
-                cbManager.set(function(message) {
-                    const expectedActuationValue = actuationValue;
-                    const componentParam = message.content.params.filter(function(param) {
-                        return param.name === componentParamName;
-                    });
-                    if (componentParam.length === 1) {
-                        const param = componentParam[0];
-                        const paramValue = param.value.toString();
-                        if (parseInt(paramValue) !== expectedActuationValue) {
-                            done(new Error('Param value wrong. Expected: ' + expectedActuationValue + ' Received: ' + paramValue));
-                        } else {
-                            actuationReceived = true;
-                        }
-                    } else {
-                        done(new Error('Did not find component param: ' + componentParamName));
-                    }
-                });
                 const checkActuation = function() {
                     if (actuationReceived) {
                         done();
@@ -825,10 +831,10 @@ describe('Creating and getting components ... \n'.bold, function() {
                         done(new Error('Actuation timed out after sending actuation command'));
                     }
                 };
-                setTimeout(checkActuation, 5000);
+                setTimeout(checkActuation, 10000);
             }
         });
-    }).timeout(10000);
+    }).timeout(15000);
 
     it('Shall get list of actuations', function(done) {
         const parameters = {
@@ -967,7 +973,7 @@ describe('Sending observations and checking rules ...\n'.bold, function() {
                                     component.data[currentDataIndex].expectedActuation.toString()));
                                 }
                             };
-                            setTimeout(checkActuation, 60 * 2000, currentActuationCounter);
+                            setTimeout(checkActuation, 60 * 3000, currentActuationCounter);
                         }
                     });
             } else {
@@ -976,14 +982,15 @@ describe('Sending observations and checking rules ...\n'.bold, function() {
         };
 
         cbManager.set(function(message) {
-            const expectedActuationValue = curComponent.data[curComponent.dataIndex].expectedActuation.toString();
-            const componentParam = message.content.params.filter(function(param) {
-                return param.name === componentParamName;
+            message = JSON.parse(message);
+            const expectedActuationValue = curComponent.data[curComponent.dataIndex].expectedActuation;
+            const componentParam = message.metrics.filter(function(metric) {
+                return metric.name === componentParamName;
             });
 
             if (componentParam.length === 1) {
                 const param = componentParam[0];
-                const paramValue = param.value.toString();
+                const paramValue = param.value;
 
                 if (paramValue === expectedActuationValue) {
                     actuationCounter++;
@@ -997,7 +1004,7 @@ describe('Sending observations and checking rules ...\n'.bold, function() {
         });
 
         sendObservationAndCheckRules(components.first);
-    }).timeout(60*3000);
+    }).timeout(60*4000);
 
     // ---------------------------------------------------------------
 
@@ -1031,7 +1038,7 @@ describe('Sending observations and checking rules ...\n'.bold, function() {
         });
         assert.equal(expectedEmailReasons.length, 0, 'Received emails do not match expected emails sent from rule-engine');
         done();
-    }).timeout(5000);
+    }).timeout(10000);
 
     it('Wait for backend synchronization', function(done) {
         setTimeout(done, BACKEND_DELAY);
@@ -1083,22 +1090,25 @@ describe('Do basic rule and alerts subtests ...'.bold, function() {
     }).timeout(GENERIC_TIMEOUT);
     it(descriptions.sendObservations, function(done) {
         test.sendObservations(done);
-    }).timeout(300000);
+    }).timeout(400000);
     it(descriptions.deleteRuleAndSendDataAgain, function(done) {
         test.deleteRuleAndSendDataAgain(done);
-    }).timeout(120000);
+    }).timeout(180000);
     it(descriptions.createRulesAndCheckAlarmReset, function(done) {
         test.createRulesAndCheckAlarmReset(done);
     }).timeout(120000);
     it(descriptions.createMultipleDevicesAndComponents, function(done) {
         test.createMultipleDevicesAndComponents(done);
     }).timeout(20000);
+    it(descriptions.openMultipleMqttConnections, function(done) {
+        test.openMultipleMqttConnections(done);
+    }).timeout(10000);
     it('Wait for backend synchronization', function(done) {
         setTimeout(done, BACKEND_DELAY);
     }).timeout(BACKEND_TIMEOUT);
     it(descriptions.sendObservationsWithMultipleDevices, function(done) {
         test.sendObservationsWithMultipleDevices(done);
-    }).timeout(300000);
+    }).timeout(400000);
     it(descriptions.cleanup, function(done) {
         test.cleanup(done);
     }).timeout(GENERIC_TIMEOUT);
@@ -1118,7 +1128,7 @@ describe('Do time based rule subtests ...'.bold, function() {
     }).timeout(10000);
 	     it(descriptions.sendObservations, function(done) {
 		 test.sendObservations(done);
-    }).timeout(120000);
+    }).timeout(400000);
 	     it(descriptions.cleanup, function(done) {
 		 test.cleanup(done);
 	     }).timeout(10000);
@@ -1139,7 +1149,7 @@ describe('Do statistics rule subtests ...'.bold, function() {
     }).timeout(10000);
 	     it(descriptions.sendObservations, function(done) {
 		 test.sendObservations(done);
-    }).timeout(50000);
+    }).timeout(400000);
 	     it(descriptions.cleanup, function(done) {
 		 test.cleanup(done);
 	     }).timeout(10000);

@@ -30,9 +30,9 @@ spec:
         resources:
           {{ if .Values.less_resources }}
           requests:
-            cpu: 200m
+            cpu: 400m
           limits:
-            cpu: 200m
+            cpu: 400m
           {{ else }}
           limits:
             cpu: 1000m

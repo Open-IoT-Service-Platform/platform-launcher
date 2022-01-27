@@ -149,7 +149,6 @@ function openMqttConnection(deviceToken, deviceId, topics, cbManager, cb, addres
     }
 
     var client = mqtt.connect(address, options);
-
     client.on('connect', function() {
         client.subscribe(topics, function(err, t) {
             if (err) {

@@ -66,32 +66,32 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
     };
     var temperatureValues = [
         {
-            value: 17.1,
-            expectedActuation: null
+        value: 17.1,
+        expectedActuation: null
         },
         {
 	    value: 17.0,
-	    expectedActuation: null,
+	    expectedActuation: null
         },
         {
 	    value: 17.9,
-	    expectedActuation: null,
+	    expectedActuation: null
         },
         {
 	    value: 17.5,
-	    expectedActuation: null,
+	    expectedActuation: null
         },
         {
 	    value: 18.1,
-	    expectedActuation: null,
+	    expectedActuation: null
         },
         {
 	    value: 16.8,
-	    expectedActuation: null,
+	    expectedActuation: null
         },
         {
 	    value: 17.3,
-	    expectedActuation: null,
+	    expectedActuation: null
         },
         {
 	    value: 16.9,
@@ -99,11 +99,11 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
         },
         {
 	    value: 17,
-	    expectedActuation: null,
+	    expectedActuation: null
         },
         {
 	    value: 18.6,
-	    expectedActuation: 1 // switch on
+	    expectedActuation: true // switch on
         },
         {
 	    value: 15.0,
@@ -111,7 +111,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager) {
         },
         {
 	    value: 10.0,
-	    expectedActuation: 0 //switch off
+	    expectedActuation: false //switch off
         },
         {
 	    value: 17.0,
