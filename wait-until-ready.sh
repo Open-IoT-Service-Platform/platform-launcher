@@ -95,8 +95,8 @@ check_sts keycloak ${NAMESPACE} 60
 check_deployment frontend ${NAMESPACE} frontend 120
 check_deployment kairosdb ${NAMESPACE} kairosdb 60
 check_deployment websocket-server ${NAMESPACE} websocket-server 60
+check_deployment mqtt-gateway ${NAMESPACE} mqtt-gateway 240
 check_deployment emqx ${NAMESPACE} emqx 240
-check_deployment mqtt-gateway ${NAMESPACE} mqtt-gateway 60
 check_beamservice rule-engine ${NAMESPACE} 240
 printf "\ndone\n"
 exit 0;

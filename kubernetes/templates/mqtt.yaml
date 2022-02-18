@@ -30,6 +30,21 @@ spec:
       labels:
         app: mqtt-gateway
     spec:
+      initContainers:
+      - name: wait-for-kafka
+        {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        {{ else }}
+        image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        {{ end }}
+        args: [{{ .Values.kafka.service }}, "--", "echo", "kafka is up"]
+      - name: wait-for-emqx
+        {{ if .Values.use_local_registry }}
+        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        {{ else }}
+        image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        {{ end }}
+        args: ["emqx:1883", "--", "echo", "emqx is up"]
       containers:
       - name: mqtt-gateway
         {{ if .Values.use_local_registry }}
@@ -39,14 +54,7 @@ spec:
         {{ end }}
         ports:
         - containerPort: {{ .Values.mqtt.gateway.port }}
-        command: ["./wait-for-it.sh"]
-        args:
-        - redis:6379
-        - -t
-        - "300000"
-        - -s
-        - --
-        - "./start-mqtt-kafka-bridge.sh"
+        command: ["./start-mqtt-kafka-bridge.sh"]
         resources:
           {{ if .Values.less_resources }}
           requests:
