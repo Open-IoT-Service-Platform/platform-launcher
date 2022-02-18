@@ -132,7 +132,7 @@ deploy-oisp: check-docker-cred-env
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
 	helm dependency update --namespace $(NAMESPACE) && \
 	if [ "$$USE_LOCAL_REGISTRY" = "true" ]; then \
-		KEYCLOAK_REGISTRY=k3d-oisp.localhost:12345/ ; \
+		LOCAL_REGISTRY=k3d-oisp.localhost:12345/ ; \
 	fi; \
 	helm install $(NAME) . --namespace $(NAMESPACE) \
 		--timeout 1200s \
@@ -157,9 +157,15 @@ deploy-oisp: check-docker-cred-env
 		--set keycloak.fusionBackend.secret="$(call randomPass)" \
 		--set tag=$(DOCKER_TAG) \
 		--set imagePrefix=$(DOCKER_PREFIX) \
-		--set keycloak.keycloak.image.repository=$${KEYCLOAK_REGISTRY}$(DOCKER_PREFIX)/keycloak \
+		--set keycloak.keycloak.image.repository=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/keycloak \
 		--set keycloak.keycloak.image.tag=$(DOCKER_TAG) \
 		--set keycloak.forceMigration=$(KEYCLOAK_FORCE_MIGRATION) \
+		--set emqx.initContainers[0].name=wait-for-mqtt-auth-service \
+		--set emqx.initContainers[0].image=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/wait-for-it:$(DOCKER_TAG) \
+		--set emqx.initContainers[0].args='{mqtt-gateway:3025,--,echo,mqtt auth service is up}' \
+		--set emqxtest.initContainers[0].name=wait-for-mqtt-auth-service \
+		--set emqxtest.initContainers[0].image=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/wait-for-it:$(DOCKER_TAG) \
+		--set emqxtest.initContainers[0].args='{mqtt-gateway:3025,--,echo,mqtt auth service is up}' \
 		--set use_local_registry=$(USE_LOCAL_REGISTRY) \
 		$(HELM_ARGS)
 
@@ -174,7 +180,7 @@ upgrade-oisp: check-docker-cred-env backup
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
 	helm dependency update --namespace $(NAMESPACE) && \
 	if [ "$$USE_LOCAL_REGISTRY" = "true" ]; then \
-		KEYCLOAK_REGISTRY=k3d-oisp.localhost:12345/ ; \
+		LOCAL_REGISTRY=k3d-oisp.localhost:12345/ ; \
 	fi; \
 	helm upgrade $(NAME) . --namespace $(NAMESPACE) \
 		--timeout 600s \
@@ -197,8 +203,14 @@ upgrade-oisp: check-docker-cred-env backup
 		--set keycloak.fusionBackend.secret="$${KEYCLOAK_FUSION_BACKEND_SECRET}" \
 		--set tag=$(DOCKER_TAG) \
 		--set imagePrefix=$(DOCKER_PREFIX) \
-		--set keycloak.keycloak.image.repository=$${KEYCLOAK_REGISTRY}$(DOCKER_PREFIX)/keycloak \
+		--set keycloak.keycloak.image.repository=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/keycloak \
 		--set keycloak.keycloak.image.tag=$(DOCKER_TAG) \
+		--set emqx.initContainers[0].name=wait-for-mqtt-auth-service \
+		--set emqx.initContainers[0].image=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/wait-for-it:$(DOCKER_TAG) \
+		--set emqx.initContainers[0].args='{mqtt-gateway:3025,--,echo,mqtt auth service is up}' \
+		--set emqxtest.initContainers[0].name=wait-for-mqtt-auth-service \
+		--set emqxtest.initContainers[0].image=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/wait-for-it:$(DOCKER_TAG) \
+		--set emqxtest.initContainers[0].args='{mqtt-gateway:3025,--,echo,mqtt auth service is up}' \
 		--set use_local_registry=$(USE_LOCAL_REGISTRY) \
 		$(HELM_ARGS)
 

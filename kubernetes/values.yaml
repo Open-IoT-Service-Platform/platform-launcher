@@ -58,6 +58,10 @@ emqx:
     EMQX_LISTENER__SSL__EXTERNAL__CERTFILE: etc/certs/server.cert
     EMQX_LISTENER__SSL__EXTERNAL__KEYFILE: etc/certs/server.key
     EMQX_LISTENER__SSL__EXTERNAL__VERIFY: verify_none
+  initContainers:
+  - name: wait-for-mqtt-auth-service
+    image: oisp/wait-for-it:latest
+    args: ["mqtt-gateway:3025", "--", "echo", "mqtt auth service is up"]
 
 emqxtest:
   replicaCount: 1
@@ -77,6 +81,10 @@ emqxtest:
     EMQX_LISTENER__SSL__EXTERNAL__CERTFILE: etc/certs/server.cert
     EMQX_LISTENER__SSL__EXTERNAL__KEYFILE: etc/certs/server.key
     EMQX_LISTENER__SSL__EXTERNAL__VERIFY: verify_none
+  initContainers:
+  - name: wait-for-mqtt-auth-service
+    image: oisp/wait-for-it:latest
+    args: ["mqtt-gateway:3025", "--", "echo", "mqtt auth service is up"]
 
 
 kafka:
