@@ -8,11 +8,16 @@ on:
         default: ''
         required: false
         type: string
+    secrets:
       CURRENT_RELEASE_VERSION:
         description: 'Release version to upgrade from, must be a valid docker tag'
-        default: ''
         required: false
-        type: string
+      DOCKER_PASSWORD:
+        description: 'Dockerhub Password'
+        required: false
+      DOCKER_USERNAME:
+        description: 'Dockerhub Username'
+        required: false
 
   pull_request:
     branches:
@@ -33,6 +38,14 @@ jobs:
       with:
         ref: ${{ github.ref }}
         submodules: recursive
+    - name: Set Env
+      env:
+        CRV: ${{ secrets.CURRENT_RELEASE_VERSION }}
+      if: ${{ inputs.UPGRADE_TEST == 'true' && env.CRV != '' }}
+      run: |
+        set +o pipefail
+        echo "UPGRADE_TEST=${{ inputs.UPGRADE_TEST }}" >> $GITHUB_ENV
+        echo "CURRENT_RELEASE_VERSION=${{ secrets.CURRENT_RELEASE_VERSION }}" >> $GITHUB_ENV
     - name: Prepare platform
       shell: bash
       run: |
@@ -52,13 +65,7 @@ jobs:
         export TERM=vt100
         yes | DOCKER_TAG=test NODOCKERLOGIN=true DEBUG=true make build
 
-    - name: Set Env
-      if: ${{ inputs.UPGRADE_TEST == 'true' && inputs.CURRENT_RELEASE_VERSION != '' }}
-      run: |
-        set +o pipefail
-        echo "UPGRADE_TEST=${{ inputs.UPGRADE_TEST }}" >> $GITHUB_ENV
-        echo "CURRENT_RELEASE_VERSION=${{ inputs.CURRENT_RELEASE_VERSION }}" >> $GITHUB_ENV
-    - name: E2E Test
+    - name: E2E Test (without test)
       shell: bash
       run: |
         set +e
@@ -75,26 +82,11 @@ jobs:
         # If CURRENT_RELEASE_VERSION is set, do an upgrade test from the release version to latest
         if [[ ${UPGRADE_TEST} = "true" ]] && [[ -n ${CURRENT_RELEASE_VERSION} ]];
         then
-          export DOCKERLOGIN=${{ secrets.DOCKER_USERNAME }}
+          export DOCKERUSER=${{ secrets.DOCKER_USERNAME }}
           export DOCKERPASS=${{ secrets.DOCKER_PASSWORD }}
           export DOCKER_TAG=${CURRENT_RELEASE_VERSION}
           export USE_LOCAL_REGISTRY=false
+          export NODOCKERLOGIN=false
         fi
-        until [ ${retval} -eq 0 ] || [ ${loops} -gt 3 ]; do
-          make undeploy-oisp
-          (for i in {1..20}; do sleep 60; echo .; done&) &&  make deploy-oisp-test
-          if [[ ${UPGRADE_TEST} = "true" ]] && [[ -n ${CURRENT_RELEASE_VERSION} ]];
-          then
-            (for i in {1..20}; do sleep 60; echo .; done&) && make wait-until-ready
-            (for i in {1..20}; do sleep 60; echo .; done&) &&  make upgrade-oisp DOCKER_TAG=test USE_LOCAL_REGISTRY=true KEYCLOAK_FORCE_MIGRATION="true"
-            kubectl -n oisp scale deployment debugger --replicas=1
-          fi
-          make test
-          retval=$?
-          loops=$((loops+1))
-        done
-        echo Test return value: ${retval}
-        exit ${retval}
-    - name: debug with upterm
-      if: failure()
+    - name: debug
       uses: lhotari/action-upterm@v1
