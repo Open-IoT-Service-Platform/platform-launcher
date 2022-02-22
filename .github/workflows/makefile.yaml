@@ -73,7 +73,6 @@ jobs:
         export PATH=$PATH:/snap/bin
         make import-images DOCKER_TAG=test DEBUG=true
         docker image prune -a -f
-        rm -rf oisp-*
         npm install nodemailer
         export NODOCKERLOGIN=true
         retval=2;
