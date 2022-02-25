@@ -50,7 +50,7 @@ function check_sts {
   error=0;
 
   printf "\nWaiting for $name"
-  while kubectl -n $namespace get pods ${name}-0 -o jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep -q false;
+  while kubectl -n $namespace get pods ${name}-0 -o jsonpath="{.status.containerStatuses[*].ready}" | grep -q false;
     do printf ".";
       let counts_actual=$counts_actual+1;
       if [ $counts_actual -ge $counts_max ];
@@ -91,12 +91,12 @@ while kubectl -n $NAMESPACE get pods | grep -q Pending; \
     done;
 
 check_deployment backend ${NAMESPACE} backend 60
-check_sts keycloak ${NAMESPACE} 60
+check_sts keycloak ${NAMESPACE} 120
 check_deployment frontend ${NAMESPACE} frontend 120
 check_deployment kairosdb ${NAMESPACE} kairosdb 60
-check_deployment websocket-server ${NAMESPACE} websocket-server 60
-check_deployment mqtt-gateway ${NAMESPACE} mqtt-gateway 240
-check_deployment emqx ${NAMESPACE} emqx 240
+check_sts websocket-server ${NAMESPACE} 60
+check_sts mqtt-gateway ${NAMESPACE} 240
+check_sts emqx ${NAMESPACE} 240
 check_beamservice rule-engine ${NAMESPACE} 240
 printf "\ndone\n"
 exit 0;
