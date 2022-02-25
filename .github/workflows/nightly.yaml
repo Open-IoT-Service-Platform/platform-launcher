@@ -10,7 +10,10 @@ jobs:
     uses: Open-IoT-Service-Platform/platform-launcher/.github/workflows/makefile.yaml@develop
     with:
       UPGRADE_TEST: "true"
+    secrets:
       CURRENT_RELEASE_VERSION: ${{ secrets.CURRENT_RELEASE_VERSION }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   build:
     needs: test
     runs-on: ubuntu-20.04
@@ -58,7 +61,7 @@ jobs:
           if [ "$DOCKER_PUSH_LATEST" = "true" ]; then
             echo Pushing images with latest tag
             if [ -z "$PUSH_DRYRUN" ]; then
-              make push-images DOCKER_PREFIX=oisp
+              make push-images DOCKER_PREFIX=oisp DEBUG=true
             else
               echo Only dry run mode. Not pushing to dockerhub!
             fi
@@ -103,3 +106,4 @@ jobs:
             --set numberReplicas.frontend=2 \
             --set numberReplicas.backend=3"
           sh deploy.sh
+
