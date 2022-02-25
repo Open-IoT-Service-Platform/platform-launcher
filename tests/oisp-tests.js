@@ -583,7 +583,7 @@ describe('Creating account and device ...\n'.bold, function() {
                 helpers.mqtt.openMqttConnection(deviceToken, deviceId, topics, cbManager, done);
             }
         });
-    }).timeout(15000);
+    }).timeout(30000);
 
     it('Shall get detail of one device', function(done) {
         helpers.devices.getDeviceDetails(userToken, accountId, deviceId, function(err, response) {
@@ -1108,7 +1108,7 @@ describe('Do basic rule and alerts subtests ...'.bold, function() {
     }).timeout(BACKEND_TIMEOUT);
     it(descriptions.sendObservationsWithMultipleDevices, function(done) {
         test.sendObservationsWithMultipleDevices(done);
-    }).timeout(400000);
+    }).timeout(500000);
     it(descriptions.cleanup, function(done) {
         test.cleanup(done);
     }).timeout(GENERIC_TIMEOUT);
@@ -1390,19 +1390,19 @@ describe('Services Operator subtests...'.bold, function() {
     it(descriptions.updateTestOperator, function(done) {
         test = require('./subtests/services-operator-tests').test(userToken);
         test.updateTestOperator(done);
-    }).timeout(100000);
+    }).timeout(200000);
     it(descriptions.testUpgradedOperator, function(done) {
         test = require('./subtests/services-operator-tests').test(userToken);
         test.testUpgradedOperator(done);
-    }).timeout(100000);
+    }).timeout(200000);
     it(descriptions.updateTestOperatorSave, function(done) {
         test = require('./subtests/services-operator-tests').test(userToken);
         test.updateTestOperatorSave(done);
-    }).timeout(100000);
+    }).timeout(200000);
     it(descriptions.testUpgradedOperatorSave, function(done) {
         test = require('./subtests/services-operator-tests').test(userToken);
         test.testUpgradedOperatorSave(done);
-    }).timeout(100000);
+    }).timeout(200000);
     it(descriptions.cleanup, function(done) {
         test.cleanup(done);
     }).timeout(10000);

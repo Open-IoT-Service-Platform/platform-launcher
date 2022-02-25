@@ -496,13 +496,13 @@ var test = function(userToken1, userToken2, accountId, deviceId, deviceToken,
         "sendObservationsWithMultipleDevices": function(done) {
             var promises = [];
             promises.push(promtests.checkObservations(temperatureValues, componentId1_1,
-                cbManager2, deviceToken1_1, accountId, deviceId1_1, componentParamName, 0));
+                cbManager2, deviceToken1_1, accountId, deviceId1_1, componentParamName, 0, 60 * 4000));
             promises.push(promtests.checkObservations(temperatureValues, componentId1_2,
-                cbManager3, deviceToken1_2, accountId, deviceId1_2, componentParamName, 0));
+                cbManager3, deviceToken1_2, accountId, deviceId1_2, componentParamName, 0, 60 * 4000));
             promises.push(promtests.checkObservations(temperatureValues, componentId2_1,
-                cbManager4, deviceToken2_1, accountId2, deviceId2_1, componentParamName, 0));
+                cbManager4, deviceToken2_1, accountId2, deviceId2_1, componentParamName, 0, 60 * 4000));
             promises.push(promtests.checkObservations(temperatureValues2, componentId2_2,
-                cbManager5, deviceToken2_2, accountId2, deviceId2_2, componentParamName, 0));
+                cbManager5, deviceToken2_2, accountId2, deviceId2_2, componentParamName, 0, 60 * 4000));
             Promise.all(promises)
                 .then(() => { done(); })
                 .catch((err) => { done(err); });
