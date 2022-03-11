@@ -58,6 +58,9 @@ emqx:
     EMQX_LISTENER__SSL__EXTERNAL__CERTFILE: etc/certs/server.cert
     EMQX_LISTENER__SSL__EXTERNAL__KEYFILE: etc/certs/server.key
     EMQX_LISTENER__SSL__EXTERNAL__VERIFY: verify_none
+  image:
+    pullSecrets:
+    - dockercred
   initContainers:
   - name: wait-for-mqtt-auth-service
     image: oisp/wait-for-it:latest
@@ -81,6 +84,9 @@ emqxtest:
     EMQX_LISTENER__SSL__EXTERNAL__CERTFILE: etc/certs/server.cert
     EMQX_LISTENER__SSL__EXTERNAL__KEYFILE: etc/certs/server.key
     EMQX_LISTENER__SSL__EXTERNAL__VERIFY: verify_none
+  image:
+    pullSecrets:
+    - dockercred
   initContainers:
   - name: wait-for-mqtt-auth-service
     image: oisp/wait-for-it:latest
