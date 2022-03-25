@@ -4,7 +4,7 @@
   "description": "E2E test with server",
   "main": "test.js",
   "scripts": {
-    "test": "mocha oisp-tests.js --exit",
+    "test": "mocha oisp-tests.js --bail --exit",
     "prep-only": "mocha oisp-prep-only.js --exit",
     "test-backup-before": "mocha test-backup-before.js --exit",
     "test-backup-after": "mocha test-backup-after.js --exit"
