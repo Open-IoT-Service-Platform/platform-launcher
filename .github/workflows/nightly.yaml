@@ -16,14 +16,15 @@ jobs:
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   build:
     needs: test
-    runs-on: ubuntu-20.04
+    runs-on: private
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       DOCKER_PREFIX: ${{ secrets.DOCKER_PREFIX }}
       PUSH_DRYRUN: ''
+      SELF_HOSTED_RUNNER: true
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
           submodules: recursive
@@ -31,8 +32,13 @@ jobs:
         shell: bash
         run: |
           export TERM=vt100
-          cd util && \
-          bash setup-ubuntu20.04.sh
+          if [ -z "${SELF_HOSTED_RUNNER}" ]; then
+            cd util && \
+            bash setup-ubuntu20.04.sh
+          else
+            make restart-cluster
+          fi
+          
       - name: Setup and Build
         shell: bash
         run: |
@@ -85,7 +91,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       NAMESPACE: ${{ secrets.NAMESPACE }}
-    runs-on: ubuntu-latest
+    runs-on: private
     container:
       image: oisp/deployer:latest
       credentials:

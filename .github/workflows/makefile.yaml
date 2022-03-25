@@ -31,10 +31,11 @@ jobs:
     env:
       UPGRADE_TEST: ''
       CURRENT_RELEASE_VERSION: ''
-    runs-on: ubuntu-20.04
+      SELF_HOSTED_RUNNER: true
+    runs-on: private
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
         submodules: recursive
@@ -50,8 +51,12 @@ jobs:
       shell: bash
       run: |
         export TERM=vt100
-        cd util && \
-        bash setup-ubuntu20.04.sh
+        if [ -z "${SELF_HOSTED_RUNNER}" ]; then
+          cd util && \
+          bash setup-ubuntu20.04.sh
+        else
+          make restart-cluster
+        fi
     - name: Setup subrepos
       shell: bash
       run: |
