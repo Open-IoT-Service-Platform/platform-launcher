@@ -1,19 +1,19 @@
 [submodule "oisp-frontend"]
 	path = oisp-frontend
-	url = git@github.com:Open-IoT-Service-Platform/oisp-frontend.git
+	url = https://github.com/Open-IoT-Service-Platform/oisp-frontend.git
 [submodule "oisp-backend"]
 	path = oisp-backend
-	url = git@github.com:Open-IoT-Service-Platform/oisp-backend.git
+	url = https://github.com/Open-IoT-Service-Platform/oisp-backend.git
 [submodule "oisp-websocket-server"]
 	path = oisp-websocket-server
-	url = git@github.com:Open-IoT-Service-Platform/oisp-websocket-server.git
+	url = https://github.com/Open-IoT-Service-Platform/oisp-websocket-server.git
 [submodule "oisp-mqtt-gw"]
 	path = oisp-mqtt-gw
-	url = git@github.com:Open-IoT-Service-Platform/oisp-mqtt-gw.git
+	url = https://github.com/Open-IoT-Service-Platform/oisp-mqtt-gw.git
 [submodule "oisp-beam-rule-engine"]
 	path = oisp-beam-rule-engine
-	url = git@github.com:Open-IoT-Service-Platform/oisp-beam-rule-engine.git
+	url = https://github.com/Open-IoT-Service-Platform/oisp-beam-rule-engine.git
 [submodule "oisp-services"]
 	path = oisp-services
-	url = git@github.com:Open-IoT-Service-Platform/oisp-services.git
+	url = https://github.com/Open-IoT-Service-Platform/oisp-services.git
 	branch = develop
