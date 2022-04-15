@@ -80,8 +80,8 @@ counts_actual=0
 counts_max=60
 
 #As long as any pod is pending - do not go forward
-printf "\nWaiting for pending ";
-while kubectl -n $NAMESPACE get pods | grep -q Pending; \
+printf "\nWaiting for pending or terminating pods";
+while kubectl -n $NAMESPACE get pods | grep -q 'Pending\|Terminating'; \
 		do printf ".";
       let counts_actual=$counts_actual+1;
       sleep 5;
