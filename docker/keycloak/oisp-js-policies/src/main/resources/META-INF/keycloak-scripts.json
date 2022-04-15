@@ -48,6 +48,11 @@
             "name": "get access type of user",
             "fileName": "type-mapper.js",
             "description": "token type - user or device"
+        },
+        {
+            "name": "get gateway id for device access",
+            "fileName": "gateway-mapper.js",
+            "description": "gatewayId - only valid if access type is device"
         }
     ]
 }

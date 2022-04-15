@@ -752,8 +752,8 @@
         "jsonType.label" : "long"
       }
     } ],
-    "defaultClientScopes" : [ "web-origins", "role_list", "profile", "roles", "accounts", "type", "email" ],
-    "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ]
+    "defaultClientScopes" : [ "web-origins", "role_list", "profile", "roles", "accounts", "type", "email", "offline_access" ],
+    "optionalClientScopes" : [ "gateway", "microprofile-jwt" ]
   }, {
     "id" : "56707dab-c91b-4c6e-99b8-718b29d7506d",
     "clientId" : "mqtt-broker",
@@ -793,8 +793,8 @@
     "authenticationFlowBindingOverrides" : { },
     "fullScopeAllowed" : true,
     "nodeReRegistrationTimeout" : -1,
-    "defaultClientScopes" : [ "web-origins", "role_list", "profile", "roles", "accounts", "type", "email" ],
-    "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ]
+    "defaultClientScopes" : [ "web-origins", "role_list", "profile", "roles", "accounts", "type", "email", "offline_access" ],
+    "optionalClientScopes" : [ "gateway", "microprofile-jwt" ]
   }, {
     "id" : "0a5c1e78-e10d-4c1c-98bb-8f6f07860306",
     "clientId" : "oisp-frontend",
@@ -880,7 +880,7 @@
       }
     } ],
     "defaultClientScopes" : [ "web-origins", "oisp-frontend", "mqtt-broker", "websocket-server", "roles", "accounts", "type", "email", "offline_access" ],
-    "optionalClientScopes" : [ "microprofile-jwt" ],
+    "optionalClientScopes" : [ "gateway", "microprofile-jwt" ],
     "authorizationSettings" : {
       "allowRemoteResourceManagement" : true,
       "policyEnforcementMode" : "ENFORCING",
@@ -1949,6 +1949,28 @@
         "claim.name" : "resource_access.${client_id}.roles",
         "jsonType.label" : "String",
         "multivalued" : "true"
+      }
+    } ]
+  }, {
+    "id" : "a3e864e7-8641-46a2-a52f-0cb23d8bb936",
+    "name" : "gateway",
+    "protocol" : "openid-connect",
+    "attributes" : {
+      "include.in.token.scope" : "true",
+      "display.on.consent.screen" : "false"
+    },
+    "protocolMappers" : [ {
+      "id" : "0adfc4f7-ceef-43d4-8ded-7bca05f61671",
+      "name" : "gateway mapper",
+      "protocol" : "openid-connect",
+      "protocolMapper" : "script-gateway-mapper.js",
+      "consentRequired" : false,
+      "config" : {
+        "id.token.claim" : "true",
+        "access.token.claim" : "true",
+        "claim.name" : "gateway",
+        "jsonType.label" : "String",
+        "userinfo.token.claim" : "true"
       }
     } ]
   }, {
