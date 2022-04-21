@@ -10,7 +10,7 @@ on:
       - '**-debugtest'
 jobs:
   test:
-    uses: Open-IoT-Service-Platform/platform-launcher/.github/workflows/makefile.yaml@develop
+    uses: Open-IoT-Service-Platform/platform-launcher/.github/workflows/makefile.yaml@nightly-debugtest
     with:
       UPGRADE_TEST: "true"
     secrets:
