@@ -5,6 +5,9 @@ name: Nigthly
 on:
   schedule:
     - cron: '0 0 * * *'
+  push:
+    branches: 
+      - '**-debugtest'
 jobs:
   test:
     uses: Open-IoT-Service-Platform/platform-launcher/.github/workflows/makefile.yaml@develop
