@@ -100,6 +100,7 @@ jobs:
             (for i in {1..20}; do sleep 60; echo .; done&) && make wait-until-ready
             (for i in {1..20}; do sleep 60; echo .; done&) &&  make upgrade-oisp DOCKER_TAG=test USE_LOCAL_REGISTRY=true KEYCLOAK_FORCE_MIGRATION="true"
             kubectl -n oisp scale deployment debugger --replicas=1
+            (for i in {1..20}; do sleep 60; echo .; done&) && make wait-until-ready
           fi
           make test
           retval=$?
