@@ -12,7 +12,6 @@ spec:
   tls:
   - hosts:
     - {{ .Values.hosts.frontend }}
-    - {{ .Values.hosts.websocketserver }}
     - {{ .Values.hosts.streamer }}
     secretName: {{ .Values.certmanager.secret }}
   rules:
@@ -37,13 +36,6 @@ spec:
         backend:
           serviceName: keycloak-http
           servicePort: 4080
-  - host: {{ .Values.hosts.websocketserver }}
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: websocket-server
-          servicePort: 5000
   - host: {{ .Values.hosts.streamer }}
     http:
       paths:

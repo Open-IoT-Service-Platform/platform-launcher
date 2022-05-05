@@ -8,7 +8,6 @@ data:
     "smtpConfig": "@@OISP_SMTP_CONFIG",
     "frontendSecurityConfig": "@@OISP_FRONTENDSECURITY_CONFIG",
     "backendHostConfig": "@@OISP_BACKENDHOST_CONFIG",
-    "websocketUserConfig": "@@OISP_WEBSOCKETUSER_CONFIG",
     "mailConfig": "@@OISP_MAIL_CONFIG",
     "ruleEngineConfig": "@@OISP_RULEENGINE_CONFIG",
     "gatewayConfig": "@@OISP_GATEWAY_CONFIG",
@@ -16,15 +15,6 @@ data:
     "grafanaConfig": "@@OISP_GRAFANA_CONFIG",
     "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG",
     "keycloakClientSecret": "{{ .Values.keycloak.frontend.secret }}"
-    }
-  websocket-server: |
-    {
-    "websocketUserConfig": "@@OISP_WEBSOCKETUSER_CONFIG",
-    "kafkaConfig": "@@OISP_KAFKA_CONFIG",
-    "redisConfig": "@@OISP_REDIS_CONFIG",
-    "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG",
-    "keycloakClientSecret": "{{ .Values.keycloak.websocketServer.secret }}",
-    "uri": ""
     }
   backend: |
     {
@@ -134,8 +124,6 @@ data:
     "resource": "oisp-frontend",
     "secret": "{{ .Values.keycloak.frontend.secret }}",
     "mqtt-broker-id": "mqtt-broker",
-    "websocket-server-secret": "{{ .Values.keycloak.websocketServer.secret }}",
-    "websocket-server-id": "websocket-server",
     "ssl-required": "external"
     }
   keycloak-admin: |
@@ -144,7 +132,6 @@ data:
     "password": "{{ .Values.keycloak.keycloak.password }}"
     }
   keycloak-frontend-secret: {{ .Values.keycloak.frontend.secret }}
-  keycloak-websocket-server-secret: {{ .Values.keycloak.websocketServer.secret }}
   keycloak-mqtt-broker-secret: {{ .Values.keycloak.mqttBroker.secret }}
   keycloak-force-migration: "{{ .Values.keycloak.forceMigration }}"
   gateway: |
@@ -172,11 +159,6 @@ data:
     "frontendUri": "frontend:4001",
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
     "zookeeperConfig": "@@OISP_ZOOKEEPER_CONFIG"
-    }
-  websocket-user: |
-    {
-    "password": "{{ .Values.websocketServer.password }}",
-    "username": "{{ .Values.websocketServer.username }}"
     }
   opentsdb-config: |
     {

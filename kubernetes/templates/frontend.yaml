@@ -107,11 +107,6 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: backend-host
-        - name: OISP_WEBSOCKETUSER_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              name: oisp-config
-              key: websocket-user
         - name: OISP_RULEENGINE_CONFIG
           valueFrom:
             configMapKeyRef:
@@ -187,11 +182,6 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: backend-host
-        - name: OISP_WEBSOCKETUSER_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              name: oisp-config
-              key: websocket-user
         - name: OISP_RULEENGINE_CONFIG
           valueFrom:
             configMapKeyRef:
@@ -299,11 +289,6 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: backend-host
-        - name: OISP_WEBSOCKETUSER_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              name: oisp-config
-              key: websocket-user
         - name: OISP_RULEENGINE_CONFIG
           valueFrom:
             configMapKeyRef:

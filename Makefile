@@ -37,7 +37,6 @@ export K3D_FIX_CGROUPV2?=false
 export GIT_COMMIT_PLATFORM_LAUNCHER=$(git rev-parse HEAD)
 export GIT_COMMIT_FRONTEND=$(git -C oisp-frontend rev-parse HEAD)
 export GIT_COMMIT_GEARPUMP=$(git -C oisp-gearpump-rule-engine rev-parse HEAD)
-export GIT_COMMIT_WEBSOCKET_SERVER=$(git -C oisp-websocket-server rev-parse HEAD)
 export GIT_COMMIT_BACKEND=$(git -C oisp-backend rev-parse HEAD)
 
 NOBACKUP?=false
@@ -145,7 +144,6 @@ deploy-oisp: check-docker-cred-env
 		--set ruleEngine.password="$(call randomPass)" \
 		--set ruleEngine.ftpPassword="$${FTPPASS}" \
 		--set ruleEngine.gearpump.password="$(call randomPass)" \
-		--set websocketServer.password="$(call randomPass)" \
 		--set stolon.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
 		--set postgres.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
 		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_PASSWORD}" \
@@ -153,7 +151,6 @@ deploy-oisp: check-docker-cred-env
 		--set keycloak.keycloak.password="$(call randomPass)" \
 		--set keycloak.frontend.secret="$(call randomPass)" \
 		--set keycloak.mqttBroker.secret="$(call randomPass)" \
-		--set keycloak.websocketServer.secret="$(call randomPass)" \
 		--set keycloak.fusionBackend.secret="$(call randomPass)" \
 		--set tag=$(DOCKER_TAG) \
 		--set imagePrefix=$(DOCKER_PREFIX) \
@@ -191,7 +188,6 @@ upgrade-oisp: check-docker-cred-env backup
 		--set mqtt.broker.password="$${MQTT_BROKER_PASSWORD}" \
 		--set ruleEngine.password="$${RULEENGINE_PASSWORD}" \
 		--set ruleEngine.gearpump.password="$${RULEENGINE_GEARPUMP_PASSWORD}" \
-		--set websocketServer.password="$${WEBSOCKETSERVER_PASSWORD}" \
 		--set stolon.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
 		--set postgres.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
 		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_SU_PASSWORD}" \
@@ -199,7 +195,6 @@ upgrade-oisp: check-docker-cred-env backup
 		--set keycloak.keycloak.password="$${KEYCLOAK_PASSWORD}" \
 		--set keycloak.frontend.secret="$${KEYCLOAK_FRONTEND_SECRET}" \
 		--set keycloak.mqttBroker.secret="$${KEYCLOAK_MQTT_BROKER_SECRET}" \
-		--set keycloak.websocketServer.secret="$${KEYCLOAK_WEBSOCKET_SERVER_SECRET}" \
 		--set keycloak.fusionBackend.secret="$${KEYCLOAK_FUSION_BACKEND_SECRET}" \
 		--set tag=$(DOCKER_TAG) \
 		--set imagePrefix=$(DOCKER_PREFIX) \

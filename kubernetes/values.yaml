@@ -206,14 +206,9 @@ ruleEngine:
   url: "http://services-server/rule-engine-bundled-0.1.2.jar"
   checkpointingInterval : "10000"
 
-websocketServer:
-  username: api_actuator
-  password: password
-
 # Hosts used for Ingress configuration
 hosts:
     frontend: latest.oisp.info
-    websocketserver: ws.latest.oisp.info
     mqttserver: mqtt.latest.oisp.info
     streamer: streamer.latest.oisp.info
 
@@ -262,11 +257,6 @@ keycloak:
           configMapKeyRef:
             name: oisp-config
             key: keycloak-frontend-secret
-      - name: OISP_WEBSOCKET_SERVER_SECRET
-        valueFrom:
-          configMapKeyRef:
-            name: oisp-config
-            key: keycloak-websocket-server-secret
       - name: OISP_MQTT_BROKER_SECRET
         valueFrom:
           configMapKeyRef:
@@ -299,8 +289,6 @@ keycloak:
       dbUser: superuser
       dbPassword: supersecret
   frontend:
-    secret: "supersecret"
-  websocketServer:
     secret: "supersecret"
   mqttBroker:
     secret: "supersecret"
