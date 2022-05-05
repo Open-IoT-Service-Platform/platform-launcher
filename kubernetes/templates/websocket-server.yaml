@@ -20,7 +20,7 @@ metadata:
     app: websocket-server
 spec:
   serviceName: "websocket-server"
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: websocket-server
