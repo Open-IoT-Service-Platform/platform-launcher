@@ -10,7 +10,6 @@ SERVICE_ACCOUNTS=$(cat ${REALM_DIR}/service-accounts.json)
 # SECRET variables are already defined in the environment variables
 sed -i "s/{{ INSERT-OISP-FRONTEND-SECRET }}/${OISP_FRONTEND_SECRET}/" ${REALM_DIR}/oisp-realm.json
 sed -i "s/{{ INSERT-MQTT-BROKER-SECRET }}/${OISP_MQTT_BROKER_SECRET}/" ${REALM_DIR}/oisp-realm.json
-sed -i "s/{{ INSERT-WEBSOCKET-SERVER-SECRET }}/${OISP_WEBSOCKET_SERVER_SECRET}/" ${REALM_DIR}/oisp-realm.json
 sed -i "s/{{ INSERT-FUSION-BACKEND-SECRET }}/${FUSION_BACKEND_SECRET}/" ${REALM_DIR}/oisp-realm.json
 
 
