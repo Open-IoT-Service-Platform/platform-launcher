@@ -94,7 +94,6 @@ check_deployment backend ${NAMESPACE} backend 60
 check_sts keycloak ${NAMESPACE} 120
 check_deployment frontend ${NAMESPACE} frontend 120
 check_deployment kairosdb ${NAMESPACE} kairosdb 60
-check_sts websocket-server ${NAMESPACE} 60
 check_sts mqtt-gateway ${NAMESPACE} 240
 check_sts emqx ${NAMESPACE} 240
 check_beamservice rule-engine ${NAMESPACE} 240
