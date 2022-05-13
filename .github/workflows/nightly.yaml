@@ -35,6 +35,7 @@ jobs:
             cd util && \
             bash setup-ubuntu20.04.sh
           else
+            make recreate-registry
             make restart-cluster
           fi
           

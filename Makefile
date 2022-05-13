@@ -290,6 +290,13 @@ restart-cluster:
 	@cd util && \
 	./restart-cluster.sh
 
+##	delete and recreate registry, used for the CI setup
+##	needs make restart-cluster command after it
+##
+recreate-registry:
+	@k3d registry delete k3d-oisp.localhost
+	@k3d registry create oisp.localhost -p 12345
+
 # =======
 # TESTING
 # =======
