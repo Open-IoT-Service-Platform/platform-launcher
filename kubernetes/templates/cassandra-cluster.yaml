@@ -1,35 +1,70 @@
-apiVersion: cassandraoperator.instaclustr.com/v1alpha1
-kind: CassandraDataCenter
-datacenter: {{ .Release.Namespace }}
-cluster: {{ .Values.cassandra.cluster }}
-host: cassandra-oisp-{{ .Release.Namespace }}-nodes.svc.cluster.local #note: datacenter and cluster have influence on how the name is built
+apiVersion: cassandra.datastax.com/v1beta1
+kind: CassandraDatacenter
 metadata:
-  name: {{ .Release.Namespace }}
+  name: {{ .Values.cassandra.name }}
   namespace: cassandra
 spec:
-  serviceAccountName: cassandra
-  deletePVCs: false
-  fsGroup: 999
-  resources:
-    {{ if .Values.less_resources }}
-    requests:
-      cpu: 50m
-      memory: 100Mi
-    {{ else }}
-    limits:
-      cpu: "1"
-      memory: 1Gi
-    requests:
-      cpu: 500m
-      memory: 1Gi
-    {{ end }}
-  dataVolumeClaimSpec:
-      accessModes:
-      - ReadWriteOnce
-      resources:
-        requests:
+  clusterName: {{ .Values.cassandra.cluster }}
+  serverType: cassandra
+  serverVersion: "4.0.3"
+  managementApiAuth:
+    insecure: {}
+  {{ if .Values.less_resources }}
+  size: 1
+  {{ else }}
+  size: {{ .Values.cassandra.nodes }}
+  {{ end }}
+  storageConfig:
+      cassandraDataVolumeClaimSpec:
+        storageClassName: local-path
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
             {{ if .Values.less_resources }}
-            storage: 0.5Gi
+            storage: 1Gi
             {{ else }}
             storage: {{ .Values.cassandra.disk }}
             {{ end }}
+  dockerImageRunsAsCassandra: false
+  podTemplateSpec:
+    spec:
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+      containers:
+        - name: "server-system-logger"
+          image: k8ssandra/system-logger:v1.11.0
+
+  resources:
+    {{ if .Values.less_resources }}
+    requests:
+      memory: 400Mi
+      cpu: 200m
+    limits:
+      memory: 400Mi
+      cpu: 200m
+    {{ else }}
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+    {{ end }}
+  racks:
+    - name: {{ .Values.cassandra.rack }}
+  config:
+    jvm-server-options:
+    {{ if .Values.less_resources }}
+      initial_heap_size: "200M"
+      max_heap_size: "200M"
+    {{ else }}
+      initial_heap_size: "1G"
+      max_heap_size: "1G"
+    {{ end }}
+    cassandra-yaml:
+      num_tokens: 16
+      authenticator: AllowAllAuthenticator
+      authorizer: AllowAllAuthorizer
+      role_manager: CassandraRoleManager

@@ -28,7 +28,7 @@ K3S_NODE=$(shell docker ps --format '{{.Names}}' | grep k3s_agent)
 KEYCLOAK_HELM_REPO:="https://codecentric.github.io/helm-charts"
 KEYCLOAK_HELM_REPO_NAME:="codecentric"
 KEYCLOAK_FORCE_MIGRATION?=""
-export K3S_IMAGE?=rancher/k3s:v1.20.7-k3s1
+export K3S_IMAGE?=rancher/k3s:v1.22.9-k3s1
 export DOCKER_TAG?=latest
 export DOCKER_PREFIX?=oisp
 # Try setting this to true if you are getting cgroups error in k3s image
@@ -163,6 +163,8 @@ deploy-oisp: check-docker-cred-env
 		--set emqxtest.initContainers[0].name=wait-for-mqtt-auth-service \
 		--set emqxtest.initContainers[0].image=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/wait-for-it:$(DOCKER_TAG) \
 		--set emqxtest.initContainers[0].args='{mqtt-gateway:3025,--,echo,mqtt auth service is up}' \
+		--set minio.adminSecretKey="$(call randomPass)" \
+		--set minio.userSecretKey="$(call randomPass)" \
 		--set use_local_registry=$(USE_LOCAL_REGISTRY) \
 		$(HELM_ARGS)
 
@@ -206,6 +208,8 @@ upgrade-oisp: check-docker-cred-env backup
 		--set emqxtest.initContainers[0].name=wait-for-mqtt-auth-service \
 		--set emqxtest.initContainers[0].image=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/wait-for-it:$(DOCKER_TAG) \
 		--set emqxtest.initContainers[0].args='{mqtt-gateway:3025,--,echo,mqtt auth service is up}' \
+		--set minio.adminSecretKey="$(call randomPass)" \
+		--set minio.userSecretKey="$(call randomPass)" \
 		--set use_local_registry=$(USE_LOCAL_REGISTRY) \
 		$(HELM_ARGS)
 
@@ -218,7 +222,7 @@ undeploy-oisp:
 	(kubectl delete -n $(NAMESPACE) bsqls --all || echo "Beam SQL services not (or already) deleted") && \
 	( helm uninstall $(NAME) --namespace $(NAMESPACE) || echo helm uninstall failed)  && \
 	(kubectl delete namespace $(NAMESPACE) || echo "namespace not (or already) deleted") && \
-	(kubectl -n cassandra delete cassandradatacenter $(NAMESPACE) || echo "cassandra dc not (or already) deleted")
+	(kubectl delete cassdcs -n cassandra --all || echo "cassandra dc not (or already) deleted")
 # Beam services must be deleted first, otherwise the finalizer (operator) is down, and deletation does not work.
 
 # =====
@@ -555,5 +559,5 @@ define msg
 endef
 
 define randomPass
-$$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c$${1:-64})
+$$(< /dev/urandom tr -dc A-Za-z0-9 | head -c$${1:-64})
 endef

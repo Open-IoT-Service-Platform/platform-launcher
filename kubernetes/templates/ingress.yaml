@@ -1,52 +1,65 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: frontend-web
   annotations:
-     kubernetes.io/ingress.class: "nginx"
-     cert-manager.io/cluster-issuer: {{ .Values.certmanager.issuer }}
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: {{ .Values.certmanager.issuer }}
 spec:
-  backend:
-    serviceName: frontend
-    servicePort: 4001
+  defaultBackend:
+    service:
+      name: frontend
+      port:
+        number: 4001
   tls:
   - hosts:
-    - {{ .Values.hosts.frontend }}
-    - {{ .Values.hosts.streamer }}
+      - {{ .Values.hosts.frontend }}
+      - {{ .Values.hosts.streamer }}
     secretName: {{ .Values.certmanager.secret }}
   rules:
   - host: {{ .Values.hosts.frontend }}
     http:
       paths:
-      - path: /
+      - pathType: Prefix
+        path: /
         backend:
-          serviceName: frontend
-          servicePort: 4001
+          service:
+            name: frontend
+            port:
+              number: 4001
   - host: {{ .Values.hosts.frontend }}
     http:
         paths:
-        - path: /ui/grafana
+        - pathType: Prefix
+          path: /ui/grafana
           backend:
-            serviceName: frontend
-            servicePort: 4002
+            service:
+              name: frontend
+              port:
+                number: 4002
   - host: {{ .Values.hosts.frontend }}
     http:
       paths:
-      - path: /keycloak
+      - pathType: Prefix
+        path: /keycloak
         backend:
-          serviceName: keycloak-http
-          servicePort: 4080
+          service:
+            name: keycloak-http
+            port:
+              number: 4080
   - host: {{ .Values.hosts.streamer }}
     http:
       paths:
-      - path: /
+      - pathType: Prefix
+        path: /
         backend:
-          serviceName: streamer
-          servicePort: 9000
-
+          service:
+            name: streamer
+            port:
+              number: 9000
 ---
 
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: tsdb-web
@@ -63,7 +76,10 @@ spec:
   - host: {{ .Values.hosts.frontend }}
     http:
       paths:
-      - path: /tsdb(/|$)(.*)
+      - pathType: Prefix
+        path: /tsdb(/|$)(.*)
         backend:
-          serviceName: frontend
-          servicePort: 4003
+          service:
+            name: frontend
+            port:
+              number: 4003

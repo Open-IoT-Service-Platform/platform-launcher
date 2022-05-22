@@ -123,7 +123,7 @@ spec:
               name: oisp-config
               key: keycloak
         command: ["/bin/bash", "-c"]
-        args: ["node admin createDB; node admin updateDB; node admin addSystemUsers"]
+        args: ["node admin createDB; node admin updateDB"]
       - name: wait-for-keycloak
         {{ if .Values.use_local_registry }}
         image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}

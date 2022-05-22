@@ -17,10 +17,10 @@ spec:
       serviceAccountName: flink-jobmanager
       initContainers:
       - name: create-checkpointing-dir
-        image: {{ printf "%s/%s" .Values.imageCredentials.registry .Values.minio.mcimage }}
+        image: {{ printf "%s/%s" .Values.imageCredentials.registry .Values.minio.mcImage }}
         env:
         - name: MC_HOST_oisp
-          value: {{ printf "http://%s:%s@%s" .Values.minio.accesskey .Values.minio.secretkey .Values.minio.endpoint }}
+          value: {{ printf "http://%s:%s@%s" .Values.minio.userAccessKey .Values.minio.userSecretKey .Values.minio.endpoint }}
         command: ["/bin/bash", "-c", "mc mb -p oisp/{{ .Values.flink.highAvailability.bucket }}"]
       containers:
       - name: jobmanager
