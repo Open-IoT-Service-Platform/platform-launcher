@@ -25,10 +25,10 @@ data:
     state.checkpoints.dir: s3://{{ .Values.flink.highAvailability.bucket }}/{{ .Values.flink.highAvailability.checkpointsDir }}
     state.savepoints.dir: s3://{{ .Values.flink.highAvailability.bucket }}/{{ .Values.flink.highAvailability.savepointsDir }}
     execution.checkpointing.interval: 60 s
-    s3.endpoint: {{ .Values.minio.httpurl }}
+    s3.endpoint: {{ .Values.minio.url }}
     s3.path.style.access: true
-    s3.access-key: {{ .Values.minio.accesskey }}
-    s3.secret-key: {{ .Values.minio.secretkey }}
+    s3.access-key: {{ .Values.minio.userAccessKey }}
+    s3.secret-key: {{ .Values.minio.userSecretKey }}
     cluster.evenly-spread-out-slots: {{ .Values.flink.highAvailability.evenlySpreadOut }}
     kubernetes.cluster-id: {{ .Values.flink.highAvailability.clusterId }}
     kubernetes.namespace: {{.Release.Namespace}}

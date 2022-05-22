@@ -27,11 +27,15 @@ numberReplicas:
     minio: 4
 
 minio:
-  httpurl: http://minio:9000
-  endpoint: minio:9000
-  accesskey: minio
-  secretkey: minio123
-  mcimage: minio/mc:latest
+  url: http://minio.oisp.svc.cluster.local:80
+  endpoint: minio.oisp.svc.cluster.local:80
+  adminAccessKey: console
+  adminSecretKey: admin-secret-key
+  userAccessKey: minio
+  userSecretKey: minio-secret-key
+  storageSize: 1G
+  healthPath: /minio/health/live
+  mcImage: minio/mc:RELEASE.2022-02-07T09-25-34Z
 
 backup:
   bucket: backup
@@ -44,16 +48,15 @@ emqx:
   replicaCount: 3
   fullnameOverride: emqx
   emqxConfig:
-    EMQX_AUTH__HTTP__ACL_REQ: http://mqtt-gateway:3025/acl
+    EMQX_AUTH__HTTP__ACL_REQ_URL: http://mqtt-gateway:3025/acl
     EMQX_AUTH__HTTP__ACL_REQ__METHOD: get
     EMQX_AUTH__HTTP__ACL_REQ__PARAMS: access=%A,username=%u,topic=%t
-    EMQX_AUTH__HTTP__AUTH_REQ: http://mqtt-gateway:3025/auth
+    EMQX_AUTH__HTTP__AUTH_REQ_URL: http://mqtt-gateway:3025/auth
     EMQX_AUTH__HTTP__AUTH_REQ__METHOD: get
     EMQX_AUTH__HTTP__AUTH_REQ__PARAMS: username=%u,password=%P
     EMQX_CLUSTER__K8S__ADDRESS_TYPE: hostname
     EMQX_CLUSTER__K8S__APISERVER: https://kubernetes.default.svc:443
     EMQX_CLUSTER__K8S__SUFFIX: svc.cluster.local
-    EMQX_LOADED_PLUGINS: emqx_auth_http
     EMQX_LOG__LEVEL: warning
     EMQX_LISTENER__SSL__EXTERNAL__CERTFILE: etc/certs/server.cert
     EMQX_LISTENER__SSL__EXTERNAL__KEYFILE: etc/certs/server.key
@@ -69,18 +72,18 @@ emqx:
 emqxtest:
   replicaCount: 1
   fullnameOverride: emqx
+  emqxLoadedPlugins: '{emqx_auth_http, true}. {emqx_management, true}.'
   emqxConfig:
-    EMQX_AUTH__HTTP__ACL_REQ: http://mqtt-gateway:3025/acl
+    EMQX_AUTH__HTTP__ACL_REQ__URL: http://mqtt-gateway:3025/acl
     EMQX_AUTH__HTTP__ACL_REQ__METHOD: get
     EMQX_AUTH__HTTP__ACL_REQ__PARAMS: access=%A,username=%u,topic=%t
-    EMQX_AUTH__HTTP__AUTH_REQ: http://mqtt-gateway:3025/auth
+    EMQX_AUTH__HTTP__AUTH_REQ__URL: http://mqtt-gateway:3025/auth
     EMQX_AUTH__HTTP__AUTH_REQ__METHOD: get
     EMQX_AUTH__HTTP__AUTH_REQ__PARAMS: username=%u,password=%P
     EMQX_CLUSTER__K8S__ADDRESS_TYPE: hostname
     EMQX_CLUSTER__K8S__APISERVER: https://kubernetes.default.svc:443
     EMQX_CLUSTER__K8S__SUFFIX: svc.cluster.local
-    EMQX_LOADED_PLUGINS: emqx_auth_http
-    EMQX_LOG__LEVEL: warning
+    EMQX_LOG__LEVEL: info
     EMQX_LISTENER__SSL__EXTERNAL__CERTFILE: etc/certs/server.cert
     EMQX_LISTENER__SSL__EXTERNAL__KEYFILE: etc/certs/server.key
     EMQX_LISTENER__SSL__EXTERNAL__VERIFY: verify_none
@@ -172,7 +175,9 @@ backend:
 # If you change cluster, you also have to update the wait-for-it in kairos-db.yaml
 # and in oisp-config.yaml
 cassandra:
+  name: cassandra
   cluster: "oisp"
+  rack: rack1
   port: 9042
   replication: "{'class': 'SimpleStrategy','replication_factor' : 2}"
   nodes: 3
@@ -187,7 +192,7 @@ mqtt:
   broker:
     username: username
     password: password
-    url: emqx
+    url: emqx-headless
     localport: 1883
   gateway:
     port: 3025

@@ -31,7 +31,7 @@ printf "\n"
 
 printf "\033[1mInstalling k3d\n"
 printf -- "-----------------\033[0m\n"
-curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=v4.4.7 bash
+curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=v5.4.1 bash
 printf "\033[1mSuccessfully installed %s\033[0m\n" "$(k3d --version)"
 printf "\n"
 
@@ -45,7 +45,7 @@ echo "127.0.0.1 k3d-oisp.localhost" | sudo tee -a /etc/hosts
 
 printf "\033[1mInstalling kubectl\n"
 printf -- "------------------\033[0m\n"
-curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
+curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.22.0/bin/linux/amd64/kubectl
 chmod +x ./kubectl
 sudo mv ./kubectl /usr/bin/kubectl
 if [ ! -d ~/.kube ]; then

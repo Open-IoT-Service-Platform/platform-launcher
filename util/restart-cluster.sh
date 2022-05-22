@@ -23,10 +23,10 @@ kubectl cluster-info
 # sudo route add -net 10.43.0.0 netmask 255.255.0.0 gw ${AGENTIP}
 
 printf "\033[1mWaiting for traefik to come up\033[0m\n"
-while [ -z "$(kubectl -n kube-system get pods -l=app=traefik --ignore-not-found)" ]; do
+while [ -z "$(kubectl -n kube-system get pods -l=app.kubernetes.io/name=traefik --ignore-not-found)" ]; do
  printf "."; sleep 5;
 done
-while kubectl -n kube-system get pods -l=app=traefik -o jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; do
+while kubectl -n kube-system get pods -l=app.kubernetes.io/name=traefik -o jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; do
  printf "."; sleep 5;
 done;
 printf "\033[1m\nTraefik ready!\033[0m\n"
