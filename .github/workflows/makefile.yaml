@@ -109,6 +109,3 @@ jobs:
         done
         echo Test return value: ${retval}
         exit ${retval}
-    - name: debug with upterm
-      if: failure()
-      uses: lhotari/action-upterm@v1

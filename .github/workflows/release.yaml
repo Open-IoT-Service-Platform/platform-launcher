@@ -1,0 +1,69 @@
+name: Tags CI&CD
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  test:
+    uses: Open-IoT-Service-Platform/platform-launcher/.github/workflows/makefile.yaml@develop
+    with:
+      UPGRADE_TEST: "false"
+    secrets:
+      CURRENT_RELEASE_VERSION: ${{ secrets.CURRENT_RELEASE_VERSION }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  build:
+    needs: test
+    runs-on: private
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      DOCKER_PREFIX: ${{ secrets.DOCKER_PREFIX }}
+      PUSH_DRYRUN: ''
+      SELF_HOSTED_RUNNER: true
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+      - name: Prepare Platform
+        shell: bash
+        run: |
+          export TERM=vt100
+          if [ -z "${SELF_HOSTED_RUNNER}" ]; then
+            cd util && \
+            bash setup-ubuntu20.04.sh
+          else
+            make recreate-registry
+            make restart-cluster
+          fi
+          
+      - name: Setup and Build
+        shell: bash
+        run: |
+          export TERM=vt100
+          set +o pipefail
+          git submodule update --recursive --init
+          make update
+          yes | DOCKER_TAG=test NODOCKERLOGIN=true DEBUG=true make build
+      - name: Push images
+        shell: bash
+        run: |
+          export TERM=vt100
+          set +o pipefail
+          docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+          # Tag passed "test" images as version tag
+          TARGET_DOCKER_TAG=`git describe --tags --exact-match` || exit 1
+          images=$(docker images --format "{{.Repository}}:{{.Tag}}"| grep :test)
+          for image in $images; do
+            newimage=$(echo $image | sed -r "s/:test/:$TARGET_DOCKER_TAG/g" | sed -r "s/$DOCKER_PREFIX/oisp/g");
+            echo tagging $image to $newimage;
+            docker tag $image $newimage;
+            if [ -z "$PUSH_DRYRUN" ]; then
+              docker push ${newimage}
+            else
+              echo Only dry run mode. Not pushing to dockerhub!
+            fi
+          done
+          
