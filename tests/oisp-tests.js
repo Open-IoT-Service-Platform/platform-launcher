@@ -1303,9 +1303,6 @@ describe('Streamer subtests...'.bold, function() {
         test = require('./subtests/streamer-tests').test(userToken);
         test.prepareStreamerTestSetup(done);
     }).timeout(10000);
-    it(descriptions.testWithComponentSplitter, function(done) {
-        test.testWithComponentSplitter(done);
-    }).timeout(30000);
     it(descriptions.cleanup, function(done) {
         test.cleanup(done);
     });

@@ -57,43 +57,6 @@ var test = function(userToken) {
                 .then(() => { done(); })
                 .catch((err) => { done(err); });
         },
-        "testWithComponentSplitter": function(done) {
-	    var nrDatapointsReceived = -1; // -1 because the first message is "OK"
-	    const nrDatapointsTarget = 4;
-            const sleep = require('sleep');
-	    promtests.submitData(nrDatapointsReceived, deviceToken, accountId, deviceId, componentId1_1)
-                .then(() => sleep.sleep(10))
-                .then(() => {
-                    // THIS MUST BE FIXED, RACE CONDITION WITH LEADER ELECTION
-                    const ws = new WebSocket('ws://' + config.streamer.host + ':' + config.streamer.port);
-                    ws.on('open', function open() {
-                        const registerMessage =
-        {"token": userToken,
-            "service": "metrics",
-            "components": [
-                [accountId, componentId1_1],
-                [accountId, componentId1_2]
-            ]
-        };
-                        ws.send(JSON.stringify(registerMessage));
-                    });
-
-                    ws.on('message', function incoming() {
-                        if (nrDatapointsReceived === -1) {
-                            sleep.sleep(10); // Sleep in first message to allow kafka time
-                            // for leader election for topic
-                        }
-                        nrDatapointsReceived += 1;
-                        process.stdout.write('.');
-                        if (nrDatapointsReceived === nrDatapointsTarget) {
-                            done();
-                        }
-                        //		console.log(data);
-                        //		console.log("Submitting:" + accountId + "." + componentId1_1);
-                        promtests.submitData(nrDatapointsReceived, deviceToken, accountId, deviceId, componentId1_1);
-                    });});
-
-        },
         "cleanup": function(done) {
 	    // delete accounts
 	    promtests.deleteAccount(userToken, accountId)
@@ -122,7 +85,6 @@ var test = function(userToken) {
 
 var descriptions = {
     "prepareStreamerTestSetup": "Create accounts, devices and components required for this test.",
-    "testWithComponentSplitter": "Bridge to output of component splitter service.",
     "cleanup": "Delete created account, devices and components for this test."
 };
 
