@@ -1,3 +1,4 @@
+{{- $secret := (lookup "v1" "Secret" .Release.Namespace "minio-user") -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -28,7 +29,7 @@ data:
     s3.endpoint: {{ .Values.minio.url }}
     s3.path.style.access: true
     s3.access-key: {{ .Values.minio.userAccessKey }}
-    s3.secret-key: {{ .Values.minio.userSecretKey }}
+    s3.secret-key: {{ if $secret }}{{ $secret.data.CONSOLE_SECRET_KEY | b64dec }}{{ else }}{{ .Values.minio.userSecretKey }}{{ end }}
     cluster.evenly-spread-out-slots: {{ .Values.flink.highAvailability.evenlySpreadOut }}
     kubernetes.cluster-id: {{ .Values.flink.highAvailability.clusterId }}
     kubernetes.namespace: {{.Release.Namespace}}
