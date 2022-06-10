@@ -31,7 +31,7 @@ printf "\n"
 
 printf "\033[1mInstalling k3d\n"
 printf -- "-----------------\033[0m\n"
-curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=v5.4.1 bash
+curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=v4.4.7 bash
 printf "\033[1mSuccessfully installed %s\033[0m\n" "$(k3d --version)"
 printf "\n"
 
