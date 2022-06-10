@@ -20,7 +20,12 @@ spec:
         image: {{ printf "%s/%s" .Values.imageCredentials.registry .Values.minio.mcImage }}
         env:
         - name: MC_HOST_oisp
+          {{- $secret := (lookup "v1" "Secret" .Release.Namespace "minio-user") -}}
+          {{- if $secret }}
+          value: {{ printf "http://%s:%s@%s" .Values.minio.userAccessKey ($secret.data.CONSOLE_SECRET_KEY | b64dec) .Values.minio.endpoint }}
+          {{- else }}
           value: {{ printf "http://%s:%s@%s" .Values.minio.userAccessKey .Values.minio.userSecretKey .Values.minio.endpoint }}
+          {{- end }}
         command: ["/bin/bash", "-c", "mc mb -p oisp/{{ .Values.flink.highAvailability.bucket }}"]
       containers:
       - name: jobmanager

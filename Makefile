@@ -163,7 +163,7 @@ deploy-oisp: check-docker-cred-env
 		--set emqxtest.initContainers[0].name=wait-for-mqtt-auth-service \
 		--set emqxtest.initContainers[0].image=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/wait-for-it:$(DOCKER_TAG) \
 		--set emqxtest.initContainers[0].args='{mqtt-gateway:3025,--,echo,mqtt auth service is up}' \
-		--set minio.adminSecretKey="$(call randomPass)" \
+		--set minio.adminAccessKey="$(call randomPass)" \
 		--set minio.userSecretKey="$(call randomPass)" \
 		--set use_local_registry=$(USE_LOCAL_REGISTRY) \
 		$(HELM_ARGS)
@@ -208,8 +208,6 @@ upgrade-oisp: check-docker-cred-env backup
 		--set emqxtest.initContainers[0].name=wait-for-mqtt-auth-service \
 		--set emqxtest.initContainers[0].image=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/wait-for-it:$(DOCKER_TAG) \
 		--set emqxtest.initContainers[0].args='{mqtt-gateway:3025,--,echo,mqtt auth service is up}' \
-		--set minio.adminSecretKey="$(call randomPass)" \
-		--set minio.userSecretKey="$(call randomPass)" \
 		--set use_local_registry=$(USE_LOCAL_REGISTRY) \
 		$(HELM_ARGS)
 

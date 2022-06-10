@@ -1,18 +1,28 @@
 ---
+{{- $secret := (lookup "v1" "Secret" .Release.Namespace "oisp-creds-secret") -}}
 apiVersion: v1
 data:
   accesskey: {{ .Values.minio.adminAccessKey | toString | b64enc }}
+  {{- if $secret }}
+  secretkey: {{ $secret.data.secretkey }}
+  {{- else }}
   secretkey: {{ .Values.minio.adminSecretKey | toString | b64enc }}
+  {{- end }}
 kind: Secret
 metadata:
   name: oisp-creds-secret
   namespace: {{ .Release.Namespace }}
 type: Opaque
 ---
+{{- $secret := (lookup "v1" "Secret" .Release.Namespace "minio-user") -}}
 apiVersion: v1
 data:
   CONSOLE_ACCESS_KEY: {{ .Values.minio.userAccessKey | toString | b64enc }}
+  {{- if $secret }}
+  CONSOLE_SECRET_KEY: {{ $secret.data.CONSOLE_SECRET_KEY }}
+  {{- else }}
   CONSOLE_SECRET_KEY: {{ .Values.minio.userSecretKey | toString | b64enc }}
+  {{- end }}
 kind: Secret
 metadata:
   name: minio-user
