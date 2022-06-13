@@ -1,3 +1,5 @@
+set -e
+
 printf "\n"
 printf "\033[1mInstalling k8s operators\n"
 printf -- "------------------------\033[0m\n"
