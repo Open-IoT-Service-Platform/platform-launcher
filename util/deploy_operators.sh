@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 
 printf "\n"
@@ -51,7 +52,9 @@ while kubectl -n cert-manager get pods -l=app=webhook -o jsonpath="{.items[*].st
   printf "."; sleep 5;
 done;
 printf "\033[1m\nCert-manager Webhook ready! Now applying clusterissuer for self-cert.\033[0m\n"
-kubectl apply -f ../kubernetes/cert-manager/clusterissuer-self-cert.yaml
+if [ -f ../kubernetes/cert-manager/clusterissuer-self-cert.yaml ]; then
+  kubectl apply -f ../kubernetes/cert-manager/clusterissuer-self-cert.yaml
+fi
 
 printf "\n"
 printf "\033[1mInstalling cassandra operator\n"
