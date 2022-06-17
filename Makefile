@@ -172,7 +172,7 @@ deploy-oisp: check-docker-cred-env
 ##
 upgrade-oisp: check-docker-cred-env backup
 	echo "Deploying operators";
-	bash ./util/deploy_operators.sh;
+	cd util && bash deploy_operators.sh;
 	@$(call msg,"Starting upgrade");
 	@source util/get_oisp_credentials.sh && \
 	cd kubernetes && \
