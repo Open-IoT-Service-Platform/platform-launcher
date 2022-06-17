@@ -59,7 +59,13 @@ fi
 printf "\n"
 printf "\033[1mInstalling cassandra operator\n"
 printf -- "------------------------\033[0m\n"
-kubectl create ns cassandra
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cassandra
+EOF
+
 kubectl apply --force-conflicts --server-side -k github.com/k8ssandra/cass-operator/config/deployments/cluster?ref=v1.11.0
 printf "\033[1mCassandra operator installed successfully.\033[0m\n"
 
@@ -71,10 +77,10 @@ git clone https://github.com/zalando/postgres-operator.git
 cd postgres-operator
 git checkout v1.7.0
 kubectl apply -f manifests/postgresql.crd.yaml
-kubectl create -f manifests/configmap.yaml  # configuration
-kubectl create -f manifests/operator-service-account-rbac.yaml  # identiy and permissions
-kubectl create -f manifests/postgres-operator.yaml  # deployment
-kubectl create -f manifests/api-service.yaml  # operator API to be used by UI
+kubectl apply -f manifests/configmap.yaml  # configuration
+kubectl apply -f manifests/operator-service-account-rbac.yaml  # identiy and permissions
+kubectl apply -f manifests/postgres-operator.yaml  # deployment
+kubectl apply -f manifests/api-service.yaml  # operator API to be used by UI
 cd ..
 rm -rf postgres-operator
 printf "\033[1mPostgres operator installed successfully.\033[0m\n"
