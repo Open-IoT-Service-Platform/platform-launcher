@@ -22,9 +22,9 @@ spec:
         - name: MC_HOST_oisp
           {{- $secret := (lookup "v1" "Secret" .Release.Namespace "minio-user") -}}
           {{- if $secret }}
-          value: {{ printf "http://%s:%s@%s" .Values.minio.userAccessKey ($secret.data.CONSOLE_SECRET_KEY | b64dec) .Values.minio.endpoint }}
+          value: {{ printf "http://%s:%s@%s.%s.svc.cluster.local:%s" .Values.minio.userAccessKey ($secret.data.CONSOLE_SECRET_KEY | b64dec) .Values.minio.endpointPrefix .Release.Namespace .Values.minio.localPort }}
           {{- else }}
-          value: {{ printf "http://%s:%s@%s" .Values.minio.userAccessKey .Values.minio.userSecretKey .Values.minio.endpoint }}
+          value: {{ printf "http://%s:%s@%s.%s.svc.cluster.local:%s" .Values.minio.userAccessKey .Values.minio.userSecretKey .Values.minio.endpointPrefix .Release.Namespace .Values.minio.localPort }}
           {{- end }}
         command: ["/bin/bash", "-c", "mc mb -p oisp/{{ .Values.flink.highAvailability.bucket }}"]
       containers:

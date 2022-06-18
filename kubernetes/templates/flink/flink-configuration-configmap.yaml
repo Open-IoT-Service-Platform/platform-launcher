@@ -26,7 +26,7 @@ data:
     state.checkpoints.dir: s3://{{ .Values.flink.highAvailability.bucket }}/{{ .Values.flink.highAvailability.checkpointsDir }}
     state.savepoints.dir: s3://{{ .Values.flink.highAvailability.bucket }}/{{ .Values.flink.highAvailability.savepointsDir }}
     execution.checkpointing.interval: 60 s
-    s3.endpoint: {{ .Values.minio.url }}
+    s3.endpoint: http://{{ .Values.minio.endpointPrefix }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.minio.localPort }}
     s3.path.style.access: true
     s3.access-key: {{ .Values.minio.userAccessKey }}
     s3.secret-key: {{ if $secret }}{{ $secret.data.CONSOLE_SECRET_KEY | b64dec }}{{ else }}{{ .Values.minio.userSecretKey }}{{ end }}

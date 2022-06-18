@@ -27,8 +27,8 @@ numberReplicas:
     minio: 4
 
 minio:
-  url: http://minio.oisp.svc.cluster.local:80
-  endpoint: minio.oisp.svc.cluster.local:80
+  endpointPrefix: minio
+  localPort: "80"
   adminAccessKey: console
   adminSecretKey: admin-secret-key
   userAccessKey: minio
