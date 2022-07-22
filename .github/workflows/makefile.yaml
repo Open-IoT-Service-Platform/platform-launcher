@@ -33,11 +33,14 @@ jobs:
       CURRENT_RELEASE_VERSION: ''
       SELF_HOSTED_RUNNER: true
     runs-on: private
-
     steps:
     - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
+    - uses: actions/checkout@v3
+      with:
+        repository: IndustryFusion/DigitalTwin
+        path: ./DigitalTwin
     - name: Set Env
       env:
         CRV: ${{ secrets.CURRENT_RELEASE_VERSION }}
@@ -46,30 +49,48 @@ jobs:
         set +o pipefail
         echo "UPGRADE_TEST=${{ inputs.UPGRADE_TEST }}" >> $GITHUB_ENV
         echo "CURRENT_RELEASE_VERSION=${{ secrets.CURRENT_RELEASE_VERSION }}" >> $GITHUB_ENV
-    - name: Prepare platform
+    - name: Prepare OISP platform
       shell: bash
       run: |
         export TERM=vt100
         if [ -z "${SELF_HOSTED_RUNNER}" ]; then
           cd util && \
           bash setup-ubuntu20.04.sh
-        else
-          make recreate-registry
-          make restart-cluster
         fi
+    - name: Prepare Digital Twin
+      shell: bash
+      run: |
+        if [ -z "${SELF_HOSTED_RUNNER}" ]; then
+          ( cd ./DigitalTwin/test && bash ./prepare-platform.sh )
+        else
+          ( cd ./DigitalTwin/test && bash ./prepare-platform-for-self-hosted-runner.sh )
+        fi
+    - name: Prepare Bats Framework
+      shell: bash
+      run: |
+        cd ./DigitalTwin/test/bats
+        bash ./prepare-test.sh
+        bats linting.bats
+        shellcheck *.sh *.bats test-*/*.bats
+    - name: Build Digital Twin locally
+      shell: bash
+      run: |
+        cd ./DigitalTwin/test && bash build-local-platform.sh
+    - name: Install Digital Twin from local registry
+      shell: bash
+      run: |
+        cd ./DigitalTwin/test && bash install-local-platform.sh
     - name: Setup subrepos
       shell: bash
       run: |
         export TERM=vt100
         git submodule update --recursive --init
         make update
-
-    - name: Build platform
+    - name: Build OISP platform
       run: |
         set +o pipefail
         export TERM=vt100
         yes | DOCKER_TAG=test NODOCKERLOGIN=true DEBUG=true make build
-
     - name: E2E Test
       shell: bash
       run: |

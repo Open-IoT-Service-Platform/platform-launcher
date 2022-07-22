@@ -33,14 +33,14 @@ spec:
       initContainers:
       - name: wait-for-kafka
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        image: k3d-iff.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ end }}
         args: [{{ .Values.kafka.service }}, "--", "echo", "kafka is up"]
       - name: wait-for-emqx
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        image: k3d-iff.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ end }}
@@ -48,7 +48,7 @@ spec:
       containers:
       - name: mqtt-gateway
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/mqtt-gateway:{{ .Values.tag }}
+        image: k3d-iff.localhost:12345/{{ .Values.imagePrefix }}/mqtt-gateway:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/mqtt-gateway:{{ .Values.tag }}
         {{ end }}

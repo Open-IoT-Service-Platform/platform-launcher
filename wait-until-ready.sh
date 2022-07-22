@@ -66,7 +66,7 @@ function check_beamservice {
   local counts_max=$3
   local counts_actual=0
   printf "\nWaiting for $name"
-  until (kubectl -n $namespace get bs rule-engine -o yaml | grep "state: RUNNING");
+  until (kubectl -n $namespace get "beamservices.${namespace}.org" rule-engine -o yaml | grep "state: RUNNING");
     do printf "."
     let counts_actual=$counts_actual+1;
     if [ $counts_actual -ge $counts_max ];

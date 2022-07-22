@@ -14,7 +14,7 @@ spec:
       serviceAccountName: beamservices-operator
       containers:
       {{ if .Values.use_local_registry }}
-      - image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/services-operator:{{ .Values.tag }}
+      - image: k3d-iff.localhost:12345/{{ .Values.imagePrefix }}/services-operator:{{ .Values.tag }}
       {{ else }}
       - image: {{ .Values.imagePrefix }}/services-operator:{{ .Values.tag }}
       {{ end }}
@@ -114,7 +114,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: beamservices-operator
+  name: beamservices-oisp-operator
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

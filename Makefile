@@ -124,6 +124,8 @@ deploy-oisp-test: check-docker-cred-env
 ## deploy-oisp: Deploy repository as HELM chart
 ##
 deploy-oisp: check-docker-cred-env
+	echo "Deploying operators";
+	bash ./util/deploy_operators.sh;
 	@$(call msg,"Starting first deploy");
 	cd kubernetes && \
 	kubectl create namespace $(NAMESPACE) && \
@@ -131,7 +133,7 @@ deploy-oisp: check-docker-cred-env
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
 	helm dependency update --namespace $(NAMESPACE) && \
 	if [ "$$USE_LOCAL_REGISTRY" = "true" ]; then \
-		LOCAL_REGISTRY=k3d-oisp.localhost:12345/ ; \
+		LOCAL_REGISTRY=k3d-iff.localhost:12345/ ; \
 	fi; \
 	helm install $(NAME) . --namespace $(NAMESPACE) \
 		--timeout 1200s \
@@ -179,7 +181,7 @@ upgrade-oisp: check-docker-cred-env backup
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
 	helm dependency update --namespace $(NAMESPACE) && \
 	if [ "$$USE_LOCAL_REGISTRY" = "true" ]; then \
-		LOCAL_REGISTRY=k3d-oisp.localhost:12345/ ; \
+		LOCAL_REGISTRY=k3d-iff.localhost:12345/ ; \
 	fi; \
 	helm upgrade $(NAME) . --namespace $(NAMESPACE) \
 		--timeout 600s \
@@ -216,8 +218,8 @@ upgrade-oisp: check-docker-cred-env backup
 ##
 undeploy-oisp:
 	@cd kubernetes && \
-	(kubectl delete -n $(NAMESPACE) bs --all || echo "Beam services not (or already) deleted") && \
-	(kubectl delete -n $(NAMESPACE) bsqls --all || echo "Beam SQL services not (or already) deleted") && \
+	(kubectl delete -n $(NAMESPACE) "beamservices.$${NAMESPACE}.org" --all || echo "Beam services not (or already) deleted") && \
+	(kubectl delete -n $(NAMESPACE) "beamsqlstatementsets.$${NAMESPACE}.org" --all || echo "Beam SQL services not (or already) deleted") && \
 	( helm uninstall $(NAME) --namespace $(NAMESPACE) || echo helm uninstall failed)  && \
 	(kubectl delete namespace $(NAMESPACE) || echo "namespace not (or already) deleted") && \
 	(kubectl delete cassdcs -n cassandra --all || echo "cassandra dc not (or already) deleted")
@@ -261,10 +263,10 @@ wait-until-ready:
 import-images:
 	$(foreach image, $(CONTAINERS), \
 		printf $(image) && \
-		docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
-		docker exec k3d-oispcluster-server-0 sh -c "ctr image rm k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG)" && \
-		docker push k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
-		docker rmi k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) k3d-iff.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		docker exec k3d-iff-cluster-server-0 sh -c "ctr image rm k3d-iff.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG)" && \
+		docker push k3d-iff.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		docker rmi k3d-iff.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
 		printf ", imported\n" \
 	)
 
@@ -273,8 +275,8 @@ import-images:
 import-images-agent:
 	@$(foreach image,$(CONTAINERS_AGENT), \
 		printf $(image) && \
-		docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
-		docker push k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) k3d-iff.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		docker push k3d-iff.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
 		printf ", imported\n"
 	)
 
@@ -296,8 +298,8 @@ restart-cluster:
 ##	needs make restart-cluster command after it
 ##
 recreate-registry:
-	@k3d registry delete k3d-oisp.localhost
-	@k3d registry create oisp.localhost -p 12345
+	@k3d registry delete k3d-iff.localhost
+	@k3d registry create iff.localhost -p 12345
 
 # =======
 # TESTING
