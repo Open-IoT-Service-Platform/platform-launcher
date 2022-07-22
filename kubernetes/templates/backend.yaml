@@ -37,14 +37,14 @@ spec:
       initContainers:
       - name: wait-for-kairos
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        image: k3d-iff.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ end }}
         args: ["kairosdb:8080", "--", "echo", "kariosds is up"]
       - name: wait-for-kafka
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
+        image: k3d-iff.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
         {{ end }}
@@ -52,7 +52,7 @@ spec:
       containers:
       - name: backend
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/backend:{{ .Values.tag }}
+        image: k3d-iff.localhost:12345/{{ .Values.imagePrefix }}/backend:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/backend:{{ .Values.tag }}
         {{ end }}

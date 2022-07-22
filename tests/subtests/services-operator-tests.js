@@ -135,8 +135,8 @@ spec:
 
     var submitToK8s = function(k8sResource) {
         return new Promise((resolve, reject) => {
-            var execstring = `cat << "EOF"| kubectl -n oisp apply -f - 
-${k8sResource} 
+            var execstring = `cat << "EOF"| kubectl -n oisp apply -f -
+${k8sResource}
 EOF`;
             exec(execstring, (error, stdout, stderr) => {
                 if (error) {
@@ -146,10 +146,10 @@ EOF`;
             });
         });
     };
-  
+
 
     var removeK8sObj = function(obj, name) {
-        return new Promise((resolve, reject) => { 
+        return new Promise((resolve, reject) => {
             var execstring = `kubectl -n oisp delete ${obj}/${name}`;
             exec(execstring, (error, stdout, stderr) => {
                 if (error) {
@@ -230,7 +230,7 @@ EOF`;
 
     var aggrProcessed;
     var aggrResultsRef;
-    
+
     const receiveTestDataFromKafka = async function(aggrResults) {
         aggrProcessed = 0;
         aggrResultsRef = aggrResults;
@@ -266,12 +266,13 @@ EOF`;
     return {
         "prepareTestSetup": done => {
             submitToK8s(bsqlresource)
-                .then(() => checkReadiness("bsqls", "test-aggregator"))
+                .then(() => checkReadiness("beamsqlstatementset.oisp.org", "test-aggregator"))
                 .then(() => done())
                 .catch((e) => done(e));
         },
         "SendDataToAggregatorAndCheckResult": done => {
             initKafka()
+                .then(() => waitForOperator(1000))
                 .then(() => startKafkaConsumer())
                 .then(() => receiveTestDataFromKafka(aggrResults1))
                 .then(() => sendTestDataToKafka())
@@ -284,19 +285,20 @@ EOF`;
         "updateTestOperator": done => {
             submitToK8s(bsqlupdate)
                 .then(() => waitForOperator(5000))
-                .then(() => checkReadiness("bsqls", "test-aggregator"))
+                .then(() => checkReadiness("beamsqlstatementsets.oisp.org", "test-aggregator"))
                 .then(() => done())
                 .catch((e) => done(e));
         },
         "updateTestOperatorSave": done => {
             submitToK8s(bsqlupdateSave)
                 .then(() => waitForOperator(5000))
-                .then(() => checkReadiness("bsqls", "test-aggregator"))
+                .then(() => checkReadiness("beamsqlstatementsets.oisp.org", "test-aggregator"))
                 .then(() => done())
                 .catch((e) => done(e));
         },
         "testUpgradedOperator": done => {
             initKafka()
+                .then(() => waitForOperator(1000))
                 .then(() => startKafkaConsumer())
                 .then(() => receiveTestDataFromKafka(aggrResults2))
                 .then(() => sendTestDataToKafka())
@@ -307,6 +309,7 @@ EOF`;
         },
         "testUpgradedOperatorSave": done => {
             initKafka()
+                .then(() => waitForOperator(1000))
                 .then(() => startKafkaConsumer())
                 .then(() => receiveTestDataFromKafka(aggrResults3))
                 .then(() => sendTestDataToKafka())
@@ -316,9 +319,9 @@ EOF`;
                 .catch((e) => done(e));
         },
         "cleanup": function(done) {
-            removeK8sObj("bsqls", "test-aggregator")
-                .then(() => removeK8sObj("bsqlt", "test-input"))
-                .then(() => removeK8sObj("bsqlt", "test-output"))
+            removeK8sObj("beamsqlstatementsets.oisp.org", "test-aggregator")
+                .then(() => removeK8sObj("beamsqltables.oisp.org", "test-input"))
+                .then(() => removeK8sObj("beamsqltables.oisp.org", "test-output"))
                 .then(() => done())
                 .catch(e => done(e));
         }

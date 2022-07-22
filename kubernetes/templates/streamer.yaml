@@ -34,7 +34,7 @@ spec:
       containers:
       - name: streamer
       {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/streamer:{{ .Values.tag }}
+        image: k3d-iff.localhost:12345/{{ .Values.imagePrefix }}/streamer:{{ .Values.tag }}
       {{ else }}
         image: {{ .Values.imagePrefix }}/streamer:{{ .Values.tag }}
       {{ end }}

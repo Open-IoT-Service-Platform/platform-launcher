@@ -1363,7 +1363,7 @@ describe('Services Operator subtests...'.bold, function() {
     it(descriptions.prepareTestSetup, function(done) {
         test = require('./subtests/services-operator-tests').test(userToken);
         test.prepareTestSetup(done);
-    }).timeout(100000);
+    }).timeout(200000);
     it(descriptions.SendDataToAggregatorAndCheckResult, function(done) {
         test.SendDataToAggregatorAndCheckResult(done);
     }).timeout(10000);

@@ -13,7 +13,7 @@ spec:
       containers:
       - name: emqx-cert-insert
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
+        image: k3d-iff.localhost:12345/{{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/backup-service:{{ .Values.tag }}
         {{ end }}
