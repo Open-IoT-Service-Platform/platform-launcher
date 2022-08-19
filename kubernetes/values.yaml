@@ -332,31 +332,8 @@ less_resources: true
 production: false
 
 flink:
-  version: 1.13.0
+  version: 1.14.3
   sqlClientPort: 9000
   restPort: 8081
-  restUrl: flink-jobmanager-rest
-  url: flink-jobmanager
-  resources:
-    jobmanager:
-      limits:
-        cpu: 100m
-        memory: 128Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
-    taskmanager:
-      replicas: 3
-      limits:
-        cpu: 100m
-        memory: 128Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
-  highAvailability:
-    bucket: flink
-    savepointsDir: savepoints
-    recoveryDir: recovery
-    checkpointsDir: checkpoints
-    clusterId: cluster-1
-    evenlySpreadOut: true
+  restUrl: flink-jobmanager-rest.iff.svc.cluster.local
+  url: flink-jobmanager.iff.svc.cluster.local
