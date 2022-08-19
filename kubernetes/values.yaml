@@ -103,42 +103,8 @@ emqxtest:
 
 
 kafka:
-  fullnameOverride: oisp-kafka
-  service: oisp-kafka-headless:9092
-  fullBrokerList: "oisp-kafka-headless:9092"
-  replicas: 3
-  metricsPartitions: 2
-  metricsTopic: "metrics"
-  replicationFactor: 2
-  requestTimeout: 20000
-  maxRetryTime: 2000
-  retries: 5
-  maxPayloadSize: "20000000"
-  resources:
-    requests:
-      cpu: 500m
-      memory: 1024Mi
-  configurationOverrides:
-    auto.create.topics.enable: true
-    offsets.topic.replication.factor: 3
-    replica.fetch.max.bytes: "20000000"
-    message.max.bytes: "20000000"
-    default.replication.factor: 2
-    log.retention.ms: "86400000"
-  zookeeper:
-    replicaCount: 3
-    resources:
-      requests:
-        cpu: 200m
-        memory: 100M
-  envOverrides:
-    JMX_PORT: 9999
-
-kafkatest:
-  fullnameOverride: oisp-kafka
-  service: oisp-kafka-headless:9092
-  fullBrokerList: "oisp-kafka-headless:9092"
-  replicas: 1
+  service: my-cluster-kafka-bootstrap.iff.svc.cluster.local:9092
+  fullBrokerList: my-cluster-kafka-bootstrap.iff.svc.cluster.local:9092
   metricsPartitions: 1
   metricsTopic: "metrics"
   replicationFactor: 1
@@ -146,24 +112,6 @@ kafkatest:
   maxRetryTime: 5000
   retries: 10
   maxPayloadSize: "20000000"
-  resources:
-    requests:
-      cpu: 100m
-      memory: 500M
-  configurationOverrides:
-    auto.create.topics.enable: true
-    offsets.topic.replication.factor: 1
-    replica.fetch.max.bytes: "20000000"
-    message.max.bytes: "20000000"
-    log.retention.ms: "86400000"
-  zookeeper:
-    replicaCount: 1
-    resources:
-      requests:
-        cpu: 50m
-        memory: 50M
-  envOverrides:
-    JMX_PORT: 9999
 
 zookeeper:
   namespace: zookeeper

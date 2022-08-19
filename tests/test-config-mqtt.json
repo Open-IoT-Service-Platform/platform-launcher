@@ -32,7 +32,7 @@
 			}
 		},
 	    "kafka": {
-		        "host": "kafka",
+		        "host": "my-cluster-kafka-bootstrap.iff.svc.cluster.local",
 		        "port": 9092,
 		        "topic": "heartbeat"
 		},
