@@ -38,7 +38,7 @@ data:
     }
   kafka: |
     {
-    {{- $kafka := ternary .Values.kafkatest .Values.kafka .Values.less_resources -}}
+    {{- $kafka := .Values.kafka -}}
     {{- with $kafka }}
     "uri": "{{ .service }}",
     "partitions": 1,

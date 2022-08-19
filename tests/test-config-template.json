@@ -32,7 +32,7 @@
 			}
 		},
 	        "kafka": {
-		        "host": "oisp-kafka-headless",
+		        "host": "my-cluster-kafka-bootstrap.iff.svc.cluster.local",
 		        "port": 9092,
 		        "topic": "heartbeat"
 		}
