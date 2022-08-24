@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPTDIR=$(dirname "$0")
-CLUSTERNAME=${CLUSTERNAME:-oispcluster}
+CLUSTERNAME=${CLUSTERNAME:-"iff-cluster"}
 
 if [ -z "$K3S_IMAGE" ]
 then
@@ -9,7 +9,7 @@ then
 fi
 
 k3d cluster delete ${CLUSTERNAME} || echo "Cluster ${CLUSTERNAME} could not be deleted/ does not exist"
-k3d cluster create ${CLUSTERNAME} --registry-use iff.localhost.12345 --image=${K3S_IMAGE}
+k3d cluster create ${CLUSTERNAME} --registry-use k3d-iff.localhost:12345 --image=${K3S_IMAGE}
 
 printf "\033[1mKubernetes cluster started\033[0m\n"
 kubectl cluster-info
