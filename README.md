@@ -1,5 +1,6 @@
-
 # Open IoT Service Platform (OISP)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FOpen-IoT-Service-Platform%2Fplatform-launcher.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FOpen-IoT-Service-Platform%2Fplatform-launcher?ref=badge_shield)
+
 
 This project is designed to provide Cloud Service Providers with a platform for enabling and supporting IoT developers to create IoT solutions with both edge devices and the cloud.
 
@@ -30,3 +31,7 @@ Before submitting a PRs make sure that you checked out the most recent develop s
 The master branches are only getting PRs from the respective develop branches.
 
 An additinal [development guide](https://platform-launcher.readthedocs.io/en/latest/development/developers_guide.html) contains tips and tricks to ease the development process.
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FOpen-IoT-Service-Platform%2Fplatform-launcher.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FOpen-IoT-Service-Platform%2Fplatform-launcher?ref=badge_large)
