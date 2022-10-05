@@ -57,10 +57,13 @@ emqx:
     EMQX_CLUSTER__K8S__ADDRESS_TYPE: hostname
     EMQX_CLUSTER__K8S__APISERVER: https://kubernetes.default.svc:443
     EMQX_CLUSTER__K8S__SUFFIX: svc.cluster.local
+    EMQX_CLUSTER__K8S__SERVICE_NAME: emqx-headless
+    EMQX_CLUSTER__K8S__APP_NAME: emqx
     EMQX_LOG__LEVEL: warning
     EMQX_LISTENER__SSL__EXTERNAL__CERTFILE: etc/certs/server.cert
     EMQX_LISTENER__SSL__EXTERNAL__KEYFILE: etc/certs/server.key
     EMQX_LISTENER__SSL__EXTERNAL__VERIFY: verify_none
+    EMQX_NAME: emqx
   image:
     pullSecrets:
     - dockercred
@@ -83,10 +86,13 @@ emqxtest:
     EMQX_CLUSTER__K8S__ADDRESS_TYPE: hostname
     EMQX_CLUSTER__K8S__APISERVER: https://kubernetes.default.svc:443
     EMQX_CLUSTER__K8S__SUFFIX: svc.cluster.local
+    EMQX_CLUSTER__K8S__SERVICE_NAME: emqx-headless
+    EMQX_CLUSTER__K8S__APP_NAME: emqx
     EMQX_LOG__LEVEL: info
     EMQX_LISTENER__SSL__EXTERNAL__CERTFILE: etc/certs/server.cert
     EMQX_LISTENER__SSL__EXTERNAL__KEYFILE: etc/certs/server.key
     EMQX_LISTENER__SSL__EXTERNAL__VERIFY: verify_none
+    EMQX_NAME: emqx
   image:
     pullSecrets:
     - dockercred
