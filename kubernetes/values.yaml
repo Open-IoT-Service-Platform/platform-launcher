@@ -316,6 +316,9 @@ postgres:
   pgSuperuserPassword: supersecret
   username: oisp_user
   password: supersecret
+  clustername: acid-oisp
+  clustersuffix: acid.zalan.do
+  team: acid
 
 # Docker image tag
 tag: latest
