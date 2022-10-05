@@ -32,6 +32,7 @@ spec:
       securityContext:
         runAsUser: 999
         runAsGroup: 999
+        fsGroup: 999
       containers:
         - name: "server-system-logger"
           image: k8ssandra/system-logger:v1.11.0
@@ -60,8 +61,8 @@ spec:
       initial_heap_size: "200M"
       max_heap_size: "200M"
     {{ else }}
-      initial_heap_size: "1G"
-      max_heap_size: "1G"
+      initial_heap_size: "500M"
+      max_heap_size: "500M"
     {{ end }}
     cassandra-yaml:
       num_tokens: 16
