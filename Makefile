@@ -124,15 +124,20 @@ deploy-oisp-test: check-docker-cred-env
 ## deploy-oisp: Deploy repository as HELM chart
 ##
 deploy-oisp: check-docker-cred-env
+
+	@echo "Deploying operators";
+	cd util && bash ./deploy_operators.sh;
+	@echo "Create Namespace"
+	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	@echo "Prepare helm"
+	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}"
+	cd kubernetes && helm dependency update --namespace $(NAMESPACE)
 	@$(call msg,"Starting first deploy");
 	cd kubernetes && \
-	kubectl create namespace $(NAMESPACE) && \
 	POSTGRES_PASSWORD="$(call randomPass)" && \
-	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
-	helm dependency update --namespace $(NAMESPACE) && \
 	if [ "$$USE_LOCAL_REGISTRY" = "true" ]; then \
-		LOCAL_REGISTRY=k3d-oisp.localhost:12345/ ; \
-	fi; \
+		LOCAL_REGISTRY=k3d-iff.localhost:12345/ ; \
+	fi && \
 	helm install $(NAME) . --namespace $(NAMESPACE) \
 		--timeout 1200s \
 		--set imageCredentials.username="$$DOCKERUSER" \
@@ -171,16 +176,19 @@ deploy-oisp: check-docker-cred-env
 ## upgrade-oisp: Upgrade already deployed HELM chart
 ##
 upgrade-oisp: check-docker-cred-env backup
-	echo "Deploying operators";
-	bash ./util/deploy_operators.sh;
+	@if [ "$$NO_OPERATOR_DEPLOY" = "true" ]; then \
+		echo "Deploying operators"; \
+		cd util && bash ./deploy_operators.sh; \
+	fi
+	@echo "Preparing Helm"
+	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}"
+	cd kubernetes && helm dependency update --namespace $(NAMESPACE)
 	@$(call msg,"Starting upgrade");
 	@source util/get_oisp_credentials.sh && \
 	cd kubernetes && \
-	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}" && \
-	helm dependency update --namespace $(NAMESPACE) && \
 	if [ "$$USE_LOCAL_REGISTRY" = "true" ]; then \
-		LOCAL_REGISTRY=k3d-oisp.localhost:12345/ ; \
-	fi; \
+		LOCAL_REGISTRY=k3d-iff.localhost:12345/ ; \
+	fi && \
 	helm upgrade $(NAME) . --namespace $(NAMESPACE) \
 		--timeout 600s \
 		--set imageCredentials.username="$$DOCKERUSER" \
