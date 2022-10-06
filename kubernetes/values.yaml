@@ -220,8 +220,6 @@ ruleEngine:
 # Hosts used for Ingress configuration
 hosts:
     frontend: latest.oisp.info
-    mqttserver: mqtt.latest.oisp.info
-    streamer: streamer.latest.oisp.info
 
 systemuser:
   username: gateway@intel.com

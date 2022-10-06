@@ -14,7 +14,6 @@ spec:
   tls:
   - hosts:
       - {{ .Values.hosts.frontend }}
-      - {{ .Values.hosts.streamer }}
     secretName: {{ .Values.certmanager.secret }}
   rules:
   - host: {{ .Values.hosts.frontend }}
