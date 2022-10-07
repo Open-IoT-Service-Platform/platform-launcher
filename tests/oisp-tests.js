@@ -26,7 +26,6 @@ const proxyConnector = oispSdk(config).lib.proxies.getControlConnector('ws');
 const mqttConnector = oispSdk(mqttConfig).lib.proxies.getProxyConnector('mqtt');
 const helpers = require('./lib/helpers');
 const promtests = require('./subtests/promise-wrap');
-const Gm = require('gm').subClass({imageMagick: true});
 const {Data, Rule, Component, Components} = require('./lib/common');
 
 const accountName = 'oisp-tests';
@@ -186,54 +185,6 @@ function temperatureCheckData(sentData, receivedData) {
     return err;
 }
 
-
-function imageData(componentName, opaque, cb) {
-    if (!cb) {
-        throw 'Callback required';
-    }
-
-    const images = [
-        new Gm(100, 200, 'red'),
-        new Gm(400, 600, 'white'),
-        new Gm(500, 720, 'blue'),
-    ];
-
-    images.forEach(function(image) {
-        image.toBuffer('RGB', function(err, buffer) {
-            if (!err) {
-                cb(opaque, new Data(buffer, null, null));
-            }
-        });
-    });
-
-    return null;
-}
-
-
-function imageCheckData(sentData, receivedData) {
-    var i = 0;
-    if (sentData.length === receivedData.length) {
-        for (i = 0; i < sentData.length; i++) {
-            if (sentData[i].ts === receivedData[i].ts &&
-                sentData[i].value.equals(receivedData[i].value)) {
-                sentData[i].ts = null;
-            }
-        }
-    }
-
-    let err = null;
-    for (i = 0; i < sentData.length; i++) {
-        if (sentData[i].ts !== null) {
-            err += i + ' ';
-        }
-    }
-    if (err) {
-        err = 'Got wrong data for items' + err;
-    }
-
-    return err;
-}
-
 // -------------------------------------------------------------------------------------------------------
 // Components
 // -------------------------------------------------------------------------------------------------------
@@ -242,11 +193,6 @@ const components = new Components();
 components.add( new Component('temperatures', 'Number', 'float', 'Degress Celsius', 'timeSeries', -150, 150,
     [lowTemperatureRule, highTemperatureRule],
     temperatureData, temperatureCheckData),
-);
-
-components.add( new Component('images', 'ByteArray', 'image/jpeg', 'pixel', 'binaryDataRenderer', null, null,
-    [],
-    imageData, imageCheckData),
 );
 
 components.add(new Component('metaData', 'String', 'JSON', 'text', 'binaryDataRenderer', null, null,
