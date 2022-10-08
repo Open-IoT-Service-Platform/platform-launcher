@@ -198,7 +198,7 @@ spec:
               name: oisp-config
               key: keycloak
         command: ["/bin/bash", "-c"]
-        args: ["./wait-for-it.sh keycloak-http:4080 -t 300000 -s -- timeout 60 node admin addSystemUsers"]
+        args: ["node admin addSystemUsers"]
       containers:
       - name: frontend
         {{ if .Values.use_local_registry }}
