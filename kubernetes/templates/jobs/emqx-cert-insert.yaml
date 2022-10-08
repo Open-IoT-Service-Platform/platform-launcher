@@ -65,7 +65,11 @@ data:
                 path: {{ .Values.mqtt.certs.cafile }}
               - key: tls.key
                 path: {{ .Values.mqtt.certs.keyfile }}
+              {{- if .Values.production }}
               secretName: {{ .Values.certmanager.secret }}
+              {{- else }}
+              secretName: selfsigned-cert-tls
+              {{ end }}
 ---
 apiVersion: v1
 kind: ServiceAccount

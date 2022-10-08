@@ -3,8 +3,12 @@ kind: Ingress
 metadata:
   name: frontend-web
   annotations:
-    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
+    {{ if .Values.production }}
     cert-manager.io/cluster-issuer: {{ .Values.certmanager.issuer }}
+    {{ else }}
+    cert-manager.io/cluster-issuer: letsencrypt-self
+    {{ end }}
 spec:
   defaultBackend:
     service:
@@ -14,7 +18,11 @@ spec:
   tls:
   - hosts:
       - {{ .Values.hosts.frontend }}
+    {{ if .Values.production}}
     secretName: {{ .Values.certmanager.secret }}
+    {{ else }}
+    secretName: selfsigned-cert-tls
+    {{ end }}
   rules:
   - host: {{ .Values.hosts.frontend }}
     http:
@@ -63,14 +71,26 @@ kind: Ingress
 metadata:
   name: tsdb-web
   annotations:
-    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
+    {{ if .Values.production }}
     cert-manager.io/cluster-issuer: {{ .Values.certmanager.issuer }}
+    {{ else }}
+    cert-manager.io/cluster-issuer: letsencrypt-self
+    {{ end }}
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   tls:
   - hosts:
+    {{ if .Values.production }}
     - {{ .Values.hosts.frontend }}
+    {{ else }}
+    - frontend
+    {{ end }}
+    {{ if .Values.production}}
     secretName: {{ .Values.certmanager.secret }}
+    {{ else }}
+    secretName: selfsigned-cert-tls
+    {{ end }}
   rules:
   - host: {{ .Values.hosts.frontend }}
     http:
