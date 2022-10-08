@@ -11,6 +11,6 @@ spec:
   dnsNames:
   - {{ .Values.hosts.frontend }}
   issuerRef:
-    name: {{ .Value.certmanager.issuer }}
+    name: {{ .Values.certmanager.issuer }}
     kind: ClusterIssuer
 {{ end }}
