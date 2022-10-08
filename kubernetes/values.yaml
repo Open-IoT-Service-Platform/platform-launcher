@@ -41,8 +41,14 @@ backup:
   bucket: backup
 
 certmanager:
-  secret: selfsigned-cert-tls
-  issuer: letsencrypt-self
+  secret: frontend-web-prod-tls
+  issuer: letsencrypt-prod
+  email: info@streammyiot.com
+  duration: 2160h
+  renewBefore: 360h
+
+ingress:
+  class: nginx
 
 emqx:
   replicaCount: 3
