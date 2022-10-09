@@ -175,7 +175,7 @@ deploy-oisp: check-docker-cred-env
 ## upgrade-oisp: Upgrade already deployed HELM chart
 ##
 upgrade-oisp: check-docker-cred-env backup
-	@if [ "$$NO_OPERATOR_DEPLOY" = "true" ]; then \
+	@if [ ! "$$NO_OPERATOR_DEPLOY" = "true" ]; then \
 		echo "Deploying operators"; \
 		cd util && bash ./deploy_operators.sh; \
 	fi
