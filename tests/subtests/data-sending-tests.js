@@ -23,10 +23,10 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
     var chai = require('chai');
     var assert = chai.assert;
     var errors = require('../lib/helpers').errors;
-    var componentNames = ["temperature-sensor-sdt", "humidity-sensor-sdt", "metadata-sensor-sdt", "binarystate-senosr-sdt", "binarydata-sensor-sdt"];
-    var componentTypes = ["temperature.v1.0", "humidity.v1.0", "metaData.v1.0", "binaryState.v1.0", "images.v1.0"];
-    var componentBasicTypes = ["number", "number", "string", "boolean", "bytearray"];
-    var aggregateable = [1, 1, 0, 0, 0];
+    var componentNames = ["temperature-sensor-sdt", "humidity-sensor-sdt", "metadata-sensor-sdt", "binarystate-senosr-sdt"];
+    var componentTypes = ["temperature.v1.0", "humidity.v1.0", "metaData.v1.0", "binaryState.v1.0"];
+    var componentBasicTypes = ["number", "number", "string", "boolean"];
+    var aggregateable = [1, 1, 0, 0];
     var promtests = require('./promise-wrap');
     var uuidv4 = require('uuid/v4');
     var componentId = [];
@@ -207,11 +207,6 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             component: 3,
             value: "1",
             ts: 1220 + BASE_TIMESTAMP
-        },
-        {
-            component: 4,
-            value: Buffer.from("Hello World. In Binary!!!"),
-            ts: 1220 + BASE_TIMESTAMP
         }]
     ];
 
@@ -308,17 +303,6 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             attributes: {
                 "key5": "value6",
                 "key1": "value1"
-            }
-        }],
-        [{
-            component: 4,
-            value: Buffer.from("Hello World. In Binary 22221111!!!"),
-            ts: 800000 + BASE_TIMESTAMP,
-            loc: [600.12, 100.12],
-            attributes: {
-                "key3": "value6",
-                "key1": "value5",
-                "key2": "value3"
             }
         }]
     ];
@@ -566,10 +550,6 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
                 .then((id) => {
                     componentId[3] = id;
                 })
-                .then(() => promtests.addComponent(componentNames[4], componentTypes[4], userToken, accountId, deviceId))
-                .then((id) => {
-                    componentId[4] = id;
-                })
                 .then(() => {
                     var proms = [];
                     dataValues1Time = 0 + BASE_TIMESTAMP;
@@ -730,7 +710,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
             var flattenedDataValues = flattenArray(dataValues4);
             promtests.searchDataAdvanced(dataValues4Time, -1, userToken, accountId, deviceId, componentId, false, keys, undefined, undefined)
                 .then((result) => {
-                    if (result.data[0].components.length !== 5) {
+                    if (result.data[0].components.length !== componentId.length) {
                         return done("Wrong number of point series!");
                     }
                     var mapping = findMapping(foundComponentMap, componentId, result.data[0].components);
@@ -767,7 +747,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
                 flattenArray(dataValues4).length;
             promtests.searchDataAdvanced(dataValues1Time, -1, userToken, accountId, deviceId, componentId, false, undefined, undefined, true)
                 .then((result) => {
-                    if (result.data[0].components.length !== 5) {
+                    if (result.data[0].components.length !== componentId.length) {
                         return done("Wrong number of point series!");
                     }
 
@@ -801,7 +781,7 @@ var test = function(userToken, accountId, deviceId, deviceToken) {
 
             promtests.searchDataAdvanced(dataValues1Time, -1, userToken, accountId, deviceId, componentId, false, undefined, "only", false)
                 .then((result) => {
-                    if (result.data[0].components.length !== 5) {
+                    if (result.data[0].components.length !== componentId.length) {
                         return done("Wrong number of point series!");
                     }
                     var mapping = findMapping(foundComponentMap, componentId, result.data[0].components);
