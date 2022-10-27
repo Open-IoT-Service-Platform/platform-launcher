@@ -1385,7 +1385,7 @@ describe('Services Operator subtests...'.bold, function() {
     }).timeout(200000);
     it(descriptions.cleanup, function(done) {
         test.cleanup(done);
-    }).timeout(10000);
+    }).timeout(30000);
 });
 
 describe('Do MQTT feedback subtests ...'.bold, function() {
