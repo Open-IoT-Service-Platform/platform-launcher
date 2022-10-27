@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       {{ if .Values.use_local_registry }}
-      - image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/services-server:{{ .Values.tag }}
+      - image: {{ .Values.localRegistry }}/{{ .Values.imagePrefix }}/services-server:{{ .Values.tag }}
       {{ else }}
       - image: {{ .Values.imagePrefix }}/services-server:{{ .Values.tag }}
       {{ end }}

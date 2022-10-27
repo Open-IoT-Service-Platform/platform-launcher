@@ -54,7 +54,7 @@ spec:
           runAsUser: 9999  # refers to user _flink_ from official flink image, change if necessary
       - name: sql-gateway
          {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/simple-flink-sql-gateway:{{ .Values.tag }}
+        image: {{ .Values.localRegistry }}/{{ .Values.imagePrefix }}/simple-flink-sql-gateway:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/simple-flink-sql-gateway:{{ .Values.tag }}
         {{ end }}

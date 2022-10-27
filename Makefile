@@ -269,10 +269,10 @@ wait-until-ready:
 import-images:
 	$(foreach image, $(CONTAINERS), \
 		printf $(image) && \
-		docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
-		docker exec k3d-oispcluster-server-0 sh -c "ctr image rm k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG)" && \
-		docker push k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
-		docker rmi k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) k3d-iff.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		docker exec k3d-oispcluster-server-0 sh -c "ctr image rm k3d-iff.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG)" && \
+		docker push k3d-iff.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		docker rmi k3d-iff.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
 		printf ", imported\n" \
 	)
 
@@ -281,8 +281,8 @@ import-images:
 import-images-agent:
 	@$(foreach image,$(CONTAINERS_AGENT), \
 		printf $(image) && \
-		docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
-		docker push k3d-oisp.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		docker tag $(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) k3d-iff.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
+		docker push k3d-iff.localhost:12345/$(DOCKER_PREFIX)/$(image):$(DOCKER_TAG) && \
 		printf ", imported\n"
 	)
 
@@ -304,8 +304,8 @@ restart-cluster:
 ##	needs make restart-cluster command after it
 ##
 recreate-registry:
-	@k3d registry delete k3d-oisp.localhost
-	@k3d registry create oisp.localhost -p 12345
+	@k3d registry delete k3d-iff.localhost
+	@k3d registry create iff.localhost -p 12345
 
 # =======
 # TESTING
