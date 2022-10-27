@@ -1,6 +1,7 @@
 # The following two should always be changed together!
 imagePrefix: oisp
 keycloakImageVar: &keycloakImage "oisp/keycloak"
+localRegistry: k3d-iff.localhost:12345
 
 # Credentials to pull images from docker registry
 imageCredentials:

@@ -45,7 +45,7 @@ spec:
       containers:
       - name: debugger
         {{ if .Values.use_local_registry }}
-        image: k3d-oisp.localhost:12345/{{ .Values.imagePrefix }}/debugger:{{ .Values.tag }}
+        image: {{ .Values.localRegistry }}/{{ .Values.imagePrefix }}/debugger:{{ .Values.tag }}
         {{ else }}
         image: {{ .Values.imagePrefix }}/debugger:{{ .Values.tag }}
         {{ end }}
