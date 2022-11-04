@@ -26,7 +26,7 @@ const proxyConnector = oispSdk(config).lib.proxies.getControlConnector('ws');
 const mqttConnector = oispSdk(mqttConfig).lib.proxies.getProxyConnector('mqtt');
 const helpers = require('./lib/helpers');
 const promtests = require('./subtests/promise-wrap');
-const {Data, Rule, Component, Components} = require('./lib/common');
+const {Data, Component, Components} = require('./lib/common');
 
 const accountName = 'oisp-tests';
 const deviceName = 'oisp-tests-device';
@@ -71,17 +71,6 @@ const checkTestCondition = function(skipifset) {
     });
     return found;
 };
-
-// -------------------------------------------------------------------------------------------------------
-// Rules
-// -------------------------------------------------------------------------------------------------------
-const lowTemperatureRule = new Rule('oisp-tests-rule-low-temp', '<=', 15);
-lowTemperatureRule.addAction('actuation', switchOnCmdName);
-lowTemperatureRule.addAction('mail', emailRecipient);
-
-const highTemperatureRule = new Rule('oisp-tests-rule-high-temp', '>', 25);
-highTemperatureRule.addAction('actuation', switchOffCmdName);
-highTemperatureRule.addAction('mail', emailRecipient);
 
 function boolData() {
     const data = [
@@ -191,7 +180,7 @@ function temperatureCheckData(sentData, receivedData) {
 const components = new Components();
 
 components.add( new Component('temperatures', 'Number', 'float', 'Degress Celsius', 'timeSeries', -150, 150,
-    [lowTemperatureRule, highTemperatureRule],
+    [],
     temperatureData, temperatureCheckData),
 );
 
@@ -219,7 +208,6 @@ let accountId;
 let deviceId;
 let deviceToken;
 let actuatorId;
-let rulelist;
 let componentParamName;
 let firstObservationTime;
 
@@ -267,7 +255,6 @@ describe('get authorization and manage user ...\n'.bold, function() {
         deviceId = '00-11-22-33-44-55';
         deviceToken = null;
         actuatorId = null;
-        rulelist = null;
         componentParamName = 'LED';
         firstObservationTime = null;
 
@@ -799,84 +786,20 @@ describe('Creating and getting components ... \n'.bold, function() {
     }).timeout(20000);
 });
 
-
-describe('Creating rules ... \n'.bold, function() {
-    before(function() {
-        if (checkTestCondition(['non_essential'])) {
-            this.skip();
-        }
-    });
-    it('Shall create rules', function(done) {
-        let nbRules = 0;
-        components.list.forEach(function(component) {
-            nbRules += component.rules.length;
-        });
-
-        if ( nbRules > 0 ) {
-            components.list.forEach(function(component) {
-                component.rules.forEach(function(rule) {
-                    rule.cid = component.id;
-                    rule.conditionComponent = component.name;
-                    helpers.rules.createRule(rule, userToken, accountId, deviceId, 'Automatic', function(err, id) {
-                        if (err) {
-                            done(new Error('Cannot create rule ' + rule.name + ': ' + err));
-                        } else {
-                            rule.id = id;
-                            if ( --nbRules === 0 ) {
-                                done();
-                            }
-                        }
-                    });
-                });
-            });
-        } else {
-            done();
-        }
-    }).timeout(20000);
-
-
-    it('Shall get all rules', function(done) {
-        helpers.rules.getRules(userToken, accountId, function(err, response) {
-            if (err) {
-                done(new Error('Cannot get rules ' + err));
-            } else {
-                components.list.forEach(function(component) {
-                    if ( component.hasOwnProperty('rules') ) {
-                        component.rules.forEach(function(rule) {
-                            let found = false;
-                            for (let i=0; i<response.length; i++) {
-                                if ( rule.name === response[i].name ) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if ( !found ) {
-                                done(new Error('rule ' + rule.name + ' not found'));
-                            }
-                        });
-                    }
-                });
-                rulelist = response;
-                done();
-            }
-        });
-    }).timeout(20000);
-});
-
-describe('Sending observations and checking rules ...\n'.bold, function() {
+describe('Sending observations\n'.bold, function() {
     before(function() {
         if (checkTestCondition(['non_essential', 'data_sending'])) {
             this.skip();
         }
     });
 
-    it('Shall send observation and check rules', function(done) {
+    it('Shall send observations', function(done) {
         assert.notEqual(proxyConnector, null, 'Invalid websocket proxy connector');
 
         let curComponent = null;
         components.reset();
 
-        var sendObservationAndCheckRules;
+        var sendObservations;
 
         const step = function(component) {
             component.dataIndex++;
@@ -885,11 +808,11 @@ describe('Sending observations and checking rules ...\n'.bold, function() {
                 component = component.next;
             }
 
-            sendObservationAndCheckRules(component);
+            sendObservations(component);
         };
 
         let actuationCounter = 0;
-        sendObservationAndCheckRules = function(component) {
+        sendObservations = function(component) {
             if ( component ) {
                 if ( curComponent !== component ) {
                     process.stdout.write('\t' + component.type.blue + '\n');
@@ -909,82 +832,17 @@ describe('Sending observations and checking rules ...\n'.bold, function() {
                             done('Cannot send observation: ' + err);
                         }
 
-                        if (component.data[component.dataIndex].expectedActuation == null) {
-                            step(component);
-                        } else {
-                            const checkActuation = function(currentCounter) {
-                                if (currentCounter >= actuationCounter) {
-                                    done(new Error('Actuation timeout by component: ' + component.name +
-                                    ', data index: ' + currentDataIndex + ', expected actuation value: ' +
-                                    component.data[currentDataIndex].expectedActuation.toString()));
-                                }
-                            };
-                            setTimeout(checkActuation, 60 * 3000, currentActuationCounter);
-                        }
+                        step(component);
                     });
             } else {
                 done();
             }
         };
 
-        cbManager.set(function(message) {
-            message = JSON.parse(message);
-            const expectedActuationValue = curComponent.data[curComponent.dataIndex].expectedActuation;
-            const componentParam = message.metrics.filter(function(metric) {
-                return metric.name === componentParamName;
-            });
-
-            if (componentParam.length === 1) {
-                const param = componentParam[0];
-                const paramValue = param.value;
-
-                if (paramValue === expectedActuationValue) {
-                    actuationCounter++;
-                    step(curComponent);
-                } else {
-                    done(new Error('Param value wrong. Expected: ' + expectedActuationValue + ' Received: ' + paramValue));
-                }
-            } else {
-                done(new Error('Did not find component param: ' + componentParamName));
-            }
-        });
-
-        sendObservationAndCheckRules(components.first);
+        sendObservations(components.first);
     }).timeout(60*4000);
 
     // ---------------------------------------------------------------
-
-    it('Shall check received emails', function(done) {
-        before(function() {
-            if (checkTestCondition(['non_essential', 'email'])) {
-                this.skip();
-            }
-        });
-        const expectedEmailReasons = [];
-        components.list.forEach(function(component) {
-            component.data.forEach(function(data) {
-                if ( data.expectedEmailReason ) {
-                    expectedEmailReasons.push(data.expectedEmailReason);
-                }
-            });
-        });
-
-        if (expectedEmailReasons.length === 0) {
-            done();
-        }
-
-        helpers.mail.waitForNewEmail(nr_mails + expectedEmailReasons.length, null, done);
-        const messages = helpers.mail.getAllEmailMessages(emailRecipient);
-        messages.forEach((message) => {
-            const reason = message.split('Reason: ')[1].split('\n')[0];
-            const index = expectedEmailReasons.indexOf(reason);
-            if (index > -1) {
-                expectedEmailReasons.splice(index, 1);
-            }
-        });
-        assert.equal(expectedEmailReasons.length, 0, 'Received emails do not match expected emails sent from rule-engine');
-        done();
-    }).timeout(10000);
 
     it('Wait for backend synchronization', function(done) {
         setTimeout(done, BACKEND_DELAY);
@@ -1019,86 +877,6 @@ describe('Sending observations and checking rules ...\n'.bold, function() {
         };
         checkObservations(components.first);
     }).timeout(BACKEND_TIMEOUT);
-});
-
-describe('Do basic rule and alerts subtests ...'.bold, function() {
-    before(function() {
-        if (checkTestCondition(['non_essential', 'rules'])) {
-            this.skip();
-        }
-    });
-    let test;
-    const descriptions = require('./subtests/rules-and-alerts-tests').descriptions;
-    it(descriptions.createBasicRules, function(done) {
-        test = require('./subtests/rules-and-alerts-tests').test(userToken, userToken2, accountId,
-            deviceId, deviceToken, cbManager, new CbManager(), new CbManager(), new CbManager(), new CbManager());
-        test.createBasicRules(done);
-    }).timeout(GENERIC_TIMEOUT);
-    it(descriptions.sendObservations, function(done) {
-        test.sendObservations(done);
-    }).timeout(400000);
-    it(descriptions.deleteRuleAndSendDataAgain, function(done) {
-        test.deleteRuleAndSendDataAgain(done);
-    }).timeout(180000);
-    it(descriptions.createRulesAndCheckAlarmReset, function(done) {
-        test.createRulesAndCheckAlarmReset(done);
-    }).timeout(120000);
-    it(descriptions.createMultipleDevicesAndComponents, function(done) {
-        test.createMultipleDevicesAndComponents(done);
-    }).timeout(20000);
-    it(descriptions.openMultipleMqttConnections, function(done) {
-        test.openMultipleMqttConnections(done);
-    }).timeout(10000);
-    it('Wait for backend synchronization', function(done) {
-        setTimeout(done, BACKEND_DELAY);
-    }).timeout(BACKEND_TIMEOUT);
-    it(descriptions.sendObservationsWithMultipleDevices, function(done) {
-        test.sendObservationsWithMultipleDevices(done);
-    }).timeout(500000);
-    it(descriptions.cleanup, function(done) {
-        test.cleanup(done);
-    }).timeout(GENERIC_TIMEOUT);
-});
-
-describe('Do time based rule subtests ...'.bold, function() {
-    before(function() {
-        if (checkTestCondition(['non_essential', 'rules'])) {
-            this.skip();
-        }
-    });
-	     let test;
-	     const descriptions = require('./subtests/timebased-rule-tests').descriptions;
-	     it(descriptions.createTbRules, function(done) {
-		 test = require('./subtests/timebased-rule-tests').test(userToken, accountId, deviceId, deviceToken, cbManager);
-		 test.createTbRules(done);
-    }).timeout(10000);
-	     it(descriptions.sendObservations, function(done) {
-		 test.sendObservations(done);
-    }).timeout(400000);
-	     it(descriptions.cleanup, function(done) {
-		 test.cleanup(done);
-	     }).timeout(10000);
-});
-
-
-describe('Do statistics rule subtests ...'.bold, function() {
-    before(function() {
-        if (checkTestCondition(['non_essential', 'rules'])) {
-            this.skip();
-        }
-    });
-	     let test;
-	     const descriptions = require('./subtests/statistic-rule-tests').descriptions;
-	     it(descriptions.createStatisticsRules, function(done) {
-		 test = require('./subtests/statistic-rule-tests').test(userToken, accountId, deviceId, deviceToken, cbManager);
-		 test.createStatisticsRules(done);
-    }).timeout(10000);
-	     it(descriptions.sendObservations, function(done) {
-		 test.sendObservations(done);
-    }).timeout(400000);
-	     it(descriptions.cleanup, function(done) {
-		 test.cleanup(done);
-	     }).timeout(10000);
 });
 
 describe('Do data sending subtests ...'.bold, function() {
@@ -1352,9 +1130,6 @@ describe('Do MQTT feedback subtests ...'.bold, function() {
     it(descriptions.receiveControlActuation, function(done) {
         test.receiveControlActuation(done);
     }).timeout(25000);
-    it(descriptions.receiveAlertActuation, function(done) {
-        test.receiveAlertActuation(done);
-    }).timeout(25000);
     it(descriptions.cleanup, function(done) {
         test.cleanup(done);
     }).timeout(10000);
@@ -1431,236 +1206,6 @@ describe('Do scale device subtests ...'.bold, function() {
     it(descriptions.cleanup, function(done) {
         test.cleanup(done);
     }).timeout(100000);
-});
-
-
-describe('Geting and manage alerts ... \n'.bold, function() {
-    before(function() {
-        if (checkTestCondition(['non_essential', 'alerts'])) {
-            this.skip();
-        }
-    });
-    it('Shall get list of alerts', function(done) {
-        var getListOfAlerts = function(component) {
-            if ( component ) {
-                const alertsNumer = component.alertsNumber();
-                if ( alertsNumer > 0 ) {
-                    helpers.alerts.getListOfAlerts(userToken, accountId, function(err, response) {
-                        if (err) {
-                            done(new Error('Cannot get list of alerts: ' + err));
-                        } else {
-                            assert.notEqual(response, null, 'response is null');
-                            assert.equal(response.length, alertsNumer, 'get wrong number of alerts');
-                            component.alerts = response;
-                            getListOfAlerts(component.next);
-                        }
-                    });
-                } else {
-                    getListOfAlerts(component.next);
-                }
-            } else {
-                done();
-            }
-        };
-        getListOfAlerts(components.first);
-    }).timeout(10000);
-
-    it('Shall add comments to the Alert', function(done) {
-        var addCommentsToAlert = function(component) {
-            if ( component ) {
-                if ( component.alerts.length > 0 ) {
-                    const comments = {
-                        'user': 'alertcomment@intel.com',
-                        'timestamp': 123233231221,
-                        'text': 'comment',
-                    };
-
-                    helpers.alerts.addCommentsToAlert(userToken, accountId, component.alerts[0].alertId, comments, function(err, response) {
-                        if (err) {
-                            done(new Error('Cannot add comments to the Alert' + err));
-                        } else {
-                            assert.notEqual(response, null, 'response is null');
-                            assert.equal(response.status, 'OK');
-                            done();
-                        }
-                    });
-                } else {
-                    addCommentsToAlert(component.next);
-                }
-            } else {
-                done();
-            }
-        };
-        addCommentsToAlert(components.first);
-    });
-
-    it('Shall get alert infomation', function(done) {
-        var getAlertDetails = function(component) {
-            if ( component ) {
-                if ( component.alerts.length > 0 ) {
-                    helpers.alerts.getAlertDetails(userToken, accountId, component.alerts[0].alertId, function(err, response) {
-                        if (err) {
-                            done(new Error('Cannot get list of alerts: ' + err));
-                        } else {
-                            assert.notEqual(response, null, 'response is null');
-                            if (!component.checkAlert(parseInt(response.conditions[0].components[0].valuePoints[0].value),
-                                response.conditions[0].condition) ) {
-                                done(new Error('get error alert for: ' + response.conditions[0].condition));
-                            }
-                            done();
-                        }
-                    });
-                } else {
-                    getAlertDetails(component.next);
-                }
-            } else {
-                done();
-            }
-        };
-        getAlertDetails(components.first);
-    });
-
-    it('Shall update alert status', function(done) {
-        var updateAlertStatus = function(component) {
-            if ( component ) {
-                if ( component.alerts.length > 1 ) {
-                    helpers.alerts.updateAlertStatus(userToken, accountId, component.alerts[1].alertId, 'Open', function(err, response) {
-                        if (err) {
-                            done(new Error('Cannot update alert status ' + err));
-                        } else {
-                            assert.notEqual(response, null, 'response is null');
-                            assert.equal(response.status, 'Open', 'wrong alert status');
-                            done();
-                        }
-                    });
-                } else {
-                    updateAlertStatus(component.next);
-                }
-            } else {
-                updateAlertStatus(component.next);
-            }
-        };
-        updateAlertStatus(components.first);
-    });
-
-    it('Shall clear alert infomation', function(done) {
-        var closeAlert = function(component) {
-            if ( component ) {
-                if ( component.alerts.length > 2 ) {
-                    helpers.alerts.closeAlert(userToken, accountId, component.alerts[2].alertId, function(err) {
-                        if (err) {
-                            done(new Error('Cannot clear alert infomation ' + err));
-                        } else {
-                            done();
-                        }
-                    });
-                } else {
-                    closeAlert(component.next);
-                }
-            } else {
-                closeAlert(component.next);
-            }
-        };
-        closeAlert(components.first);
-    });
-});
-
-describe('update rules and create draft rules ... \n'.bold, function() {
-    before(function() {
-        if (checkTestCondition(['non_essential', 'rules'])) {
-            this.skip();
-        }
-    });
-    let cloneruleId;
-
-    it('Shall clone a rule', function(done) {
-        var cloneRule = function(component) {
-            if ( component ) {
-                if ( component.rules.length > 0 ) {
-                    const rulename_clone = component.rules[0].name + ' - cloned';
-
-                    helpers.rules.cloneRule(userToken, accountId, component.rules[0].id, function(err, response) {
-                        if (err) {
-                            done(new Error('cannot clone a rule ' + err));
-                        } else {
-                            assert.notEqual(response, null, 'response is null');
-                            assert.equal(response.name, rulename_clone, 'clone error rule');
-                            cloneruleId = response.id;
-                            done();
-                        }
-                    });
-                } else {
-                    cloneRule(component.next);
-                }
-            } else {
-                done();
-            }
-        };
-        cloneRule(components.first);
-    });
-
-    it('Shall update a rule', function(done) {
-        var updateRule = function(component) {
-            if ( component ) {
-                if ( component.rules.length > 0 ) {
-                    const newrule = new Rule('oisp-tests-rule-high-temp-new', '>', 28);
-                    newrule.synchronizationStatus = 'NotSync';
-                    newrule.actuationCmd = switchOffCmdName;
-                    newrule.cid = component.id;
-                    newrule.conditionComponent = component.name;
-
-                    helpers.rules.updateRule(newrule, userToken, accountId, cloneruleId, function(err, response) {
-                        if (err) {
-                            done(new Error('Cannot update rules ' + err));
-                        } else {
-                            assert.equal(response.name, newrule.name, 'update rule wrong');
-                            done();
-                        }
-                    });
-                } else {
-                    updateRule(component.next);
-                }
-            } else {
-                done();
-            }
-        };
-        updateRule(components.first);
-    }).timeout(20000);
-
-    it('Shall update rule status', function(done) {
-        var updateRuleStatus = function(component) {
-            if ( component ) {
-                if ( component.rules.length > 1 ) {
-                    helpers.rules.updateRuleStatus(userToken, accountId, component.rules[1].id, 'Archived', function(err, response) {
-                        if (err) {
-                            done(new Error('Cannot update rule status ' + err));
-                        } else {
-                            assert.notEqual(response, null, 'response is null');
-                            assert.equal(response.status, 'Archived', 'wrong rule status');
-                            done();
-                        }
-                    });
-                } else {
-                    updateRuleStatus(component.next);
-                }
-            } else {
-                done();
-            }
-        };
-        updateRuleStatus(components.first);
-    });
-
-    it('Shall create a draft rule', function(done) {
-        helpers.rules.createDraftRule('Draftrule', userToken, accountId, function(err, response) {
-            if (err) {
-                done(new Error('cannot create a draft rule ' + err));
-            } else {
-                assert.notEqual(response, null, 'response is null');
-                assert.equal(response.name, 'Draftrule', 'wrong draft rule name');
-                done();
-            }
-        });
-    });
 });
 
 describe('Adding user and posting email ...\n'.bold, function() {
@@ -1929,30 +1474,6 @@ describe('change password and delete receiver ... \n'.bold, function() {
                 done(new Error('Cannot change password: ' + err));
             } else {
                 assert.equal(response.password, 'oispnewpasswd2', 'new password error');
-                done();
-            }
-        });
-    });
-
-    it('Shall delete draft rule', function(done) {
-        helpers.rules.deleteRule(userToken, accountId, null, function(err, response) {
-            if (err) {
-                done(new Error('cannot delete a draft rule ' + err));
-            } else {
-                assert.notEqual(response, null, 'response is null');
-                assert.equal(response.status, 'Done');
-                done();
-            }
-        });
-    });
-
-    it('Shall delete a rule', function(done) {
-        helpers.rules.deleteRule(userToken, accountId, rulelist[0].id, function(err, response) {
-            if (err) {
-                done(new Error('cannot delete a rule ' + err));
-            } else {
-                assert.notEqual(response, null, 'response is null');
-                assert.equal(response.status, 'Done');
                 done();
             }
         });

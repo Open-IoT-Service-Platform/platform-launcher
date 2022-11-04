@@ -461,7 +461,7 @@ var test = function(userToken, accountId, deviceId, deviceToken, cbManager, mqtt
 };
 
 var descriptions = {
-    "cleanup": "Cleanup components, commands, rules created for subtest",
+    "cleanup": "Cleanup components, commands created for subtest",
     "sendAggregatedDataPoints": "Shall send multiple datapoints for one component",
     "sendSingleDataPoint": "Send a single data point",
     "sendMultipleDataPoints": "Send several data points in one message",

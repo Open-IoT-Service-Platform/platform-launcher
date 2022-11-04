@@ -210,7 +210,7 @@ var descriptions = {
     "countPartialData": "Count data of partial devices and components",
     "countSingleDeviceData": "Count large amount of data sent to single device",
     "waitForBackendSynchronization": "Waiting maximal tolerable time backend needs to flush so that points are available",
-    "cleanup": "Cleanup components, commands, rules created for subtest"
+    "cleanup": "Cleanup components, commands created for subtest"
 };
 
 module.exports = {
