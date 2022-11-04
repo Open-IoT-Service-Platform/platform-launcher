@@ -1349,7 +1349,7 @@ var descriptions = {
     "receiveRawDataDesc": "Receive data in desc order",
     "receiveRawDataLatest": "Receive latest data",
     "receiveAggregatedDataFromMultipleComponents": "Receive multiple aggregated components",
-    "cleanup": "Cleanup components, commands, rules created for subtest"
+    "cleanup": "Cleanup components, commands created for subtest"
 };
 
 module.exports = {

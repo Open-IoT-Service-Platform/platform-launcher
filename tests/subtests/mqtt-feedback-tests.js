@@ -34,18 +34,6 @@ var test = function(userToken, mqttConnector) {
     var switchOnCmdName = "switch-on-rat";
     var deviceId = "mqttfeedbackdevice";
     var gatewayId = "00-11-22-33-44-55";
-    var rule = {
-        name: "oisp-tests-rule-rat-gte",
-        conditionComponent: componentName,
-        basicConditionOperator: ">=",
-        basicConditionValue: "20",
-        actions: [
-            {
-                type: "actuation",
-                target: [ switchOnCmdName ]
-            }
-        ],
-    };
     var cbManager = {
         cb: () => {}
     };
@@ -54,7 +42,6 @@ var test = function(userToken, mqttConnector) {
     var accountId;
     var componentId;
     var actuatorId;
-    var ruleId;
 
     var temperatureValues = [ { value: 17.3 }, { value: 1 }, { value: 17 }, { value: 30.1 }, { value: 15 } ];
     const numOfActuations = 1;
@@ -69,12 +56,10 @@ var test = function(userToken, mqttConnector) {
                 .then(() => promtests.activateDevice(userToken, accountId, deviceId))
                 .then(res => deviceToken = res.deviceToken)
                 .then(() => promtests.addComponent(componentName, componentType, userToken, accountId, deviceId))
-                .then(id => { componentId = id; rule.cid = id; })
+                .then(id => componentId = id)
                 .then(() => promtests.addActuator(actuatorName, actuatorType, userToken, accountId, deviceId))
                 .then(id => actuatorId = id)
                 .then(() => promtests.createCommand(switchOnCmdName, componentParamName, 1, userToken, accountId, deviceId, actuatorId))
-                .then(() => promtests.createSimpleRule(rule, userToken, accountId, deviceId))
-                .then(rId => ruleId = rId)
                 .then(() => done())
                 .catch(err => done(err));
         },
@@ -130,46 +115,6 @@ var test = function(userToken, mqttConnector) {
                 }
             });
         },
-        receiveAlertActuation: function(done) {
-            const actuationValue = 1;
-            var actuationReceived = 0;
-            var topicCb = function(message) {
-                message = JSON.parse(message);
-                const expectedActuationValue = true;
-                const componentMetric = message.metrics.filter(function(metric) {
-                    return metric.name === componentParamName && actuatorId === metric.cid;
-                });
-                if (componentMetric.length === 1) {
-                    const value = componentMetric[0].value;
-                    if (value !== expectedActuationValue) {
-                        done(new Error('Param value wrong. Expected: ' + expectedActuationValue + ' Received: ' + paramValue));
-                    } else {
-                        actuationReceived++;
-                    }
-                } else {
-                    done(new Error('Did not find component param: ' + componentParamName));
-                }
-            };
-            cbManager.cb = topicCb;
-            var maxRetry = 10;
-            var retry = 0;
-            const checkActuation = function() {
-                if (retry >= maxRetry) {
-                    done(new Error('Actuation timed out after sending actuation command'));
-                    return;
-                }
-                if (actuationReceived === numOfActuations) {
-                    done();
-                } else {
-                    retry++;
-                    setTimeout(checkActuation, 2000);
-                }
-            };
-            var proms = temperatureValues.map(val => promtests.submitData(val.value, deviceToken, accountId, deviceId, componentId));
-            Promise.all(proms)
-                .then(() => setTimeout(checkActuation, 2000))
-                .catch(err => done(err));
-        },
         cleanup: function(done) {
             promtests.deleteAccount(userToken, accountId)
                 .then(() => done())
@@ -182,7 +127,6 @@ var descriptions = {
     "setup": "Create accounts, devices, components needed for this test",
     "openMqttConnection": "Open MQTT connection and wait until it syncs",
     "receiveControlActuation": "Shall receive actuation through control api",
-    "receiveAlertActuation": "Shall receive actuation through rule alert",
     "cleanup": "Cleanup accounts, devices, components created during this test"
 };
 

@@ -60,22 +60,6 @@ function check_sts {
     done
 }
 
-function check_beamservice {
-  local name=$1
-  local namespace=$2
-  local counts_max=$3
-  local counts_actual=0
-  printf "\nWaiting for $name"
-  until (kubectl -n $namespace get "beamservices.${namespace}.org" rule-engine -o yaml | grep "state: RUNNING");
-    do printf "."
-    let counts_actual=$counts_actual+1;
-    if [ $counts_actual -ge $counts_max ];
-      then exit 2
-    fi
-    sleep 1;
-  done;
-}
-
 counts_actual=0
 counts_max=60
 
@@ -96,6 +80,5 @@ check_deployment frontend ${NAMESPACE} frontend 120
 check_deployment kairosdb ${NAMESPACE} kairosdb 60
 check_sts mqtt-gateway ${NAMESPACE} 240
 check_sts emqx ${NAMESPACE} 240
-check_beamservice rule-engine ${NAMESPACE} 240
 printf "\ndone\n"
 exit 0;
