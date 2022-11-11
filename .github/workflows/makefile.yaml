@@ -14,11 +14,10 @@ on:
         required: false
       DOCKER_PASSWORD:
         description: 'Dockerhub Password'
-        required: false
+        required: true
       DOCKER_USERNAME:
         description: 'Dockerhub Username'
-        required: false
-
+        required: true
   pull_request:
     branches:
       - develop
@@ -65,6 +64,17 @@ jobs:
         else
           ( cd ./DigitalTwin/test && bash ./prepare-platform-for-self-hosted-runner.sh )
         fi
+    - name: Patch Kubernetes Service Account for Digital Twin
+      shell: bash
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        DIGITALTWIN_NAMESPACE: iff
+      run: |
+        [[ ! -z "${DOCKER_USERNAME}" ]] && echo "Not empty" || echo "Empty"
+        [[ ! -z "${DOCKER_PASSWORD}" ]] && echo "Not empty" || echo "Empty"
+        kubectl -n ${DIGITALTWIN_NAMESPACE} create secret docker-registry dockerhub-key --docker-username=${DOCKER_USERNAME} --docker-password=${DOCKER_PASSWORD}
+        kubectl -n ${DIGITALTWIN_NAMESPACE} patch serviceaccount default -p '{"imagePullSecrets": [{"name": "dockerhub-key"}]}'
     - name: Prepare Bats Framework
       shell: bash
       run: |
@@ -93,6 +103,10 @@ jobs:
         yes | DOCKER_TAG=test NODOCKERLOGIN=true DEBUG=true make build
     - name: E2E Test
       shell: bash
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        OISP_NAMESPACE: oisp
       run: |
         set +e
         export TERM=vt100
@@ -116,11 +130,16 @@ jobs:
         fi
         until [ ${retval} -eq 0 ] || [ ${loops} -gt 3 ]; do
           make undeploy-oisp
+          # Patch the service account in OISP deployment
+          kubectl create namespace ${OISP_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+          kubectl -n ${OISP_NAMESPACE} create secret docker-registry dockerhub-key --docker-username=${DOCKER_USERNAME} --docker-password=${DOCKER_PASSWORD}
+          kubectl -n ${DIGITALTWIN_NAMESPACE} patch serviceaccount default -p '{"imagePullSecrets": [{"name": "dockerhub-key"}]}'
           (for i in {1..20}; do sleep 60; echo .; done&) &&  make deploy-oisp-test
           if [[ ${UPGRADE_TEST} = "true" ]] && [[ -n ${CURRENT_RELEASE_VERSION} ]];
           then
             (for i in {1..20}; do sleep 60; echo .; done&) && make wait-until-ready
-            (for i in {1..20}; do sleep 60; echo .; done&) &&  make upgrade-oisp DOCKER_TAG=test USE_LOCAL_REGISTRY=true KEYCLOAK_FORCE_MIGRATION="true"
+            (for i in {1..20}; do sleep 60; echo .; done&) &&  make upgrade-oisp \
+              DOCKER_TAG=test USE_LOCAL_REGISTRY=true KEYCLOAK_FORCE_MIGRATION="true"
             kubectl -n oisp scale deployment debugger --replicas=1
             (for i in {1..20}; do sleep 60; echo .; done&) && make wait-until-ready
           fi
