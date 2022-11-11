@@ -1076,42 +1076,6 @@ describe('TSDB Proxy subtests...'.bold, function() {
     }).timeout(10000);
 });
 
-describe('Services Operator subtests...'.bold, function() {
-    before(function() {
-        if (checkTestCondition(['non_essential', 'services'])) {
-            this.skip();
-        }
-    });
-    let test;
-    const descriptions = require('./subtests/services-operator-tests').descriptions;
-    it(descriptions.prepareTestSetup, function(done) {
-        test = require('./subtests/services-operator-tests').test(userToken);
-        test.prepareTestSetup(done);
-    }).timeout(200000);
-    it(descriptions.SendDataToAggregatorAndCheckResult, function(done) {
-        test.SendDataToAggregatorAndCheckResult(done);
-    }).timeout(10000);
-    it(descriptions.updateTestOperator, function(done) {
-        test = require('./subtests/services-operator-tests').test(userToken);
-        test.updateTestOperator(done);
-    }).timeout(200000);
-    it(descriptions.testUpgradedOperator, function(done) {
-        test = require('./subtests/services-operator-tests').test(userToken);
-        test.testUpgradedOperator(done);
-    }).timeout(200000);
-    it(descriptions.updateTestOperatorSave, function(done) {
-        test = require('./subtests/services-operator-tests').test(userToken);
-        test.updateTestOperatorSave(done);
-    }).timeout(200000);
-    it(descriptions.testUpgradedOperatorSave, function(done) {
-        test = require('./subtests/services-operator-tests').test(userToken);
-        test.testUpgradedOperatorSave(done);
-    }).timeout(200000);
-    it(descriptions.cleanup, function(done) {
-        test.cleanup(done);
-    }).timeout(200000);
-});
-
 describe('Do MQTT feedback subtests ...'.bold, function() {
     before(function() {
         if (checkTestCondition(['non_essential', 'mqtt'])) {
