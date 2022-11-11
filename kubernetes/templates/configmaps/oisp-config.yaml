@@ -207,14 +207,6 @@ data:
     "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG",
     "keycloakClientSecret": "{{ .Values.keycloak.mqttBroker.secret }}"
     }
-  streamer: |
-    {
-    "kafkaConfig": "@@OISP_KAFKA_CONFIG",
-    "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG",
-    "hostname": "streamer",
-    "port": 9000
-    }
-
 
 
 kind: ConfigMap

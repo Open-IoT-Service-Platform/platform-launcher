@@ -72,10 +72,6 @@ BACKUP_EXCLUDE:=sh.helm stolon default-token oisp-stolon-token
 	else \
 		git submodule update --init --recursive; \
 	fi;
-	@if [ -f docker/hbase/id_rsa ]; then echo "HBase keys existing already"; else \
-		ssh-keygen -q -t rsa -P "" -f docker/hbase/id_rsa; \
-	fi;
-	@chmod 755 docker/hbase/id_rsa*
 	@touch $@
 
 # ===================

@@ -16,13 +16,6 @@
 version: '3.7'
 
 services:
-  websocket-server:
-    image: ${DOCKER_PREFIX:-oisp}/websocket-server:${DOCKER_TAG}
-    build:
-      context: ./oisp-websocket-server
-      labels:
-        - oisp=true
-        - oisp.git_commit=${GIT_COMMIT_WEBSOCKET_SERVER}
   frontend:
     image: ${DOCKER_PREFIX:-oisp}/frontend:${DOCKER_TAG}
     build:
@@ -37,12 +30,6 @@ services:
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_BACKEND}
-  streamer:
-    image: ${DOCKER_PREFIX:-oisp}/streamer:${DOCKER_TAG}
-    build:
-      context: ./oisp-services/frontends/oisp-streamer
-      labels:
-        - oisp=true
   kairosdb:
     image: ${DOCKER_PREFIX:-oisp}/kairosdb:${DOCKER_TAG}
     build:
@@ -78,27 +65,9 @@ services:
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
-  services-operator:
-    image: ${DOCKER_PREFIX:-oisp}/services-operator:${DOCKER_TAG}
-    build:
-      context: oisp-services/services-operator
-      labels:
-        - oisp=true
-  services-server:
-    image: ${DOCKER_PREFIX:-oisp}/services-server:${DOCKER_TAG}
-    build:
-      context: ./oisp-services
-      labels:
-        - oisp=true
   wait-for-it:
     image: ${DOCKER_PREFIX:-oisp}/wait-for-it:${DOCKER_TAG}
     build:
       context: ./docker/wait-for-it/
-      labels:
-        - oisp=true
-  simple-flink-sql-gateway:
-    image: ${DOCKER_PREFIX:-oisp}/simple-flink-sql-gateway:${DOCKER_TAG}
-    build:
-      context: ./oisp-services/simple-flink-sql-gateway
       labels:
         - oisp=true
