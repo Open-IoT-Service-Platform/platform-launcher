@@ -65,7 +65,7 @@ jobs:
         else
           ( cd ./DigitalTwin/test && bash ./prepare-platform-for-self-hosted-runner.sh )
         fi
-    - name: Prepare Bats Framework
+    - name: Prepare IFF Bats Framework
       shell: bash
       run: |
         cd ./DigitalTwin/test/bats
@@ -91,6 +91,13 @@ jobs:
         set +o pipefail
         export TERM=vt100
         yes | DOCKER_TAG=test NODOCKERLOGIN=true DEBUG=true make build
+    - name: Prepare OISP Bats Framework
+      shell: bash
+      run: |
+        cd ./tests/bats
+        bash ./prepare-bats.sh
+        bats linting.bats
+        shellcheck *.sh *.bats test-*/*.bats
     - name: E2E Test
       shell: bash
       run: |

@@ -98,6 +98,10 @@ check-docker-cred-env:
 #		fi; \
 	fi
 
+deploy-operators:
+	@echo "Deploying operators"; \
+	cd util && bash ./deploy_operators.sh
+
 ## deploy-oisp-test: Deploy repository as HELM chart,
 ##     create an ethereal address, and make sure there is
 ##     a debugger container.
@@ -119,9 +123,7 @@ deploy-oisp-test: check-docker-cred-env
 
 ## deploy-oisp: Deploy repository as HELM chart
 ##
-deploy-oisp: check-docker-cred-env
-	@echo "Deploying operators";
-	cd util && bash ./deploy_operators.sh;
+deploy-oisp: check-docker-cred-env deploy-operators wait-until-operators-ready
 	@echo "Create Namespace"
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	@echo "Prepare helm"
@@ -172,8 +174,8 @@ deploy-oisp: check-docker-cred-env
 ##
 upgrade-oisp: check-docker-cred-env backup
 	@if [ "$$NO_OPERATOR_DEPLOY" = "true" ]; then \
-		echo "Deploying operators"; \
-		cd util && bash ./deploy_operators.sh; \
+		make deploy-operators; \
+		make wait-until-operators-ready; \
 	fi
 	@echo "Preparing Helm"
 	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}"
@@ -241,6 +243,14 @@ reset-db:
 ##
 add-test-user:
 	for i in $(shell seq 1 1); do kubectl -n $(NAMESPACE) exec $(FRONTEND_POD) -c frontend -- node admin addUser user$${i}@example.com password; done;
+
+wait-until-operators-ready:
+	@{ printf "\nWaiting for readiness of operators\n"; \
+	cd ./tests/bats; \
+	if [ ! -d "./lib" ]; then \
+		$(SHELL) ./prepare-bats.sh; \
+	fi; \
+	bats ./test-operators/*.bats; }
 
 ## wait-until-ready: Wait until the platform is up and running
 ##     As of now, this is assumed if all frontend and backend containers
