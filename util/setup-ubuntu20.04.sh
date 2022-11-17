@@ -80,6 +80,11 @@ printf -- "---------------\033[0m\n";
 sudo apt-get -q install jq;
 printf "\n";
 
+printf "\033[1mInstalling bats\n";
+printf -- "---------------\033[0m\n";
+sudo apt install -yq bats
+printf "\n";
+
 printf "\033[1mInstalling S3 tools\n"
 printf -- "----------------------------\033[0m\n"
 sudo apt -qq install s3cmd
