@@ -26,17 +26,6 @@ numberReplicas:
     debugger: 1
     minio: 4
 
-minio:
-  endpointPrefix: minio
-  localPort: "80"
-  adminAccessKey: console
-  adminSecretKey: admin-secret-key
-  userAccessKey: minio
-  userSecretKey: minio-secret-key
-  storageSize: 2Gi
-  healthPath: /minio/health/live
-  mcImage: minio/mc:RELEASE.2022-02-07T09-25-34Z
-
 backup:
   bucket: backup
 

@@ -159,18 +159,14 @@ data:
     "cassandraPort": {{ .Values.cassandra.port | quote}},
     "cassandraReplication": {{ .Values.cassandra.replication | quote}}
     }
-  {{ $secret := (lookup "v1" "Secret" .Release.Namespace "minio-user") }}
+  {{ $secret := (lookup "v1" "Secret" "iff" "minio-user") }}
   minio: |
     {
-    "endPoint": "minio.oisp.svc.cluster.local",
+    "endPoint": "minio.iff.svc.cluster.local",
     "port": "80",
     "useSSL": "false",
-    "accessKey": "{{ .Values.minio.userAccessKey }}",
-    {{- if $secret }}
+    "accessKey": "{{ $secret.data.CONSOLE_ACCESS_KEY | b64dec }}",
     "secretKey": "{{ $secret.data.CONSOLE_SECRET_KEY | b64dec }}"
-    {{- else }}
-    "secretKey": "{{ .Values.minio.userSecretKey }}"
-    {{- end }}
     }
   grafana: |
     {

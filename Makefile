@@ -161,8 +161,6 @@ deploy-oisp: check-docker-cred-env deploy-operators wait-until-operators-ready
 		--set emqxtest.initContainers[0].name=wait-for-mqtt-auth-service \
 		--set emqxtest.initContainers[0].image=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/wait-for-it:$(DOCKER_TAG) \
 		--set emqxtest.initContainers[0].args='{mqtt-gateway:3025,--,echo,mqtt auth service is up}' \
-		--set minio.adminAccessKey="$(call randomPass)" \
-		--set minio.userSecretKey="$(call randomPass)" \
 		--set use_local_registry=$(USE_LOCAL_REGISTRY) \
 		$(HELM_ARGS)
 
