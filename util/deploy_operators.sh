@@ -18,29 +18,6 @@ kubectl apply -f https://raw.githubusercontent.com/wagmarcel/oisp-services/beam-
 printf "\033[1mCustom resource definitions for the services operator installed successfully.\033[0m\n"
 
 printf "\n"
-printf "\033[1mInstalling minio operator\n"
-printf -- "------------------------\033[0m\n"
-printf "\n"
-printf "\033[1mInstalling KREW\n"
-printf -- "------------------------\033[0m\n"
-(
-  set -x; cd "$(mktemp -d)" &&
-  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
-  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
-  KREW="krew-${OS}_${ARCH}" &&
-  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
-  tar zxvf "${KREW}.tar.gz" &&
-  ./"${KREW}" install krew
-)
-printf "\n"
-printf "\033[1mInstalling MINIO operator via krew\n"
-printf -- "------------------------\033[0m\n"
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-kubectl krew update
-kubectl krew install minio
-kubectl minio init
-
-printf "\n"
 printf "\033[1mInstalling cert-manager\n"
 printf -- "------------------------\033[0m\n"
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.7.1/cert-manager.yaml
