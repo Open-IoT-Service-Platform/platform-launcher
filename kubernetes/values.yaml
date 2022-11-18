@@ -157,14 +157,6 @@ mqtt:
     certfile: "server.cert"
     rootpath: "/opt/emqx/etc/certs"
 
-# Gearpump username and password are legacy, they can be removed safely
-# after the rule-engine is updated to ignore them.
-ruleEngine:
-  username: "rule_engine@intel.com"
-  password: password
-  url: "http://services-server/rule-engine-bundled-0.1.2.jar"
-  checkpointingInterval : "10000"
-
 # Hosts used for Ingress configuration
 hosts:
     frontend: latest.oisp.info

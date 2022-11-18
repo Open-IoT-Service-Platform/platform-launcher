@@ -107,11 +107,6 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: backend-host
-        - name: OISP_RULEENGINE_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              name: oisp-config
-              key: rule-engine
         - name: OISP_MAIL_CONFIG
           valueFrom:
             configMapKeyRef:
@@ -182,11 +177,6 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: backend-host
-        - name: OISP_RULEENGINE_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              name: oisp-config
-              key: rule-engine
         - name: OISP_MAIL_CONFIG
           valueFrom:
             configMapKeyRef:
@@ -289,11 +279,6 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: backend-host
-        - name: OISP_RULEENGINE_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              name: oisp-config
-              key: rule-engine
         - name: OISP_MAIL_CONFIG
           valueFrom:
             configMapKeyRef:

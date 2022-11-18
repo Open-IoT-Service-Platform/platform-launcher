@@ -142,10 +142,6 @@ deploy-oisp: check-docker-cred-env deploy-operators wait-until-operators-ready
 		--set systemuser.password="$(call randomPass)" \
 		--set grafana.password="$(call randomPass)" \
 		--set mqtt.broker.password="$(call randomPass)" \
-		--set ruleEngine.password="$(call randomPass)" \
-		--set ruleEngine.password="$(call randomPass)" \
-		--set ruleEngine.ftpPassword="$${FTPPASS}" \
-		--set ruleEngine.gearpump.password="$(call randomPass)" \
 		--set stolon.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
 		--set postgres.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
 		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_PASSWORD}" \
@@ -193,8 +189,6 @@ upgrade-oisp: check-docker-cred-env backup
 		--set systemuser.password="$${SYSTEMUSER_PASSWORD}" \
 		--set grafana.password="$${GRAFANA_PASSWORD}" \
 		--set mqtt.broker.password="$${MQTT_BROKER_PASSWORD}" \
-		--set ruleEngine.password="$${RULEENGINE_PASSWORD}" \
-		--set ruleEngine.gearpump.password="$${RULEENGINE_GEARPUMP_PASSWORD}" \
 		--set stolon.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
 		--set postgres.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
 		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_SU_PASSWORD}" \

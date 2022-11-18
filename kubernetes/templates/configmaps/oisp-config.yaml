@@ -9,7 +9,6 @@ data:
     "frontendSecurityConfig": "@@OISP_FRONTENDSECURITY_CONFIG",
     "backendHostConfig": "@@OISP_BACKENDHOST_CONFIG",
     "mailConfig": "@@OISP_MAIL_CONFIG",
-    "ruleEngineConfig": "@@OISP_RULEENGINE_CONFIG",
     "gatewayConfig": "@@OISP_GATEWAY_CONFIG",
     "jaegerTracing": {{ .Values.jaeger_tracing }},
     "grafanaConfig": "@@OISP_GRAFANA_CONFIG",
@@ -147,18 +146,6 @@ data:
   mail: |
     {
     "sender": "test.sender@streammyiot.com"
-    }
-  # Gearpump username and password are legacy, they can be removed safely
-  # after the rule-engine is updated to ignore them.
-  rule-engine: |
-    {
-    "password": "{{ .Values.ruleEngine.password }}",
-    "username": "{{ .Values.ruleEngine.username }}",
-    "gearpumpUsername": "{{ .Values.ruleEngine.gearpump.username }}",
-    "gearpumpPassword": "{{ .Values.ruleEngine.gearpump.password }}",
-    "frontendUri": "frontend:4001",
-    "kafkaConfig": "@@OISP_KAFKA_CONFIG",
-    "zookeeperConfig": "@@OISP_ZOOKEEPER_CONFIG"
     }
   opentsdb-config: |
     {
