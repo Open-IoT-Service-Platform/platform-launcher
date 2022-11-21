@@ -63,8 +63,7 @@ jobs:
       run: |
         export TERM=vt100
         git submodule update --recursive --init
-        make update
-
+        # make update
     - name: Build platform
       run: |
         set +o pipefail

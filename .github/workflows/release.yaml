@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    uses: Open-IoT-Service-Platform/platform-launcher/.github/workflows/makefile.yaml@develop
+    uses: Open-IoT-Service-Platform/platform-launcher/.github/workflows/makefile.yaml@v2.2-branch
     with:
       UPGRADE_TEST: "false"
     secrets:
@@ -45,7 +45,7 @@ jobs:
           export TERM=vt100
           set +o pipefail
           git submodule update --recursive --init
-          make update
+          # make update
           yes | DOCKER_TAG=test NODOCKERLOGIN=true DEBUG=true make build
       - name: Push images
         shell: bash
