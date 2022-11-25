@@ -33,7 +33,7 @@ An additinal [development guide](https://platform-launcher.readthedocs.io/en/lat
 
 ## Install from v2.2-branch
 
-### Install helm with MQTT TCP Service
+### Install ingress-nginx with MQTT TCP Service
 
 ``helm install ingress-nginx ingress-nginx/ingress-nginx --set tcp.8883="emqx-headless:8883" -n ingress-nginx``
 
