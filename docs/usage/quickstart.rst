@@ -51,7 +51,7 @@ In the following, we describe the build, deploy, and test of ``v2.0.4-beta.3`` v
   git clone https://github.com/Open-IoT-Service-Platform/platform-launcher.git
 
   cd platform-launcher/
-  git checkout v2.0.4-beta.3
+  git checkout v2.2-beta.2
   cd util/
   sudo bash ./setup-ubuntu20.04.sh
   sudo chown -R $USER ~/.config ~/k3s ~/.cache
@@ -65,9 +65,9 @@ diretory is ``platform-launcher``
   git submodule update --init --recursive
   export NODOCKERLOGIN=true
 
-  DEBUG=true  DOCKER_TAG=v2.0.4-beta.3 make build
-  DEBUG=true make DOCKER_TAG=v2.0.4-beta.3 import-images
-  DEBUG=true make DOCKER_TAG=v2.0.4-beta.3 USE_LOCAL_REGISTRY=true deploy-oisp-test
+  DEBUG=true  DOCKER_TAG=v2.2-beta.2 make build
+  DEBUG=true make DOCKER_TAG=v2.2-beta.2 import-images
+  DEBUG=true make DOCKER_TAG=v2.2-beta.2 USE_LOCAL_REGISTRY=true deploy-oisp-test
   make test
 
 
@@ -261,8 +261,8 @@ and see the metrics on the charts:
 For more details on the agent, please consult https://github.com/Open-IoT-Service-Platform/oisp-iot-agent.
 
 
-Running OISP
---------------
+Deploying OISP
+---------------------------
 OISP can be deployed on any Kubernetes cluster with a volume provisioner and an ingress controller. For development purposes, we recommend a local installation based on `k3s <https://k3s.io/>`_, as described in `Creating a lightweight local kubernetes cluster`_.
 
 If you wish to deploy on an external cluster, make sure the following conditions are met:
@@ -290,8 +290,8 @@ If you need to recreate the cluster, simply run ``make restart-cluster``.
 
 .. warning:: Both scripts are going to replace your ``~/.kube/kubeconfig`` file!
 
-Deployment
-~~~~~~~~~~
+Local Deployment
+~~~~~~~~~~~~~~~~
 If you have access to the OISP dockerhub repository, export your user credentials to your shell:
 
 .. code-block:: bash
@@ -313,6 +313,42 @@ Finally, adapt the ``kubernetes/values.yaml`` to fit your needs and run ``make d
 .. note:: If you wish to run tests, or have a debugger container inside the cluster with useful tools, run ``make deploy-oisp-test``, which requires you to also build with ``make build DEBUG=true`` from the repository root.
 
 .. hint:: You can watch the deployment process by running ``watch kubectl -n oisp get pods``, or programmatically wait until the system is up and running by using the command ``make wait-until-ready``.
+
+
+Cloud Deployment
+~~~~~~~~~~~~~~~~
+
+In the following it is assumed that the OISP images are provided in a docker registry.
+
+First install helm with MQTT TCP Service:
+
+.. code-block:: bash
+
+  helm install ingress-nginx ingress-nginx/ingress-nginx --set tcp.8883="emqx-headless:8883" -n ingress-nginx
+
+Make sure that you have registered a for this external IP, e.g. ``mydomain.org``. **This is important** for the cert-manager later to get the certificate and to bring up the whole platform. Without a properly mapping of domainname to external IP, the platform will not come up properly.
+
+To install,
+create an install script ``deploy.sh`` with your email and hostname:
+
+.. code-block:: bash
+
+  export NAMESPACE=oisp
+  export DOCKER_TAG=v2.2-beta.2
+  export HELM_ARGS="--set less_resources=\"false\" \
+                    --set production=\"true\" \
+                    --set certmanager.email=\"<my-email>\" \
+                    --set hosts.frontend=\"<domain-name as defined above>\""
+  make deploy-oisp
+
+Then configure your docker-credentials and execute the script:
+
+.. code-block:: bash
+
+  export DOCKERUSER=<user>
+  read -s DOCKERPASS
+  export DOCKERPASS
+  bash ./deploy.sh
 
 Running end to end tests
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -365,12 +401,7 @@ with Kubernetes. Once there is a running OISP instance, you can create a test us
 Cert-Manager
 ------------
 
-OISP is prepared to be used with cert-manager to retrieve and update certificates from letsencrypt. For tesing,
-it is using cert manager with self-certified certificates. For deployments which need ssl, a cluster issuer for signed certificates has to be installed.
-To configure the cert-manager:
-
-1. Install issuer `kubectl apply -f kubernetes/cert-manager/clusterissuer-prod.yaml`. Note that it is managing certificates cluster wide and thus does not have a namespace.
-2. Adapt email address in  `kubernetes/certificate_web_prod.yaml`. Install the certificate in namespace oisp: `kubectl apply -f kubernetes/certificate_web_prod.yaml -n oisp`
+OISP installs and configures Cert-Managger. No separate deployment is needed any longer
 
 Updating Keycloak Realm Keys
 ----------------------------
