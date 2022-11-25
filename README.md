@@ -30,3 +30,39 @@ Before submitting a PRs make sure that you checked out the most recent develop s
 The master branches are only getting PRs from the respective develop branches.
 
 An additinal [development guide](https://platform-launcher.readthedocs.io/en/latest/development/developers_guide.html) contains tips and tricks to ease the development process.
+
+## Install from v2.2-branch
+
+### Install helm with MQTT TCP Service
+
+``helm install ingress-nginx ingress-nginx/ingress-nginx --set tcp.8883="emqx-headless:8883" -n ingress-nginx``
+
+Check the ``EXTERNAL-IP`` field of your cloud load-balancer:
+
+``kubectl -n ingress-nginx get svc/ingress-nginx-controller``
+
+Make sure that you have registered a <domain-name> for this external IP, e.g. ``mydomain.org``. **This is important** for the cert-manager later to get the certificate and to bring up the whole platform. Without a properly mapping of domainname to external IP, the platform will **not** come up properly.
+
+### Install OISP branch
+
+Create install script ``deploy.sh`` with your email and hostname:
+
+```
+export NAMESPACE=oisp
+export DOCKER_TAG=v2.2-beta.2
+export HELM_ARGS="--set less_resources=\"false\" \
+                  --set production=\"true\" \
+                  --set certmanager.email=\"<my-email>\" \
+                  --set hosts.frontend=\"<domain-name as defined above>\""
+make deploy-oisp
+
+```
+
+configure your docker-credentials and deploy:
+
+```
+export DOCKERUSER=<user>
+read -s DOCKERPASS
+export DOCKERPASS
+bash ./deploy.sh
+```
