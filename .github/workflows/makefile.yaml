@@ -79,7 +79,20 @@ jobs:
     - name: Install Digital Twin from local registry
       shell: bash
       run: |
-        cd ./DigitalTwin/test && bash install-local-platform.sh
+        cd ./DigitalTwin/test
+        retval=2
+        loops=0
+        until bash install-local-platform.sh || [ ${loops} -gt 3 ]; do
+          loops=$((loops+1))
+          echo loop: ${loops}
+          k3d cluster delete iff-cluster
+          if [ -z "${SELF_HOSTED_RUNNER}" ]; then
+            bash ./prepare-platform.sh
+          else
+            bash ./prepare-platform-for-self-hosted-runner.sh
+          fi
+        done
+        if [ ${loops} -gt 3 ]; then exit 1; fi
     - name: Setup subrepos
       shell: bash
       run: |
