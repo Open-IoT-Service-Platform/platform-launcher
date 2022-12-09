@@ -1,0 +1,26 @@
+---
+# yamllint disable rule:line-length
+# yamllint disable rule:braces
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bridge-configmap
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: bridge-configmap
+data:
+  config.json: |
+    {
+      "kafka": {
+              "brokers": [{{ .Values.kafka.fullBrokerList | quote }}]
+      },
+      "kairosdb": {
+              "topic": {{ .Values.kafkaBridge.kairosdb.listenTopic | quote }},
+              "hostname": {{ .Values.backend.tsdbUri | quote }},
+              "port": {{ .Values.backend.tsdbPort | quote }},
+              "protocol": "http:"
+      },
+      "logger": {
+              "loglevel": "info"
+      }
+    }

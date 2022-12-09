@@ -324,6 +324,8 @@ test: OISP_TESTS_SKIP_SCALE ?= "true"
 test: prepare-tests test-prep-only
 	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger \
 		-- /bin/bash -c "cd /home/$(CURRENT_DIR_BASE)/tests && make test TERM=xterm NAMESPACE=$(NAMESPACE) OISP_TESTS_SKIP_SCALE=$(OISP_TESTS_SKIP_SCALE)"
+	@$(call msg,"Starting the e2e bats testing ...");
+	@cd tests/bats && bats test-*
 
 # ==============
 # BUILD COMMANDS

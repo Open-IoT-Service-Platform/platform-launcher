@@ -1,0 +1,60 @@
+---
+# yamllint disable rule:line-length
+# yamllint disable rule:braces
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kairosdb-bridge
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kairosdb-bridge
+spec:
+  replicas: {{ .Values.kafkaBridge.kairosdb.replicaCount }}
+  selector:
+    matchLabels:
+      app: kairosdb-bridge
+  template:
+    metadata:
+      labels:
+        app: kairosdb-bridge
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/kafkabridges/bridge-configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: kairosdb-bridge
+          {{ if .Values.use_local_registry }}
+          image: k3d-iff.localhost:12345/{{ .Values.imagePrefix }}/kafka-bridge:{{ .Values.tag }}
+          {{ else }}
+          image: {{ .Values.imagePrefix }}/kafka-bridge:{{ .Values.tag }}
+          {{ end }}
+          command: ["node"]
+          args: ["/opt/kairosdb/app.js"]
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+                - cat
+                - /tmp/healthy
+            initialDelaySeconds: 300
+          readinessProbe:
+            exec:
+              command:
+                - cat
+                - /tmp/ready
+            initialDelaySeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /opt/config
+              readOnly: true
+          resources:
+      volumes:
+        - name: config
+          configMap:
+            # Provide the name of the ConfigMap you want to mount.
+            name: bridge-configmap
+            # An array of keys from the ConfigMap to create as files
+            items:
+              - key: "config.json"
+                path: "config.json"
+      imagePullSecrets:
+        - name: dockercred

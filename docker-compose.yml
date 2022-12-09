@@ -42,7 +42,12 @@ services:
   mqtt-gateway:
     image: ${DOCKER_PREFIX:-oisp}/mqtt-gateway:${DOCKER_TAG}
     build:
-      context: ./oisp-mqtt-gw
+      context: ./oisp-mqtt-gw/
+      dockerfile: Dockerfile
+  kafka-bridge:
+    image: ${DOCKER_PREFIX:-oisp}/kafka-bridge:${DOCKER_TAG}
+    build:
+      context: ./oisp-mqtt-gw/KafkaBridge
       dockerfile: Dockerfile
   grafana:
     image: ${DOCKER_PREFIX:-oisp}/grafana:${DOCKER_TAG}
