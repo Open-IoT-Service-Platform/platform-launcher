@@ -102,6 +102,12 @@ kafka:
   retries: 10
   maxPayloadSize: "20000000"
 
+kafkaBridge:
+  kairosdb:
+    repliacCount: 1
+    listenTopic: "iff.ngsild.attributes"
+
+
 zookeeper:
   namespace: zookeeper
   name: zookeeper
