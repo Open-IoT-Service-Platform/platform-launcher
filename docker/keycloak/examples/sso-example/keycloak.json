@@ -1,8 +1,0 @@
-{
-  "realm": "OISP",
-  "auth-server-url": "http://keycloak-http:4080/keycloak",
-  "ssl-required": "external",
-  "resource": "example-sso-client",
-  "public-client": true,
-  "confidential-port": 0
-}
