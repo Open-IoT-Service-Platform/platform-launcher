@@ -1,5 +1,6 @@
 apiVersion: v1
 data:
+  {{ $secret := (lookup "v1" "Secret" "iff" "keycloak-client-secret-oisp-frontend") }}
   frontend: |
     {
     "postgresConfig": "@@OISP_POSTGRES_CONFIG",
@@ -13,7 +14,7 @@ data:
     "jaegerTracing": {{ .Values.jaeger_tracing }},
     "grafanaConfig": "@@OISP_GRAFANA_CONFIG",
     "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG",
-    "keycloakClientSecret": "{{ .Values.keycloak.frontend.secret }}"
+    "keycloakClientSecret": "{{ $secret.data.CLIENT_SECRET | b64dec }}"
     }
   backend: |
     {
@@ -111,28 +112,31 @@ data:
     "private_pem_path": "./keys/private.pem",
     "public_pem_path": "./keys/public.pem"
     }
+  {{ $secret := (lookup "v1" "Secret" "iff" "keycloak-client-secret-oisp-frontend") }}
   keycloak: |
     {
     "listenerPort": "4004",
-    "realm": "OISP",
+    "realm": "iff",
     {{ if .Values.less_resources }}
-    "auth-server-url": "{{ .Values.keycloak.authServerUrl }}",
+    "auth-server-url": "http://keycloak.local/auth",
     {{ else }}
-    "auth-server-url": {{- printf "https://%s/keycloak" .Values.hosts.frontend | quote }},
+    "auth-server-url": "https://keycloak.local/auth",
     {{ end }}
-    "resource": "oisp-frontend",
-    "secret": "{{ .Values.keycloak.frontend.secret }}",
+    "resource": "{{ $secret.data.CLIENT_ID | b64dec }}",
+    "secret": "{{ $secret.data.CLIENT_SECRET | b64dec }}",
     "mqtt-broker-id": "mqtt-broker",
     "ssl-required": "external"
     }
+  {{ $secret := (lookup "v1" "Secret" "iff" "keycloak-initial-admin") }}
   keycloak-admin: |
     {
-    "username": "{{ .Values.keycloak.keycloak.username }}",
-    "password": "{{ .Values.keycloak.keycloak.password }}"
+    "username": "{{ $secret.data.username | b64dec }}",
+    "password": "{{ $secret.data.password | b64dec }}"
     }
-  keycloak-frontend-secret: {{ .Values.keycloak.frontend.secret }}
-  keycloak-mqtt-broker-secret: {{ .Values.keycloak.mqttBroker.secret }}
-  keycloak-force-migration: "{{ .Values.keycloak.forceMigration }}"
+  {{ $secret := (lookup "v1" "Secret" "iff" "keycloak-client-secret-oisp-frontend") }}
+  keycloak-frontend-secret: "{{ $secret.data.CLIENT_SECRET | b64dec }}"
+  {{ $secret := (lookup "v1" "Secret" "iff" "keycloak-client-secret-mqtt-broker") }}
+  keycloak-mqtt-broker-secret: "{{ $secret.data.CLIENT_SECRET | b64dec }}"
   gateway: |
     {
     "username": "{{ .Values.systemuser.username }}",
@@ -177,6 +181,7 @@ data:
     "dataSourceHost": "kairosdb",
     "dataSourcePort": "8080"
     }
+  {{ $secret := (lookup "v1" "Secret" "iff" "keycloak-client-secret-mqtt-broker") }}
   mqtt-gateway: |
     {
     "mqttBrokerUrl": "{{ .Values.mqtt.broker.url }}",
@@ -188,7 +193,7 @@ data:
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
     "postgresConfig": "@@OISP_POSTGRES_CONFIG",
     "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG",
-    "keycloakClientSecret": "{{ .Values.keycloak.mqttBroker.secret }}"
+    "keycloakClientSecret": "{{ $secret.data.CLIENT_SECRET | b64dec }}"
     }
 
 

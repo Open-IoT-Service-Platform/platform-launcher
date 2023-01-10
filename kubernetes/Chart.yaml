@@ -4,10 +4,6 @@ description: OISP Helm Chart
 name: oisp
 version: 2.2-beta.1
 dependencies:
-- name: keycloak
-  version: 6.0.4
-  repository: https://codecentric.github.io/helm-charts
-  condition: less_resources
 - name: emqx
   alias: emqxtest
   version: 4.4.5

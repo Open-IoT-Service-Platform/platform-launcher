@@ -119,13 +119,6 @@ spec:
               key: keycloak
         command: ["/bin/bash", "-c"]
         args: ["node admin createDB; node admin updateDB"]
-      - name: wait-for-keycloak
-        {{ if .Values.use_local_registry }}
-        image: k3d-iff.localhost:12345/{{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
-        {{ else }}
-        image: {{ .Values.imagePrefix }}/wait-for-it:{{ .Values.tag }}
-        {{ end }}
-        args: ["keycloak-http:4080", "--", "echo", "keycloak is up"]
       - name: add-system-users
         {{ if .Values.use_local_registry }}
         image: k3d-iff.localhost:12345/{{ .Values.imagePrefix }}/frontend:{{ .Values.tag }}
@@ -213,12 +206,6 @@ spec:
         - --
         - ./wait-for-it.sh
         - {{ .Values.kafka.service}}
-        - -t
-        - "300000"
-        - -s
-        - --
-        - ./wait-for-it.sh
-        - keycloak-http:4080
         - -t
         - "300000"
         - -s

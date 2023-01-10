@@ -63,13 +63,6 @@ services:
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
-  keycloak:
-    image: ${DOCKER_PREFIX:-oisp}/keycloak:${DOCKER_TAG}
-    build:
-      context: ./docker/keycloak
-      labels:
-        - oisp=true
-        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
   wait-for-it:
     image: ${DOCKER_PREFIX:-oisp}/wait-for-it:${DOCKER_TAG}
     build:

@@ -25,9 +25,6 @@ EXT_CONTAINERS=cassandra;gcr.io/cassandra-operator/cassandra-3.11.6:v6.4.0 cassa
 CONTAINERS_AGENT=oisp-testsensor oisp-iot-agent
 DOCKER_COMPOSE_ARGS?=
 K3S_NODE=$(shell docker ps --format '{{.Names}}' | grep k3s_agent)
-KEYCLOAK_HELM_REPO:="https://codecentric.github.io/helm-charts"
-KEYCLOAK_HELM_REPO_NAME:="codecentric"
-KEYCLOAK_FORCE_MIGRATION?=""
 export K3S_IMAGE?=rancher/k3s:v1.22.9-k3s1
 export DOCKER_TAG?=latest
 export DOCKER_PREFIX?=oisp
@@ -127,7 +124,6 @@ deploy-oisp: check-docker-cred-env deploy-operators wait-until-operators-ready
 	@echo "Create Namespace"
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	@echo "Prepare helm"
-	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}"
 	cd kubernetes && helm dependency update --namespace $(NAMESPACE)
 	@$(call msg,"Starting first deploy");
 	cd kubernetes && \
@@ -144,17 +140,9 @@ deploy-oisp: check-docker-cred-env deploy-operators wait-until-operators-ready
 		--set mqtt.broker.password="$(call randomPass)" \
 		--set stolon.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
 		--set postgres.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
-		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_PASSWORD}" \
 		--set postgres.password="$(call randomPass)" \
-		--set keycloak.keycloak.password="$(call randomPass)" \
-		--set keycloak.frontend.secret="$(call randomPass)" \
-		--set keycloak.mqttBroker.secret="$(call randomPass)" \
-		--set keycloak.fusionBackend.secret="$(call randomPass)" \
 		--set tag=$(DOCKER_TAG) \
 		--set imagePrefix=$(DOCKER_PREFIX) \
-		--set keycloak.keycloak.image.repository=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/keycloak \
-		--set keycloak.keycloak.image.tag=$(DOCKER_TAG) \
-		--set keycloak.forceMigration=$(KEYCLOAK_FORCE_MIGRATION) \
 		--set emqx.initContainers[0].name=wait-for-mqtt-auth-service \
 		--set emqx.initContainers[0].image=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/wait-for-it:$(DOCKER_TAG) \
 		--set emqx.initContainers[0].args='{mqtt-gateway:3025,--,echo,mqtt auth service is up}' \
@@ -172,7 +160,6 @@ upgrade-oisp: check-docker-cred-env backup
 		make wait-until-operators-ready; \
 	fi
 	@echo "Preparing Helm"
-	helm repo add "${KEYCLOAK_HELM_REPO_NAME}" "${KEYCLOAK_HELM_REPO}" --namespace "${NAMESPACE}"
 	cd kubernetes && helm dependency update --namespace $(NAMESPACE)
 	@$(call msg,"Starting upgrade");
 	@source util/get_oisp_credentials.sh && \
@@ -189,16 +176,9 @@ upgrade-oisp: check-docker-cred-env backup
 		--set mqtt.broker.password="$${MQTT_BROKER_PASSWORD}" \
 		--set stolon.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
 		--set postgres.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
-		--set keycloak.keycloak.persistence.dbPassword="$${POSTGRES_SU_PASSWORD}" \
 		--set postgres.password="$${POSTGRES_PASSWORD}" \
-		--set keycloak.keycloak.password="$${KEYCLOAK_PASSWORD}" \
-		--set keycloak.frontend.secret="$${KEYCLOAK_FRONTEND_SECRET}" \
-		--set keycloak.mqttBroker.secret="$${KEYCLOAK_MQTT_BROKER_SECRET}" \
-		--set keycloak.fusionBackend.secret="$${KEYCLOAK_FUSION_BACKEND_SECRET}" \
 		--set tag=$(DOCKER_TAG) \
 		--set imagePrefix=$(DOCKER_PREFIX) \
-		--set keycloak.keycloak.image.repository=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/keycloak \
-		--set keycloak.keycloak.image.tag=$(DOCKER_TAG) \
 		--set emqx.initContainers[0].name=wait-for-mqtt-auth-service \
 		--set emqx.initContainers[0].image=$${LOCAL_REGISTRY}$(DOCKER_PREFIX)/wait-for-it:$(DOCKER_TAG) \
 		--set emqx.initContainers[0].args='{mqtt-gateway:3025,--,echo,mqtt auth service is up}' \
@@ -418,7 +398,6 @@ test-backup: prepare-tests test-prep-only
 	$(MAKE) NAMESPACE=$(NAMESPACE) DEBUG=$(DEBUG) DOCKER_TAG=$(DOCKER_TAG) deploy-oisp-test
 	$(MAKE) restore
 	FRONTEND=$$(kubectl -n $(NAMESPACE) get pods | grep frontend| cut -d " " -f 1) && \
-	kubectl -n $(NAMESPACE) delete pod keycloak-0 $${FRONTEND}
 	DEBUGGER_POD=$$(kubectl -n $(NAMESPACE) get pods -o custom-columns=:metadata.name | grep debugger | head -n 1) && \
 	$(MAKE) NAMESPACE=$(NAMESPACE) DEBUGGER_POD=$${DEBUGGER_POD} prepare-tests && \
 	kubectl -n $(NAMESPACE) exec $${DEBUGGER_POD} -c debugger \
