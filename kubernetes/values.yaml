@@ -160,18 +160,9 @@ systemuser:
   username: gateway@intel.com
   password: 7d501829lhbl1or0bb1784462c97bcad6
 
-stolon:
-  pgSuperuserName: superuser
-  pgSuperuserPassword: supersecret
-
 postgres:
-  pgSuperuserName: superuser
-  pgSuperuserPassword: supersecret
   username: oisp_user
   password: supersecret
-  clustername: acid-oisp
-  clustersuffix: postgresql.acid.zalan.do
-  team: acid
 
 # Docker image tag
 tag: latest
