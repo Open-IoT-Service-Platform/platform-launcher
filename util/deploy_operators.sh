@@ -46,20 +46,4 @@ EOF
 kubectl apply --force-conflicts --server-side -k github.com/k8ssandra/cass-operator/config/deployments/cluster?ref=v1.11.0
 printf "\033[1mCassandra operator installed successfully.\033[0m\n"
 
-printf "\n"
-printf "\033[1mInstalling Zalando postgres-operator\n"
-printf -- "------------------------\033[0m\n"
-# First, clone the repository and change to the directory
-git clone https://github.com/zalando/postgres-operator.git
-cd postgres-operator
-git checkout v1.7.0
-kubectl apply -f manifests/postgresql.crd.yaml
-kubectl apply -f manifests/configmap.yaml  # configuration
-kubectl apply -f manifests/operator-service-account-rbac.yaml  # identiy and permissions
-kubectl apply -f manifests/postgres-operator.yaml  # deployment
-kubectl apply -f manifests/api-service.yaml  # operator API to be used by UI
-cd ..
-rm -rf postgres-operator
-printf "\033[1mPostgres operator installed successfully.\033[0m\n"
-
 printf -- "\033[1mOperators installed successfully.\033[0m\n"

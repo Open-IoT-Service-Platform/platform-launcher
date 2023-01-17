@@ -138,8 +138,6 @@ deploy-oisp: check-docker-cred-env deploy-operators wait-until-operators-ready
 		--set systemuser.password="$(call randomPass)" \
 		--set grafana.password="$(call randomPass)" \
 		--set mqtt.broker.password="$(call randomPass)" \
-		--set stolon.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
-		--set postgres.pgSuperuserPassword="$${POSTGRES_PASSWORD}" \
 		--set postgres.password="$(call randomPass)" \
 		--set tag=$(DOCKER_TAG) \
 		--set imagePrefix=$(DOCKER_PREFIX) \
@@ -174,8 +172,6 @@ upgrade-oisp: check-docker-cred-env backup
 		--set systemuser.password="$${SYSTEMUSER_PASSWORD}" \
 		--set grafana.password="$${GRAFANA_PASSWORD}" \
 		--set mqtt.broker.password="$${MQTT_BROKER_PASSWORD}" \
-		--set stolon.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
-		--set postgres.pgSuperuserPassword="$${POSTGRES_SU_PASSWORD}" \
 		--set postgres.password="$${POSTGRES_PASSWORD}" \
 		--set tag=$(DOCKER_TAG) \
 		--set imagePrefix=$(DOCKER_PREFIX) \

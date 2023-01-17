@@ -81,14 +81,15 @@ data:
     "hbase.zookeeper.quorum": {{ .Values.zookeeper.servers | quote }},
     "hbase.rootdir": "/hbase"
     }
+  {{ $secret := (lookup "v1" "Secret" "iff" "oisp.acid-cluster.credentials.postgresql.acid.zalan.do") }}
   postgres: |
     {
-    "dbname": "oisp",
-    "hostname": "acid-oisp-repl",
-    "writeHostname": "acid-oisp",
+    "dbname": "oispdb",
+    "hostname": "acid-cluster.iff.svc.cluster.local",
+    "writeHostname": "acid-cluster.iff.svc.cluster.local",
     "port": "5432",
-    "su_username": "{{ .Values.stolon.pgSuperuserName }}",
-    "su_password": "{{ .Values.stolon.pgSuperuserPassword }}",
+    "su_username": "{{ $secret.data.username | b64dec }}",
+    "su_password": "{{ $secret.data.password | b64dec }}",
     "username": "{{ .Values.postgres.username }}",
     "password": "{{ .Values.postgres.password }}"
     }
