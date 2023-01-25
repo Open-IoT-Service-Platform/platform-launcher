@@ -194,7 +194,9 @@ data:
     "kafkaConfig": "@@OISP_KAFKA_CONFIG",
     "postgresConfig": "@@OISP_POSTGRES_CONFIG",
     "keycloakConfig": "@@OISP_KEYCLOAK_CONFIG",
-    "keycloakClientSecret": "{{ $secret.data.CLIENT_SECRET | b64dec }}"
+    "keycloakClientSecret": "{{ $secret.data.CLIENT_SECRET | b64dec }}",
+    "ngsildEnable": true,
+    "ngsildTopic": "iff.ngsild.attributes"
     }
 
 
