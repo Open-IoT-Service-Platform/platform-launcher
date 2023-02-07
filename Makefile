@@ -25,7 +25,7 @@ EXT_CONTAINERS=cassandra;gcr.io/cassandra-operator/cassandra-3.11.6:v6.4.0 cassa
 CONTAINERS_AGENT=oisp-testsensor oisp-iot-agent
 DOCKER_COMPOSE_ARGS?=
 K3S_NODE=$(shell docker ps --format '{{.Names}}' | grep k3s_agent)
-export K3S_IMAGE?=rancher/k3s:v1.22.9-k3s1
+export K3S_IMAGE?=rancher/k3s:v1.24.10-k3s1-amd64
 export DOCKER_TAG?=latest
 export DOCKER_PREFIX?=oisp
 # Try setting this to true if you are getting cgroups error in k3s image
