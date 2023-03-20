@@ -10,29 +10,6 @@ helm repo add stable https://charts.helm.sh/stable
 helm repo add k8ssandra https://helm.k8ssandra.io/stable
 helm repo update
 
-## install CRDs for services operator - operator will be installed later by helm
-printf "\n"
-printf "\033[1mInstalling custom resource definitions for the services operator\n"
-printf -- "------------------------\033[0m\n"
-kubectl apply -f https://raw.githubusercontent.com/wagmarcel/oisp-services/beam-operator-rebase-from-digital-twin/services-operator/kubernetes/crd.yml
-printf "\033[1mCustom resource definitions for the services operator installed successfully.\033[0m\n"
-
-printf "\n"
-printf "\033[1mInstalling cert-manager\n"
-printf -- "------------------------\033[0m\n"
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.7.1/cert-manager.yaml
-printf "\033[1mWaiting for cert-manager web-hook to come up\033[0m\n"
-while [ -z "$(kubectl -n cert-manager get pods -l=app=webhook --ignore-not-found)" ]; do
-  printf "."; sleep 5;
-done
-while kubectl -n cert-manager get pods -l=app=webhook -o jsonpath="{.items[*].status.containerStatuses[*].ready}" | grep false >> /dev/null; do
-  printf "."; sleep 5;
-done;
-printf "\033[1m\nCert-manager Webhook ready! Now applying clusterissuer for self-cert.\033[0m\n"
-if [ -f ../kubernetes/cert-manager/clusterissuer-self-cert.yaml ]; then
-  kubectl apply -f ../kubernetes/cert-manager/clusterissuer-self-cert.yaml
-fi
-
 printf "\n"
 printf "\033[1mInstalling cassandra operator\n"
 printf -- "------------------------\033[0m\n"
