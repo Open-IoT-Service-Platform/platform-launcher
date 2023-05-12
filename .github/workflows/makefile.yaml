@@ -142,7 +142,7 @@ jobs:
           kubectl -n oisp scale deployment debugger --replicas=1
           (for i in {1..20}; do sleep 60; echo .; done&) && make wait-until-ready
         fi
-        velero backup create test-backup --include-resources configmaps,secrets --include-namespaces oisp
+        velero backup create test-backup --include-resources configmaps,secrets --selector 'app.kubernetes.io/part-of=oisp' --include-namespaces oisp
         until [[ $(velero backup describe test-backup | grep "Completed") ]]; do
           sleep 15
           echo .
@@ -152,11 +152,15 @@ jobs:
         until [ ${retval} -eq 0 ] || [ ${loops} -gt 3 ]; do
           make undeploy-oisp
           (for i in {1..20}; do sleep 60; echo .; done&) &&  make deploy-oisp-test
-          restore_name=$(velero restore create --from-backup test-backup --existing-resource-policy update | cut -d " " -f 3 | cut -d "\"" -f 2)
+          restore_name=$(velero restore create --from-backup test-backup --existing-resource-policy update | head -n 1 | cut -d " " -f 3 | cut -d "\"" -f 2)
           until [[ $(velero restore describe ${restore_name} | grep "Completed") ]]; do
             sleep 15
             echo .
           done
+          # restart necessary pods for re-init
+          kubectl -n oisp delete pod -l 'app=grafana'
+          kubectl -n oisp delete pod -l 'app=frontend'
+          # reset database to delete any leftover from previous deployment
           make reset-db
           if [[ ${UPGRADE_TEST} = "true" ]] && [[ -n ${CURRENT_RELEASE_VERSION} ]];
           then

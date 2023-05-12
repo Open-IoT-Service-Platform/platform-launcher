@@ -205,3 +205,5 @@ metadata:
   creationTimestamp: null
   name: oisp-config
   selfLink: /api/v1/namespaces/cloudfest-1/configmaps/oisp-config
+  labels:
+    app.kubernetes.io/part-of: oisp
