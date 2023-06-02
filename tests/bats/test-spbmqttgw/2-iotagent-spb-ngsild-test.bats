@@ -165,7 +165,7 @@ setup_file() {
 	echo "# Activating iot-agent device with activation code: $account_activation_code"
 	echo "# Installing Iot Agent"
 	cd oisp-iot-agent/ || exit
-	git checkout v2.4.1
+	git checkout v2.4.2
 	npm install 
     sleep 5
 	mv ../config.json ./config/config.json 
