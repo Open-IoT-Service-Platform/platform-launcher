@@ -134,6 +134,8 @@ jobs:
           export USE_LOCAL_REGISTRY=false
           export NODOCKERLOGIN=false
         fi
+        KEYCLOAK_ADMIN_USERNAME=$(kubectl -n iff get secrets keycloak-initial-admin -o json | jq -r .data.username | base64 -d)
+        KEYCLOAK_ADMIN_PASSWORD=$(kubectl -n iff get secrets keycloak-initial-admin -o json | jq -r .data.password | base64 -d)
         make deploy-oisp-test
         if [[ ${UPGRADE_TEST} = "true" ]] && [[ -n ${CURRENT_RELEASE_VERSION} ]];
         then
@@ -149,6 +151,7 @@ jobs:
         done
         make test
         retval=$?
+        loops=0
         until [ ${retval} -eq 0 ] || [ ${loops} -gt 3 ]; do
           make undeploy-oisp
           (for i in {1..20}; do sleep 60; echo .; done&) &&  make deploy-oisp-test
@@ -157,11 +160,24 @@ jobs:
             sleep 15
             echo .
           done
-          # restart necessary pods for re-init
-          kubectl -n oisp delete pod -l 'app=grafana'
-          kubectl -n oisp delete pod -l 'app=frontend'
           # reset database to delete any leftover from previous deployment
           make reset-db
+          # Delete the test users inside keycloak, they are not deleted by make reset-db
+          KEYCLOAK_POD=$(kubectl get -n iff pods -l app=keycloak -o json | jq -r .items[0].metadata.name)
+          kubectl -n iff exec ${KEYCLOAK_POD} -- \
+            /opt/keycloak/bin/kcadm.sh config credentials \
+              --server http://keycloak.local/auth \
+              --realm master \
+              --user ${KEYCLOAK_ADMIN_USERNAME} \
+              --password ${KEYCLOAK_ADMIN_PASSWORD}
+          TEST_USER_ID1=$(kubectl -n iff exec ${KEYCLOAK_POD} -- \
+            /opt/keycloak/bin/kcadm.sh get users -r iff -q email=oisp@testing.com | jq -r .[0].id)
+          kubectl -n iff exec ${KEYCLOAK_POD} -- \
+            /opt/keycloak/bin/kcadm.sh delete users/${TEST_USER_ID1} -r iff
+          TEST_USER_ID2=$(kubectl -n iff exec ${KEYCLOAK_POD} -- \
+            /opt/keycloak/bin/kcadm.sh get users -r iff -q email=oisp2@testing.com | jq -r .[0].id)
+          kubectl -n iff exec ${KEYCLOAK_POD} -- \
+            /opt/keycloak/bin/kcadm.sh delete users/${TEST_USER_ID2} -r iff
           if [[ ${UPGRADE_TEST} = "true" ]] && [[ -n ${CURRENT_RELEASE_VERSION} ]];
           then
             (for i in {1..20}; do sleep 60; echo .; done&) && make wait-until-ready

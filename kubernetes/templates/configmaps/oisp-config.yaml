@@ -182,6 +182,7 @@ data:
     "dataSourceHost": "kairosdb",
     "dataSourcePort": "8080"
     }
+  grafana-admin-password: "{{ .Values.grafana.password }}"
   {{ $secret := (lookup "v1" "Secret" "iff" "keycloak-client-secret-mqtt-broker") }}
   mqtt-gateway: |
     {

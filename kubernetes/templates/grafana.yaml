@@ -46,7 +46,10 @@ spec:
         - name: GF_SECURITY_ADMIN_USER
           value: {{ .Values.grafana.admin }}
         - name: GF_SECURITY_ADMIN_PASSWORD
-          value: {{ .Values.grafana.password }}
+          valueFrom:
+            configMapKeyRef:
+              name: oisp-config
+              key: grafana-admin-password
         - name: DATASOURCE_URL
           value: http://frontend:4003
         resources:
