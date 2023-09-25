@@ -23,13 +23,6 @@ services:
       labels:
         - oisp=true
         - oisp.git_commit=${GIT_COMMIT_FRONTEND}
-  backend:
-    image: ${DOCKER_PREFIX:-oisp}/backend:${DOCKER_TAG}
-    build:
-      context: ./oisp-backend
-      labels:
-        - oisp=true
-        - oisp.git_commit=${GIT_COMMIT_BACKEND}
   kairosdb:
     image: ${DOCKER_PREFIX:-oisp}/kairosdb:${DOCKER_TAG}
     build:
@@ -49,20 +42,6 @@ services:
     build:
       context: ./oisp-mqtt-gw/KafkaBridge
       dockerfile: Dockerfile
-  grafana:
-    image: ${DOCKER_PREFIX:-oisp}/grafana:${DOCKER_TAG}
-    build:
-      context: ./docker/grafana
-      labels:
-        - oisp=true
-        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
-  backup-service:
-    image: ${DOCKER_PREFIX:-oisp}/backup-service:${DOCKER_TAG}
-    build:
-      context: ./docker/backup-service
-      labels:
-        - oisp=true
-        - oisp.git_commit=${GIT_COMMIT_PLATFORM_LAUNCHER}
   wait-for-it:
     image: ${DOCKER_PREFIX:-oisp}/wait-for-it:${DOCKER_TAG}
     build:

@@ -74,7 +74,6 @@ while kubectl -n $NAMESPACE get pods | grep -q 'Pending\|Terminating'; \
       fi
     done;
 
-check_deployment backend ${NAMESPACE} backend 60
 check_deployment frontend ${NAMESPACE} frontend 120
 check_deployment kairosdb ${NAMESPACE} kairosdb 60
 check_sts mqtt-gateway ${NAMESPACE} 240

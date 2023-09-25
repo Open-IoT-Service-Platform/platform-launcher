@@ -279,28 +279,9 @@ recreate-registry:
 	@k3d registry delete k3d-iff.localhost
 	@k3d registry create iff.localhost -p 12345
 
-# =======
-# TESTING
-# =======
-## prepare-tests: Push the working directory to the debugger pod.
-##     This has no permanent effect as the pod on which the tests
-##     are prepared is mortal
-##
-prepare-tests: wait-until-ready
-	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger -- /bin/bash -c "rm -rf *"
-	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger -- /bin/bash -c "rm -rf .* || true"
-	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger -- /bin/bash -c "pkill node || true"
-	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger -- fake-smtp-server -s 2525 > /dev/null 2>&1 &
-	kubectl -n $(NAMESPACE) cp $(CURRENT_DIR) $(DEBUGGER_POD):/home -c debugger
-
-## test: Run tests
-##
-test: OISP_TESTS_SKIP_SCALE ?= "true"
-test: prepare-tests test-prep-only
-	kubectl -n $(NAMESPACE) exec $(DEBUGGER_POD) -c debugger \
-		-- /bin/bash -c "cd /home/$(CURRENT_DIR_BASE)/tests && make test TERM=xterm NAMESPACE=$(NAMESPACE) OISP_TESTS_SKIP_SCALE=$(OISP_TESTS_SKIP_SCALE)"
-	@$(call msg,"Starting the e2e bats testing ...");
-	@cd tests/bats && bats test-*
+test: 
+## TO-DO: adjust bats tests to not use OISP
+##	@cd tests/bats && bats test-*
 
 # ==============
 # BUILD COMMANDS
