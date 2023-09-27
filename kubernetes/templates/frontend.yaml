@@ -76,15 +76,6 @@ spec:
             configMapKeyRef:
               name: oisp-config
               key: grafana
-        livenessProbe:
-          httpGet:
-            path: /v1/api/health
-            port: 4001
-          initialDelaySeconds: 200
-        readinessProbe:
-          httpGet:
-            path: /v1/api/health
-            port: 4001
         resources:
           {{ if .Values.less_resources }}
           requests:
